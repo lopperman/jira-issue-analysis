@@ -9,7 +9,7 @@ namespace JiraCon
 {
     public static class ConfigHelper
     {
-        const string configFileName = "JiraConConfig.txt";
+        const string configFileName = "JiraTISConfig.txt";
         const string configIssueStatus = "JiraConIssueStatus.txt";
 
 
@@ -49,11 +49,11 @@ namespace JiraCon
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        if (line.StartsWith("#"))
+                        if (line.StartsWith(value: "#"))
                         {
                             continue;
                         }
-                        string[] arr = line.Split('|');
+                        string[] arr = line.Split(separator: '|');
                         JItemStatus newJIS = new JItemStatus();
                         newJIS.StatusName = arr[0];
                         newJIS.StatusId = arr[1];
@@ -65,8 +65,6 @@ namespace JiraCon
                     }
                 }
             }
-
-
             return ret;
         }
 
@@ -75,9 +73,9 @@ namespace JiraCon
 
             ConsoleTable table = null;
 
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("********** LOGIN CONFIG **********", ConsoleColor.Yellow, ConsoleColor.Black, false);
-            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteLine(text: "");
+            ConsoleUtil.WriteLine(text: "********** LOGIN CONFIG **********", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            ConsoleUtil.WriteLine(text: "");
             ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
 
             var loginArr = GetConfig();
@@ -91,10 +89,10 @@ namespace JiraCon
             var ok = Console.ReadKey(true);
 
 
-            ConsoleUtil.WriteLine("********** ISSUE STATUS TIME METRICS CONFIG *********", ConsoleColor.Yellow, ConsoleColor.Black, false);
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("All issue statuses. These are determined automatically via the Issue Status Cagetory from Jira, unless otherwise annotated. To add or remove overrides, use the Config menu option for 'Override Issue Status Time Metrics'.");
-            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteLine(text: "********** ISSUE STATUS TIME METRICS CONFIG *********", ConsoleColor.Yellow, ConsoleColor.Black, clearScreen: false);
+            ConsoleUtil.WriteLine(text: "");
+            ConsoleUtil.WriteLine(text: "All issue statuses. These are determined automatically via the Issue Status Cagetory from Jira, unless otherwise annotated. To add or remove overrides, use the Config menu option for 'Override Issue Status Time Metrics'.");
+            ConsoleUtil.WriteLine(text: "");
             ConsoleUtil.WriteLine(string.Format("Path = {0}", Path.Combine(personalFolder, configIssueStatus)));
 
             table = new ConsoleTable("Name","Category Key/Name","CalendarWork","ActiveWork");
@@ -103,9 +101,9 @@ namespace JiraCon
                 table.AddRow(jis.StatusName, string.Format("{0}/{1}",jis.CategoryKey, jis.CategoryName), jis.CalendarWork, jis.ActiveWork);
             }
             table.Write();
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("********** END ISSUE STATUS TIME METRICS CONFIG *****", ConsoleColor.Yellow, ConsoleColor.Black, false);
-            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteLine(text: "");
+            ConsoleUtil.WriteLine(text: "********** END ISSUE STATUS TIME METRICS CONFIG *****", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            ConsoleUtil.WriteLine(text: "");
 
             //ConsoleUtil.WriteLine("statusName,statusId,categoryKey,categoryName,calendartWork,activeWork");
             //foreach (var jis in JiraUtil.JiraRepo.JItemStatuses.OrderBy(xx=>xx.StatusName))
