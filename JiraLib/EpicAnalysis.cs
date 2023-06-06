@@ -21,7 +21,7 @@ namespace JiraCon
 
         private static string BuildJQL_EpicChildren(string epicKey)
         {
-            return string.Format("project=BAM AND parentEpic={0}", epicKey);
+            return string.Format("project=WWT AND parentEpic={0}", epicKey);
         }
 
         private static bool Menu()

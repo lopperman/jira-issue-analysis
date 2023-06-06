@@ -12,6 +12,7 @@ namespace JiraCon
         private static bool _initialized = false;
         static JiraConfiguration config = null;
         private static string[] _args = null;
+        static string projectKey = string.Empty ;
         
 
         public static void Main(string[] args)
@@ -175,13 +176,18 @@ namespace JiraCon
                 {
                     ConsoleUtil.WriteLine("Would you like to include changes to card description and comments? (enter Y to include)");
                     resp = Console.ReadKey(true);
+                    List<JIssue>? retIssues;
                     if (resp.Key == ConsoleKey.Y)
                     {
-                        AnalyzeIssues(keys,true);
+                        retIssues = AnalyzeIssues(keys,true);
                     }
                     else
                     {
-                        AnalyzeIssues(keys,false);
+                        retIssues = AnalyzeIssues(keys,false);                    
+                    }
+                    if (retIssues != null)
+                    {
+                        WriteChangeLogCSV(retIssues);
                     }
 
                 }
@@ -727,16 +733,24 @@ namespace JiraCon
 
         }
 
-        public static void AnalyzeIssues(string cardNumbers, bool includeDescAndComments)
+
+
+        public static List<JIssue> AnalyzeIssues(string cardNumbers, bool includeDescAndComments)
         {
+            var retIssues = new List<JIssue>();
             string[] arr = cardNumbers.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < arr.Length; i++)
             {
-                AnalyzeOneIssue(arr[i], includeDescAndComments);
+                JIssue? nIssue = AnalyzeOneIssue(arr[i], includeDescAndComments);
+                if (nIssue != null) 
+                {
+                    retIssues.Add(nIssue);
+                }
             }
+            return retIssues;
         }
 
-        public static void AnalyzeOneIssue(string key, bool includeDescAndComments)
+        public static JIssue? AnalyzeOneIssue(string key, bool includeDescAndComments) 
         {
 
             ConsoleUtil.WriteLine("");
@@ -748,7 +762,7 @@ namespace JiraCon
             if (issue == null)
             {
                 ConsoleUtil.WriteLine("***** Jira Card: " + key + " NOT FOUND!", ConsoleColor.DarkBlue, ConsoleColor.White, false);
-                return;
+                return null;
             }
 
             ConsoleUtil.WriteLine(string.Format("***** loading change logs for {0}-({1}):",key,issue.Summary));
@@ -799,6 +813,8 @@ namespace JiraCon
                 }
             }
 
+            return jIss ;
+
             //ConsoleUtil.WriteLine("***** JSON for  " + key + " *****", ConsoleColor.Black, ConsoleColor.Cyan, false);
             //ConsoleUtil.WriteLine(JsonConvert.SerializeObject(jIss,Formatting.Indented), ConsoleColor.DarkBlue, ConsoleColor.Cyan, false);
 
@@ -820,7 +836,48 @@ namespace JiraCon
 
 
 
+        public static void WriteChangeLogCSV(List<JIssue> issues)
+        {
+            //        private static string personalFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon");
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon","changeLog.csv");
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            var writer = new StreamWriter(filePath,false);
 
+            writer.WriteLine("jiraKEY,changeLogTime,fieldName,fromStatus,toStatus");
+
+            for (int j = 0; j < issues.Count; j++)
+            {
+                var jIss = issues[j];
+
+                for (int i = 0; i < jIss.ChangeLogs.Count; i++)
+                {
+                    JIssueChangeLog changeLog = jIss.ChangeLogs[i];
+                    foreach (JIssueChangeLogItem cli in changeLog.Items)
+                    {
+                        if (cli.FieldName.ToLower().StartsWith("status"))
+                        {
+                            writer.WriteLine(string.Format("{0},{1},{2},{3},{4}",jIss.Key,changeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
+                            // writer.WriteLine(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", jIss.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue));
+                            // writer.WriteLine(string.Format("{0}", cli.ToValue));
+                        }
+                        // else if (cli.FieldName.ToLower().StartsWith("label"))
+                        // {
+                        //     writer.WriteLine(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", jIss.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue));
+                        //     writer.WriteLine(string.Format("{0}", cli.ToValue));
+                        // }
+                    }
+                }
+
+
+//                writer.WriteLine(jIss.Key);
+//                writer.WriteLine("Change Log Count: " + jIss.ChangeLogs.Count);
+            }
+
+            writer.Close();
+        }
 
 
 

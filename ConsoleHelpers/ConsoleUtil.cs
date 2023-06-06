@@ -47,7 +47,7 @@ namespace JiraCon
         {
             consoleLines.AddConsoleLine(" ------------- ", ConsoleColor.Black, ConsoleColor.White);
             consoleLines.AddConsoleLine("|  Main Menu  |");
-            consoleLines.AddConsoleLine(" ------------- ");
+            consoleLines.AddConsoleLine(" ------------- ");            
             consoleLines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards");
             consoleLines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards");
             consoleLines.AddConsoleLine("(X) Create E(X)tract files");

@@ -12,11 +12,14 @@ namespace JiraCon
         const string configFileName = "JiraConConfig.txt";
         const string configIssueStatus = "JiraConIssueStatus.txt";
 
-        private static string personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Application Support/JiraCon";
+
+
+        private static string personalFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon");
 
 
         public static List<JItemStatus> GetItemStatusConfig()
         {
+
             var ret = new List<JItemStatus>();
 
             string path = Path.Combine(personalFolder, configIssueStatus);
@@ -78,8 +81,8 @@ namespace JiraCon
             ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
 
             var loginArr = GetConfig();
-            table = new ConsoleTable("loginName", "apiKey", "Jira Base Url");
-            table.AddRow(loginArr[0], loginArr[1], loginArr[2]);
+            table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
+            table.AddRow(loginArr[0], loginArr[1], loginArr[2], loginArr[3]);
             table.Write();
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);
@@ -128,9 +131,9 @@ namespace JiraCon
             {
                 config = LoadConfigFile(args[0]);
             }
-            else if (args.Length == 3)
+            else if (args.Length == 4)
             {
-                config = new JiraConfiguration(args[0], args[1], args[2]);
+                config = new JiraConfiguration(args[0], args[1], args[2], args[3]);
             }
 
             return config;
@@ -186,7 +189,10 @@ namespace JiraCon
         {
             string[] ret = null;
 
-            var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Application Support/JiraCon";
+            //var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Application Support/JiraCon";
+            var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) ;
+            personalFolder = Path.Combine(personalFolder,"Library","Application Support","JiraCon");
+
             if (!Directory.Exists(personalFolder))
             {
                 Directory.CreateDirectory(personalFolder);
@@ -202,7 +208,7 @@ namespace JiraCon
                     if (!string.IsNullOrWhiteSpace(text))
                     {
                         var arr = text.Split(' ');
-                        if (arr.Length == 3)
+                        if (arr.Length == 4)
                         {
                             ret = arr;
                         }
@@ -215,10 +221,12 @@ namespace JiraCon
                 string userName = "";
                 string apiToken = "";
                 string jiraBaseUrl = "";
+                string projKey = "";
 
                 userName = GetConsoleInput("Missing config -- please enter username (email address) for Jira login:");
                 apiToken = GetConsoleInput("Missing config -- please enter API token for Jira login:");
                 jiraBaseUrl = GetConsoleInput("Missing config -- please enter base url for Jira instance:");
+                projKey = GetConsoleInput("Missing Project Key -- please enter ProjectKey for current Jira instance:");
 
                 bool validCredentials = false;
                 //test connection
@@ -251,7 +259,7 @@ namespace JiraCon
                 {
                     using (StreamWriter writer = new StreamWriter(configFile))
                     {
-                        writer.WriteLine(string.Format("{0} {1} {2}", userName, apiToken, jiraBaseUrl));
+                        writer.WriteLine(string.Format("{0} {1} {2} {3}", userName, apiToken, jiraBaseUrl, projKey));
                     }
                     return GetConfig();
                 }
@@ -292,17 +300,19 @@ namespace JiraCon
     public class JiraConfiguration
     {
 
-        public JiraConfiguration(string jiraUserName, string jiraAPIToken, string jiraBaseUrl)
+        public JiraConfiguration(string jiraUserName, string jiraAPIToken, string jiraBaseUrl, string projectKey)
         {
             this.jiraUserName = jiraUserName;
             this.jiraAPIToken = jiraAPIToken;
             this.jiraBaseUrl = jiraBaseUrl;
+            this.jiraProjectKey = projectKey;
         }
 
         public bool IsValid { get; set; }
         public string jiraUserName { get; set; }
         public string jiraAPIToken { get; set; }
         public string jiraBaseUrl { get; set; }
+        public string jiraProjectKey {get;set;}
 
     }
 }
