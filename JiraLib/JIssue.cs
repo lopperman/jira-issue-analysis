@@ -36,14 +36,25 @@ namespace JiraCon
 
         public JIssue()
         {
-            
+            Key = string.Empty ;
+            Project = string.Empty ;
+            SecurityLevel = string.Empty;
+            StatusName = string.Empty;
+            StatusDescription = string.Empty;
+            StatusCategoryKey = string.Empty;
+            ParentIssueKey = string.Empty;
+            IssueType = string.Empty;
+            Summary = string.Empty;
+            ParentKey = string.Empty;
+            StatusCategoryName = string.Empty ;
         }
 
-        public JIssue(Issue issue)
+        public JIssue(Issue issue): this()
         {
             this._issue = issue;
             Initialize();
         }
+
 
         #region Properties
 
