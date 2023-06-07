@@ -66,7 +66,7 @@ namespace JiraCon
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.BackgroundColor = ConsoleColor.White;
 
-                string title = string.Format("JiraConsole (Not Trademarked) - written by Paul Brower");
+                string title = string.Format("JiraTIS - (https://github.com/lopperman/jiraTimeInStatus)");
 
                 Console.WriteLine(title);
                 if (!string.IsNullOrEmpty(configInfo))

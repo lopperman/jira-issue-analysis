@@ -20,7 +20,7 @@ namespace JiraCon
             }
             if (PopulateFromFile()==true)
             {
-                HasConfigFile = true;
+                ValidConfig = true;
             }
         }
 
@@ -34,20 +34,29 @@ namespace JiraCon
                 defaultProject=project;
             }
         }
-        public string? userName {get;set;}
-        public string? apiToken {get;set;}
-        public string? baseUrl {get;set;}
+        public string? userName {get;private set;}
+        public string? apiToken {get;private set;}
+        public string? baseUrl {get;private set;}
         public string? defaultProject {get;set;}
 
-        public bool HasConfigFile {get;set;}
+        public bool ValidConfig {get;private set;}
 
-        private string ConfigFolderPath
+        public string ConfigFolderPath
         {
             get
             {
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support",configFolderName );
             }
         }
+        public string ConfigFilePath
+        {
+            get
+            {
+                return Path.Combine(ConfigFolderPath,configFileName);
+            }
+        }
+
+
 
         public void SaveToFile(string filePath)
         {

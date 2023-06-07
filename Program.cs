@@ -1,4 +1,5 @@
-﻿using JConsole.Utilities;
+﻿using System;
+using JConsole.Utilities;
 using Newtonsoft.Json;
 
 namespace JiraCon
@@ -6,21 +7,17 @@ namespace JiraCon
     class MainClass
     {
         private static bool _initialized = false;
+        static JTISConfig? jConfig ;
         static JiraConfiguration config = null;
         private static string[] _args = null;
         static string projectKey = string.Empty ;
+
         
 
-        public static void Main(string[] args)
+        public static void Main(string[] args) 
         {
-            ConsoleUtil.InitializeConsole(ConsoleColor.White, ConsoleColor.Black);
-            JTISConfig jt = new JTISConfig(); 
-
-            ConsoleUtil.WriteLine("Valid JTISConfig: " + jt.HasConfigFile );
-            Console.ReadKey(true);
-
-
-
+            ConsoleUtil.InitializeConsole(ConsoleColor.Black, ConsoleColor.White);
+            jConfig = new JTISConfig();             
 
             if (args == null || args.Length == 0)
             {
@@ -160,7 +157,19 @@ namespace JiraCon
             ConsoleUtil.Lines.WriteQueuedLines(true);
 
             var resp = Console.ReadKey(true);
-            if (resp.Key == ConsoleKey.M)
+            if (resp.Key == ConsoleKey.T)
+            {
+                if (jConfig.ValidConfig )
+                {
+                    ConsoleUtil.WriteLine(string.Format("userName: {0}",jConfig.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("apiToken: {0}",jConfig.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("jiraURL: {0}",jConfig.baseUrl ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("defaultProject: {0}",jConfig.defaultProject  ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    resp = Console.ReadKey(true);
+                }
+                return true;
+            }
+            else if (resp.Key == ConsoleKey.M)
             {
                 ConsoleUtil.WriteLine("");
                 ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or E to exit.", ConsoleColor.Black, ConsoleColor.White, false);

@@ -56,6 +56,7 @@ namespace JiraCon
             consoleLines.AddConsoleLine("");
             consoleLines.AddConsoleLine("(I) View (I)tem Status values for work metrics");
             consoleLines.AddConsoleLine("(C) Config Menu");
+            consoleLines.AddConsoleLine("(T) DEV TESTING");
             consoleLines.AddConsoleLine("Enter selection or E to exit.");
         }
 
