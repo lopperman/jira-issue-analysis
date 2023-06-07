@@ -14,6 +14,13 @@ namespace JiraCon
         public static void Main(string[] args)
         {
             ConsoleUtil.InitializeConsole(ConsoleColor.White, ConsoleColor.Black);
+            JTISConfig jt = new JTISConfig(); 
+
+            ConsoleUtil.WriteLine("Valid JTISConfig: " + jt.HasConfigFile );
+            Console.ReadKey(true);
+
+
+
 
             if (args == null || args.Length == 0)
             {
