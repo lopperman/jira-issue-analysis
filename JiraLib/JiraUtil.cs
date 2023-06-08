@@ -13,6 +13,10 @@ namespace JiraCon
         {
             get
             {
+                if (_jiraRepo == null && MainClass.config.ValidConfig == true)
+                {
+                    CreateRestClient();
+                }
                 if (_jiraRepo != null)
                 {
                     return _jiraRepo;
@@ -24,7 +28,7 @@ namespace JiraCon
             }
         }
 
-        public static bool CreateRestClient(JiraConfiguration config)
+        public static bool CreateRestClient()
         {
             bool ret = false;
             try
@@ -32,7 +36,7 @@ namespace JiraCon
                 _settings = new JiraRestClientSettings();
                 _settings.EnableUserPrivacyMode = true;
 
-                _jiraRepo = new JiraRepo(config.jiraBaseUrl, config.jiraUserName, config.jiraAPIToken);
+                _jiraRepo = new JiraRepo(MainClass.config.baseUrl , MainClass.config.userName , MainClass.config.apiToken );
 
                 if (_jiraRepo != null)
                 {

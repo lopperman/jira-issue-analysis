@@ -7,24 +7,49 @@ namespace JiraCon
     class MainClass
     {
         private static bool _initialized = false;
-        static JTISConfig? jConfig ;
-        static JiraConfiguration config = null;
-        private static string[] _args = null;
+        public static JTISConfig? config ;
+        static JiraConfiguration OLDconfig = null;
+        //private static string[] _args = null;
         static string projectKey = string.Empty ;
 
         
 
         public static void Main(string[] args) 
         {
+            bool requireManualConfig = false ;
             ConsoleUtil.InitializeConsole(ConsoleColor.Black, ConsoleColor.White);
-            jConfig = new JTISConfig();             
-
-            if (args == null || args.Length == 0)
+            config = new JTISConfig();      
+            if (args==null || args.Length != JTISConfig.ConfigItemRequiredCount  )
             {
-                args = ConfigHelper.GetConfig();
+                if (config.ValidConfig == false)
+                {
+                    requireManualConfig=true;
+                }
+            }
+            else if (config.ValidConfig==false && args.Length == JTISConfig.ConfigItemRequiredCount)
+            {
+                //SAVE FILE
+                if (config.SetConfigFromArgs(args, true)==false) 
+                {
+                    requireManualConfig=true;
+                }
+            }
+            else 
+            {
+                requireManualConfig = true;
             }
 
-            _args = args;
+            if (requireManualConfig==true)
+            {
+                 throw new Exception("MISSING CONFIG!");
+            }
+
+            // if (args == null || args.Length == 0)
+            // {
+            //     args = ConfigHelper.GetConfig();
+            // }
+
+            //_args = args;
             bool showMenu = true;
 
             while (showMenu)
@@ -72,80 +97,80 @@ namespace JiraCon
 
         private static bool MainMenu()
         {
-            if (!_initialized)
-            {
-                if (config == null && _args != null)
-                {
-                    config = ConfigHelper.BuildConfig(_args);
-                }
-                if (config == null)
-                {
-                    ConsoleUtil.BuildNotInitializedQueue();
-                    ConsoleUtil.Lines.WriteQueuedLines(true);
-                    string vs = Console.ReadLine();
-                    if (string.IsNullOrWhiteSpace(vs)) vs = string.Empty;
-                    string[] arr = vs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                    config = ConfigHelper.BuildConfig(arr);
+            // if (!_initialized)
+            // {
+            //     if (config == null )
+            //     {
+            //         config = ConfigHelper.BuildConfig(_args);
+            //     }
+            //     if (config == null)
+            //     {
+            //         ConsoleUtil.BuildNotInitializedQueue();
+            //         ConsoleUtil.Lines.WriteQueuedLines(true);
+            //         string vs = Console.ReadLine();
+            //         if (string.IsNullOrWhiteSpace(vs)) vs = string.Empty;
+            //         string[] arr = vs.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+            //         config = ConfigHelper.BuildConfig(arr);
 
-                    ConsoleUtil.Lines.configInfo = string.Format("User: {0}", config.jiraUserName);
+            //         ConsoleUtil.Lines.configInfo = string.Format("User: {0}", config.jiraUserName);
 
 
-                    if (config != null)
-                    {
-                        if (JiraUtil.CreateRestClient(config))
-                        {
-                            _initialized = true;
-                            return _initialized;
-                        }
-                        else
-                        {
-                            _initialized = false;
-                            ConsoleUtil.WriteLine("Invalid arguments!", ConsoleColor.Yellow, ConsoleColor.DarkBlue, false);
-                            ConsoleUtil.WriteLine("Enter path to config file");
-                            ConsoleUtil.WriteLine("Do you want to try again? (Y/N):");
-                            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-                            if (keyInfo.Key == ConsoleKey.Y)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                }
+            //         if (config != null)
+            //         {
+            //             if (JiraUtil.CreateRestClient(config))
+            //             {
+            //                 _initialized = true;
+            //                 return _initialized;
+            //             }
+            //             else
+            //             {
+            //                 _initialized = false;
+            //                 ConsoleUtil.WriteLine("Invalid arguments!", ConsoleColor.Yellow, ConsoleColor.DarkBlue, false);
+            //                 ConsoleUtil.WriteLine("Enter path to config file");
+            //                 ConsoleUtil.WriteLine("Do you want to try again? (Y/N):");
+            //                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            //                 if (keyInfo.Key == ConsoleKey.Y)
+            //                 {
+            //                     return true;
+            //                 }
+            //                 else
+            //                 {
+            //                     return false;
+            //                 }
+            //             }
+            //         }
+            //     }
 
-                else
-                {
-                    if (JiraUtil.CreateRestClient(config))
-                    {
-                        ConsoleUtil.WriteLine("Successfully connected to Jira as " + config.jiraUserName);
-                        ConsoleUtil.Lines.configInfo = string.Format("User: {0}", config.jiraUserName);
+            //     else
+            //     {
+            //         if (JiraUtil.CreateRestClient(config))
+            //         {
+            //             ConsoleUtil.WriteLine("Successfully connected to Jira as " + config.jiraUserName);
+            //             ConsoleUtil.Lines.configInfo = string.Format("User: {0}", config.jiraUserName);
 
-                        _initialized = true;
-                        return _initialized;
-                    }
-                    else
-                    {
-                        _initialized = false;
-                        ConsoleUtil.WriteLine("Invalid arguments!", ConsoleColor.Yellow, ConsoleColor.DarkBlue, false);
-                        ConsoleUtil.WriteLine("Enter path to config file");
-                        ConsoleUtil.WriteLine("Do you want to try again? (Y/N):");
-                        ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-                        if (keyInfo.Key == ConsoleKey.Y)
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
+            //             _initialized = true;
+            //             return _initialized;
+            //         }
+            //         else
+            //         {
+            //             _initialized = false;
+            //             ConsoleUtil.WriteLine("Invalid arguments!", ConsoleColor.Yellow, ConsoleColor.DarkBlue, false);
+            //             ConsoleUtil.WriteLine("Enter path to config file");
+            //             ConsoleUtil.WriteLine("Do you want to try again? (Y/N):");
+            //             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            //             if (keyInfo.Key == ConsoleKey.Y)
+            //             {
+            //                 return true;
+            //             }
+            //             else
+            //             {
+            //                 return false;
+            //             }
+            //         }
 
-                }
+            //     }
 
-            }
+            // }
 
             return InitializedMenu();
 
@@ -159,12 +184,12 @@ namespace JiraCon
             var resp = Console.ReadKey(true);
             if (resp.Key == ConsoleKey.T)
             {
-                if (jConfig.ValidConfig )
+                if (config.ValidConfig )
                 {
-                    ConsoleUtil.WriteLine(string.Format("userName: {0}",jConfig.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                    ConsoleUtil.WriteLine(string.Format("apiToken: {0}",jConfig.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                    ConsoleUtil.WriteLine(string.Format("jiraURL: {0}",jConfig.baseUrl ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                    ConsoleUtil.WriteLine(string.Format("defaultProject: {0}",jConfig.defaultProject  ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("userName: {0}",config.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("apiToken: {0}",config.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("jiraURL: {0}",config.baseUrl ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                    ConsoleUtil.WriteLine(string.Format("defaultProject: {0}",config.defaultProject  ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
                     resp = Console.ReadKey(true);
                 }
                 return true;

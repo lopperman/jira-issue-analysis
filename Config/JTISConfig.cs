@@ -1,16 +1,17 @@
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Diagnostics;
-using System.Threading;
+using System.Reflection.Metadata.Ecma335;
+using System.Dynamic;
+using System.IO;
 using System;
-using System.Collections.Generic;
-
 namespace JiraCon
 {
     public class JTISConfig
     {
         const string configFileName = "JiraTISConfig.txt";
         const string configFolderName = "JiraTIS";
+        private const string CFG_FIELD_USERNAME = "username";
+        private const string CFG_FIELD_APITOKEN = "apitoken";
+        private const string CFG_FIELD_BASEURL = "jiraurl";
+        private const string CFG_FIELD_PROJECT = "project";
 
         public JTISConfig()
         {
@@ -18,28 +19,53 @@ namespace JiraCon
             {
                 Directory.CreateDirectory(Path.Combine(ConfigFolderPath ));
             }
-            if (PopulateFromFile()==true)
-            {
-                ValidConfig = true;
-            }
+            PopulateFromFile();
         }
 
-        public JTISConfig(string loginName, string authToken, string url, string? project): this()
+        public JTISConfig(string loginName, string authToken, string url, string project): this()
         {
             userName=loginName;
             apiToken=authToken;
             baseUrl=url;
-            if (project != null)
-            {
-                defaultProject=project;
-            }
+            defaultProject=project;
         }
         public string? userName {get;private set;}
         public string? apiToken {get;private set;}
         public string? baseUrl {get;private set;}
         public string? defaultProject {get;set;}
 
-        public bool ValidConfig {get;private set;}
+        public bool ValidConfig 
+        {
+            get
+            {
+                bool tmpValid = true;
+                if (userName == null || userName.Length == 0)
+                {
+                    tmpValid = false;
+                }
+                if (apiToken==null || apiToken.Length==0)
+                {
+                    tmpValid = false;
+                }
+                if (baseUrl == null || baseUrl.Length==0)
+                {
+                    tmpValid = false;
+                }
+                if (defaultProject==null || defaultProject.Length==0)
+                {
+                    tmpValid = false;
+                }
+                return tmpValid;
+            }
+        }
+
+        public static int ConfigItemRequiredCount
+        {
+            get
+            {
+                return 4;
+            }
+        }
 
         public string ConfigFolderPath
         {
@@ -56,16 +82,72 @@ namespace JiraCon
             }
         }
 
-
-
-        public void SaveToFile(string filePath)
+        public bool SetConfigFromArgs(string[] progArgs, bool? saveToFile = false)
         {
+            //TODO:  IMPLEMENT
+
+            userName = null;
+            apiToken = null;
+            baseUrl = null;
+            defaultProject = null;
+
+            if  (progArgs.Length != ConfigItemRequiredCount  )
+            {
+                throw new ArgumentException("SetConfigArgs must have: " + ConfigItemRequiredCount.ToString() + " arguments.","progArgs");
+            }
+
+            for (int i = 0; i<progArgs.Length; i ++)
+            {
+                string tmpArg = progArgs[i];
+                if (tmpArg.Contains(string.Format("{0}=",CFG_FIELD_USERNAME )))
+                {
+                    userName = tmpArg.Split("=")[1];
+                }
+                else if (tmpArg.Contains(string.Format("{0}=",CFG_FIELD_APITOKEN )))
+                {
+                    apiToken = tmpArg.Split("=")[1];
+                }
+                else if (tmpArg.Contains(string.Format("{0}=",CFG_FIELD_BASEURL )))
+                {
+                    baseUrl = tmpArg.Split("=")[1];
+                }
+                else if (tmpArg.Contains(string.Format("{0}=",CFG_FIELD_PROJECT )))
+                {
+                    defaultProject = tmpArg.Split("=")[1];
+                }
+            }
+            if (ValidConfig==true && saveToFile != null && saveToFile.Value == true)
+            {
+                SaveToFile(ConfigFilePath,1);
+            }
+
+            return ValidConfig;
+        }
+
+        public void SaveToFile(string filePath, int? configNumber)
+        {
+            if (ValidConfig==true)
+            {
+                if (configNumber==null){configNumber = 1;}
+                using (StreamWriter writer = new StreamWriter(filePath,false))
+                {
+                    writer.WriteLine(String.Format("## BEGIN JTIS_CONFIG_{0:00}",configNumber.Value));
+                    writer.WriteLine(String.Format("{0}={1}",CFG_FIELD_USERNAME,userName));
+                    writer.WriteLine(String.Format("{0}={1}",CFG_FIELD_APITOKEN,apiToken));
+                    writer.WriteLine(String.Format("{0}={1}",CFG_FIELD_BASEURL,baseUrl));
+                    writer.WriteLine(String.Format("{0}={1}",CFG_FIELD_PROJECT,defaultProject));
+                    writer.WriteLine(String.Format("## END JTIS_CONFIG_{0:00}",configNumber.Value));
+                }
+            }
             
         }
 
         private bool PopulateFromFile()
         {
-            bool validFileConfig = false;
+            userName = null;
+            apiToken = null;
+            baseUrl = null;
+            defaultProject = null;
 
             if (File.Exists(Path.Combine(ConfigFolderPath,configFileName)))
             {
@@ -84,37 +166,29 @@ namespace JiraCon
                             lineArr = line.Split("=");
                             if (lineArr.Length==2)
                             {
-                                if (lineArr[0].ToLower() == "username")
+                                if (lineArr[0].ToLower() == CFG_FIELD_USERNAME)
                                 {
                                     userName = lineArr[1];
-                                } else if (lineArr[0].ToLower() == "apitoken")
+                                } else if (lineArr[0].ToLower() == CFG_FIELD_APITOKEN)
                                 {
                                     apiToken = lineArr[1];
-                                }else if (lineArr[0].ToLower() == "jiraurl")
+                                }else if (lineArr[0].ToLower() == CFG_FIELD_BASEURL)
                                 {
                                     baseUrl = lineArr[1];
-                                }else if (lineArr[0].ToLower() == "project")
+                                }else if (lineArr[0].ToLower() == CFG_FIELD_PROJECT)
                                 {
                                     defaultProject = lineArr[1];
                                 } 
                             }
                         }
                     }
-                    validFileConfig = true;
-                    if (userName == null || baseUrl == null || apiToken == null || defaultProject == null)
-                    {
-                        validFileConfig = false;
-                    }
+                    return ValidConfig;
                 }    
             } else 
             {
                 File.Create(Path.Combine(ConfigFolderPath,configFileName));
-                //TODO:  populate file
+                return false;
             }
-
-
-
-            return validFileConfig ;
         }
 
     }
