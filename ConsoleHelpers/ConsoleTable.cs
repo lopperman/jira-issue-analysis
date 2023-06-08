@@ -40,7 +40,7 @@ namespace JConsole.ConsoleHelpers
             public IList<object[]> Rows { get; protected set; }
 
             public ConsoleTableOptions Options { get; protected set; }
-            public Type[] ColumnTypes { get; private set; }
+            public Type[]? ColumnTypes { get; private set; }
 
             public static HashSet<Type> NumericTypes = new HashSet<Type>
         {

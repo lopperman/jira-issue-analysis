@@ -5,15 +5,18 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>8600;8601;8602;8603;8604;8629;8767</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Atlassian.SDK" Version="13.0.0" />
     <!-- <PackageReference Include="JsonConfig" Version="1.0.0" /> -->
-    <PackageReference Include="JsonFx" Version="2.0.1209.2802" />
+    <!-- <PackageReference Include="JsonFx" Version="2.0.1209.2802" /> -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Terminal.Gui" Version="1.12.1" />
   </ItemGroup>
 
 </Project>
+
+

@@ -9,7 +9,7 @@ namespace JConsole.Utilities
     public class WorkMetrics
     {
         private SortedList<JIssue, List<WorkMetric>> _workMetricList = new SortedList<JIssue, List<WorkMetric>>();
-        private JiraRepo _repo = null;
+        private JiraRepo _repo;
         private int _startHour = 0;
         private int _endHour = 0;
         private SortedDictionary<string, string> _forceIgnoreKeyAndReason = new SortedDictionary<string, string>();
@@ -122,7 +122,7 @@ namespace JConsole.Utilities
         public DateTime End { get; set; }
         public int StartHour { get; set; }
         public int EndHour { get; set; }
-        private string _forceIgnoreReason = null;
+        private string _forceIgnoreReason ;
 
         public bool Exclude
         {

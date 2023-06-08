@@ -104,84 +104,11 @@ namespace JiraCon
             ConsoleUtil.WriteLine(text: "");
             ConsoleUtil.WriteLine(text: "********** END ISSUE STATUS TIME METRICS CONFIG *****", ConsoleColor.Yellow, ConsoleColor.Black, false);
             ConsoleUtil.WriteLine(text: "");
-
-            //ConsoleUtil.WriteLine("statusName,statusId,categoryKey,categoryName,calendartWork,activeWork");
-            //foreach (var jis in JiraUtil.JiraRepo.JItemStatuses.OrderBy(xx=>xx.StatusName))
-            //{
-            //     ConsoleUtil.WriteLine(string.Format("{0},{1},{2},{3},{4},{5}",jis.StatusName, jis.StatusId, jis.CategoryKey, jis.CategoryName, jis.CalendarWork, jis.ActiveWork));
-            //} 
-
-
+            
             ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
             ok = Console.ReadKey(true);
-        }
+        }      
 
-        internal static JiraConfiguration BuildConfig(string[] args)
-        {
-            JiraConfiguration config = null;
-
-            if (args.Length == 1)
-            {
-                return LoadConfigFile(args[0]);
-            }
-
-            if (args.Length == 1)
-            {
-                config = LoadConfigFile(args[0]);
-            }
-            else if (args.Length == 4)
-            {
-                config = new JiraConfiguration(args[0], args[1], args[2], args[3]);
-            }
-
-            return config;
-        }
-
-        private static JiraConfiguration LoadConfigFile(string configFilePath)
-        {
-            JiraConfiguration configuration = null;
-
-            StreamReader reader = null;
-
-            try
-            {
-                reader = new StreamReader(configFilePath);
-                string line1 = reader.ReadLine();
-                if (!string.IsNullOrWhiteSpace(line1))
-                {
-                    string[] arr = line1.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                    configuration = BuildConfig(arr);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error Loading Config File: {0}", ex.Message);
-            }
-            finally
-            {
-                if (reader != null)
-                {
-                    reader.Close();
-                }
-            }
-
-            return configuration;
-        }
-
-        public static void KillConfig()
-        {
-            if (Directory.Exists(personalFolder))
-            {
-                string configFile = Path.Combine(personalFolder, configFileName);
-                if (File.Exists(configFile))
-                {
-                    File.Delete(configFile);
-                }
-            }
-
-            ConsoleUtil.WriteLine("Config file has been deleted. Run program again to create new config file. Press any key to exit.", ConsoleColor.White, ConsoleColor.DarkMagenta, true);
-            Console.ReadKey(true);
-        }
 
         public static string[] GetConfig()
         {
@@ -292,25 +219,6 @@ namespace JiraCon
             return ret;
 
         }
-
-    }
-
-    public class JiraConfiguration
-    {
-
-        public JiraConfiguration(string jiraUserName, string jiraAPIToken, string jiraBaseUrl, string projectKey)
-        {
-            this.jiraUserName = jiraUserName;
-            this.jiraAPIToken = jiraAPIToken;
-            this.jiraBaseUrl = jiraBaseUrl;
-            this.jiraProjectKey = projectKey;
-        }
-
-        public bool IsValid { get; set; }
-        public string jiraUserName { get; set; }
-        public string jiraAPIToken { get; set; }
-        public string jiraBaseUrl { get; set; }
-        public string jiraProjectKey {get;set;}
 
     }
 }

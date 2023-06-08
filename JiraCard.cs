@@ -10,7 +10,13 @@ namespace JiraCon
 
         public JiraCard()
         {
-            
+            _id = string.Empty;
+            Key = string.Empty;
+            Description = string.Empty;
+            Created =DateTime.MinValue ;
+            Updated =DateTime.MinValue;
+            Status = string.Empty;
+            CardType = string.Empty;            
         }
 
         public JiraCard(string id, string key, string status, string desc, DateTime created, DateTime updated, string type)

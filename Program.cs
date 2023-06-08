@@ -6,9 +6,7 @@ namespace JiraCon
 {
     class MainClass
     {
-        private static bool _initialized = false;
         public static JTISConfig? config ;
-        static JiraConfiguration OLDconfig = null;
         //private static string[] _args = null;
         static string projectKey = string.Empty ;
 
@@ -68,9 +66,12 @@ namespace JiraCon
             var resp = Console.ReadKey(true);
             if (resp.Key == ConsoleKey.R)
             {
-                ConfigHelper.KillConfig();
-                ConsoleUtil.Lines.ByeBye();
-                Environment.Exit(0);
+                if (config != null)
+                {
+                    JTISConfigHelper.DeleteConfigFile(config.ConfigFilePath );
+                    ConsoleUtil.Lines.ByeBye();
+                    Environment.Exit(0);
+                }
             }
             else if (resp.Key == ConsoleKey.E)
             {

@@ -525,9 +525,9 @@ namespace JiraCon
             }
         }
 
-        public List<T> GetCustomFieldValues<T>(string customFieldName)
+        public List<T>? GetCustomFieldValues<T>(string customFieldName)
         {
-            List<T> ret = null;
+            List<T>? ret = null;
 
             var find = _customFields.Where(x => x.Id == customFieldName || x.Name == customFieldName).FirstOrDefault();
 
@@ -540,7 +540,7 @@ namespace JiraCon
                 }
             }
 
-            return ret;
+            return ret ;
         }
 
         public int CompareTo(object obj)
