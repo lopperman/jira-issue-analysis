@@ -77,11 +77,13 @@ namespace JiraCon
         public static void BuildNotInitializedQueue()
         {
             consoleLines.AddConsoleLine("This application can be initialized with");
-            consoleLines.AddConsoleLine("1. path to config file with arguments");
-            consoleLines.AddConsoleLine("");
-            consoleLines.AddConsoleLine("For Example:  john.doe@wwt.com SECRETAPIKEY https://client.atlassian.net");
-            consoleLines.AddConsoleLine("Please initialize application now per the above example:");
+            consoleLines.AddConsoleLine("1a. No Arguments, if previous config file has been created in default location");
+            consoleLines.AddConsoleLine("1b. No Arguments, if you wish to create new config file in default location");
 
+            consoleLines.AddConsoleLine("2. path to valid config file");
+            consoleLines.AddConsoleLine("3. The 4 required valid arguments (see below example)");
+            consoleLines.AddConsoleLine("   (arguments must contain argument label, and use a SPACE between args)");
+            consoleLines.AddConsoleLine("For Example:  'userName=john.doe@github.com apiToken=VALID_API_TOKEN jiraUrl=https://client.atlassian.net project=JIRA_PROJECT_KEY");
         }
 
 

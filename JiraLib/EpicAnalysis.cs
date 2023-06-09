@@ -21,7 +21,20 @@ namespace JiraCon
 
         private static string BuildJQL_EpicChildren(string epicKey)
         {
-            return string.Format("project=WWT AND parentEpic={0}", epicKey);
+            string retJQL = string.Empty;
+            if (MainClass.config != null)
+            {
+                if (MainClass.config.ValidConfig == true)
+                {
+                    retJQL = string.Format("project={0} and parentEpic={1}",MainClass.config.defaultProject,epicKey);
+                }
+                else 
+                {
+                    retJQL = string.Format("parentEpic={0}",epicKey);
+                }
+            }
+
+            return retJQL;
         }
 
         private static bool Menu()
