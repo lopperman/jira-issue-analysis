@@ -5,7 +5,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <NoWarn>8600;8601;8602;8603;8604;8629;8767</NoWarn>
+    <NoWarn>8600;8601;8602;8603;8604;8620;8629;8767</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

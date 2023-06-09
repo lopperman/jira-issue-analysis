@@ -6,8 +6,8 @@ namespace JiraCon
 {
     public static class JiraUtil
     {
-        private static JiraRestClientSettings _settings = null;
-        private static JiraRepo _jiraRepo = null;
+        private static JiraRestClientSettings? _settings ;
+        private static JiraRepo? _jiraRepo;
 
         public static JiraRepo JiraRepo
         {

@@ -10,7 +10,6 @@ namespace JiraCon
 
 
         private string _sourceJQL = string.Empty;
-        public string SourceJQL { get; }
         private List<Issue> _issues = new List<Issue>();
         private SortedList<string, List<IssueChangeLog>> _changeLog = new SortedList<string, List<IssueChangeLog>>();
 

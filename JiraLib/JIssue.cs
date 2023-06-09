@@ -22,7 +22,7 @@ namespace JiraCon
 
     public class JIssue:IComparable, IComparer<JIssue>
     {
-        private Issue _issue = null;
+        private Issue? _issue ;
 
         private List<string> _components = new List<string>();
         private List<JCustomField> _customFields = new List<JCustomField>();

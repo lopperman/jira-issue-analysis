@@ -122,7 +122,7 @@ namespace JConsole.Utilities
         public DateTime End { get; set; }
         public int StartHour { get; set; }
         public int EndHour { get; set; }
-        private string _forceIgnoreReason ;
+        private string _forceIgnoreReason = string.Empty ;
 
         public bool Exclude
         {

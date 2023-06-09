@@ -415,7 +415,7 @@ namespace JiraCon
 
         private static void CreateWorkMetricsFile(string jql, int startHour, int endHour)
         {
-            CreateWorkMetricsFile(jql, startHour, endHour, null);
+            CreateWorkMetricsFile(jql, startHour, endHour, string.Empty);
         }
 
         public static void CreateWorkMetricsFile(string jql, int startHour, int endHour, string epicKey)

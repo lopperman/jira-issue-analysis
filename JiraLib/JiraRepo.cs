@@ -18,7 +18,7 @@ namespace JiraCon
         private List<JField> _fieldList = new List<JField>();
         private string _epicLinkFieldKey = string.Empty;
         private string _featureTeamChoicesFieldKey = string.Empty;
-        private List<JItemStatus> _itemStatuses = null;
+        private List<JItemStatus>? _itemStatuses ;
 
         public JiraRepo(string server, string userName, string password)
         {
@@ -487,10 +487,14 @@ namespace JiraCon
 
         public JItemStatus()
         {
+            StatusName = string.Empty;
+            StatusId = string.Empty;
+            CategoryKey = string.Empty;
+            CategoryName = string.Empty;
 
         }
 
-        public JItemStatus(string name, string id, string categoryKey, string categoryName)
+        public JItemStatus(string name, string id, string categoryKey, string categoryName): this()
         {
             StatusName = name.ToLower();
             StatusId = id.ToLower();
@@ -596,10 +600,12 @@ namespace JiraCon
     {
         public JField()
         {
-
+            ID = string.Empty;
+            Key = string.Empty;
+            Name  = string.Empty;
         }
 
-        public JField(string key, string name)
+        public JField(string key, string name): this()
         {
             Key = key;
             Name = name;

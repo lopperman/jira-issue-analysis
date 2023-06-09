@@ -7,14 +7,17 @@ namespace JiraCon
 {
     public class JIssueChangeLog
     {
-        private IssueChangeLog _changeLog = null;
-        private List<JIssueChangeLogItem> _items = null;
+        private IssueChangeLog? _changeLog;
+        private List<JIssueChangeLogItem>? _items ;
 
         public JIssueChangeLog()
         {
+            Id = string.Empty;
+            Author = string.Empty;
+            CreatedDate = DateTime.MinValue;
         }
 
-        public JIssueChangeLog(IssueChangeLog changeLog)
+        public JIssueChangeLog(IssueChangeLog changeLog):this()
         {
             _changeLog = changeLog;
             Initialize();

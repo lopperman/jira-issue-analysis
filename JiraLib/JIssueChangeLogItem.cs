@@ -6,13 +6,19 @@ namespace JiraCon
 {
     public class JIssueChangeLogItem
     {
-        private IssueChangeLogItem _item = null;
+        private IssueChangeLogItem? _item = null;
 
         public JIssueChangeLogItem()
         {
+            FieldName = string.Empty;
+            FieldType = string.Empty;
+            FromId = string.Empty;
+            ToId = string.Empty;
+            ToValue = string.Empty;
+            FromValue = string.Empty;
         }
 
-        public JIssueChangeLogItem(IssueChangeLogItem item)
+        public JIssueChangeLogItem(IssueChangeLogItem item): this()
         {
             _item = item;
             Initialize();
