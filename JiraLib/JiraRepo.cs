@@ -145,6 +145,8 @@ namespace JiraCon
 
             string data = GetItemStatusesAsync().GetAwaiter().GetResult();
 
+            //Console.Write(data);
+
             JArray json = JArray.Parse(data);
 
             for (int i = 0; i < json.Count; i++)

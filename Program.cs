@@ -1,6 +1,7 @@
 ﻿using System;
 using JConsole.Utilities;
 using Newtonsoft.Json;
+using Terminal.Gui;
 
 namespace JiraCon
 {
@@ -420,10 +421,11 @@ namespace JiraCon
 
         public static void CreateWorkMetricsFile(string jql, int startHour, int endHour, string epicKey)
         {
+
             try
             {
                 DateTime now = DateTime.Now;
-                string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.txt", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+                string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
 
                 string workMetricsFile = String.Format("JiraCon_WorkMetrics_{0}", fileNameSuffix);
                 if (epicKey != null && epicKey.Length > 0)
@@ -520,7 +522,7 @@ namespace JiraCon
                                 JHelper.RemoveCommas(j.LabelsToString),wm.Start, wm.End,
                                 wm.ItemStatus.StatusName, wm.ItemStatus.ActiveWork, wm.ItemStatus.CalendarWork,
                                 wm.TotalBusinessDays,wm.Total8HourAdjBusinessHours,wm.TransitionAfterHours,
-                                wm.Exclude,wm.ExcludeReasons);
+                                wm.Exclude,JHelper.RemoveCommas(wm.ExcludeReasons));
                             writer.WriteLine(text);
                             ConsoleUtil.WriteLine(text) ;
                         }

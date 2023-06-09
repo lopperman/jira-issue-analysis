@@ -22,7 +22,7 @@ namespace JiraCon
 
             var ret = new List<JItemStatus>();
 
-            string path = Path.Combine(personalFolder, configIssueStatus);
+            string path = Path.Combine(MainClass.config.ConfigFolderPath, configIssueStatus);
 
             if (!File.Exists(path))
             {
@@ -78,9 +78,8 @@ namespace JiraCon
             ConsoleUtil.WriteLine(text: "");
             ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
 
-            var loginArr = GetConfig();
             table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
-            table.AddRow(loginArr[0], loginArr[1], loginArr[2], loginArr[3]);
+            table.AddRow(MainClass.config.userName, MainClass.config.apiToken, MainClass.config.baseUrl, MainClass.config.defaultProject);
             table.Write();
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);
@@ -110,89 +109,89 @@ namespace JiraCon
         }      
 
 
-        public static string[] GetConfig()
-        {
-            string[] ret = null;
+        // public static string[] GetConfig()
+        // {
+        //     string[] ret = null;
 
-            //var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Application Support/JiraCon";
-            var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) ;
-            personalFolder = Path.Combine(personalFolder,"Library","Application Support","JiraCon");
+        //     //var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) + "/Library/Application Support/JiraCon";
+        //     var personalFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal) ;
+        //     personalFolder = Path.Combine(personalFolder,"Library","Application Support","JiraCon");
 
-            if (!Directory.Exists(personalFolder))
-            {
-                Directory.CreateDirectory(personalFolder);
-            }
-            string configFile = Path.Combine(personalFolder, configFileName);
+        //     if (!Directory.Exists(personalFolder))
+        //     {
+        //         Directory.CreateDirectory(personalFolder);
+        //     }
+        //     string configFile = Path.Combine(personalFolder, configFileName);
 
-            if (File.Exists(configFile))
-            {
-                //check to confirm file has 3 arguments
-                using (StreamReader reader = new StreamReader(configFile))
-                {
-                    var text = reader.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(text))
-                    {
-                        var arr = text.Split(' ');
-                        if (arr.Length == 4)
-                        {
-                            ret = arr;
-                        }
-                    }
-                }
-            }
+        //     if (File.Exists(configFile))
+        //     {
+        //         //check to confirm file has 3 arguments
+        //         using (StreamReader reader = new StreamReader(configFile))
+        //         {
+        //             var text = reader.ReadLine();
+        //             if (!string.IsNullOrWhiteSpace(text))
+        //             {
+        //                 var arr = text.Split(' ');
+        //                 if (arr.Length == 4)
+        //                 {
+        //                     ret = arr;
+        //                 }
+        //             }
+        //         }
+        //     }
 
-            if (ret == null)
-            {
-                string userName = "";
-                string apiToken = "";
-                string jiraBaseUrl = "";
-                string projKey = "";
+        //     if (ret == null)
+        //     {
+        //         string userName = "";
+        //         string apiToken = "";
+        //         string jiraBaseUrl = "";
+        //         string projKey = "";
 
-                userName = GetConsoleInput("Missing config -- please enter username (email address) for Jira login:");
-                apiToken = GetConsoleInput("Missing config -- please enter API token for Jira login:");
-                jiraBaseUrl = GetConsoleInput("Missing config -- please enter base url for Jira instance:");
-                projKey = GetConsoleInput("Missing Project Key -- please enter ProjectKey for current Jira instance:");
+        //         userName = GetConsoleInput("Missing config -- please enter username (email address) for Jira login:");
+        //         apiToken = GetConsoleInput("Missing config -- please enter API token for Jira login:");
+        //         jiraBaseUrl = GetConsoleInput("Missing config -- please enter base url for Jira instance:");
+        //         projKey = GetConsoleInput("Missing Project Key -- please enter ProjectKey for current Jira instance:");
 
-                bool validCredentials = false;
-                //test connection
-                try
-                {
-                    ConsoleUtil.WriteLine("testing Jira connection ...");
-                    var testConn = new JiraRepo(jiraBaseUrl, userName, apiToken);
+        //         bool validCredentials = false;
+        //         //test connection
+        //         try
+        //         {
+        //             ConsoleUtil.WriteLine("testing Jira connection ...");
+        //             var testConn = new JiraRepo(jiraBaseUrl, userName, apiToken);
 
-                    if (testConn != null)
-                    {
-                        var test = testConn.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
-                        if (test != null && test.Count > 0)
-                        {
-                            validCredentials = true;
-                            ConsoleUtil.WriteLine("testing Jira connection ... successful");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ConsoleUtil.WriteLine("testing Jira connection ... failed");
-                    ConsoleUtil.WriteLine(ex.Message);
-                }
+        //             if (testConn != null)
+        //             {
+        //                 var test = testConn.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
+        //                 if (test != null && test.Count > 0)
+        //                 {
+        //                     validCredentials = true;
+        //                     ConsoleUtil.WriteLine("testing Jira connection ... successful");
+        //                 }
+        //             }
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             ConsoleUtil.WriteLine("testing Jira connection ... failed");
+        //             ConsoleUtil.WriteLine(ex.Message);
+        //         }
 
-                if (!validCredentials)
-                {
-                    return GetConfig();
-                }
-                else
-                {
-                    using (StreamWriter writer = new StreamWriter(configFile))
-                    {
-                        writer.WriteLine(string.Format("{0} {1} {2} {3}", userName, apiToken, jiraBaseUrl, projKey));
-                    }
-                    return GetConfig();
-                }
-            }
+        //         if (!validCredentials)
+        //         {
+        //             return GetConfig();
+        //         }
+        //         else
+        //         {
+        //             using (StreamWriter writer = new StreamWriter(configFile))
+        //             {
+        //                 writer.WriteLine(string.Format("{0} {1} {2} {3}", userName, apiToken, jiraBaseUrl, projKey));
+        //             }
+        //             return GetConfig();
+        //         }
+        //     }
 
-            return ret;
+        //     return ret;
 
-        }
+        // }
 
         private static string GetConsoleInput(string message)
         {
