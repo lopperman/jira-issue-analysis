@@ -22,7 +22,7 @@ namespace JiraCon
 
             var ret = new List<JItemStatus>();
 
-            string path = Path.Combine(MainClass.config.ConfigFolderPath, configIssueStatus);
+            string path = Path.Combine(JTISConfigHelper.ConfigFolderPath, configIssueStatus);
 
             if (!File.Exists(path))
             {
