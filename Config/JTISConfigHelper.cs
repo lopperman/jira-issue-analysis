@@ -4,15 +4,35 @@ using System.Diagnostics;
 using System.Threading;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace JiraCon
 {
     public static class JTISConfigHelper
     {
-        public static bool CreateConfig()
+        public static JTISConfig? CreateConfig()
         {
+            JTISConfig? retCfg = null;
+            string? tmpUserName = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter username (email address) for Jira login:");
+            string? tmpApiToken = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter API token for Jira login:");
+            string? tmpUrl = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter base url for Jira instance:");
+            string? tmpProject = ConsoleUtil.GetConsoleInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:");
 
-            return false;
+            if (tmpUserName != null && tmpApiToken != null && tmpUrl != null & tmpProject != null)
+            {
+                retCfg = new JTISConfig(true);
+                retCfg.userName = tmpUserName;
+                retCfg.apiToken = tmpApiToken;
+                retCfg.baseUrl = tmpUrl;
+                retCfg.defaultProject = tmpProject;
+
+                retCfg.SaveToFile(retCfg.ConfigFilePath,1);
+                return retCfg;                
+            }
+            else 
+            {
+                return null;
+            }
         }
 
         public static void  DeleteConfigFile(string? filePath)
@@ -30,6 +50,36 @@ namespace JiraCon
                     Console.ReadKey(true);
                 }
             }
+        }
+
+        public static List<JTISConfig> GetJTISConfigs(string jsonFilePath)
+        {
+            JTISConfig cfg1 = new JTISConfig(true);
+            cfg1.userName="paulbrower97@gmail.com";
+            cfg1.apiToken="abcde12345";
+            cfg1.baseUrl="www.jira.com";
+            cfg1.defaultProject="WWT1";
+            JTISConfig cfg2 = new JTISConfig(true);
+            cfg2.userName="paulbrower97@outlook.com";
+            cfg2.apiToken="abcde12345";
+            cfg2.baseUrl="www.jira.com";
+            cfg2.defaultProject="WWT1";
+
+            var retList = new List<JTISConfig>();
+            retList.Add(cfg1);
+            retList.Add(cfg2);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+            string data = JsonConvert.SerializeObject(retList,Formatting.None,settings);
+
+            using (StreamWriter writer = new StreamWriter(jsonFilePath, false))
+            {
+                writer.Write(data);
+            }            
+
+            return retList;
         }
 
         // public static JTISConfig GetConfig()

@@ -11,8 +11,6 @@ namespace JiraCon
         //private static string[] _args = null;
         static string projectKey = string.Empty ;
 
-        
-
         public static void Main(string[] args) 
         {
             bool requireManualConfig = false ;
@@ -40,7 +38,14 @@ namespace JiraCon
 
             if (requireManualConfig==true)
             {
-                 throw new Exception("MISSING CONFIG!");
+                JTISConfig? manualConfig = JTISConfigHelper.CreateConfig(); 
+                if (manualConfig != null)
+                {
+                    if (manualConfig.ValidConfig)
+                    {
+                        MainClass.config = manualConfig;
+                    }
+                }
             }
 
             // if (args == null || args.Length == 0)
@@ -114,6 +119,8 @@ namespace JiraCon
             {
                 if (config.ValidConfig )
                 {
+                    JTISConfigHelper.GetJTISConfigs(Path.Combine(MainClass.config.ConfigFolderPath,"test.json"));
+
                     ConsoleUtil.WriteLine(string.Format("userName: {0}",config.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
                     ConsoleUtil.WriteLine(string.Format("apiToken: {0}",config.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
                     ConsoleUtil.WriteLine(string.Format("jiraURL: {0}",config.baseUrl ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);

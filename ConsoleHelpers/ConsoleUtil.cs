@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Runtime.ExceptionServices;
+using System;
 using System.Text;
 
 namespace JiraCon
@@ -38,6 +39,7 @@ namespace JiraCon
 
         public static void InitializeConsole(ConsoleColor defForeground, ConsoleColor defBackground)
         {
+            Console.Clear();
             ResetConsoleColors();
             Console.Clear();
 
@@ -137,6 +139,42 @@ namespace JiraCon
             }
             ResetConsoleColors();
         }
+
+        public static T GetConsoleInput<T>(string message) where T:IConvertible 
+        {
+            WriteLine("...");
+            WriteLine(message);
+            var ret = Console.ReadLine();
+            
+            if (string.IsNullOrWhiteSpace(ret))
+            {
+                return GetConsoleInput<T>(message);
+            }
+            WriteLine("");
+            WriteLine(string.Format("Enter 'Y' to Use '{0}', otherwise enter 'E' to exit or another key to enter new value", ret));
+            var key = Console.ReadKey(true);
+
+            if (key.Key == ConsoleKey.E)
+            {
+                Environment.Exit(0);
+            }
+            if (key.Key != ConsoleKey.Y)
+            {
+                return GetConsoleInput<T>(message);
+            }
+            try 
+            {
+                T retVal = (T)Convert.ChangeType(ret,typeof(T));
+                return retVal;
+            }
+            catch
+            {
+                WriteLine(ret + " is not valid, try again",ConsoleColor.Red,ConsoleColor.DarkYellow ,false);
+                return GetConsoleInput<T>(message);
+            }
+
+        }
+
 
     }
 

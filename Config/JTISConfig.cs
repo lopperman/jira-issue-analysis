@@ -2,11 +2,15 @@ using System.Reflection.Metadata.Ecma335;
 using System.Dynamic;
 using System.IO;
 using System;
+using System.Text.Json.Serialization;
+
 namespace JiraCon
 {
     public class JTISConfig
     {
+        [JsonIgnore]
         const string configFileName = "JiraTISConfig.txt";
+        [JsonIgnore]
         const string configFolderName = "JiraTIS";
         private const string CFG_FIELD_USERNAME = "username";
         private const string CFG_FIELD_APITOKEN = "apitoken";
@@ -22,6 +26,14 @@ namespace JiraCon
             PopulateFromFile();
         }
 
+        public JTISConfig(bool emptyConfig)
+        {
+            userName=string.Empty;
+            apiToken=string.Empty;
+            baseUrl=string.Empty;
+            defaultProject=string.Empty;
+        }
+
         public JTISConfig(string loginName, string authToken, string url, string project): this()
         {
             userName=loginName;
@@ -29,11 +41,16 @@ namespace JiraCon
             baseUrl=url;
             defaultProject=project;
         }
-        public string? userName {get;private set;}
-        public string? apiToken {get;private set;}
-        public string? baseUrl {get;private set;}
+        [JsonPropertyName("loginName")]
+        public string? userName {get; set;}
+        [JsonPropertyName("securityToken")]
+        public string? apiToken {get; set;}
+        [JsonPropertyName("jiraBaseUrl")]
+        public string? baseUrl {get; set;}
+        [JsonPropertyName("projectKey")]
         public string? defaultProject {get;set;}
 
+        [JsonIgnore]
         public bool ValidConfig 
         {
             get
@@ -59,6 +76,7 @@ namespace JiraCon
             }
         }
 
+        [JsonIgnore]
         public static int ConfigItemRequiredCount
         {
             get
@@ -67,6 +85,7 @@ namespace JiraCon
             }
         }
 
+        [JsonIgnore]
         public string ConfigFolderPath
         {
             get
@@ -74,6 +93,7 @@ namespace JiraCon
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support",configFolderName );
             }
         }
+        [JsonIgnore]
         public string ConfigFilePath
         {
             get
