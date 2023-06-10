@@ -45,6 +45,23 @@ namespace JiraCon
             }
         }
 
+        public static List<string> ConfigNameList
+        {
+            get
+            {
+                List<string> tmpRet = new List<string>();
+
+                if (ConfigCount > 0)
+                {
+                    for (int i = 0; i < cfgList.Count; i++)
+                    {
+                        tmpRet.Add(string.Format("{0:00} | {1}",cfgList[i].configId,cfgList[i].configName));
+                    }
+                }
+                return tmpRet;
+            }
+        }
+
         public static JTISConfig? GetConfigFromList(int cfgID)
         {
             return cfgList.Find(x=>x.configId==cfgID);
@@ -122,93 +139,5 @@ namespace JiraCon
             var desObj = JsonConvert.DeserializeObject<List<JTISConfig>>(data);
             cfgList = desObj;
         }
-
-        // public static List<JTISConfig> GetJTISConfigs(string jsonFilePath)
-        // {
-        //     JTISConfig cfg1 = new JTISConfig(true);
-        //     cfg1.userName="paulbrower97@gmail.com";
-        //     cfg1.apiToken="abcde12345";
-        //     cfg1.baseUrl="www.jira.com";
-        //     cfg1.defaultProject="WWT1";
-        //     JTISConfig cfg2 = new JTISConfig(true);
-        //     cfg2.userName="paulbrower97@outlook.com";
-        //     cfg2.apiToken="abcde12345";
-        //     cfg2.baseUrl="www.jira.com";
-        //     cfg2.defaultProject="WWT1";
-
-        //     var retList = new List<JTISConfig>();
-        //     retList.Add(cfg1);
-        //     retList.Add(cfg2);
-
-        //     JsonSerializerSettings settings = new JsonSerializerSettings();
-        //     settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-        //     string data = JsonConvert.SerializeObject(retList,Formatting.None,settings);
-
-        //     using (StreamWriter writer = new StreamWriter(jsonFilePath, false))
-        //     {
-        //         writer.Write(data);
-        //     }            
-
-        //     return retList;
-        // }
-
-        // public static JTISConfig GetConfig()
-        // {            
-
-
-        //     if (ret == null)
-        //     {
-        //         string userName = "";
-        //         string apiToken = "";
-        //         string jiraBaseUrl = "";
-        //         string projKey = "";
-
-        //         userName = GetConsoleInput("Missing config -- please enter username (email address) for Jira login:");
-        //         apiToken = GetConsoleInput("Missing config -- please enter API token for Jira login:");
-        //         jiraBaseUrl = GetConsoleInput("Missing config -- please enter base url for Jira instance:");
-        //         projKey = GetConsoleInput("Missing Project Key -- please enter ProjectKey for current Jira instance:");
-
-        //         bool validCredentials = false;
-        //         //test connection
-        //         try
-        //         {
-        //             ConsoleUtil.WriteLine("testing Jira connection ...");
-        //             var testConn = new JiraRepo(jiraBaseUrl, userName, apiToken);
-
-        //             if (testConn != null)
-        //             {
-        //                 var test = testConn.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
-        //                 if (test != null && test.Count > 0)
-        //                 {
-        //                     validCredentials = true;
-        //                     ConsoleUtil.WriteLine("testing Jira connection ... successful");
-        //                 }
-        //             }
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             ConsoleUtil.WriteLine("testing Jira connection ... failed");
-        //             ConsoleUtil.WriteLine(ex.Message);
-        //         }
-
-        //         if (!validCredentials)
-        //         {
-        //             return GetConfig();
-        //         }
-        //         else
-        //         {
-        //             using (StreamWriter writer = new StreamWriter(configFile))
-        //             {
-        //                 writer.WriteLine(string.Format("{0} {1} {2} {3}", userName, apiToken, jiraBaseUrl, projKey));
-        //             }
-        //             return GetConfig();
-        //         }
-        //     }
-
-        //     return ret;
-
-        // }
-
     }
 }

@@ -35,6 +35,18 @@ namespace JiraCon
             {
                 config = JTISConfigHelper.GetConfigFromList(1);
             }
+            else if (JTISConfigHelper.ConfigCount > 1)
+            {
+                ConsoleUtil.WriteLine("Enter the number (e.g. '1') of the config you want to use",true);
+                var cfgNames = JTISConfigHelper.ConfigNameList;
+                for (int i = 0; i < cfgNames.Count; i ++)
+                {
+                    ConsoleUtil.WriteLine(cfgNames[i]);
+                }
+                var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the number (e.g. '1') of the config you want to use");
+                config = JTISConfigHelper.GetConfigFromList(cfgResp);
+            }
+
             if (config==null || config.ValidConfig==false)
             {
                 requireManualConfig = true;
@@ -117,6 +129,17 @@ namespace JiraCon
             {
                 JEnvironmentConfig.JiraEnvironmentInfo();
                 return true;
+            }
+            else if (resp.Key == ConsoleKey.N)
+            {
+                var newCfg = JTISConfigHelper.CreateConfig();
+                if (newCfg != null && newCfg.ValidConfig==true)
+                {
+                    MainClass.config = newCfg;
+                    return true;
+                }
+                return false;
+
             }
             else if (resp.Key == ConsoleKey.M)
             {
