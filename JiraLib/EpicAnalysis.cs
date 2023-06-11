@@ -22,11 +22,11 @@ namespace JiraCon
         private static string BuildJQL_EpicChildren(string epicKey)
         {
             string retJQL = string.Empty;
-            if (MainClass.config != null)
+            if (JTISConfigHelper.config != null)
             {
-                if (MainClass.config.ValidConfig == true)
+                if (JTISConfigHelper.config.ValidConfig == true)
                 {
-                    retJQL = string.Format("project={0} and parentEpic={1}",MainClass.config.defaultProject,epicKey);
+                    retJQL = string.Format("project={0} and parentEpic={1}",JTISConfigHelper.config.defaultProject,epicKey);
                 }
                 else 
                 {

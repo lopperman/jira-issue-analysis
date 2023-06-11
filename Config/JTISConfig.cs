@@ -14,6 +14,7 @@ namespace JiraCon
         private const string CFG_FIELD_APITOKEN = "apitoken";
         private const string CFG_FIELD_BASEURL = "jiraurl";
         private const string CFG_FIELD_PROJECT = "project";
+        private bool _validConn = false;
 
         public JTISConfig()
         {
@@ -46,7 +47,9 @@ namespace JiraCon
         {
             get
             {
+
                 bool tmpValid = true;
+
                 if (userName == null || userName.Length == 0)
                 {
                     tmpValid = false;
@@ -70,6 +73,18 @@ namespace JiraCon
                 if (configId == null || configId.Value <=0)
                 {
                     tmpValid = false;
+                }
+                if (tmpValid == true && _validConn == false )
+                {                    
+                    if (JiraUtil.CreateRestClient(this)==true)
+                    {
+                        tmpValid = true;
+                        _validConn = true ;
+                    }
+                    else 
+                    {
+                        tmpValid = false;
+                    }
                 }
                 return tmpValid;
             }

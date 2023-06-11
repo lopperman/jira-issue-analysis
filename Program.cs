@@ -7,7 +7,7 @@ namespace JiraCon
 {
     class MainClass
     {
-        public static JTISConfig? config ;
+        // public static JTISConfig? config ;
         //private static string[] _args = null;
         static string projectKey = string.Empty ;
 
@@ -15,7 +15,7 @@ namespace JiraCon
         public static void Main(string[] args) 
         {
             bool requireManualConfig = false ;
-            ConsoleUtil.InitializeConsole(ConsoleColor.Black, ConsoleColor.White);
+            
             if (args == null || args.Length == 0)
             {
                 if (File.Exists(JTISConfigHelper.ConfigFilePath))
@@ -33,41 +33,21 @@ namespace JiraCon
             }
             if (JTISConfigHelper.ConfigCount == 1)
             {
-                config = JTISConfigHelper.GetConfigFromList(1);
+                JTISConfigHelper.config  = JTISConfigHelper.GetConfigFromList(1);
             }
             else if (JTISConfigHelper.ConfigCount > 1)
             {
                 var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
                 if (changeCfg != null && changeCfg.ValidConfig==true)
                 {
-                    config = changeCfg;
+                    JTISConfigHelper.config = changeCfg;
                 }
             }
 
-            if (config==null || config.ValidConfig==false)
+            if (JTISConfigHelper.config==null || JTISConfigHelper.config.ValidConfig==false)
             {
                 requireManualConfig = true;
             }
-
-            // if (args==null || args.Length != JTISConfig.ConfigItemRequiredCount  )
-            // {
-            //     if (config.ValidConfig == false)
-            //     {
-            //         requireManualConfig=true;
-            //     }
-            // }
-            // else if (config.ValidConfig==false && args.Length == JTISConfig.ConfigItemRequiredCount)
-            // {
-            //     //SAVE FILE
-            //     if (config.SetConfigFromArgs(args, true)==false) 
-            //     {
-            //         requireManualConfig=true;
-            //     }
-            // }
-            // else 
-            // {
-            //     requireManualConfig = true;
-            // }
 
             if (requireManualConfig==true)
             {
@@ -76,17 +56,11 @@ namespace JiraCon
                 {
                     if (manualConfig.ValidConfig)
                     {
-                        MainClass.config = manualConfig;
+                        JTISConfigHelper.config = manualConfig;
                     }
                 }
             }
 
-            // if (args == null || args.Length == 0)
-            // {
-            //     args = ConfigHelper.GetConfig();
-            // }
-
-            //_args = args;
             bool showMenu = true;
 
             while (showMenu)
@@ -105,7 +79,7 @@ namespace JiraCon
             var resp = Console.ReadKey(true);
             if (resp.Key == ConsoleKey.R)
             {
-                if (config != null)
+                if (JTISConfigHelper.config != null)
                 {
                     JTISConfigHelper.DeleteConfigFile(JTISConfigHelper.ConfigFilePath );
                     ConsoleUtil.Lines.ByeBye();
@@ -132,7 +106,7 @@ namespace JiraCon
                 var newCfg = JTISConfigHelper.CreateConfig();
                 if (newCfg != null && newCfg.ValidConfig==true)
                 {
-                    MainClass.config = newCfg;
+                    JTISConfigHelper.config = newCfg;
                     return true;
                 }
                 return false;
@@ -142,7 +116,7 @@ namespace JiraCon
                 var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
                 if (changeCfg != null)
                 {
-                    config = changeCfg;                    
+                    JTISConfigHelper.config = changeCfg;                    
                 }
                 return true;
             }
@@ -171,7 +145,7 @@ namespace JiraCon
 
                 // if (config.ValidConfig )
                 // {
-                //     JTISConfigHelper.GetJTISConfigs(Path.Combine(MainClass.config.ConfigFolderPath,"test.json"));
+                //     JTISConfigHelper.GetJTISConfigs(Path.Combine(JTISConfigHelper.config.ConfigFolderPath,"test.json"));
 
                 //     ConsoleUtil.WriteLine(string.Format("userName: {0}",config.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
                 //     ConsoleUtil.WriteLine(string.Format("apiToken: {0}",config.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
@@ -179,6 +153,7 @@ namespace JiraCon
                 //     ConsoleUtil.WriteLine(string.Format("defaultProject: {0}",config.defaultProject  ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
                 //     resp = Console.ReadKey(true);
                 // }
+
                 return true;
             }
             else if (resp.Key == ConsoleKey.M)

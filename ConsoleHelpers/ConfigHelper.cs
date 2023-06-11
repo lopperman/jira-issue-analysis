@@ -79,7 +79,7 @@ namespace JiraCon
         //     ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
 
         //     table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
-        //     table.AddRow(MainClass.config.userName, MainClass.config.apiToken, MainClass.config.baseUrl, MainClass.config.defaultProject);
+        //     table.AddRow(JTISConfigHelper.config.userName, JTISConfigHelper.config.apiToken, JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
         //     table.Write();
         //     ConsoleUtil.WriteLine("");
         //     ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);

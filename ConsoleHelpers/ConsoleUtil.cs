@@ -47,7 +47,7 @@ namespace JiraCon
 
         public static void BuildInitializedMenu()
         {
-            var cfgName = MainClass.config.configName;
+            var cfgName = JTISConfigHelper.config.configName;
             string padd = new string('-',cfgName.Length + 1 );
 
             consoleLines.AddConsoleLine(" ------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
@@ -68,7 +68,7 @@ namespace JiraCon
         public static void BuildConfigMenu()
         {
 
-            var cfgName = MainClass.config.configName;
+            var cfgName = JTISConfigHelper.config.configName;
             string padd = new string('-',cfgName.Length + 1 );
             consoleLines.AddConsoleLine(" --------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
             consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName);

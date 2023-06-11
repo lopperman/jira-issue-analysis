@@ -12,6 +12,21 @@ namespace JiraCon
     
     public static class JTISConfigHelper
     {
+        private static JTISConfig? _config ;
+
+        public static JTISConfig? config
+        {
+            get
+            {
+                return _config;
+            }
+            set
+            {
+                _config = value;
+                JiraUtil.CreateRestClient();
+            }
+        }
+
         private static List<JTISConfig> cfgList = new List<JTISConfig>();
         public static string? JTISConfigFilePath {get;set;}
         public static string configFileName = "JiraTISCfg.json";
@@ -116,7 +131,7 @@ namespace JiraCon
 
         public static void  DeleteConfigFile(string? filePath)
         {
-            if (filePath == null && MainClass.config != null)
+            if (filePath == null && JTISConfigHelper.config != null)
             {
                 filePath = ConfigFilePath  ;
             }
@@ -184,7 +199,7 @@ namespace JiraCon
         {
 
             var ret = new List<JItemStatus>();
-            string fName = string.Format("CONFIG_ISSUE_STATUS_{0:00}.txt",MainClass.config.configId);
+            string fName = string.Format("CONFIG_ISSUE_STATUS_{0:00}.txt",JTISConfigHelper.config.configId);
             string path = Path.Combine(JTISRootPath, fName);
 
             if (!File.Exists(path))
@@ -242,7 +257,7 @@ namespace JiraCon
             // ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
 
             table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
-            table.AddRow(MainClass.config.userName, MainClass.config.apiToken, MainClass.config.baseUrl, MainClass.config.defaultProject);
+            table.AddRow(JTISConfigHelper.config.userName, JTISConfigHelper.config.apiToken, JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
             table.Write();
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);

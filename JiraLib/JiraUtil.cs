@@ -13,7 +13,7 @@ namespace JiraCon
         {
             get
             {
-                if (_jiraRepo == null && MainClass.config.ValidConfig == true)
+                if (_jiraRepo == null && JTISConfigHelper.config != null && JTISConfigHelper.config.ValidConfig == true)
                 {
                     CreateRestClient();
                 }
@@ -28,7 +28,7 @@ namespace JiraCon
             }
         }
 
-        public static bool CreateRestClient()
+        public static bool CreateRestClient(JTISConfig cfg)
         {
             bool ret = false;
             try
@@ -36,7 +36,7 @@ namespace JiraCon
                 _settings = new JiraRestClientSettings();
                 _settings.EnableUserPrivacyMode = true;
 
-                _jiraRepo = new JiraRepo(MainClass.config.baseUrl , MainClass.config.userName , MainClass.config.apiToken );
+                _jiraRepo = new JiraRepo(cfg.baseUrl , cfg.userName , cfg.apiToken );
 
                 if (_jiraRepo != null)
                 {
@@ -57,7 +57,19 @@ namespace JiraCon
             }
 
 
-            return ret;
+            return ret;            
+        }
+
+        public static bool CreateRestClient()
+        {
+            if (JTISConfigHelper.config != null)
+            {
+                return CreateRestClient(JTISConfigHelper.config);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
