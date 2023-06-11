@@ -1,6 +1,6 @@
 # jiraTimeInStatus
 ---
-#### (Will update help files soon -- feel free to comment and ask questions)
+#### (Will update help files soon -- feel free to [comment and ask questions](https://github.com/lopperman/jiraTimeInStatus/discussions))
 ---
 [Alpha Release](https://github.com/lopperman/jiraTimeInStatus/releases/tag/0.1.0-alpha)
 ---
