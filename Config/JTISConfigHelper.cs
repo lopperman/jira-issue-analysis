@@ -5,6 +5,7 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using JConsole.ConsoleHelpers.ConsoleTables;
 
 namespace JiraCon
 {
@@ -13,13 +14,29 @@ namespace JiraCon
     {
         private static List<JTISConfig> cfgList = new List<JTISConfig>();
         public static string? JTISConfigFilePath {get;set;}
-        public static string configFileName = "JiraTISConfig.txt";
-        public static string configFolderName = "JiraTIS";        
+        public static string configFileName = "JiraTISCfg.json";
+        public static string JTISRootPath
+        {
+            get
+            {
+                string tmpPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"JiraJTIS");
+                if (Directory.Exists(tmpPath)==false)
+                {
+                    Directory.CreateDirectory(tmpPath);
+                }
+                return tmpPath;
+            }
+        }
         public static string ConfigFolderPath
         {
             get
             {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support",configFolderName );
+                string tmpPath = Path.Combine(JTISRootPath,"Config");
+                if (Directory.Exists(tmpPath)==false)
+                {
+                    Directory.CreateDirectory(tmpPath);
+                }
+                return tmpPath;
             }
         }
         public static string ConfigFilePath
@@ -28,7 +45,7 @@ namespace JiraCon
             {
                 if (JTISConfigFilePath == null || JTISConfigFilePath.Length ==0)
                 {
-                    return Path.Combine(ConfigFolderPath,configFileName);            
+                    return Path.Combine(ConfigFolderPath,configFileName);
                 }
                 else 
                 {
@@ -162,5 +179,97 @@ namespace JiraCon
             }
 
         }
+
+        public static List<JItemStatus> GetItemStatusConfig()
+        {
+
+            var ret = new List<JItemStatus>();
+            string fName = string.Format("CONFIG_ISSUE_STATUS_{0:00}.txt",MainClass.config.configId);
+            string path = Path.Combine(JTISRootPath, fName);
+
+            if (!File.Exists(path))
+            {
+                ConsoleUtil.WriteLine("Missing config file: " + path, ConsoleColor.Red, ConsoleColor.Gray, false);
+                ConsoleUtil.WriteLine("File will be generated with defaults but you will need to verify 'CalendarWork' and 'ActiveWork' in file: " + path,ConsoleColor.Red, ConsoleColor.Gray, false);
+                ConsoleUtil.WriteLine("Press any key to continue");
+                var ok = Console.ReadKey(true);
+
+                var jItemStatuses = JiraUtil.JiraRepo.GetJItemStatusDefaults();
+                ret = jItemStatuses;
+                using (StreamWriter writer = new StreamWriter(path))
+                {
+                    writer.WriteLine("##statusName, statusId, categoryKey, categoryName, calendarWork, activeWork");
+                    foreach (JItemStatus jis in jItemStatuses)
+                    {
+                        writer.WriteLine(string.Format("{0}|{1}|{2}|{3}|{4}|{5}", jis.StatusName, jis.StatusId, jis.CategoryKey, jis.CategoryName, jis.CalendarWork, jis.ActiveWork));
+                    }
+                }
+            }
+            else
+            {
+                using (StreamReader reader = new StreamReader(path))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.StartsWith(value: "#"))
+                        {
+                            continue;
+                        }
+                        string[] arr = line.Split(separator: '|');
+                        JItemStatus newJIS = new JItemStatus();
+                        newJIS.StatusName = arr[0];
+                        newJIS.StatusId = arr[1];
+                        newJIS.CategoryKey = arr[2];
+                        newJIS.CategoryName = arr[3];
+                        newJIS.CalendarWork = (arr[4].ToLower() == "true") ? true : false;
+                        newJIS.ActiveWork = (arr[5].ToLower() == "true") ? true : false;
+                        ret.Add(newJIS);
+                    }
+                }
+            }
+            return ret;
+        }        
+
+        internal static void ViewAll()
+        {
+
+            ConsoleTable table = null;
+
+            // ConsoleUtil.WriteLine(text: "");
+            // ConsoleUtil.WriteLine(text: "********** LOGIN CONFIG **********", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            // ConsoleUtil.WriteLine(text: "");
+            // ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
+
+            table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
+            table.AddRow(MainClass.config.userName, MainClass.config.apiToken, MainClass.config.baseUrl, MainClass.config.defaultProject);
+            table.Write();
+            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
+            var ok = Console.ReadKey(true);
+
+
+            // ConsoleUtil.WriteLine(text: "********** ISSUE STATUS TIME METRICS CONFIG *********", ConsoleColor.Yellow, ConsoleColor.Black, clearScreen: false);
+            // ConsoleUtil.WriteLine(text: "");
+            // ConsoleUtil.WriteLine(text: "All issue statuses. These are determined automatically via the Issue Status Cagetory from Jira, unless otherwise annotated. To add or remove overrides, use the Config menu option for 'Override Issue Status Time Metrics'.");
+            // ConsoleUtil.WriteLine(text: "");
+            // ConsoleUtil.WriteLine(string.Format("Path = {0}", Path.Combine(personalFolder, configIssueStatus)));
+
+            table = new ConsoleTable("Name","Category Key/Name","CalendarWork","ActiveWork");
+            foreach (var jis in JiraUtil.JiraRepo.JItemStatuses)
+            {
+                table.AddRow(jis.StatusName, string.Format("{0}/{1}",jis.CategoryKey, jis.CategoryName), jis.CalendarWork, jis.ActiveWork);
+            }
+            table.Write();
+            ConsoleUtil.WriteLine(text: "");
+            ConsoleUtil.WriteLine(text: "********** END ISSUE STATUS TIME METRICS CONFIG *****", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            ConsoleUtil.WriteLine(text: "");
+            
+            ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
+            ok = Console.ReadKey(true);
+        }      
+
     }
 }

@@ -118,8 +118,8 @@ namespace JiraCon
                 Environment.Exit(0);
             }
             else if (resp.Key == ConsoleKey.V)
-            {
-                ConfigHelper.ViewAll();
+            {                
+                JTISConfigHelper.ViewAll();
                 return true;
             }
             else if (resp.Key == ConsoleKey.J)
@@ -448,11 +448,7 @@ namespace JiraCon
                     jissues.Add(newIssue);
                 }
 
-                var extractFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "JiraCon");
-                if (!Directory.Exists(extractFolder))
-                {
-                    Directory.CreateDirectory(extractFolder);
-                }
+                var extractFolder = JTISConfigHelper.JTISRootPath;
 
                 ConsoleUtil.WriteLine("Calculating work time metrics ...");
 
@@ -571,11 +567,7 @@ namespace JiraCon
                     jissues.Add(newIssue);
                 }
 
-                var extractFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "JiraCon");
-                if (!Directory.Exists(extractFolder))
-                {
-                    Directory.CreateDirectory(extractFolder);
-                }
+                var extractFolder = JTISConfigHelper.JTISRootPath;
 
                 ConsoleUtil.WriteLine("Calculating QA Failures ...");
                 CreateQAFailExtract(jissues, Path.Combine(extractFolder, qaFailFile));
@@ -636,7 +628,7 @@ namespace JiraCon
                     jissues.Add(newIssue);
                 }
 
-                var extractFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "JiraCon");
+                var extractFolder = JTISConfigHelper.JTISRootPath;
                 if (!Directory.Exists(extractFolder))
                 {
                     Directory.CreateDirectory(extractFolder);
@@ -681,22 +673,20 @@ namespace JiraCon
 
         private static void CreateChangeLogExtract(List<JIssue> issues, string file,bool includeCommentsAndDesc)
         {
-            //issues = issues.OrderBy(x => x.Key).ToList();
+            issues = issues.OrderBy(x => x.Key).ToList();
 
-            //using (StreamWriter writer = new StreamWriter(file))
-            //{
-
-            //    writer.WriteLine("key,type,status,name");
-            //    foreach (var iss in issues)
-            //    {
-            //        DateTime? devDoneDate = iss.GetDevDoneDate();
-            //        if (devDoneDate.HasValue)
-            //        {
-            //            //writer.WriteLine(string.Format("{0},{1},{2}", iss.Key, iss.IssueType,iss.StatusName,iss.devDoneDate.Value.ToShortDateString()));
-            //        }
-
-            //    }
-            //}
+            using (StreamWriter writer = new StreamWriter(file))
+            {
+               writer.WriteLine("key,type,status,name");
+               foreach (var iss in issues)
+               {
+                   DateTime? devDoneDate = iss.GetDevDoneDate();
+                   if (devDoneDate.HasValue)
+                   {
+                       writer.WriteLine(string.Format("{0},{1},{2}", iss.Key, iss.IssueType,iss.StatusName,devDoneDate.Value.ToShortDateString()));
+                   }
+               }
+            }
 
         }
 
@@ -876,8 +866,7 @@ namespace JiraCon
         {
 
             string fName = string.Format("changeLogs_{0}.csv",DateTime.Now.ToString("yyyyMMMdd_HHmmss"));
-            //string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon","changeLog.csv");
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"JiraJIT");
+            string filePath = Path.Combine(JTISConfigHelper.JTISRootPath,fName);
             if (Directory.Exists(filePath)==false)
             {
                 Directory.CreateDirectory(filePath);

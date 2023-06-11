@@ -382,7 +382,6 @@ namespace JiraCon
                         toDemo.Add(cl.CreatedDate);
                         break;
                     }
-
                 }
             }
 

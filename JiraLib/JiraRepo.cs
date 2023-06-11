@@ -1,13 +1,7 @@
-﻿using System;
-using Atlassian.Jira;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
-using System.Text;
 
 namespace JiraCon
 {
@@ -25,8 +19,6 @@ namespace JiraCon
 
             JiraRestClientSettings settings = new JiraRestClientSettings();
             settings.EnableUserPrivacyMode = true;
-            
-
             _jira = Atlassian.Jira.Jira.CreateRestClient(server, userName, password,settings);
 
             _jira.Issues.MaxIssuesPerRequest = 500;
@@ -50,10 +42,8 @@ namespace JiraCon
 
         public void ConfigureItemStatuses()
         {
-            var itemStatusConfig = ConfigHelper.GetItemStatusConfig();
-
+            var itemStatusConfig = JTISConfigHelper.GetItemStatusConfig();
             _itemStatuses = itemStatusConfig;
-
         }
 
         public List<JItemStatus> JItemStatuses

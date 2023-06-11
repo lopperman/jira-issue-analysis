@@ -17,11 +17,6 @@ namespace JiraCon
 
         public JTISConfig()
         {
-            // if (!Directory.Exists(Path.Combine(JTISConfigHelper.ConfigFolderPath)))
-            // {
-            //     Directory.CreateDirectory(Path.Combine(JTISConfigHelper.ConfigFolderPath ));
-            // }
-            // PopulateFromFile();
         }
 
         public JTISConfig(int cfgId, string cfgName, string loginName, string authToken, string url, string project): this()
