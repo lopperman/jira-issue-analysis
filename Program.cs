@@ -198,6 +198,7 @@ namespace JiraCon
                 string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                 if (arr.Length >= 1)
                 {
+                    bool canWriteCSV = false;
                     ConsoleUtil.WriteLine("Would you like to include changes to card description and comments? (enter Y to include)");
                     resp = Console.ReadKey(true);
                     List<JIssue>? retIssues;
@@ -207,13 +208,23 @@ namespace JiraCon
                     }
                     else
                     {
+                        canWriteCSV = true;
                         retIssues = AnalyzeIssues(keys,false);                    
-                    }
-                    if (retIssues != null)
-                    {
-                        WriteChangeLogCSV(retIssues);
+
                     }
 
+                    if (retIssues != null)
+                    {
+                        if (canWriteCSV)
+                        {
+                            ConsoleUtil.WriteLine("Enter 'Y' to save output to csv file, otherwise press any key");
+                            resp = Console.ReadKey(true);
+                            if (resp.Key == ConsoleKey.Y)
+                            {
+                                WriteChangeLogCSV(retIssues);                                
+                            }
+                        }
+                    }
                 }
 
                 ConsoleUtil.WriteLine("");
@@ -861,10 +872,17 @@ namespace JiraCon
 
 
 
-        public static void WriteChangeLogCSV(List<JIssue> issues)
+        public static string WriteChangeLogCSV(List<JIssue> issues)
         {
-            //        private static string personalFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon");
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon","changeLog.csv");
+
+            string fName = string.Format("changeLogs_{0}.csv",DateTime.Now.ToString("yyyyMMMdd_HHmmss"));
+            //string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library","Application Support","JiraCon","changeLog.csv");
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"JiraJIT");
+            if (Directory.Exists(filePath)==false)
+            {
+                Directory.CreateDirectory(filePath);
+            }
+            filePath = Path.Combine(filePath,fName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -885,23 +903,13 @@ namespace JiraCon
                         if (cli.FieldName.ToLower().StartsWith("status"))
                         {
                             writer.WriteLine(string.Format("{0},{1},{2},{3},{4}",jIss.Key,changeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
-                            // writer.WriteLine(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", jIss.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue));
-                            // writer.WriteLine(string.Format("{0}", cli.ToValue));
                         }
-                        // else if (cli.FieldName.ToLower().StartsWith("label"))
-                        // {
-                        //     writer.WriteLine(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", jIss.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue));
-                        //     writer.WriteLine(string.Format("{0}", cli.ToValue));
-                        // }
                     }
                 }
-
-
-//                writer.WriteLine(jIss.Key);
-//                writer.WriteLine("Change Log Count: " + jIss.ChangeLogs.Count);
-            }
-
+           }
+            ConsoleUtil.WriteLine(String.Format("file saved to: {0}",filePath),ConsoleColor.DarkCyan,ConsoleColor.White,false);
             writer.Close();
+            return filePath;
         }
 
 
