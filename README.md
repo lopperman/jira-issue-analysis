@@ -1,5 +1,7 @@
 # jiraTimeInStatus
 ---
+#### (Will update help files soon -- feel free to comment and ask questions)
+---
 [Alpha Release](https://github.com/lopperman/jiraTimeInStatus/releases/tag/0.1.0-alpha)
 ---
 Utility to determine amount of time a jira issue has spend in any status
