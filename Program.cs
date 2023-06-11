@@ -155,10 +155,13 @@ namespace JiraCon
                 {
                     for (int iFore = 0; iFore <= 15; iFore ++)
                     {
-                        string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",iBack,iFore);
                         if (iBack != iFore) 
                         {
-                            ConsoleUtil.WriteLine(clrTest,(ConsoleColor)iFore, (ConsoleColor)iBack, false);
+                            ConsoleColor ccFore = (ConsoleColor)iFore;
+                            ConsoleColor ccBack = (ConsoleColor)iBack;
+                            
+                            string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",ccBack,ccFore);
+                            ConsoleUtil.WriteLine(clrTest,ccFore, ccBack, false);
                         }
                     }
                     Console.WriteLine("** PRESS ANY KEY TO SEE NEXT BACKCOLOR **");

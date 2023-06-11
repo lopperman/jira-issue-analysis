@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Atlassian.Jira;
 using JConsole.ConsoleHelpers.ConsoleTables;
+using static JiraCon.ConsoleUtil;
 
 namespace JiraCon 
 {
@@ -93,8 +94,8 @@ namespace JiraCon
             IEnumerable<CustomField> fields = repo.GetJira().Fields.GetCustomFieldsAsync().GetAwaiter().GetResult();
 
             ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("***** SYSTEM AND CUSTOM ISSUE FIELDS *********", ConsoleColor.White, ConsoleColor.DarkBlue, false);
 
+            ConsoleUtil.WriteLine("***** SYSTEM AND CUSTOM ISSUE FIELDS *********", StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle), false);
             var table = new ConsoleTable("Id", "Name", "CustomType","CustomIdentfier");
             foreach (var field in repo.GetJira().Fields.GetCustomFieldsAsync().GetAwaiter().GetResult())
             {
@@ -102,7 +103,7 @@ namespace JiraCon
             }
             table.Write();
 
-            ConsoleUtil.WriteLine("***** SYSTEM AND CUSTOM ISSUE FIELDS *********", ConsoleColor.White, ConsoleColor.DarkBlue, false);
+            ConsoleUtil.WriteLine("***** SYSTEM AND CUSTOM ISSUE FIELDS *********", StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle), false);
             ConsoleUtil.PressAnyKeyToContinue();
         }
 
@@ -113,7 +114,7 @@ namespace JiraCon
 
             DateTimeOffset? serverTime = repo.ServerInfo.ServerTime;
 
-            ConsoleUtil.WriteLine("***** SERVER INFO *********",ConsoleColor.White,ConsoleColor.DarkBlue,false);
+            ConsoleUtil.WriteLine("***** SERVER INFO *********",StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle),false);
             var table = new ConsoleTable("Key","Value");
             table.AddRow("BaseUrl", repo.ServerInfo.BaseUrl);
             table.AddRow("Build", repo.ServerInfo.BuildNumber);
@@ -122,7 +123,7 @@ namespace JiraCon
             table.AddRow("Server Title", repo.ServerInfo.ServerTitle);
             table.AddRow("Version", repo.ServerInfo.Version);
             table.Write();
-            ConsoleUtil.WriteLine("***** END SERVER INFO *****", ConsoleColor.White, ConsoleColor.DarkBlue, false);
+            ConsoleUtil.WriteLine("***** END SERVER INFO *****", StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle), false);
             ConsoleUtil.PressAnyKeyToContinue();
 
         }

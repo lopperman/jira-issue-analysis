@@ -1,12 +1,87 @@
-﻿using System.Runtime.ExceptionServices;
+﻿using System.Collections;
+using System.Runtime.ExceptionServices;
 using System;
 using System.Text;
 
+
+// GOOD COLOR COMBINATIONS
+// ** BLACK BACKGROUND ** DarkGreen, DarkCyan (bluish), DarkMagenta, Green, Cyan (bluish), Red, Magenta, Yellow, White
+// ** DARKBLUE BACKGROUND ** Gray, Green, Cyan, Red, Magenta, Yellow, White
+// ** DARKGREEN BACKGROUND ** Black, DarkBlue, Gray, Blue, Yellow, White
+// ** DARKCYAN BACKGROUND ** Black, DarkBlue, GRay, Blue, Yellow, White
+// ** DARKRED BACKGROUND ** Black, Gray, Cyan, Red, Magenta, Yellow, White
+// ** DARKMAGENTA BACKGROUND ** Black, DarkBlue, Gray, Yellow, White
+// ** DARKYELLOW BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
+// ** GRAY BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkGray, Blue, Red
+// ** DARKGRAY BACKGROUND ** Gray, Green, Cyan, Red, Magenta, Yellow, White
+// ** BLUE BACKGROUND ** Gray, Cyan, Red, Magenta, Yellow, White
+// ** GREEN BACKGROUND ** Black, DarkBlue, DarkRed, DarkMagenta, Blue, Red, Yellow, White
+// ** CYAN BACKGROUND ** Black, DarkBlue, DarkRed, DarkMagenta, DarkGray, Blue, Red, Magenta
+// ** RED BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
+// ** MAGENTA BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
+// ** YELLOW BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkGray, Blue, Red, Magenta
+// ** WHITE BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, DarkGray, Blue, Red, Magenta
+
+
+
 namespace JiraCon
 {
-
     public static class ConsoleUtil
     {
+        public enum StdLine
+        {
+            slTitle = 1, 
+            slMenuName, 
+            slMenuDetail, 
+            slResponse, 
+            slError,
+            slOutputTitle, 
+            slOutput
+        }
+        public static ConsoleColor StdForecolor(StdLine lineType )
+        {
+            switch(lineType)
+            {
+                case StdLine.slTitle:
+                    return ConsoleColor.White;
+                case StdLine.slMenuName:
+                    return ConsoleColor.Blue;
+                case StdLine.slMenuDetail:
+                    return ConsoleColor.Black ;
+                case StdLine.slResponse:
+                    return ConsoleColor.DarkMagenta;
+                case StdLine.slError:
+                    return ConsoleColor.Red;
+                case StdLine.slOutput:
+                    return ConsoleColor.DarkBlue;
+                case StdLine.slOutputTitle:
+                    return ConsoleColor.White;
+                default:
+                    return ConsoleColor.Black;
+            }
+        } 
+        public static ConsoleColor StdBackcolor(StdLine lineType )
+        {
+            switch(lineType)
+            {
+                case StdLine.slTitle:
+                    return ConsoleColor.DarkGray;
+                case StdLine.slMenuName:
+                    return ConsoleColor.Cyan;
+                case StdLine.slMenuDetail:
+                    return ConsoleColor.White ;
+                case StdLine.slResponse:
+                    return ConsoleColor.White;
+                case StdLine.slError:
+                    return ConsoleColor.Yellow;
+                case StdLine.slOutput:
+                    return ConsoleColor.White;
+                case StdLine.slOutputTitle:
+                    return ConsoleColor.DarkBlue;
+                default:
+                    return ConsoleColor.White;
+            }
+        } 
         static ConsoleLines consoleLines = new ConsoleLines();
         static ConsoleColor defBackground = Console.BackgroundColor;
         static ConsoleColor defForeground = Console.ForegroundColor;
@@ -51,19 +126,19 @@ namespace JiraCon
             var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
 
-            consoleLines.AddConsoleLine(" ------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
-            consoleLines.AddConsoleLine("|  Main Menu  |" + " " + cfgName);
-            consoleLines.AddConsoleLine(" ------------- " + padd);            
-            consoleLines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards");
-            consoleLines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards");
-            consoleLines.AddConsoleLine("(X) Create E(X)tract files");
-            consoleLines.AddConsoleLine("(W) Create (W)ork Metrics Analysis from JQL Query");
-            consoleLines.AddConsoleLine("(A) Epic (A)nalysis - Find and Analyze - Yep, this exists");
+            consoleLines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine("|  Main Menu  |" + " " + cfgName, StdLine.slMenuName);
+            consoleLines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(X) Create E(X)tract files", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(W) Create (W)ork Metrics Analysis from JQL Query", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(A) Epic (A)nalysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("");
-            consoleLines.AddConsoleLine("(I) View (I)tem Status values for work metrics");
-            consoleLines.AddConsoleLine("(C) Config Menu");
-            consoleLines.AddConsoleLine("(T) DEV TESTING");
-            consoleLines.AddConsoleLine("Enter selection or E to exit.");
+            consoleLines.AddConsoleLine("(I) View (I)tem Status values for work metrics", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(T) DEV TESTING", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("Enter selection or E to exit.", StdLine.slResponse );
         }
 
         public static void BuildConfigMenu()
@@ -71,20 +146,20 @@ namespace JiraCon
 
             var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
-            consoleLines.AddConsoleLine(" --------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
-            consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName);
-            consoleLines.AddConsoleLine(" --------------- " + padd);            
-            consoleLines.AddConsoleLine(string.Format("INFO - Config File: {0}",JTISConfigHelper.ConfigFilePath));
-            consoleLines.AddConsoleLine(string.Format("INFO - Output Files: {0}",JTISConfigHelper.JTISRootPath));
+            consoleLines.AddConsoleLine(" --------------- " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName, StdLine.slMenuName);
+            consoleLines.AddConsoleLine(" --------------- " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine(string.Format("INFO - Config File: {0}",JTISConfigHelper.ConfigFilePath), StdLine.slMenuName);
+            consoleLines.AddConsoleLine(string.Format("INFO - Output Files: {0}",JTISConfigHelper.JTISRootPath), StdLine.slMenuName);
 
-            consoleLines.AddConsoleLine("(N) Add New Jira Config");
-            consoleLines.AddConsoleLine("(C) Change Current Jira Config");
-            consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config");
-            consoleLines.AddConsoleLine("(R) Remove Login Configuation");
-            consoleLines.AddConsoleLine(string.Format("(J) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl));
+            consoleLines.AddConsoleLine("(N) Add New Jira Config", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(C) Change Current Jira Config", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(R) Remove Login Configuation", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine(string.Format("(J) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl), StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("");
-            consoleLines.AddConsoleLine("(M) Main Menu");
-            consoleLines.AddConsoleLine("Enter selection or (E) to exit.");
+            consoleLines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);
         }
 
 
@@ -110,6 +185,20 @@ namespace JiraCon
         public static void WriteLine(string text, bool clearScreen)
         {
             WriteLine(text, Console.ForegroundColor, Console.BackgroundColor, clearScreen);
+        }
+
+        public static void WriteLine(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor)
+        {
+            WriteLine(text,foregroundColor,backgroundColor,false);
+        }
+
+        public static void Writeline(string text, StdLine lineType)
+        {
+            WriteLine(text, StdForecolor(lineType), StdBackcolor(lineType),false);
+        }
+        public static void Writeline(string text, StdLine lineType, bool clearScreen)
+        {
+            WriteLine(text, StdForecolor(lineType), StdBackcolor(lineType),clearScreen);            
         }
 
         public static void WriteLine(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor, bool clearScreen)

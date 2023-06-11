@@ -185,11 +185,11 @@ namespace JiraCon
             {
                 msg = "Enter the config id number to use";
             }
-            ConsoleUtil.WriteLine("Choose config:",true);
+            ConsoleUtil.WriteLine("Choose config:", ConsoleColor.DarkMagenta, ConsoleColor.White);
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
-                ConsoleUtil.WriteLine(cfgNames[i]);
+                ConsoleUtil.WriteLine(cfgNames[i],ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
             }
             var cfgResp = ConsoleUtil.GetConsoleInput<int>(msg);
             chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);

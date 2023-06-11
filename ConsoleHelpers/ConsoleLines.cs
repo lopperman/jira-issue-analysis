@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using static JiraCon.ConsoleUtil;
 
 namespace JiraCon
 {
     public class ConsoleLines
     {
         private SortedDictionary<int, ConsoleLine> _lines = new SortedDictionary<int, ConsoleLine>();
-        public string configInfo = string.Empty;
 
         public SortedDictionary<int, ConsoleLine> Lines
         {
@@ -26,6 +26,15 @@ namespace JiraCon
             {
                 return _lines.Count > 0;
             }
+        }
+
+        public void AddConsoleLine(string text, StdLine lineType)
+        {
+            AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType));
+        }
+        public void AddConsoleLine(string text, StdLine lineType, bool writePartial)
+        {
+            AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType), writePartial);
         }
 
         public void AddConsoleLine(string text, ConsoleColor foreground, ConsoleColor background)
@@ -55,44 +64,61 @@ namespace JiraCon
 
         public void WriteQueuedLines()
         {
-            WriteQueuedLines(false);
+            WriteQueuedLines(false,true);
         }
 
-        public void WriteQueuedLines(bool clearScreen)
+        public void WriteQueuedLines(bool clearScreen, bool addTitle)
         {
+            Console.ResetColor();
             if (clearScreen)
             {
                 Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.BackgroundColor = ConsoleColor.White;
 
-                string title = string.Format("JiraTIS - (https://github.com/lopperman/jiraTimeInStatus)");
-
-                Console.WriteLine(title);
-                if (!string.IsNullOrEmpty(configInfo))
-                {
-                    Console.WriteLine(configInfo);
-                }
+            }
+            if (addTitle)
+            {
+                string title = "JiraTIS - (https://github.com/lopperman/jiraTimeInStatus";
+                ConsoleUtil.WriteLine(title,ConsoleColor.White,ConsoleColor.DarkGray,false);
             }
             for (int i = 0; i < _lines.Count; i++)
             {
+                Console.ResetColor();
                 ConsoleLine l = _lines[i];
                 if (l.UseColors)
                 {
                     Console.ForegroundColor = l.Foreground;
                     Console.BackgroundColor = l.Background;
+
                 }
                 if (l.WritePartialLine)
                 {
-                    Console.Write(l.Text);
+                    if (l.UseColors)
+                    {
+                        ConsoleUtil.WriteAppend(l.Text,l.Foreground,l.Background);
+                    }
+                    else 
+                    {
+                        ConsoleUtil.WriteAppend(l.Text);
+                    }
+                    // Console.Write(l.Text);
                 }
                 else
                 {
-                    Console.WriteLine(l.Text);
+                    if (l.UseColors)
+                    {
+                        ConsoleUtil.WriteLine(l.Text,l.Foreground,l.Background,false);
+                    }
+                    else 
+                    {
+                        ConsoleUtil.WriteLine(l.Text);
+                    }
                 }
             }
             _lines.Clear();
-
+        }
+        public void WriteQueuedLines(bool clearScreen)
+        {
+            WriteQueuedLines(clearScreen,true);
         }
 
         public void ByeBye()
