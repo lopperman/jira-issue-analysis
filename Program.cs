@@ -1,4 +1,5 @@
 ﻿using System;
+using Atlassian.Jira;
 using JConsole.Utilities;
 using Newtonsoft.Json;
 using Terminal.Gui;
@@ -150,6 +151,22 @@ namespace JiraCon
             var resp = Console.ReadKey(true);
             if (resp.Key == ConsoleKey.T)
             {
+                for (int iBack = 0; iBack <=15; iBack ++)
+                {
+                    for (int iFore = 0; iFore <= 15; iFore ++)
+                    {
+                        string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",iBack,iFore);
+                        if (iBack != iFore) 
+                        {
+                            ConsoleUtil.WriteLine(clrTest,(ConsoleColor)iFore, (ConsoleColor)iBack, false);
+                        }
+                    }
+                    Console.WriteLine("** PRESS ANY KEY TO SEE NEXT BACKCOLOR **");
+                    Console.ReadKey(true);
+                }
+                Console.WriteLine("** PRESS ANY KEY TO RETURN TO CONFIG MENU **");
+                Console.ReadKey(true);
+
                 //T = DEV TESTING
 
                 // if (config.ValidConfig )
@@ -766,26 +783,39 @@ namespace JiraCon
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("***** Jira Card: " + key, ConsoleColor.DarkBlue, ConsoleColor.White, false);
 
-            var issue = JiraUtil.JiraRepo.GetIssue(key);
-            //issue.
+            JIssue? retJIssue = null;
+            Issue tmpIssue;
 
-            if (issue == null)
+            try 
             {
-                ConsoleUtil.WriteLine("***** Jira Card: " + key + " NOT FOUND!", ConsoleColor.DarkBlue, ConsoleColor.White, false);
-                return null;
+                tmpIssue = JiraUtil.JiraRepo.GetIssue(key);                
+                if (tmpIssue != null)
+                {
+                    retJIssue = new JIssue(tmpIssue);
+                }
             }
+            finally 
+            {
+                if (retJIssue == null) 
+                {
+                    ConsoleUtil.WriteLine("***** Jira Card: " + key + " NOT FOUND!", ConsoleColor.DarkRed, ConsoleColor.White, false);
+                }
+            }
+            if (retJIssue == null)
+            {
+                return null;
+            }   
+            
+            ConsoleUtil.WriteLine(string.Format("***** loading change logs for {0}-({1}):",key,tmpIssue.Summary));
 
-            ConsoleUtil.WriteLine(string.Format("***** loading change logs for {0}-({1}):",key,issue.Summary));
+            retJIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tmpIssue));
 
-            var jIss = new JIssue(issue);
-            jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
+            ConsoleUtil.WriteLine(string.Format("Found {0} change logs for {1}", retJIssue.ChangeLogs.Count, key));
 
-            ConsoleUtil.WriteLine(string.Format("Found {0} change logs for {1}", jIss.ChangeLogs.Count, key));
-
-            for (int i = 0; i < jIss.ChangeLogs.Count; i++)
+            for (int i = 0; i < retJIssue.ChangeLogs.Count; i++)
             {
 
-                JIssueChangeLog changeLog = jIss.ChangeLogs[i];
+                JIssueChangeLog changeLog = retJIssue.ChangeLogs[i];
 
 
                 foreach (JIssueChangeLogItem cli in changeLog.Items)
@@ -794,7 +824,7 @@ namespace JiraCon
                     {
                         if (includeDescAndComments)
                         {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed ", issue.Key, changeLog.CreatedDate.ToString(), cli.FieldName), true);
+                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName), true);
                             ConsoleUtil.WriteAppend(string.Format("\t{0} changed from ", cli.FieldName), true);
                             ConsoleUtil.WriteAppend(string.Format("{0}", cli.FromValue), ConsoleColor.DarkGreen, Console.BackgroundColor, true);
                             ConsoleUtil.WriteAppend(string.Format("\t{0} changed to ", cli.FieldName), true);
@@ -805,25 +835,24 @@ namespace JiraCon
                     {
                         if (cli.FieldName.ToLower().StartsWith("status"))
                         {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", issue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
+                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
                             ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue),ConsoleColor.White,ConsoleColor.Red,true);
                         }
                         else if (cli.FieldName.ToLower().StartsWith("label"))
                         {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", issue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
+                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
                             ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue), ConsoleColor.White, ConsoleColor.Blue);
                         }
 
                         else
                         {
-                            ConsoleUtil.WriteLine($"{issue.Key} - Changed On {changeLog.CreatedDate}, {cli.FieldName} field changed from '{cli.FromValue}' to '{cli.ToValue}'");
-
+                            ConsoleUtil.WriteLine($"{tmpIssue.Key} - Changed On {changeLog.CreatedDate}, {cli.FieldName} field changed from '{cli.FromValue}' to '{cli.ToValue}'");
                         }
                     }
                 }
             }
 
-            return jIss ;
+            return retJIssue ;
 
             //ConsoleUtil.WriteLine("***** JSON for  " + key + " *****", ConsoleColor.Black, ConsoleColor.Cyan, false);
             //ConsoleUtil.WriteLine(JsonConvert.SerializeObject(jIss,Formatting.Indented), ConsoleColor.DarkBlue, ConsoleColor.Cyan, false);

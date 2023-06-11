@@ -426,9 +426,17 @@ namespace JiraCon
             return issues;
         }
 
-        public Issue GetIssue(string key)
+        public Issue? GetIssue(string key)
         {
-            return GetIssues(string.Format("key={0}", key)).FirstOrDefault();
+            try 
+            {
+                return GetIssues(string.Format("key={0}", key)).FirstOrDefault();
+            }
+            catch
+            {
+                ConsoleUtil.WriteLine("ERROR GETTING ISSUE: " + key,ConsoleColor.DarkRed,ConsoleColor.Yellow,false);
+                return null;
+            }
 
 
             ////IssueSearchOptions options = new IssueSearchOptions(string.Format("project={0}", config.jiraProjectKey));
