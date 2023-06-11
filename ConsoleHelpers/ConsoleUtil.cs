@@ -47,7 +47,8 @@ namespace JiraCon
 
         public static void BuildInitializedMenu()
         {
-            var cfgName = JTISConfigHelper.config.configName;
+
+            var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
 
             consoleLines.AddConsoleLine(" ------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
@@ -68,11 +69,14 @@ namespace JiraCon
         public static void BuildConfigMenu()
         {
 
-            var cfgName = JTISConfigHelper.config.configName;
+            var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
             consoleLines.AddConsoleLine(" --------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
             consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName);
             consoleLines.AddConsoleLine(" --------------- " + padd);            
+            consoleLines.AddConsoleLine(string.Format("INFO - Config File: {0}",JTISConfigHelper.ConfigFilePath));
+            consoleLines.AddConsoleLine(string.Format("INFO - Output Files: {0}",JTISConfigHelper.JTISRootPath));
+
             consoleLines.AddConsoleLine("(N) Add New Jira Config");
             consoleLines.AddConsoleLine("(C) Change Current Jira Config");
             consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config");
