@@ -37,7 +37,7 @@ namespace JiraCon
             }
             else if (JTISConfigHelper.ConfigCount > 1)
             {
-                var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
+                var changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
                 if (changeCfg != null && changeCfg.ValidConfig==true)
                 {
                     JTISConfigHelper.config = changeCfg;
@@ -81,9 +81,18 @@ namespace JiraCon
             {
                 if (JTISConfigHelper.config != null)
                 {
-                    JTISConfigHelper.DeleteConfigFile(JTISConfigHelper.ConfigFilePath );
-                    ConsoleUtil.Lines.ByeBye();
-                    Environment.Exit(0);
+                    Console.WriteLine("Type 'Y' to DELETE 1 or more saved Jira Configurations");
+                    resp = Console.ReadKey(true);
+                    if (resp.Key == ConsoleKey.Y)
+                    {
+                        JTISConfigHelper.DeleteConfig();
+                    }
+                    if (JTISConfigHelper.config == null )
+                    {
+                        ConsoleUtil.Lines.ByeBye();
+                        Environment.Exit(0);
+                    }
+                    return true;                    
                 }
             }
             else if (resp.Key == ConsoleKey.E)
@@ -113,7 +122,7 @@ namespace JiraCon
             }
             else if (resp.Key == ConsoleKey.C)
             {
-                var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
+                var changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
                 if (changeCfg != null)
                 {
                     JTISConfigHelper.config = changeCfg;                    

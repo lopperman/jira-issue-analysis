@@ -1,0 +1,13 @@
+{
+    "editor.wordWrap": "on",
+    "editor.accessibilitySupport": "off",
+    "editor.autoIndent": "brackets",
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.dragAndDrop": false,
+    "editor.dropIntoEditor.enabled": false,
+    "editor.glyphMargin": false,
+    "editor.guides.indentation": true,
+    "editor.smoothScrolling": true,
+    "accessibility.verbosity.chat": false,
+    "csharp.inlayHints.parameters.forIndexerParameters": true
+}

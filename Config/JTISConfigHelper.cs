@@ -1,3 +1,4 @@
+using System.Data;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Diagnostics;
@@ -99,6 +100,11 @@ namespace JiraCon
             return cfgList.Find(x=>x.configId==cfgID);
         }
 
+        public static string MakeConfigName(JTISConfig cfg)
+        {
+            return string.Format("CFG{0:00} - {1} - {2}",cfg.configId,cfg.baseUrl,cfg.defaultProject);
+        }
+
         public static JTISConfig? CreateConfig()
         {
             JTISConfig? retCfg = null;
@@ -116,7 +122,7 @@ namespace JiraCon
                 retCfg.apiToken = tmpApiToken;
                 retCfg.baseUrl = tmpUrl;
                 retCfg.defaultProject = tmpProject;
-                retCfg.configName = string.Format("CFG{0:00} - {1} - {2}",retCfg.configId,retCfg.baseUrl,retCfg.defaultProject);
+                retCfg.configName = MakeConfigName(retCfg);
                 cfgList.Add(retCfg);
                 SaveConfigList();
 
@@ -172,17 +178,20 @@ namespace JiraCon
             cfgList = desObj;
         }
 
-        internal static JTISConfig? ChangeCurrentConfig()
+        internal static JTISConfig? ChangeCurrentConfig(string? msg)
         {
             JTISConfig? chCfg = null; 
-
+            if (msg==null || msg.Length == 0)
+            {
+                msg = "Enter the config id number to use";
+            }
             ConsoleUtil.WriteLine("Choose config:",true);
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
                 ConsoleUtil.WriteLine(cfgNames[i]);
             }
-            var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the number (e.g. '1') of the config you want to use");
+            var cfgResp = ConsoleUtil.GetConsoleInput<int>(msg);
             chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
             if (chCfg !=null && chCfg.ValidConfig==true)
             {
@@ -284,7 +293,56 @@ namespace JiraCon
             
             ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
             ok = Console.ReadKey(true);
-        }      
+        }
 
+        internal static void DeleteConfig()
+        {
+            JTISConfig? delCfg = null; 
+            JTISConfig? changeToCfg = null;
+
+            ConsoleUtil.WriteLine("** DELETE JIRA CONFIG ** ", ConsoleColor.DarkRed,ConsoleColor.Yellow, true);
+            var cfgNames = JTISConfigHelper.ConfigNameList;
+            for (int i = 0; i < cfgNames.Count; i ++)
+            {
+                ConsoleUtil.WriteLine(cfgNames[i]);
+            }
+            var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the config number you want to DELETE");
+            delCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
+            if (delCfg !=null )
+            {
+                if (ConfigCount > 1 && delCfg.configName == config.configName)
+                {
+                    changeToCfg = ChangeCurrentConfig(string.Format("Enter config id number to use after '{0}' is deleted",delCfg.configName));
+                    if (changeToCfg != null)
+                    {
+                        if (changeToCfg.configId == delCfg.configId)
+                        {
+                            ConsoleUtil.WriteLine("You cannot use the config you are trying to delete! Press any key to continue");
+                            Console.ReadKey(true);
+                            return;
+                        }
+                        else 
+                        {
+                            config = changeToCfg;
+                        }
+                    }
+                }
+                else 
+                {
+                    config = null;
+                }
+                cfgList.Remove(delCfg);
+                if (cfgList.Count > 0)
+                {
+                    for (int i = 0; i < cfgList.Count ; i ++)
+                    {
+                        JTISConfig modCfg = cfgList[i];
+                        modCfg.configId = i + 1;
+                        modCfg.configName = MakeConfigName(modCfg);
+                    }
+                    SaveConfigList();
+                }
+            }
+        }
     }
 }

@@ -73,10 +73,10 @@ namespace JiraCon
             consoleLines.AddConsoleLine(" --------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
             consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName);
             consoleLines.AddConsoleLine(" --------------- " + padd);            
-            consoleLines.AddConsoleLine("(R) Rebuild Login Configuation");
             consoleLines.AddConsoleLine("(N) Add New Jira Config");
             consoleLines.AddConsoleLine("(C) Change Current Jira Config");
             consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config");
+            consoleLines.AddConsoleLine("(R) Remove Login Configuation");
             consoleLines.AddConsoleLine(string.Format("(J) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl));
             consoleLines.AddConsoleLine("");
             consoleLines.AddConsoleLine("(M) Main Menu");
