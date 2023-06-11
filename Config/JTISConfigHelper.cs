@@ -139,5 +139,28 @@ namespace JiraCon
             var desObj = JsonConvert.DeserializeObject<List<JTISConfig>>(data);
             cfgList = desObj;
         }
+
+        internal static JTISConfig? ChangeCurrentConfig()
+        {
+            JTISConfig? chCfg = null; 
+
+            ConsoleUtil.WriteLine("Choose config:",true);
+            var cfgNames = JTISConfigHelper.ConfigNameList;
+            for (int i = 0; i < cfgNames.Count; i ++)
+            {
+                ConsoleUtil.WriteLine(cfgNames[i]);
+            }
+            var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the number (e.g. '1') of the config you want to use");
+            chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
+            if (chCfg !=null && chCfg.ValidConfig==true)
+            {
+                return chCfg;
+            }
+            else 
+            {
+                return null;
+            }
+
+        }
     }
 }

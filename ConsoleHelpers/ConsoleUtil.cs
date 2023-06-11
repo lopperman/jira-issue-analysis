@@ -47,9 +47,12 @@ namespace JiraCon
 
         public static void BuildInitializedMenu()
         {
-            consoleLines.AddConsoleLine(" ------------- ", ConsoleColor.Black, ConsoleColor.White);
-            consoleLines.AddConsoleLine("|  Main Menu  |");
-            consoleLines.AddConsoleLine(" ------------- ");            
+            var cfgName = MainClass.config.configName;
+            string padd = new string('-',cfgName.Length + 1 );
+
+            consoleLines.AddConsoleLine(" ------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
+            consoleLines.AddConsoleLine("|  Main Menu  |" + " " + cfgName);
+            consoleLines.AddConsoleLine(" ------------- " + padd);            
             consoleLines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards");
             consoleLines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards");
             consoleLines.AddConsoleLine("(X) Create E(X)tract files");
@@ -64,11 +67,15 @@ namespace JiraCon
 
         public static void BuildConfigMenu()
         {
-            consoleLines.AddConsoleLine(" --------------- ", ConsoleColor.Black, ConsoleColor.White);
-            consoleLines.AddConsoleLine("|  Config Menu  |");
-            consoleLines.AddConsoleLine(" --------------- ");
+
+            var cfgName = MainClass.config.configName;
+            string padd = new string('-',cfgName.Length + 1 );
+            consoleLines.AddConsoleLine(" --------------- " + padd, ConsoleColor.Black, ConsoleColor.White);
+            consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName);
+            consoleLines.AddConsoleLine(" --------------- " + padd);            
             consoleLines.AddConsoleLine("(R) Rebuild Login Configuation");
             consoleLines.AddConsoleLine("(N) Add New Jira Config");
+            consoleLines.AddConsoleLine("(C) Change Current Jira Config");
             consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config");
             consoleLines.AddConsoleLine(string.Format("(J) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl));
             consoleLines.AddConsoleLine("");

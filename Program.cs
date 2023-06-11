@@ -37,14 +37,11 @@ namespace JiraCon
             }
             else if (JTISConfigHelper.ConfigCount > 1)
             {
-                ConsoleUtil.WriteLine("Enter the number (e.g. '1') of the config you want to use",true);
-                var cfgNames = JTISConfigHelper.ConfigNameList;
-                for (int i = 0; i < cfgNames.Count; i ++)
+                var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
+                if (changeCfg != null && changeCfg.ValidConfig==true)
                 {
-                    ConsoleUtil.WriteLine(cfgNames[i]);
+                    config = changeCfg;
                 }
-                var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the number (e.g. '1') of the config you want to use");
-                config = JTISConfigHelper.GetConfigFromList(cfgResp);
             }
 
             if (config==null || config.ValidConfig==false)
@@ -139,7 +136,15 @@ namespace JiraCon
                     return true;
                 }
                 return false;
-
+            }
+            else if (resp.Key == ConsoleKey.C)
+            {
+                var changeCfg = JTISConfigHelper.ChangeCurrentConfig();
+                if (changeCfg != null)
+                {
+                    config = changeCfg;                    
+                }
+                return true;
             }
             else if (resp.Key == ConsoleKey.M)
             {
