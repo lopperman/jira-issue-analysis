@@ -68,8 +68,7 @@ namespace JiraCon
             {
                 showMenu = MainMenu();
             }
-            ConsoleUtil.Lines.ByeBye();
-            Environment.Exit(0);
+            ConsoleUtil.Lines.ByeByeForced();
         }
 
         private static bool JQLMenu()
@@ -80,7 +79,6 @@ namespace JiraCon
             var resp = Console.ReadKey(true);
             if (resp.Key == ConsoleKey.V)
             {
-                ConsoleUtil.Lines.AddConsoleLine("** SAVED JQL **",ConsoleUtil.StdLine.slOutputTitle);
                 if (JTISConfigHelper.config.SavedJQLCount > 0)
                 {
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
@@ -94,7 +92,6 @@ namespace JiraCon
                 {
                     ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdLine.slOutput);
                 }
-                ConsoleUtil.Lines.AddConsoleLine("** SAVED JQL **",ConsoleUtil.StdLine.slOutputTitle);
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 Console.ReadKey(true);
                 return true;                                
@@ -120,6 +117,13 @@ namespace JiraCon
             else if (resp.Key == ConsoleKey.C)
             {
                 return false;
+            }
+            else if (resp.Key == ConsoleKey.E)
+            {                
+                if(ConsoleUtil.Lines.ByeBye())
+                {
+                    Environment.Exit(0);
+                }
             }
             return true;
         }
@@ -156,8 +160,11 @@ namespace JiraCon
             }
             else if (resp.Key == ConsoleKey.E)
             {
-                ConsoleUtil.Lines.ByeBye();
-                Environment.Exit(0);
+                if (ConsoleUtil.Lines.ByeBye())
+                {
+                    Environment.Exit(0);
+                }
+                return true;
             }
             else if (resp.Key == ConsoleKey.M)
             {
@@ -186,16 +193,17 @@ namespace JiraCon
                     }
                     if (JTISConfigHelper.config == null )
                     {
-                        ConsoleUtil.Lines.ByeBye();
-                        Environment.Exit(0);
+                        ConsoleUtil.Lines.ByeByeForced();
                     }
                     return true;                    
                 }
             }
             else if (resp.Key == ConsoleKey.E)
-            {
-                ConsoleUtil.Lines.ByeBye();
-                Environment.Exit(0);
+            {                
+                if(ConsoleUtil.Lines.ByeBye())
+                {
+                    Environment.Exit(0);
+                }
             }
             else if (resp.Key == ConsoleKey.V)
             {                

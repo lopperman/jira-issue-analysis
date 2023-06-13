@@ -121,10 +121,27 @@ namespace JiraCon
             WriteQueuedLines(clearScreen,true);
         }
 
-        public void ByeBye()
+        public bool ByeBye()
+        {
+            AddConsoleLine("Press 'Y' to exit, otherwise press any key to continue",StdLine.slResponse);
+            WriteQueuedLines(false);
+            if (Console.ReadKey(true).Key !=ConsoleKey.Y)
+            {
+                return false;
+            }
+            else 
+            {
+                AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+                WriteQueuedLines(true);
+                return true;
+            }
+        }
+
+        public void ByeByeForced()
         {
             AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
-            WriteQueuedLines(true);
+            WriteQueuedLines(false);
+            Environment.Exit(0);
         }
     }
 
