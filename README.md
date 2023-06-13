@@ -8,7 +8,7 @@
 ---
 #### (Will update help files soon -- feel free to [comment and ask questions](https://github.com/lopperman/jiraTimeInStatus/discussions))
 ---
-[Alpha Release](https://github.com/lopperman/jiraTimeInStatus/releases/tag/0.1.7-alpha)
+[Latest Release](https://github.com/lopperman/jiraTimeInStatus/releases)
 ---
 Utility to determine amount of time a jira issue has spend in any status
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/mainMenu.png?raw=true)
