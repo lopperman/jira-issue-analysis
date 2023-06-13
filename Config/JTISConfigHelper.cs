@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using JConsole.ConsoleHelpers.ConsoleTables;
+using static JiraCon.ConsoleUtil;
 
 namespace JiraCon
 {
@@ -269,7 +270,7 @@ namespace JiraCon
             table.AddRow(JTISConfigHelper.config.userName, JTISConfigHelper.config.apiToken, JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
             table.Write();
             ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******", ConsoleColor.Yellow, ConsoleColor.Black, false);
+            ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******",ConsoleUtil.StdForecolor(StdLine.slOutputTitle), ConsoleUtil.StdBackcolor(StdLine.slOutputTitle), false);
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
             var ok = Console.ReadKey(true);

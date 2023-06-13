@@ -72,6 +72,58 @@ namespace JiraCon
             Environment.Exit(0);
         }
 
+        private static bool JQLMenu()
+        {
+            ConsoleUtil.BuildJQLMenu();
+            ConsoleUtil.Lines.WriteQueuedLines(true);
+
+            var resp = Console.ReadKey(true);
+            if (resp.Key == ConsoleKey.V)
+            {
+                ConsoleUtil.Lines.AddConsoleLine("** SAVED JQL **",ConsoleUtil.StdLine.slOutputTitle);
+                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                {
+                    for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
+                    {
+                        JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdLine.slOutputTitle);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdLine.slOutput);
+                    }
+                }
+                else 
+                {
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdLine.slOutput);
+                }
+                ConsoleUtil.Lines.AddConsoleLine("** SAVED JQL **",ConsoleUtil.StdLine.slOutputTitle);
+                ConsoleUtil.Lines.WriteQueuedLines(false);
+                Console.ReadKey(true);
+                return true;                                
+            }
+            else if (resp.Key == ConsoleKey.A)
+            {
+                string tmpName = string.Empty;
+                string tmpJql = string.Empty;
+                tmpJql = ConsoleUtil.GetConsoleInput<string>("Enter JQL");                
+                tmpName = ConsoleUtil.GetConsoleInput<string>("Enter short name to describe JQL");                
+                ConsoleUtil.WriteLine(string.Format("Name: {0}",tmpName));
+                ConsoleUtil.WriteLine(string.Format("JQL: {0}",tmpJql));
+                ConsoleUtil.WriteLine(string.Format("Press 'Y' to save, otherwise press any key"));
+                resp = Console.ReadKey(true);
+                if (resp.Key == ConsoleKey.Y)
+                {
+                    JTISConfigHelper.config.AddJQL(tmpName,tmpJql);
+                    JTISConfigHelper.SaveConfigList();
+                    return false;
+                }
+                
+            }
+            else if (resp.Key == ConsoleKey.C)
+            {
+                return false;
+            }
+            return true;
+        }
+
         private static bool DevMenu()
         {
             ConsoleUtil.BuildDevMenu();
@@ -150,10 +202,18 @@ namespace JiraCon
                 JTISConfigHelper.ViewAll();
                 return true;
             }
-            else if (resp.Key == ConsoleKey.J)
+            else if (resp.Key == ConsoleKey.I)
             {
                 JEnvironmentConfig.JiraEnvironmentInfo();
                 return true;
+            }
+            else if (resp.Key == ConsoleKey.J)
+            {
+                while (JQLMenu())
+                {
+
+                }
+                return true;                
             }
             else if (resp.Key == ConsoleKey.N)
             {

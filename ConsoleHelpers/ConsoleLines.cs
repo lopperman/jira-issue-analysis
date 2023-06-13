@@ -77,7 +77,7 @@ namespace JiraCon
             }
             if (addTitle)
             {
-                string title = "JiraTIS - (https://github.com/lopperman/jiraTimeInStatus";
+                string title = "  JiraTIS - (https://github.com/lopperman/jiraTimeInStatus  ";
                 ConsoleUtil.WriteLine(title,ConsoleColor.White,ConsoleColor.DarkGray,false);
             }
             for (int i = 0; i < _lines.Count; i++)

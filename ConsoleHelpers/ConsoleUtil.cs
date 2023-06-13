@@ -141,6 +141,23 @@ namespace JiraCon
             consoleLines.AddConsoleLine("Enter selection or E to exit.", StdLine.slResponse );
         }
 
+        public static void BuildJQLMenu()
+        {
+            var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
+            string padd = new string('-',cfgName.Length + 1 );
+            consoleLines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine("|  JQL Menu  |" + " " + cfgName, StdLine.slMenuName);
+            consoleLines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
+
+            consoleLines.AddConsoleLine("(V) View All Saved JQL", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(A) Add JQL", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(F) Find Saved JQL", StdLine.slMenuDetail);
+
+            consoleLines.AddConsoleLine("");
+            consoleLines.AddConsoleLine("(C) Back to Config Menu", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);            
+        }
+
         public static void BuildDevMenu()
         {
             var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
@@ -165,11 +182,12 @@ namespace JiraCon
             consoleLines.AddConsoleLine(string.Format("INFO - Config File: {0}",JTISConfigHelper.ConfigFilePath), StdLine.slMenuName);
             consoleLines.AddConsoleLine(string.Format("INFO - Output Files: {0}",JTISConfigHelper.JTISRootPath), StdLine.slMenuName);
 
+            consoleLines.AddConsoleLine("(J) Manage Saved JQL", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("(N) Add New Jira Config", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("(C) Change Current Jira Config", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("(V) View JiraConsole (this app) config", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("(R) Remove Login Configuation", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine(string.Format("(J) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl), StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine(string.Format("(I) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl), StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("");
             consoleLines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);
