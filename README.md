@@ -2,8 +2,9 @@
 ---
 # jiraTimeInStatus
 ### Description
-Retrieve Jira Issues via [Jira v3 REST API](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version), and calculate amount of time issues have spent in any combination of defined Issues States.  All user-defined states resolve to _TO DO, IN PROGRESS, or DONE_.  A configuration file is created which maps issues statuses to 'Active' or 'Waiting', and is used to calculate total 'Active Days' and 'Calendar Days'.  
-It can be difficult to obtain this information from a Jira Cloud Instance, as it requires accessing all the change logs for an issue.  This tool obtains all issue change logs (including where the number of change logs exceeds maximum changes logs per API request).
+
+##### Retrieve Jira Issues via [Jira v3 REST API](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version), and calculate amount of time issues have spent in any combination of defined Issues States.  All user-defined states resolve to _TO DO, IN PROGRESS, or DONE_.  A configuration file is created which maps issues statuses to 'Active' or 'Waiting', and is used to calculate total 'Active Days' and 'Calendar Days'.  
+##### It can be difficult to obtain this information from a Jira Cloud Instance, as it requires accessing all the change logs for an issue.  This tool obtains all issue change logs (including where the number of change logs exceeds maximum changes logs per API request).
 ---
 #### (Will update help files soon -- feel free to [comment and ask questions](https://github.com/lopperman/jiraTimeInStatus/discussions))
 ---
