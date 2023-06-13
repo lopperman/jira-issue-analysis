@@ -1,4 +1,5 @@
 # jiraTimeInStatus
+[![.NET](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml/badge.svg)](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml)
 ---
 #### (Will update help files soon -- feel free to [comment and ask questions](https://github.com/lopperman/jiraTimeInStatus/discussions))
 ---
