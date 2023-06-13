@@ -123,7 +123,7 @@ namespace JiraCon
         public static void BuildInitializedMenu()
         {
 
-            var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
+            var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
 
             consoleLines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
@@ -137,14 +137,27 @@ namespace JiraCon
             consoleLines.AddConsoleLine("");
             consoleLines.AddConsoleLine("(I) View (I)tem Status values for work metrics", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(T) DEV TESTING", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("(D) Dev/Misc Menu", StdLine.slMenuDetail);
             consoleLines.AddConsoleLine("Enter selection or E to exit.", StdLine.slResponse );
         }
 
+        public static void BuildDevMenu()
+        {
+            var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
+            string padd = new string('-',cfgName.Length + 1 );
+            consoleLines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
+            consoleLines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, StdLine.slMenuName);
+            consoleLines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
+
+            consoleLines.AddConsoleLine("(C) View Console Fore/Back Colors", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("");
+            consoleLines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
+            consoleLines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);            
+        }
         public static void BuildConfigMenu()
         {
 
-            var cfgName = string.Format("Connected: {0}",JTISConfigHelper.config.configName);
+            var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
             consoleLines.AddConsoleLine(" --------------- " + padd, StdLine.slMenuName);
             consoleLines.AddConsoleLine("|  Config Menu  |" + " " + cfgName, StdLine.slMenuName);

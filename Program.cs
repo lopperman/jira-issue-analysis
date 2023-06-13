@@ -72,6 +72,50 @@ namespace JiraCon
             Environment.Exit(0);
         }
 
+        private static bool DevMenu()
+        {
+            ConsoleUtil.BuildDevMenu();
+            ConsoleUtil.Lines.WriteQueuedLines(true);
+
+            var resp = Console.ReadKey(true);
+            if (resp.Key == ConsoleKey.C)
+            {
+
+                for (int iBack = 0; iBack <=15; iBack ++)
+                {
+                    for (int iFore = 0; iFore <= 15; iFore ++)
+                    {
+                        if (iBack != iFore) 
+                        {
+                            ConsoleColor ccFore = (ConsoleColor)iFore;
+                            ConsoleColor ccBack = (ConsoleColor)iBack;
+                            
+                            string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",ccBack,ccFore);
+                            ConsoleUtil.WriteLine(clrTest,ccFore, ccBack, false);
+                        }
+                    }
+                    Console.WriteLine("** PRESS ANY KEY TO SEE NEXT BACKCOLOR **");
+                    Console.ReadKey(true);
+                }
+                Console.WriteLine("** PRESS ANY KEY TO RETURN TO CONFIG MENU **");
+                Console.ReadKey(true);
+
+                return true;                    
+            }
+            else if (resp.Key == ConsoleKey.E)
+            {
+                ConsoleUtil.Lines.ByeBye();
+                Environment.Exit(0);
+            }
+            else if (resp.Key == ConsoleKey.M)
+            {
+                return false;
+            }
+
+
+            return true;
+
+        }
         private static bool ConfigMenu()
         {
             ConsoleUtil.BuildConfigMenu();
@@ -149,43 +193,7 @@ namespace JiraCon
             ConsoleUtil.Lines.WriteQueuedLines(true);
 
             var resp = Console.ReadKey(true);
-            if (resp.Key == ConsoleKey.T)
-            {
-                for (int iBack = 0; iBack <=15; iBack ++)
-                {
-                    for (int iFore = 0; iFore <= 15; iFore ++)
-                    {
-                        if (iBack != iFore) 
-                        {
-                            ConsoleColor ccFore = (ConsoleColor)iFore;
-                            ConsoleColor ccBack = (ConsoleColor)iBack;
-                            
-                            string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",ccBack,ccFore);
-                            ConsoleUtil.WriteLine(clrTest,ccFore, ccBack, false);
-                        }
-                    }
-                    Console.WriteLine("** PRESS ANY KEY TO SEE NEXT BACKCOLOR **");
-                    Console.ReadKey(true);
-                }
-                Console.WriteLine("** PRESS ANY KEY TO RETURN TO CONFIG MENU **");
-                Console.ReadKey(true);
-
-                //T = DEV TESTING
-
-                // if (config.ValidConfig )
-                // {
-                //     JTISConfigHelper.GetJTISConfigs(Path.Combine(JTISConfigHelper.config.ConfigFolderPath,"test.json"));
-
-                //     ConsoleUtil.WriteLine(string.Format("userName: {0}",config.userName ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                //     ConsoleUtil.WriteLine(string.Format("apiToken: {0}",config.apiToken ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                //     ConsoleUtil.WriteLine(string.Format("jiraURL: {0}",config.baseUrl ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                //     ConsoleUtil.WriteLine(string.Format("defaultProject: {0}",config.defaultProject  ),ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
-                //     resp = Console.ReadKey(true);
-                // }
-
-                return true;
-            }
-            else if (resp.Key == ConsoleKey.M)
+            if (resp.Key == ConsoleKey.M)
             {
                 ConsoleUtil.WriteLine("");
                 ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or E to exit.", ConsoleColor.Black, ConsoleColor.White, false);
@@ -327,6 +335,19 @@ namespace JiraCon
 
                 }
                 return true;
+            }
+            else if (resp.Key == ConsoleKey.D)
+            {
+                while (DevMenu())
+                {
+
+                }
+                return true;
+
+
+
+
+
             }
             return false;
         }
