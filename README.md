@@ -1,17 +1,19 @@
 [![.NET](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml/badge.svg)](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml)
 ---
 # jiraTimeInStatus
+### Description
+Retrieve Jira Issues via [Jira v3 REST API](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version), and calculate amount of time issues have spent in any combination of defined Issues States.  All user-defined states resolve to _TO DO, IN PROGRESS, or DONE_.  A configuration file is created which maps issues statuses to 'Active' or 'Waiting', and is used to calculate total 'Active Days' and 'Calendar Days'.  
+It can be difficult to obtain this information from a Jira Cloud Instance, as it requires accessing all the change logs for an issue.  This tool obtains all issue change logs (including where the number of change logs exceeds maximum changes logs per API request).
 ---
 #### (Will update help files soon -- feel free to [comment and ask questions](https://github.com/lopperman/jiraTimeInStatus/discussions))
 ---
-[Alpha Release](https://github.com/lopperman/jiraTimeInStatus/releases/tag/0.1.0-alpha)
+[Alpha Release](https://github.com/lopperman/jiraTimeInStatus/releases/tag/0.1.7-alpha)
 ---
 Utility to determine amount of time a jira issue has spend in any status
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/mainMenu.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/configMenu.png?raw=true)
 
 ## Mac and PC Compatible
-
 ### Console App to interact with Jira Cloud
 #### Primary Purpose - retrieve ALL issueLogs for stories in order to find and analyze about of calendar time, and 'In Progress' time a Jira Issue has spent in any particular state.
  - Retrieve Issue Status mapping from Jira to determine if any given issue status is a 'TO DO', 'IN PROGRESS', or 'DONE' -- this issue is written to a local file, but can be overriden
