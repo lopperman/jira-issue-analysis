@@ -4,6 +4,13 @@ using Newtonsoft.Json;
 
 namespace JiraCon
 {
+    public enum ChangeLogTypeEnum
+    {
+        clUnknown = 0, 
+        clStatus = 1, 
+        clBlockedFlag = 2, 
+        clOther = 3
+    }
     public class JIssueChangeLogItem
     {
         private IssueChangeLogItem? _item = null;
@@ -16,6 +23,7 @@ namespace JiraCon
             ToId = string.Empty;
             ToValue = string.Empty;
             FromValue = string.Empty;
+            ChangeLogType = ChangeLogTypeEnum.clUnknown;
         }
 
         public JIssueChangeLogItem(IssueChangeLogItem item): this()
@@ -30,6 +38,7 @@ namespace JiraCon
         public string FromValue { get; set; }
         public string ToId { get; set; }
         public string ToValue { get; set; }
+        public ChangeLogTypeEnum ChangeLogType {get;set;} 
 
         public T GetToValue<T>()
         {
@@ -49,6 +58,18 @@ namespace JiraCon
             FromValue = _item.FromValue;
             ToId = _item.ToId;
             ToValue = _item.ToValue;
+            if (_item.FieldName.ToLower()=="status")
+            {
+                ChangeLogType = ChangeLogTypeEnum.clStatus ;
+            }
+            else if (_item.FieldName.ToLower()=="flagged" && (_item.FromValue.ToLower()=="impediment" || _item.ToValue.ToLower()=="impediment"))
+            {
+                ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
+            }
+            else 
+            {
+                ChangeLogType = ChangeLogTypeEnum.clOther ;
+            }
         }
 
         [JsonIgnore]

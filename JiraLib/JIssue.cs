@@ -6,20 +6,6 @@ using Newtonsoft.Json;
 
 namespace JiraCon
 {
-    public class JCustomField
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string[] Values { get; set; }
-
-        public JCustomField(string id, string name, string[] values)
-        {
-            Id = id;
-            Name = name;
-            Values = values;
-        }
-    }
-
     public class JIssue:IComparable, IComparer<JIssue>
     {
         private Issue? _issue ;
@@ -139,6 +125,7 @@ namespace JiraCon
 
         }
 
+        [JsonIgnore]
         public string FeatureTeamChoices
         {
             get

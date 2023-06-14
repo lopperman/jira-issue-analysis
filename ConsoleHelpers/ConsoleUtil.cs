@@ -26,18 +26,18 @@ using System.Text;
 
 namespace JiraCon
 {
+    public enum StdLine
+    {
+        slTitle = 1, 
+        slMenuName, 
+        slMenuDetail, 
+        slResponse, 
+        slError,
+        slOutputTitle, 
+        slOutput
+    }
     public static class ConsoleUtil
     {
-        public enum StdLine
-        {
-            slTitle = 1, 
-            slMenuName, 
-            slMenuDetail, 
-            slResponse, 
-            slError,
-            slOutputTitle, 
-            slOutput
-        }
         public static ConsoleColor StdForecolor(StdLine lineType )
         {
             switch(lineType)
@@ -86,10 +86,6 @@ namespace JiraCon
         static ConsoleColor defBackground = Console.BackgroundColor;
         static ConsoleColor defForeground = Console.ForegroundColor;
 
-        public static void test()
-        {
-            
-        }
 
         public static ConsoleLines Lines
         {
@@ -104,41 +100,6 @@ namespace JiraCon
             WriteLine("...");
             WriteLine("PRESS ANY KEY TO CONTINUE");
             var key = Console.ReadKey(true);
-        }
-
-        public static void ResetConsoleColors()
-        {
-            // Console.BackgroundColor = defBackground;
-            // Console.ForegroundColor = defForeground;
-        }
-
-        public static void InitializeConsole(ConsoleColor defForeground, ConsoleColor defBackground)
-        {
-            Console.Clear();
-            ResetConsoleColors();
-            Console.Clear();
-
-        }
-
-        public static void BuildInitializedMenu()
-        {
-
-            var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
-            string padd = new string('-',cfgName.Length + 1 );
-
-            consoleLines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
-            consoleLines.AddConsoleLine("|  Main Menu  |" + " " + cfgName, StdLine.slMenuName);
-            consoleLines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
-            consoleLines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(X) Create E(X)tract files", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(W) Create (W)ork Metrics Analysis from JQL Query", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(A) Epic (A)nalysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("");
-            consoleLines.AddConsoleLine("(I) View (I)tem Status values for work metrics", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("(D) Dev/Misc Menu", StdLine.slMenuDetail);
-            consoleLines.AddConsoleLine("Enter selection or E to exit.", StdLine.slResponse );
         }
 
         public static void BuildJQLMenu()

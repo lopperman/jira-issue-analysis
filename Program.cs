@@ -62,12 +62,14 @@ namespace JiraCon
                 }
             }
 
-            bool showMenu = true;
+            MenuManager.Start(JTISConfigHelper.config);
 
-            while (showMenu)
-            {
-                showMenu = MainMenu();
-            }
+            // bool showMenu = true;
+
+            // while (showMenu)
+            // {
+            //     showMenu = MainMenu();
+            // }
             ConsoleUtil.Lines.ByeByeForced();
         }
 
@@ -84,13 +86,13 @@ namespace JiraCon
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdLine.slOutputTitle);
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdLine.slOutput);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
                     }
                 }
                 else 
                 {
-                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
                 }
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 Console.ReadKey(true);
@@ -128,7 +130,7 @@ namespace JiraCon
             return true;
         }
 
-        private static bool DevMenu()
+        public static bool DevMenu()
         {
             ConsoleUtil.BuildDevMenu();
             ConsoleUtil.Lines.WriteQueuedLines(true);
@@ -175,7 +177,7 @@ namespace JiraCon
             return true;
 
         }
-        private static bool ConfigMenu()
+        public static bool ConfigMenu()
         {
             ConsoleUtil.BuildConfigMenu();
             ConsoleUtil.Lines.WriteQueuedLines(true);
@@ -250,175 +252,7 @@ namespace JiraCon
             return true;
         }
 
-        private static bool MainMenu()
-        {
-            return InitializedMenu();
-        }
 
-        private static bool InitializedMenu()
-        {
-            ConsoleUtil.BuildInitializedMenu();
-            ConsoleUtil.Lines.WriteQueuedLines(true);
-
-            var resp = Console.ReadKey(true);
-            if (resp.Key == ConsoleKey.M)
-            {
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or E to exit.", ConsoleColor.Black, ConsoleColor.White, false);
-                var keys = Console.ReadLine().ToUpper();
-                if (string.IsNullOrWhiteSpace(keys))
-                {
-                    return true;
-                }
-                if (keys.ToUpper() == "E")
-                {
-                    return false;
-                }
-
-                string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                if (arr.Length >= 1)
-                {
-                    bool canWriteCSV = false;
-                    ConsoleUtil.WriteLine("Would you like to include changes to card description and comments? (enter Y to include)");
-                    resp = Console.ReadKey(true);
-                    List<JIssue>? retIssues;
-                    if (resp.Key == ConsoleKey.Y)
-                    {
-                        retIssues = AnalyzeIssues(keys,true);
-                    }
-                    else
-                    {
-                        canWriteCSV = true;
-                        retIssues = AnalyzeIssues(keys,false);                    
-
-                    }
-
-                    if (retIssues != null)
-                    {
-                        if (canWriteCSV)
-                        {
-                            ConsoleUtil.WriteLine("Enter 'Y' to save output to csv file, otherwise press any key");
-                            resp = Console.ReadKey(true);
-                            if (resp.Key == ConsoleKey.Y)
-                            {
-                                WriteChangeLogCSV(retIssues);                                
-                            }
-                        }
-                    }
-                }
-
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Press any key to continue.");
-                Console.ReadKey(true);
-                return true;
-            }
-            else if (resp.Key == ConsoleKey.X)
-            {
-                
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
-                var jql = Console.ReadLine();
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
-                ConsoleUtil.WriteLine("");
-                var keys = Console.ReadKey(true);
-                if (keys.Key == ConsoleKey.Y)
-                {
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Enter (Y)es to include card descriptions and comments in the Change History file, otherwise press any key");
-                    ConsoleUtil.WriteLine("");
-                    var k = Console.ReadKey(true);
-                    bool includeCommentsAndDesc = false;
-                    if (k.Key == ConsoleKey.Y)
-                    {
-                        includeCommentsAndDesc = true;
-                    }
-
-                    CreateExtractFiles(jql,includeCommentsAndDesc);
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Press any key to continue.");
-                    Console.ReadKey(true);
-                }
-                return true;
-
-            }
-            else if (resp.Key == ConsoleKey.W)
-            {
-                string jql = GetJQL();
-
-                int startHour = 7;
-                int endHour = 18;
-
-                if (jql != null)
-                {
-                    var dic = GetBusinessHours();
-                    startHour = dic["start"];
-                    endHour = dic["end"];
-
-                    CreateWorkMetricsFile(jql,startHour,endHour);
-
-                    ConsoleUtil.PressAnyKeyToContinue();
-                }
-                return true;
-
-            }
-            else if (resp.Key == ConsoleKey.A)
-            {
-                var epicAnalysis = new EpicAnalysis();
-                epicAnalysis.Analyze();
-                return true;
-            }
-            else if (resp.Key == ConsoleKey.I)
-            {
-                ShowItemStatusConfig();
-
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Press any key to continue.");
-                Console.ReadKey(true);
-                return true;
-            }
-            else if (resp.Key == ConsoleKey.J)
-            {
-
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
-                var jql = Console.ReadLine();
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
-                var keys = Console.ReadKey(true);
-                if (keys.Key == ConsoleKey.Y)
-                {
-                    ShowJSON(jql);
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Press any key to continue.");
-                    Console.ReadKey(true);
-                }
-                return true;
-
-            }
-            else if (resp.Key == ConsoleKey.C)
-            {
-                while (ConfigMenu())
-                {
-
-                }
-                return true;
-            }
-            else if (resp.Key == ConsoleKey.D)
-            {
-                while (DevMenu())
-                {
-
-                }
-                return true;
-
-
-
-
-
-            }
-            return false;
-        }
 
         public static Dictionary<string,int> GetBusinessHours()
         {
@@ -473,7 +307,7 @@ namespace JiraCon
 
         }
 
-        private static string GetJQL()
+        public static string GetJQL()
         {
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
@@ -494,7 +328,7 @@ namespace JiraCon
 
         }
 
-        private static void ShowItemStatusConfig()
+        public static void ShowItemStatusConfig()
         {
             List<JItemStatus> ordered = JiraUtil.JiraRepo.JItemStatuses.OrderBy(x => x.StatusName).ToList();
             foreach (JItemStatus item in ordered)
@@ -503,7 +337,7 @@ namespace JiraCon
             }
         }
 
-        private static void CreateWorkMetricsFile(string jql, int startHour, int endHour)
+        public static void CreateWorkMetricsFile(string jql, int startHour, int endHour)
         {
             CreateWorkMetricsFile(jql, startHour, endHour, string.Empty);
         }
@@ -627,7 +461,7 @@ namespace JiraCon
         }
 
 
-        private static void CreateExtractFiles(string jql, bool includeCommentsAndDesc)
+        public static void CreateExtractFiles(string jql, bool includeCommentsAndDesc)
         {
             try
             {
@@ -695,7 +529,7 @@ namespace JiraCon
             }
         }
 
-        private static void ShowJSON(string jql)
+        public static void ShowJSON(string jql)
         {
             try
             {
