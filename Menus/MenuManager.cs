@@ -6,8 +6,8 @@ namespace JiraCon
 {
     public interface IMenuConsole
     {        
+        public JTISConfig ActiveConfig {get; set;}
         public bool DoMenu();
-        public void BuildMenu();
         public bool ProcessKey(ConsoleKey key);        
     }
 
@@ -16,12 +16,24 @@ namespace JiraCon
     {
         public static void Start(JTISConfig cfg)
         {
-            MenuMain mnu = new MenuMain(cfg);
-            while(mnu.DoMenu())
+            while (DoMenu(new MenuMain(cfg)))
             {
 
             }
         }
+        public static bool DoMenu(IMenuConsole menu)
+        {
+            if (menu.ActiveConfig != JTISConfigHelper.config )
+            {
+                menu.ActiveConfig = JTISConfigHelper.config;
+            }
+            while (menu.DoMenu())
+            {
+
+            }
+            return false;
+        }
     }
+
 
 }

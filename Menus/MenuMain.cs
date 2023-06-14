@@ -7,15 +7,15 @@ namespace JiraCon
 
     public class MenuMain : IMenuConsole
     {
-        private readonly JTISConfig _cfg;        
+        public JTISConfig ActiveConfig {get;set;}        
         public MenuMain(JTISConfig cfg)
         {
-            _cfg = cfg;                        
+            ActiveConfig = cfg;                        
         }
 
-        public void BuildMenu()
+        private void BuildMenu()
         {
-            var cfgName = string.Format("Connected: {0} ",_cfg.configName);
+            var cfgName = string.Format("Connected: {0} ",ActiveConfig.configName);
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
             lines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
@@ -169,7 +169,7 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.C)
             {
-                while (MainClass.ConfigMenu())
+                while (MenuManager.DoMenu(new MenuConfig(ActiveConfig)))
                 {
 
                 }
@@ -177,7 +177,7 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.D)
             {
-                while (MainClass.DevMenu())
+                while (MenuManager.DoMenu(new MenuDev(ActiveConfig)))
                 {
 
                 }
