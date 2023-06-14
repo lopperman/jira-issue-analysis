@@ -290,6 +290,36 @@ namespace JiraCon
             return result;
         }
 
+        public async Task<IssueLabelCollection> GetIssueLabelsAsync(string issueKey, CancellationToken token = default(CancellationToken)) 
+        {
+            IssueLabelCollection result = default(IssueLabelCollection);
+
+                //GET /rest/api/3/issue/ABC-123?fields=labels
+                var resourceUrl = String.Format("rest/api/3/issue/{0}?fields=labels", issueKey);
+                var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+                var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
+                    .ConfigureAwait(false);
+
+                JToken issueLabels = response["fields"][key:"labels"];
+//                JToken totalChangeLogs = response["total"];
+
+                if (issueLabels != null)
+                {
+                    result = JsonConvert.DeserializeObject<IssueLabelCollection>(issueLabels.ToString(), serializerSettings);
+                }
+
+
+            // var resourceUrl = String.Format("rest/api/3/status");
+            // var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
+            //     .ConfigureAwait(false);
+
+            // return response.ToString();
+
+
+            return result;
+
+        }
+
         public async Task<List<IssueChangeLog>> GetChangeLogsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
             List<IssueChangeLog> result = new List<IssueChangeLog>();

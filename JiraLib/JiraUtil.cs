@@ -8,15 +8,13 @@ namespace JiraCon
     {
         private static JiraRestClientSettings? _settings ;
         private static JiraRepo? _jiraRepo;
+        private static JTISConfig? _cfg;
 
         public static JiraRepo JiraRepo
         {
             get
             {
-                if (_jiraRepo == null && JTISConfigHelper.config != null && JTISConfigHelper.config.ValidConfig == true)
-                {
-                    CreateRestClient();
-                }
+                CreateRestClient();
                 if (_jiraRepo != null)
                 {
                     return _jiraRepo;
@@ -33,17 +31,25 @@ namespace JiraCon
             bool ret = false;
             try
             {
-                _settings = new JiraRestClientSettings();
-                _settings.EnableUserPrivacyMode = true;
-
-                _jiraRepo = new JiraRepo(cfg.baseUrl , cfg.userName , cfg.apiToken );
-
-                if (_jiraRepo != null)
+                if (_jiraRepo != null && _cfg != null && _cfg.userName == cfg.userName & _cfg.baseUrl == cfg.baseUrl && _cfg.apiToken == cfg.apiToken)
                 {
-                    var test = _jiraRepo.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
-                    if (test != null && test.Count > 0)
+                    ret = true;
+                }
+                else 
+                {
+                    _settings = new JiraRestClientSettings();
+                    _settings.EnableUserPrivacyMode = true;
+                    _cfg = cfg;
+
+                    _jiraRepo = new JiraRepo(cfg.baseUrl , cfg.userName , cfg.apiToken );
+
+                    if (_jiraRepo != null)
                     {
-                        ret = true;
+                        var test = _jiraRepo.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
+                        if (test != null && test.Count > 0)
+                        {
+                            ret = true;
+                        }
                     }
                 }
 

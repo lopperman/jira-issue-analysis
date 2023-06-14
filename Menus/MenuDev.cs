@@ -21,6 +21,8 @@ namespace JiraCon
             lines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, StdLine.slMenuName);
             lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
             lines.AddConsoleLine("(C) View Console Fore/Back Colors", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(A) DEVTEST1()", StdLine.slMenuDetail);
+
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
             lines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);            
@@ -61,7 +63,7 @@ namespace JiraCon
                 Console.ReadKey(true);
                 return true;                    
             }
-            else if (resp.Key == ConsoleKey.E)
+            else if (key == ConsoleKey.E)
             {
                 if (ConsoleUtil.Lines.ByeBye())
                 {
@@ -69,11 +71,33 @@ namespace JiraCon
                 }
                 return true;
             }
-            else if (resp.Key == ConsoleKey.M)
+            else if (key == ConsoleKey.M)
             {
                 return false;
+            }
+            else if (key == ConsoleKey.A)
+            {
+                DevTest1();
+                Console.WriteLine("** PRESS ANY KEY **");
+                Console.ReadKey(true);
+                return true;
             }            
             return true;
         }
+
+        private void DevTest1()
+        {
+            var tmpIssue = JiraUtil.JiraRepo.GetIssue("WWT-292"); 
+            if (tmpIssue.Labels != null) 
+            {
+                Console.WriteLine(string.Format("Labels Count {0}",tmpIssue.Labels.Count ));
+            }
+            var labels = JiraUtil.JiraRepo.GetIssueLabelsAsync("WWT-292").GetAwaiter().GetResult();
+                Console.WriteLine(string.Format("Labels Count {0}",tmpIssue.Labels.Count ));
+
+            //return GetSubTasksAsync(issue).GetAwaiter().GetResult().ToList();
+
+        }
+
     }
 }
