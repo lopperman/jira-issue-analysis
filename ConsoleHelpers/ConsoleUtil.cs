@@ -107,6 +107,11 @@ namespace JiraCon
             WriteLine(text, false);
         }
 
+        public static void WriteError(string text)
+        {
+            WriteLine(text,StdForecolor(StdLine.slError),StdBackcolor(StdLine.slError),false);
+        }
+
         public static void WriteLine(string text, bool clearScreen)
         {
             WriteLine(text, Console.ForegroundColor, Console.BackgroundColor, clearScreen);

@@ -34,8 +34,8 @@ namespace JiraCon
 
         public string FieldName { get; set; }
         public string FieldType { get; set; }
-        public string FromId { get; set; }
-        public string FromValue { get; set; }
+        public string? FromId { get; set; }
+        public string? FromValue { get; set; }
         public string ToId { get; set; }
         public string ToValue { get; set; }
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
@@ -52,23 +52,61 @@ namespace JiraCon
 
         private void Initialize()
         {
-            FieldName = _item.FieldName;
-            FieldType = _item.FieldType;
-            FromId = _item.FromId;
-            FromValue = _item.FromValue;
-            ToId = _item.ToId;
-            ToValue = _item.ToValue;
-            if (_item.FieldName.ToLower()=="status")
+            try 
             {
-                ChangeLogType = ChangeLogTypeEnum.clStatus ;
+                FieldName = _item.FieldName;
+                FieldType = _item.FieldType;
+                if (_item.FromId == null)
+                {
+                    FromId = "[empty]";
+                }
+                else 
+                {
+                    FromId = _item.FromId;
+                }
+                if (_item.FromValue == null)
+                {
+                    FromValue = "[empty]";
+                }
+                else 
+                {
+                    FromValue = _item.FromValue;
+                }
+                if (_item.ToId == null)
+                {
+                    ToId = "[empty]";
+                }
+                else 
+                {
+                    ToId = _item.ToId;
+                }
+                if (_item.ToValue == null)
+                {
+                    ToValue = "[empty]";
+                }
+                else 
+                {
+                    ToValue = _item.ToValue;
+                }
+
+                if (_item.FieldName.ToLower()=="status")
+                {
+                    ChangeLogType = ChangeLogTypeEnum.clStatus ;
+                }
+                else if (_item.FieldName.ToLower()=="flagged" && (_item.FromValue.ToLower()=="impediment" || _item.ToValue.ToLower()=="impediment"))
+                {
+                    ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
+                }
+                else 
+                {
+                    ChangeLogType = ChangeLogTypeEnum.clOther ;
+                }
             }
-            else if (_item.FieldName.ToLower()=="flagged" && (_item.FromValue.ToLower()=="impediment" || _item.ToValue.ToLower()=="impediment"))
+            catch(Exception ex)
             {
-                ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
-            }
-            else 
-            {
-                ChangeLogType = ChangeLogTypeEnum.clOther ;
+                string errMsg = string.Format("Error occurred in JIssueChangeLogItem.Initialize). {0}: {1}",ex.Message,ex.ToString());
+                errMsg = string.Format("{0}{1}Issue Field: {2}",errMsg,Environment.NewLine,_item.FieldName );
+                ConsoleUtil.WriteError(errMsg);
             }
         }
 
