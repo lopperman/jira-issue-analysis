@@ -87,7 +87,7 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.E)
             {                
-                if(ConsoleUtil.Lines.ByeBye())
+                if(ConsoleUtil.ByeBye())
                 {
                     Environment.Exit(0);
                 }

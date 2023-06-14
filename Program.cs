@@ -70,7 +70,7 @@ namespace JiraCon
             // {
             //     showMenu = MainMenu();
             // }
-            ConsoleUtil.Lines.ByeByeForced();
+            ConsoleUtil.ByeByeForced();
         }
 
 

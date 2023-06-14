@@ -186,13 +186,17 @@ namespace JiraCon
             {
                 msg = "Enter the config id number to use";
             }
-            ConsoleUtil.WriteLine("Choose config:", ConsoleColor.DarkMagenta, ConsoleColor.White);
+            ConsoleUtil.WriteLine("Choose config or press '0' to exit:", ConsoleColor.DarkMagenta, ConsoleColor.White);
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
                 ConsoleUtil.WriteLine(cfgNames[i],ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
             }
             var cfgResp = ConsoleUtil.GetConsoleInput<int>(msg);
+            if (cfgResp == 0)
+            {
+                ConsoleUtil.ByeByeForced();
+            }
             chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
             if (chCfg !=null && chCfg.ValidConfig==true)
             {

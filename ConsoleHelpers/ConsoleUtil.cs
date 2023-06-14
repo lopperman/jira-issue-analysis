@@ -210,6 +210,31 @@ namespace JiraCon
 
         }
 
+        public static bool ByeBye()
+        {
+            var lines = new ConsoleLines();
+            lines.AddConsoleLine("Press 'Y' to exit, otherwise press any key to continue",StdLine.slResponse);
+            lines.WriteQueuedLines(false);
+            if (Console.ReadKey(true).Key !=ConsoleKey.Y)
+            {
+                return false;
+            }
+            else 
+            {
+                lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+                lines.WriteQueuedLines(true);
+                return true;
+            }
+        }
+
+        public static void ByeByeForced()
+        {
+            var lines = new ConsoleLines();
+            lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+            lines.WriteQueuedLines(false);
+            Environment.Exit(0);
+        }        
+
 
     }
 

@@ -60,7 +60,7 @@ namespace JiraCon
                     }
                     if (JTISConfigHelper.config == null )
                     {
-                        ConsoleUtil.Lines.ByeByeForced();
+                        ConsoleUtil.ByeByeForced();
                     }
                     return true;                    
                 }
@@ -108,7 +108,7 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.E)
             {                
-                if(ConsoleUtil.Lines.ByeBye())
+                if(ConsoleUtil.ByeBye())
                 {
                     Environment.Exit(0);
                 }

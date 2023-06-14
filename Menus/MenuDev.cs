@@ -39,7 +39,7 @@ namespace JiraCon
 
         public bool ProcessKey(ConsoleKey key)
         {
-            ConsoleKeyInfo resp = default(ConsoleKeyInfo);
+            // ConsoleKeyInfo resp = default(ConsoleKeyInfo);
 
             if (key == ConsoleKey.C)
             {
@@ -65,7 +65,7 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.E)
             {
-                if (ConsoleUtil.Lines.ByeBye())
+                if (ConsoleUtil.ByeBye())
                 {
                     Environment.Exit(0);
                 }
