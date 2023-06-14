@@ -93,9 +93,21 @@ namespace JiraCon
                 {
                     ChangeLogType = ChangeLogTypeEnum.clStatus ;
                 }
-                else if (_item.FieldName.ToLower()=="flagged" && (_item.FromValue.ToLower()=="impediment" || _item.ToValue.ToLower()=="impediment"))
+                else if (_item.FieldName.ToLower()=="flagged")
                 {
-                    ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
+                    // && (_item.FromValue.ToLower()=="impediment" || _item.ToValue.ToLower()=="impediment"))                    
+                    if (_item.FromValue != null && _item.FromValue.ToLower()=="impediment")
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
+                    }
+                    else if (_item.ToValue != null && _item.ToValue.ToLower()=="impediment")
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
+                    }
+                    else
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clOther ;
+                    }
                 }
                 else 
                 {

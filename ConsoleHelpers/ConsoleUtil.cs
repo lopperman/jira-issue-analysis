@@ -71,7 +71,7 @@ namespace JiraCon
                 case StdLine.slMenuDetail:
                     return ConsoleColor.White ;
                 case StdLine.slResponse:
-                    return ConsoleColor.White;
+                    return ConsoleColor.Yellow;
                 case StdLine.slError:
                     return ConsoleColor.Yellow;
                 case StdLine.slOutput:
@@ -177,21 +177,22 @@ namespace JiraCon
 
         public static T GetConsoleInput<T>(string message) where T:IConvertible 
         {
-            WriteLine("...");
-            WriteLine(message);
+            
+
+            WriteLine("");
+            WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
             var ret = Console.ReadLine();
             
             if (string.IsNullOrWhiteSpace(ret))
             {
                 return GetConsoleInput<T>(message);
             }
-            WriteLine("");
-            WriteLine(string.Format("Enter 'Y' to Use '{0}', otherwise enter 'E' to exit or another key to enter new value", ret));
+            WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OR 'E' TO EXIT", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
             var key = Console.ReadKey(true);
 
             if (key.Key == ConsoleKey.E)
             {
-                Environment.Exit(0);
+                ConsoleUtil.ByeByeForced();
             }
             if (key.Key != ConsoleKey.Y)
             {
@@ -204,7 +205,7 @@ namespace JiraCon
             }
             catch
             {
-                WriteLine(ret + " is not valid, try again",ConsoleColor.Red,ConsoleColor.DarkYellow ,false);
+                WriteError(ret + " is not valid, try again");
                 return GetConsoleInput<T>(message);
             }
 

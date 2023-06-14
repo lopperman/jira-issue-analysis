@@ -184,9 +184,9 @@ namespace JiraCon
             JTISConfig? chCfg = null; 
             if (msg==null || msg.Length == 0)
             {
-                msg = "Enter the config id number to use";
+                msg = "ENTER CONFIG ID:";
             }
-            ConsoleUtil.WriteLine("Choose config or press '0' to exit:", ConsoleColor.DarkMagenta, ConsoleColor.White);
+            ConsoleUtil.WriteLine("** CHOOSE CONFIG **",StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle));
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
