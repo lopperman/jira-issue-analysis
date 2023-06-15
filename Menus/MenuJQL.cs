@@ -63,6 +63,83 @@ namespace JiraCon
                 Console.ReadKey(true);
                 return true;                                
             }
+            else if (key == ConsoleKey.F)
+            {
+                int matchCount = 0;
+                bool wcBegin = false;
+                bool wcEnd = false;
+
+                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                {
+                    var searchTerm = ConsoleUtil.GetConsoleInput<string>("Enter search text - use '*' at beginning and/or end to do wildcard search (e.g. '*Story' finds text ending with 'story'; '*story*' find any text containing 'story' - NOTE will search name as well as JQL",false);
+                    if (searchTerm.Length > 0)
+                    {
+                        bool isMatch = false ;
+                        if (searchTerm.StartsWith("*") && searchTerm.EndsWith("*"))
+                        {
+                            wcBegin = true;
+                            wcEnd = true;
+                        }
+                        else if (searchTerm.StartsWith("*"))
+                        {
+                            wcBegin = true;
+                        }
+                        else if (searchTerm.EndsWith("*"))
+                        {
+                            wcEnd = true ;
+                        }
+                        searchTerm = searchTerm.Replace("*","");
+
+                        for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
+                        {
+                            isMatch = false; 
+
+                            JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
+                            if (wcBegin && wcEnd)
+                            {
+                                if (tJql.jql.Contains(searchTerm,StringComparison.OrdinalIgnoreCase) || tJql.jqlName.Contains(searchTerm,StringComparison.OrdinalIgnoreCase))
+                                {
+                                    isMatch = true;
+                                }
+                            }
+                            else if (wcBegin)
+
+                            {
+                                if (tJql.jql.EndsWith(searchTerm,StringComparison.OrdinalIgnoreCase ) || tJql.jqlName.EndsWith(searchTerm,StringComparison.OrdinalIgnoreCase ))
+                                {
+                                    isMatch = true;
+                                }
+                            }
+                            else if (wcEnd)
+                            {
+                                if (tJql.jql.StartsWith(searchTerm,StringComparison.OrdinalIgnoreCase ) || tJql.jqlName.StartsWith(searchTerm,StringComparison.OrdinalIgnoreCase ))
+                                {
+                                    isMatch = true;
+                                }
+                            }
+                            if (isMatch)
+                            {
+                                matchCount +=1;
+                                ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
+                                ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                            }
+                        }
+                    }
+                }
+                else 
+                {
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                }
+                if (matchCount == 0 && JTISConfigHelper.config.SavedJQLCount > 0)
+                {
+                    ConsoleUtil.Lines.AddConsoleLine("no matching jql was found",StdLine.slOutput);
+                }
+                ConsoleUtil.Lines.WriteQueuedLines(false);
+                Console.ReadKey(true);
+                return true;                                
+
+
+            }
             else if (key == ConsoleKey.A)
             {
                 string tmpName = string.Empty;
