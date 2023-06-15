@@ -26,8 +26,6 @@ namespace JiraCon
             lines.AddConsoleLine("(A) Edit Analysis Configuration", StdLine.slMenuDetail);
             lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slOutputTitle );
             lines.AddConsoleLine("(J) View/Edit Saved JQL", StdLine.slMenuDetail);
-
-            lines.AddConsoleLine("");
             lines.AddConsoleLine("(I) Analyze: Enter Issue(s)", StdLine.slMenuDetail);
             lines.AddConsoleLine("(P) Analyze: Issues in an Epic", StdLine.slMenuDetail);
             lines.AddConsoleLine("(Q) Analyze: Issues from JQL", StdLine.slMenuDetail);

@@ -36,8 +36,8 @@ namespace JiraCon
             lines.AddConsoleLine("(R) Remove Login Configuation", StdLine.slMenuDetail);
             lines.AddConsoleLine(string.Format("(I) View Jira Info for {0}",JiraUtil.JiraRepo.ServerInfo.BaseUrl), StdLine.slMenuDetail);
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);
+            lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
+            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);
             lines.WriteQueuedLines(true,true);
 
             lines = null;
@@ -107,11 +107,11 @@ namespace JiraCon
                 }
                 return true;
             }
-            else if (key == ConsoleKey.M)
+            else if (key == ConsoleKey.B)
             {
                 return false;
             }
-            else if (key == ConsoleKey.E)
+            else if (key == ConsoleKey.X)
             {                
                 if(ConsoleUtil.ByeBye())
                 {

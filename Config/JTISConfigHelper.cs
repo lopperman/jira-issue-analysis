@@ -157,6 +157,10 @@ namespace JiraCon
         {
             if (cfgList.Count > 0)
             {
+                if (File.Exists(ConfigFilePath))
+                {
+                    File.Delete(ConfigFilePath);
+                }
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 string data = JsonConvert.SerializeObject(cfgList,Formatting.None,settings);

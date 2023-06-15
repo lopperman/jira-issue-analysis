@@ -1,3 +1,5 @@
+using System.Xml.Linq;
+using System.Linq;
 
 
 
@@ -24,6 +26,8 @@ namespace JiraCon
             lines.AddConsoleLine("(V) View All Saved JQL", StdLine.slMenuDetail);
             lines.AddConsoleLine("(A) Add JQL", StdLine.slMenuDetail);
             lines.AddConsoleLine("(F) Find Saved JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(D) Delete a Saved JQL", StdLine.slMenuDetail);
+
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Config Menu", StdLine.slMenuDetail);
@@ -62,6 +66,58 @@ namespace JiraCon
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 Console.ReadKey(true);
                 return true;                                
+            }
+            else if (key == ConsoleKey.D)
+            {
+                ConsoleUtil.Lines.AddConsoleLine(" ** SAVED JQL **",StdLine.slOutputTitle );
+                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                {
+                    for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
+                    {
+                        JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                    }
+                }
+                else 
+                {
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                }
+                ConsoleUtil.Lines.WriteQueuedLines(false);
+                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                {
+                    var deleteJqlId = ConsoleUtil.GetConsoleInput<int>("Enter JQL item number (number after 'NAME') to delete. Enter zero ('0') to cancel",false);
+                    if (deleteJqlId > 0 && deleteJqlId <= JTISConfigHelper.config.SavedJQLCount)
+                    {
+                        JQLConfig? delCfg = JTISConfigHelper.config.SavedJQL.Single(x=>x.jqlId == deleteJqlId);
+
+                        if (delCfg != null) 
+                        {
+                            ConsoleUtil.WriteStdLine(string.Format("PRESS 'Y' TO DELETE SAVED JQL: {0}",delCfg.jqlName),StdLine.slResponse,false);
+                            if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                            {
+                                JTISConfigHelper.config.SavedJQL.Remove(delCfg);
+                                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                                {
+                                    for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
+                                    {
+                                        JTISConfigHelper.config.SavedJQL[i].jqlId = i + 1;
+                                    }
+                                }
+                                JTISConfigHelper.SaveConfigList();
+                                ConsoleUtil.WriteStdLine(string.Format("DELETED SAVED JQL: {0} - PRESS ANY KEY",delCfg.jqlName),StdLine.slResponse,false);
+                                Console.ReadKey(true);
+                            }
+                        }
+                    }
+                }
+                else 
+                {
+                    ConsoleUtil.WriteStdLine("PRESS ANY KEY TO CONTINUE",StdLine.slResponse,false);
+                    Console.ReadKey(true);
+                }
+                return true;                                
+
             }
             else if (key == ConsoleKey.F)
             {

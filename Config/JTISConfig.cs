@@ -19,6 +19,7 @@ namespace JiraCon
         public JTISConfig()
         {
             SavedJQL = new List<JQLConfig>();
+            StatusConfigs = new List<StatusConfig>();
         }
 
         public JTISConfig(int cfgId, string cfgName, string loginName, string authToken, string url, string project): this()
@@ -44,6 +45,8 @@ namespace JiraCon
         public string? defaultProject {get;set;}
         [JsonPropertyName("savedJQL")]
         public List<JQLConfig> SavedJQL {get; set;}
+        public List<StatusConfig> StatusConfigs {get; set;}
+        
 
         [JsonIgnore]
         public int SavedJQLCount
@@ -145,45 +148,6 @@ namespace JiraCon
             return retNames;
         }
 
-        // public string? GetSavedJQL()
-        // {
-        //     if (SavedJQLCount == 0)
-        //     {
-        //         return null;
-        //     }
-        //     else if(SavedJQLCount == 1)
-        //     {
-        //         return SavedJQL[0].jql;
-        //     }
-        //     else 
-        //     {
-        //         int nextIdx = 0;
-        //         int maxItems = 10;
-        //         int viewedCount = 0;
-        //         int totItems = SavedJQLCount;
-        //         int selectedId = 0;
 
-        //         while(selectedId == 0)
-        //         {
-        //             for (int i = nextIdx; i< nextIdx + maxItems; i ++)
-        //             {
-        //                 if (i>=totItems)
-        //                 {
-        //                     break;
-        //                 }
-
-        //             }
-        //         }
-
-        //         // for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
-        //         // {
-        //         //     JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-        //         //     ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-        //         //     ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
-        //         // }
-
-
-        //     }
-        // }
     }
 }
