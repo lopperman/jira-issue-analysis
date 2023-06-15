@@ -192,14 +192,28 @@ namespace JiraCon
             {
                 ConsoleUtil.WriteLine(cfgNames[i],ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
             }
-            var cfgResp = ConsoleUtil.GetConsoleInput<int>(msg);
+            int cfgResp = 0;
+            if (JTISConfigHelper.config == null)
+            {
+                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,false);
+            }
+            else 
+            {
+                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,true);
+            }            
+            
             if (cfgResp == 0)
             {
                 ConsoleUtil.ByeByeForced();
             }
+
             chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
-            if (chCfg !=null && chCfg.ValidConfig==true)
+            if (chCfg !=null )
             {
+                if (JTISConfigHelper.config != null)
+                {
+                    JTISConfigHelper.config = null;
+                }
                 return chCfg;
             }
             else 

@@ -16,6 +16,11 @@ namespace JiraCon
 
         private void BuildMenu()
         {
+            if (ActiveConfig.configId != JTISConfigHelper.config.configId)
+            {
+                ActiveConfig = JTISConfigHelper.config;
+            }
+
             var cfgName = string.Format("Connected: {0} ",ActiveConfig.configName);
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
@@ -96,7 +101,7 @@ namespace JiraCon
             else if (key == ConsoleKey.C)
             {
                 var changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
-                if (changeCfg != null)
+                if (changeCfg != null && changeCfg.ValidConfig)
                 {
                     JTISConfigHelper.config = changeCfg;                    
                 }

@@ -180,7 +180,7 @@ namespace JiraCon
             }
         }
 
-        public static T GetConsoleInput<T>(string message) where T:IConvertible 
+        public static T GetConsoleInput<T>(string message, bool requireConfirmation) where T:IConvertible
         {
             WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
             var ret = Console.ReadLine();            
@@ -188,15 +188,18 @@ namespace JiraCon
             {
                 return GetConsoleInput<T>(message);
             }
-            WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
-            var key = Console.ReadKey(true);
-            if (key.Key == ConsoleKey.X)
+            if (requireConfirmation)
             {
-                ConsoleUtil.ByeByeForced();
-            }
-            if (key.Key != ConsoleKey.Y)
-            {
-                return GetConsoleInput<T>(message);
+                WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.X)
+                {
+                    ConsoleUtil.ByeByeForced();
+                }
+                if (key.Key != ConsoleKey.Y)
+                {
+                    return GetConsoleInput<T>(message);
+                }
             }
             try 
             {
@@ -207,7 +210,37 @@ namespace JiraCon
             {
                 WriteError(ret + " is not valid, try again");
                 return GetConsoleInput<T>(message);
-            }
+            }            
+        }
+        public static T GetConsoleInput<T>(string message) where T:IConvertible 
+        {
+            return GetConsoleInput<T>(message,true);
+            // WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
+            // var ret = Console.ReadLine();            
+            // if (string.IsNullOrWhiteSpace(ret))
+            // {
+            //     return GetConsoleInput<T>(message);
+            // }
+            // WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
+            // var key = Console.ReadKey(true);
+            // if (key.Key == ConsoleKey.X)
+            // {
+            //     ConsoleUtil.ByeByeForced();
+            // }
+            // if (key.Key != ConsoleKey.Y)
+            // {
+            //     return GetConsoleInput<T>(message);
+            // }
+            // try 
+            // {
+            //     T retVal = (T)Convert.ChangeType(ret,typeof(T));
+            //     return retVal;
+            // }
+            // catch
+            // {
+            //     WriteError(ret + " is not valid, try again");
+            //     return GetConsoleInput<T>(message);
+            // }
 
         }
 
