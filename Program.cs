@@ -525,7 +525,6 @@ namespace JiraCon
 
         public static JIssue? AnalyzeOneIssue(string key, bool includeDescAndComments) 
         {
-
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("***** Jira Card: " + key, ConsoleColor.DarkBlue, ConsoleColor.White, false);
 

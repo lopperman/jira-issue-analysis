@@ -21,16 +21,17 @@ namespace JiraCon
             lines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
             lines.AddConsoleLine("|  Main Menu  |" + " " + cfgName, StdLine.slMenuName);
             lines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("(M) Show Change History for 1 or (M)ore Cards", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(J) Show (J)SON for 1 or more Cards", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(X) Create E(X)tract files", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(W) Create (W)ork Metrics Analysis from JQL Query", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(A) Epic (A)nalysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(A) Analyze Issue(s) Time In Status", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(M) Show Change History for 1 or more Cards", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(J) Show JSON for 1 or more Cards", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(F) Create Extract Files", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(W) Create Work Metrics Analysis from JQL Query", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(E) Epic Analysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(I) View (I)tem Status values for work metrics", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(I) View Item Status values for work metrics", StdLine.slMenuDetail);
             lines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
             lines.AddConsoleLine("(D) Dev/Misc Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or E to exit.", StdLine.slResponse );
+            lines.AddConsoleLine("Enter selection or X to exit.", StdLine.slResponse );
             lines.WriteQueuedLines(true,true);
             lines = null;
         }
@@ -49,7 +50,7 @@ namespace JiraCon
             if (key == ConsoleKey.M)
             {
                 ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or E to exit.", ConsoleColor.Black, ConsoleColor.White, false);
+                ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or ENTER to cancel", ConsoleColor.Black, ConsoleColor.White, false);
                 var keys = Console.ReadLine().ToUpper();
                 if (string.IsNullOrWhiteSpace(keys))
                 {
@@ -90,30 +91,30 @@ namespace JiraCon
                 Console.ReadKey(true);
                 return true;
             }
-            else if (key == ConsoleKey.X)
+            else if (key == ConsoleKey.F)
             {                
                 ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
+                ConsoleUtil.WriteStdLine("Enter or paste JQL, or ENTER to return",StdLine.slOutputTitle,false);
                 var jql = Console.ReadLine();
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
-                ConsoleUtil.WriteLine("");
-                var keys = Console.ReadKey(true);
-                if (keys.Key == ConsoleKey.Y)
+                if (jql.Length > 0)
                 {
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Enter (Y)es to include card descriptions and comments in the Change History file, otherwise press any key");
-                    ConsoleUtil.WriteLine("");
-                    var k = Console.ReadKey(true);
-                    bool includeCommentsAndDesc = false;
-                    if (k.Key == ConsoleKey.Y)
+                    ConsoleUtil.WriteStdLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql),StdLine.slResponse,false);
+                    var keys = Console.ReadKey(true);
+                    if (keys.Key == ConsoleKey.Y)
                     {
-                        includeCommentsAndDesc = true;
+                        ConsoleUtil.WriteStdLine("Enter (Y)es to include card descriptions and comments in the Change History file, otherwise press any key",StdLine.slResponse,false);
+                        var k = Console.ReadKey(true);
+                        bool includeCommentsAndDesc = false;
+                        if (k.Key == ConsoleKey.Y)
+                        {
+                            includeCommentsAndDesc = true;
+                        }
+                        MainClass.CreateExtractFiles(jql,includeCommentsAndDesc);
+                        ConsoleUtil.WriteLine("");
+                        ConsoleUtil.WriteStdLine("Press any key to continue.",StdLine.slResponse,false);
+                        Console.ReadKey(true);
                     }
-                    MainClass.CreateExtractFiles(jql,includeCommentsAndDesc);
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Press any key to continue.");
-                    Console.ReadKey(true);
+
                 }
                 return true;
             }
@@ -135,7 +136,7 @@ namespace JiraCon
                 return true;
 
             }
-            else if (key == ConsoleKey.A)
+            else if (key == ConsoleKey.E)
             {
                 var epicAnalysis = new EpicAnalysis();
                 epicAnalysis.Analyze();
@@ -154,15 +155,18 @@ namespace JiraCon
                 ConsoleUtil.WriteLine("");
                 ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
                 var jql = Console.ReadLine();
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
-                var keys = Console.ReadKey(true);
-                if (keys.Key == ConsoleKey.Y)
+                if (jql.Length > 0)
                 {
-                    MainClass.ShowJSON(jql);
                     ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine("Press any key to continue.");
-                    Console.ReadKey(true);
+                    ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
+                    var keys = Console.ReadKey(true);
+                    if (keys.Key == ConsoleKey.Y)
+                    {
+                        MainClass.ShowJSON(jql);
+                        ConsoleUtil.WriteLine("");
+                        ConsoleUtil.WriteLine("Press any key to continue.");
+                        Console.ReadKey(true);
+                    }
                 }
                 return true;
 
@@ -183,7 +187,16 @@ namespace JiraCon
                 }
                 return true;
             }
-            else if (key == ConsoleKey.E)
+            else if (key == ConsoleKey.A)
+            {
+                while (MenuManager.DoMenu(new MenuIssueStates(ActiveConfig)))
+                {
+
+                }
+                return true;
+            }
+
+            else if (key == ConsoleKey.X)
             {
                 return false;
             }

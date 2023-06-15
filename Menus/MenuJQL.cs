@@ -26,8 +26,8 @@ namespace JiraCon
             lines.AddConsoleLine("(F) Find Saved JQL", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(C) Back to Config Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);            
+            lines.AddConsoleLine("(B) Back to Config Menu", StdLine.slMenuDetail);
+            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
 
             lines.WriteQueuedLines(true,true);
             lines = null;
@@ -81,11 +81,11 @@ namespace JiraCon
                 }
                 
             }
-            else if (key == ConsoleKey.C)
+            else if (key == ConsoleKey.B)
             {
                 return false;
             }
-            else if (key == ConsoleKey.E)
+            else if (key == ConsoleKey.X)
             {                
                 if(ConsoleUtil.ByeBye())
                 {

@@ -20,12 +20,12 @@ namespace JiraCon
             lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
             lines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, StdLine.slMenuName);
             lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("(C) View Console Fore/Back Colors", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(V) View Console Fore/Back Colors", StdLine.slMenuDetail);
             lines.AddConsoleLine("(A) DEVTEST1()", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(M) Main Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (E) to exit.", StdLine.slResponse);            
+            lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
+            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
             lines.WriteQueuedLines(true,true);
             lines = null;
         }
@@ -41,7 +41,7 @@ namespace JiraCon
         {
             // ConsoleKeyInfo resp = default(ConsoleKeyInfo);
 
-            if (key == ConsoleKey.C)
+            if (key == ConsoleKey.V)
             {
                 for (int iBack = 0; iBack <=15; iBack ++)
                 {
@@ -63,7 +63,7 @@ namespace JiraCon
                 Console.ReadKey(true);
                 return true;                    
             }
-            else if (key == ConsoleKey.E)
+            else if (key == ConsoleKey.X)
             {
                 if (ConsoleUtil.ByeBye())
                 {
@@ -71,7 +71,7 @@ namespace JiraCon
                 }
                 return true;
             }
-            else if (key == ConsoleKey.M)
+            else if (key == ConsoleKey.B)
             {
                 return false;
             }

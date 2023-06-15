@@ -49,7 +49,7 @@ namespace JiraCon
                 case StdLine.slMenuDetail:
                     return ConsoleColor.Black ;
                 case StdLine.slResponse:
-                    return ConsoleColor.DarkMagenta;
+                    return ConsoleColor.Yellow;
                 case StdLine.slError:
                     return ConsoleColor.Red;
                 case StdLine.slOutput:
@@ -71,7 +71,7 @@ namespace JiraCon
                 case StdLine.slMenuDetail:
                     return ConsoleColor.White ;
                 case StdLine.slResponse:
-                    return ConsoleColor.Yellow;
+                    return ConsoleColor.DarkBlue;
                 case StdLine.slError:
                     return ConsoleColor.Yellow;
                 case StdLine.slOutput:
@@ -105,6 +105,11 @@ namespace JiraCon
         public static void WriteLine(string text)
         {
             WriteLine(text, false);
+        }
+
+        public static void WriteStdLine(string text, StdLine msgType, bool clearScreen)
+        {
+            WriteLine(text, StdForecolor(msgType), StdBackcolor(msgType), clearScreen);
         }
 
         public static void WriteError(string text)
@@ -177,20 +182,15 @@ namespace JiraCon
 
         public static T GetConsoleInput<T>(string message) where T:IConvertible 
         {
-            
-
-            WriteLine("");
             WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
-            var ret = Console.ReadLine();
-            
+            var ret = Console.ReadLine();            
             if (string.IsNullOrWhiteSpace(ret))
             {
                 return GetConsoleInput<T>(message);
             }
-            WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OR 'E' TO EXIT", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
+            WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
             var key = Console.ReadKey(true);
-
-            if (key.Key == ConsoleKey.E)
+            if (key.Key == ConsoleKey.X)
             {
                 ConsoleUtil.ByeByeForced();
             }
