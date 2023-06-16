@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using Atlassian.Jira;
 
@@ -46,6 +47,11 @@ namespace JiraCon
                 ConsoleUtil.WriteStdLine("ENTER JQL TO FILTER ISSUES",StdLine.slResponse,false);
                 ConsoleUtil.WriteStdLine("(IF YOU WISH TO CANCEL OR SELECT A SAVED LIST OF JQL, PRESS 'ENTER')",StdLine.slResponse,false);
             }
+            else if (_type == AnalysisType.atEpics)
+            {
+                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE EPICS SEPARATED BY SPACES",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("(IF YOU WISH TO CANCEL OR SELECT A SAVED LIST OF EPICS, PRESS 'ENTER')",StdLine.slResponse,false);
+            }
             data = Console.ReadLine();
             if (data == null || data.Length == 0)
             {
@@ -72,6 +78,51 @@ namespace JiraCon
 
             foreach (var jc in JCalcs)
             {
+                JIssueChangeLogItem? firstActive = null;
+                JIssueChangeLog? firstParent = null;
+
+                foreach (JIssueChangeLog  cl in jc.IssueObj.ChangeLogs )
+                {
+                    foreach (var cli in cl.Items )
+                    {
+                        if (cli.ChangeLogType == ChangeLogTypeEnum.clStatus )
+                        {
+                            int tmpID;
+                            if (int.TryParse(cli.ToId, out tmpID))
+                            {
+                                if (tmpID > 0)
+                                {
+                                    var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID && x.Type == StatusType.stActiveState );
+                                    if (stCfg != null)
+                                    {
+                                        if (firstActive == null)
+                                        {
+                                            firstActive = cli;
+                                            firstParent = cl;
+                                        }
+                                        else 
+                                        {
+                                            if (cl.CreatedDate < firstParent.CreatedDate)
+                                            {
+                                                firstActive = cli;
+                                                firstParent = cl;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                if (firstActive != null)
+                {
+                    firstActive.TrackType = StatusType.stStart ;
+                }
+
                 foreach (var ln in jc.StateCalcStringList())
                 {
                     ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
@@ -152,13 +203,17 @@ namespace JiraCon
         {
             List<Issue> issues = new List<Issue>();
             ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slOutputTitle ,false);
+            string toJQL = string.Empty;
             switch(_type)
             {
                 case AnalysisType.atIssues:
-                    string toJQL = BuildJQLKeyInList(searchData);
+                    toJQL = BuildJQLKeyInList(searchData);
                     issues = JiraUtil.JiraRepo.GetIssues(toJQL);
                     break;
                 case AnalysisType.atEpics:
+                    toJQL = BuildJQLForEpicChildren(searchData);
+                    issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+
                     break;
                 case AnalysisType.atJQL:
                     issues = JiraUtil.JiraRepo.GetIssues(searchData);
@@ -179,6 +234,36 @@ namespace JiraCon
             }
             return JIssues.Count;
             
+        }
+
+        private string BuildJQLForEpicChildren(string srchData)
+        {
+            string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
+            StringBuilder sb = new StringBuilder();
+            sb.Append("parentEpic in (");
+            int added = 0;
+            if (cards.Length > 0)
+            {
+                for (int i = 0; i < cards.Length; i ++)
+                {
+                    if (added == 0)
+                    {
+                        sb.AppendFormat("{0}",cards[i]);
+                    }
+                    else 
+                    {
+                        sb.AppendFormat(",{0}",cards[i]);
+                    }
+                }
+                sb.Append(")");
+            }
+            return sb.ToString();
+
+
+            //     retJQL = string.Format("project={0} and parentEpic={1}",JTISConfigHelper.config.defaultProject,epicKey);
+            // {
+            //     retJQL = string.Format("parentEpic={0}",epicKey);
+            // }
         }
 
         private string BuildJQLKeyInList(string srchData)

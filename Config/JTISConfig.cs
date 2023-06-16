@@ -11,8 +11,9 @@ namespace JiraCon
         stActiveState = 1, 
         stPassiveState = 2, 
         stIgnoreState = 3, 
-        stEnd = 4, 
-        stUnknown = 5
+        stStart = 4, 
+        stEnd = 5, 
+        stUnknown = 6
         // for any issue, 'Start' is the first active state that occurred
         // stStart = 5
     }    

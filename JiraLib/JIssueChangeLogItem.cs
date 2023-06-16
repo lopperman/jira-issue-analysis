@@ -25,6 +25,8 @@ namespace JiraCon
             ToValue = string.Empty;
             FromValue = string.Empty;
             ChangeLogType = ChangeLogTypeEnum.clUnknown;
+            TrackType = StatusType.stUnknown;
+
         }
 
         public JIssueChangeLogItem(IssueChangeLogItem item): this()
@@ -40,6 +42,7 @@ namespace JiraCon
         public string ToId { get; set; }
         public string ToValue { get; set; }
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
+        public StatusType TrackType {get;set;}
 
         public T GetToValue<T>()
         {
@@ -89,7 +92,6 @@ namespace JiraCon
                 {
                     ToValue = _item.ToValue;
                 }
-
                 if (_item.FieldName.ToLower()=="status")
                 {
                     ChangeLogType = ChangeLogTypeEnum.clStatus ;
@@ -129,6 +131,8 @@ namespace JiraCon
                 {
                     ChangeLogType = ChangeLogTypeEnum.clOther ;
                 }
+
+
             }
             catch(Exception ex)
             {

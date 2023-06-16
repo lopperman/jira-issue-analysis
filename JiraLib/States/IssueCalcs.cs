@@ -30,11 +30,11 @@ namespace  JiraCon
                 {
                     if (addHeader == true &&  addedHeader == false)
                     {
-                        ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}","Key","Summary","CurrentStatus","ChangeLogType", "StartDt","EndDt","FromId","FromValue","ToId","ToValue" ));                    
+                        ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}","Key","Summary","CurrentStatus","ChangeLogType", "StartDt","EndDt","FromId","FromValue","ToId","ToValue", "TrackType" ));                    
                         addedHeader = true;
                     }
                     StateCalc c = StateCalcs[i];
-                    ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}",IssueObj.Key,IssueObj.Summary.Replace(","," "),IssueObj.StatusName,c.LogItem.ChangeLogType, c.StartDt,c.EndDt,c.FromId,c.FromValue,c.ToId,c.ToValue ));                    
+                    ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}",IssueObj.Key,IssueObj.Summary.Replace(","," "),IssueObj.StatusName,c.LogItem.ChangeLogType, c.StartDt,c.EndDt,c.FromId,c.FromValue,c.ToId,c.ToValue, "***"  ));                    
                 }
             }
 
@@ -47,11 +47,6 @@ namespace  JiraCon
             {
                 foreach (var cli in cl.Items)
                 {
-                    // if (cli.FieldName.ToLower() == "status")
-                    // {
-                    //     StateCalc sc = new StateCalc(cli, cl.CreatedDate );
-                    //     StateCalcs.Add(sc);
-                    // }
                     if (cli.ChangeLogType == ChangeLogTypeEnum.clStatus || cli.ChangeLogType == ChangeLogTypeEnum.clBlockedFlag || cli.ChangeLogType == ChangeLogTypeEnum.clBlockedField)
                     {
                         StateCalc sc = new StateCalc(cli, cl.CreatedDate );
@@ -59,6 +54,9 @@ namespace  JiraCon
                     }
                 }
             }
+            //FIND FIRST ACTIVE STATE 'STATUS' CHANGE
+            JIssueChangeLogItem? fItem = null;
+
         }
     }
 }
