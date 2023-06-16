@@ -10,13 +10,29 @@ namespace  JiraCon
         private string _fromId = string.Empty;
         private string _toValue = string.Empty;
         private string _toId = string.Empty;
+        public JIssueChangeLogItem? LogItem {get;set;}
         
 
         public StateCalc()
         {
             CreatedDt = DateTime.MinValue;
         }
+        public StateCalc(JIssueChangeLogItem cli, DateTime created):this()
+        {
+            LogItem = cli;
+            CreatedDt = created;
+            Populate();
+        }
 
+        private void Populate()
+        {
+            
+            FromId = LogItem.FromId;
+            FromValue = LogItem.FromValue;
+            ToId = LogItem.ToId;
+            ToValue = LogItem.ToValue;
+
+        }
 
         public DateTime CreatedDt {get;set;}
         public string FromValue
@@ -37,6 +53,15 @@ namespace  JiraCon
                 }
             }
         }
+
+        public DateTime StartDt
+        {
+            get
+            {
+                return CreatedDt;
+            }
+        }
+        public DateTime? EndDt {get;set;}
         public string FromId
         {
             get

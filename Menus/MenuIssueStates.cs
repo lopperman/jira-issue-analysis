@@ -81,8 +81,30 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.I)
             {
-                AnalyzeIssues analize = new AnalyzeIssues(AnalysisType.atIssues);
-
+                AnalyzeIssues analyze = new AnalyzeIssues(AnalysisType.atIssues);
+                int issueCount = 0;
+                if (analyze.HasSearchData)
+                {
+                    issueCount = analyze.GetData();
+                } 
+                if (issueCount > 0)
+                {
+                    analyze.ClassifyStates();
+                }
+                return true;
+            }
+            else if (key == ConsoleKey.Q)
+            {
+                AnalyzeIssues analyze = new AnalyzeIssues(AnalysisType.atJQL);
+                int issueCount = 0;
+                if (analyze.HasSearchData)
+                {
+                    issueCount = analyze.GetData();
+                } 
+                if (issueCount > 0)
+                {
+                    analyze.ClassifyStates();
+                }
                 return true;
             }
  

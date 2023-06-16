@@ -9,7 +9,8 @@ namespace JiraCon
         clUnknown = 0, 
         clStatus = 1, 
         clBlockedFlag = 2, 
-        clOther = 3
+        clBlockedField = 3, 
+        clOther = 4
     }
     public class JIssueChangeLogItem
     {
@@ -103,10 +104,25 @@ namespace JiraCon
                     else if (_item.ToValue != null && _item.ToValue.ToLower()=="impediment")
                     {
                         ChangeLogType = ChangeLogTypeEnum.clBlockedFlag;
-                    }
+                    }                    
                     else
                     {
                         ChangeLogType = ChangeLogTypeEnum.clOther ;
+                    }
+                }
+                else if (_item.FieldName.ToLower()=="priority")
+                {
+                    if (_item.FromValue != null && _item.FromValue.ToLower().StartsWith("block"))
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clBlockedField ;
+                    }
+                    else if (_item.ToValue != null && _item.ToValue.ToLower().StartsWith("block"))
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clBlockedField ;
+                    }
+                    else 
+                    {
+                        ChangeLogType = ChangeLogTypeEnum.clOther;
                     }
                 }
                 else 
