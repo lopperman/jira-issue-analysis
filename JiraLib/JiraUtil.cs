@@ -16,7 +16,7 @@ namespace JiraCon
             {
                 CreateRestClient();
                 if (_jiraRepo != null)
-                {
+                {                     
                     return _jiraRepo;
                 }
                 else 

@@ -44,6 +44,7 @@ namespace JiraCon
         {
             var itemStatusConfig = JTISConfigHelper.GetItemStatusConfig();
             _itemStatuses = itemStatusConfig;
+
         }
 
         public List<JItemStatus> JItemStatuses
@@ -228,7 +229,7 @@ namespace JiraCon
             return response.ToString();
         }
 
-        private async Task<string> GetItemStatusesAsync(CancellationToken token = default(CancellationToken))
+        public async Task<string> GetItemStatusesAsync(CancellationToken token = default(CancellationToken))
         {
             var resourceUrl = String.Format("rest/api/3/status");
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)

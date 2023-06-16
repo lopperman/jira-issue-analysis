@@ -14,6 +14,7 @@ namespace JiraCon
 
         public void BuildMenu()
         {
+
             var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
@@ -22,10 +23,11 @@ namespace JiraCon
             lines.AddConsoleLine("|  Time in Status Menu  |" + " " + cfgName, StdLine.slMenuName);
             lines.AddConsoleLine(" ----------------------- " + padd, StdLine.slMenuName);
 
-            lines.AddConsoleLine("-- [SHOW STATUS SELECTION & CLASSIFICATION] -- ", StdLine.slOutputTitle );
+//            lines.AddConsoleLine("-- [SHOW STATUS SELECTION & CLASSIFICATION] -- ", StdLine.slOutputTitle );
             lines.AddConsoleLine("(A) Edit Analysis Configuration", StdLine.slMenuDetail);
             lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slOutputTitle );
-            lines.AddConsoleLine("(J) View/Edit Saved JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(J) Manage Saved JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(S) Manage Issue Status Classification", StdLine.slMenuDetail);
             lines.AddConsoleLine("(I) Analyze: Enter Issue(s)", StdLine.slMenuDetail);
             lines.AddConsoleLine("(P) Analyze: Issues in an Epic", StdLine.slMenuDetail);
             lines.AddConsoleLine("(Q) Analyze: Issues from JQL", StdLine.slMenuDetail);
@@ -60,6 +62,22 @@ namespace JiraCon
                 {
                     Environment.Exit(0);
                 }
+            }
+            else if (key == ConsoleKey.S)
+            {                
+                while (MenuManager.DoMenu(new MenuStatusConfig(ActiveConfig)))
+                {
+
+                }
+                return true;                
+            }
+            else if (key == ConsoleKey.J)
+            {
+                while (MenuManager.DoMenu(new MenuJQL(ActiveConfig)))
+                {
+
+                }
+                return true;                
             }
  
 

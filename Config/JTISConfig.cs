@@ -6,7 +6,17 @@ using System.Text.Json.Serialization;
 
 namespace JiraCon
 {
-    public class JTISConfig
+   public enum StatusType
+    {
+        stActiveState = 1, 
+        stPassiveState = 2, 
+        stIgnoreState = 3, 
+        stEnd = 4, 
+        stUnknown = 5
+        // for any issue, 'Start' is the first active state that occurred
+        // stStart = 5
+    }    
+    public class JTISConfig: IDisposable
     {
         // private const string CFG_FIELD_ID = "configId";
         // private const string CFG_FIELD_NAME = "configName";
@@ -15,11 +25,13 @@ namespace JiraCon
         // private const string CFG_FIELD_BASEURL = "jiraurl";
         // private const string CFG_FIELD_PROJECT = "project";
         private bool _validConn = false;
+        private bool disposedValue;
 
         public JTISConfig()
         {
             SavedJQL = new List<JQLConfig>();
-            StatusConfigs = new List<StatusConfig>();
+            StatusConfigs = new List<JiraStatus>();
+            DefaultStatusConfigs = new List<JiraStatus>();
         }
 
         public JTISConfig(int cfgId, string cfgName, string loginName, string authToken, string url, string project): this()
@@ -45,7 +57,8 @@ namespace JiraCon
         public string? defaultProject {get;set;}
         [JsonPropertyName("savedJQL")]
         public List<JQLConfig> SavedJQL {get; set;}
-        public List<StatusConfig> StatusConfigs {get; set;}
+        public List<JiraStatus> StatusConfigs {get; set;}
+        public List<JiraStatus> DefaultStatusConfigs {get;set;}
         
 
         [JsonIgnore]
@@ -148,6 +161,33 @@ namespace JiraCon
             return retNames;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
 
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~JTISConfig()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

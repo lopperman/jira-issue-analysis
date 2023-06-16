@@ -30,7 +30,7 @@ namespace JiraCon
 
 
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(B) Back to Config Menu", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(B) Back to Previous Menu", StdLine.slMenuDetail);
             lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
 
             lines.WriteQueuedLines(true,true);

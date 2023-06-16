@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Xml.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Reflection;
 using System.Runtime.Versioning;
@@ -6,6 +9,7 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using JConsole.ConsoleHelpers.ConsoleTables;
 using static JiraCon.ConsoleUtil;
 
@@ -26,6 +30,17 @@ namespace JiraCon
             {
                 _config = value;
                 JiraUtil.CreateRestClient();
+                if (_config.DefaultStatusConfigs.Count == 0 || _config.DefaultStatusConfigs.Count != _config.StatusConfigs.Count )
+                {
+                    ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
+                    UpdateDefaultStatusConfigs();
+                }
+                else 
+                {
+                    FillMissingStatusConfigs();
+                }
+
+
             }
         }
 
@@ -168,6 +183,50 @@ namespace JiraCon
                 {
                     writer.Write(data);
                 }                                
+            }
+        }
+
+        public static void UpdateDefaultStatusConfigs()
+        {
+            JTISConfig cfg = JTISConfigHelper.config;
+            List<JiraStatus> scList = new List<JiraStatus>();
+            JiraRepo tmpRepo = new JiraRepo(cfg.baseUrl,cfg.userName,cfg.apiToken);
+            string data = tmpRepo.GetItemStatusesAsync().GetAwaiter().GetResult();
+            JArray json = JArray.Parse(data);
+
+            for (int i = 0; i < json.Count; i++)
+            {
+                JToken j = json[i];                
+                scList.Add(new JiraStatus(j));
+            }            
+            if (scList.Count > 0)
+            {
+                cfg.DefaultStatusConfigs.Clear();
+                cfg.DefaultStatusConfigs = scList;
+                FillMissingStatusConfigs();
+                JTISConfigHelper.SaveConfigList();
+            }                        
+        }
+
+        private static void FillMissingStatusConfigs()
+        {
+            JTISConfig cfg = JTISConfigHelper.config;
+            bool isChanged = false;
+            if (cfg.DefaultStatusConfigs.Count > 0 )
+            {
+                for (int i = 0; i < cfg.DefaultStatusConfigs.Count; i ++)
+                {
+                    var dflt = cfg.DefaultStatusConfigs[i];
+                    if (cfg.StatusConfigs.SingleOrDefault(x=>x.StatusId  == dflt.StatusId )==null)
+                    {
+                        isChanged = true;
+                        cfg.StatusConfigs.Add(new JiraStatus(dflt.StatusId,dflt.StatusName,dflt.CategoryKey,dflt.CategoryName));
+                    }
+                }
+                if (isChanged)
+                {
+                    JTISConfigHelper.SaveConfigList();
+                }
             }
         }
         public static void ReadConfigList()
