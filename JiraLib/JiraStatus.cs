@@ -18,6 +18,7 @@ namespace JiraCon
         public string StatusName {get;set;}
         public string CategoryKey {get;set;}
         public string CategoryName {get;set;}
+        public bool DefaultInUse {get;set;}
 
         public JiraStatus()
         {
@@ -26,12 +27,13 @@ namespace JiraCon
             CategoryName = string.Empty;
         }
 
-        public JiraStatus(int id, string name, string catKey, string catName ):this()
+        public JiraStatus(int id, string name, string catKey, string catName, bool inDefaultPrj ):this()
         {
             StatusId = id;
             StatusName = name;
             CategoryKey = catKey;
             CategoryName = catName;    
+            DefaultInUse = inDefaultPrj ;
         }
 
         public JiraStatus(JToken token):this()

@@ -186,32 +186,78 @@ namespace JiraCon
             }
         }
 
-        public static void UpdateDefaultStatusConfigs()
+        public static List<JiraStatus> GetJiraStatuses(bool defaultProjectOnly = true)
         {
-            JTISConfig cfg = JTISConfigHelper.config;
-            List<JiraStatus> scList = new List<JiraStatus>();
-            JiraRepo tmpRepo = new JiraRepo(cfg.baseUrl,cfg.userName,cfg.apiToken);
-            string data = tmpRepo.GetItemStatusesAsync().GetAwaiter().GetResult();
-            JArray json = JArray.Parse(data);
+            List<JiraStatus> ret = new List<JiraStatus>();
+            string data = string.Empty;
+            if (defaultProjectOnly)
+            {
+                data = JiraUtil.JiraRepo.GetProjectItemStatusesAsync().GetAwaiter().GetResult(); 
+                JArray json = JArray.Parse(data);
+                for (int i = 0; i < json.Count; i++)
+                {
+                    JToken jt = json[i]["statuses"];                      
+                    for (int k = 0; k < jt.Count(); k ++)
+                    {
+                        JToken j = jt[k].Value<JToken>();
+                        JiraStatus checkStatus = new JiraStatus(j);
+                        if (ret.Exists(x=>x.StatusId == checkStatus.StatusId)==false)          
+                        {
+                            ret.Add(checkStatus);
+                        }
+                    }
+                }
+            }
+            else 
+            {
+                data = JiraUtil.JiraRepo.GetItemStatusesAsync().GetAwaiter().GetResult(); 
+                JArray json = JArray.Parse(data);
+                for (int i = 0; i < json.Count; i++)
+                {
+                    JToken j = json[i].Value<JToken>();
+                    JiraStatus checkStatus = new JiraStatus(j);
+                    if (ret.Exists(x=>x.StatusId == checkStatus.StatusId)==false)          
+                    {
+                        ret.Add(checkStatus);
+                    }
+                }
 
-            for (int i = 0; i < json.Count; i++)
+            }
+            return ret;
+        }
+
+        public static void UpdateDefaultStatusConfigs(bool clearLocal = false)
+        {
+            List<JiraStatus> statusAll = GetJiraStatuses(false);
+            List<JiraStatus> statusProj = GetJiraStatuses(true);
+
+            for (int i = 0; i < statusAll.Count; i ++)
             {
-                JToken j = json[i];                
-                scList.Add(new JiraStatus(j));
-            }            
-            if (scList.Count > 0)
+                if (statusProj.Exists(x=>x.StatusId == statusAll[i].StatusId))
+                {
+                    statusAll[i].DefaultInUse = true;
+                }
+            }
+
+            config.DefaultStatusConfigs.Clear();
+            config.DefaultStatusConfigs = statusAll;
+            if (clearLocal)
             {
-                cfg.DefaultStatusConfigs.Clear();
-                cfg.DefaultStatusConfigs = scList;
+                config.StatusConfigs.Clear();
+                config.StatusConfigs = statusAll;
+            }
+            else 
+            {
                 FillMissingStatusConfigs();
-                JTISConfigHelper.SaveConfigList();
-            }                        
+            }
+            JTISConfigHelper.SaveConfigList();
         }
 
         private static void FillMissingStatusConfigs()
         {
             JTISConfig cfg = JTISConfigHelper.config;
             bool isChanged = false;
+
             if (cfg.DefaultStatusConfigs.Count > 0 )
             {
                 for (int i = 0; i < cfg.DefaultStatusConfigs.Count; i ++)
@@ -220,7 +266,7 @@ namespace JiraCon
                     if (cfg.StatusConfigs.SingleOrDefault(x=>x.StatusId  == dflt.StatusId )==null)
                     {
                         isChanged = true;
-                        cfg.StatusConfigs.Add(new JiraStatus(dflt.StatusId,dflt.StatusName,dflt.CategoryKey,dflt.CategoryName));
+                        cfg.StatusConfigs.Add(new JiraStatus(dflt.StatusId,dflt.StatusName,dflt.CategoryKey,dflt.CategoryName, dflt.DefaultInUse));
                     }
                 }
                 if (isChanged)

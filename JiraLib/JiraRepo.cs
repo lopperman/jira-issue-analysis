@@ -237,6 +237,14 @@ namespace JiraCon
 
             return response.ToString();
         }
+        public async Task<string> GetProjectItemStatusesAsync(CancellationToken token = default(CancellationToken))
+        {
+            var resourceUrl = String.Format("rest/api/3/project/{0}/statuses",JTISConfigHelper.config.defaultProject);
+            var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
+                .ConfigureAwait(false);
+
+            return response.ToString();
+        }
 
 
         public async Task<List<IssueStatus>> GetIssueTypeStatusesAsync(string projKey, string issueType, CancellationToken token = default(CancellationToken))

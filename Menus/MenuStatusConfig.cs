@@ -24,7 +24,7 @@ namespace JiraCon
             lines.AddConsoleLine(" ---------------------------- " + padd, StdLine.slMenuName);
 
             lines.AddConsoleLine("(V) View All", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(C) Check Default Status Configs (from Jira)", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(R) Reset Status Configs to Match Jira", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Previous Menu", StdLine.slMenuDetail);
@@ -43,23 +43,23 @@ namespace JiraCon
 
         public bool ProcessKey(ConsoleKey key)
         {
-            ConsoleKeyInfo resp = default(ConsoleKeyInfo);
+            //ConsoleKeyInfo resp = default(ConsoleKeyInfo);
 
            if (key == ConsoleKey.V)
             {
                 ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
                 JTISConfigHelper.UpdateDefaultStatusConfigs();
 
-                var table = new ConsoleTable("JiraId","Name","LocalState","DefaultState","User-Changed");
-                foreach (var jStatus in ActiveConfig.StatusConfigs.OrderBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
+                var table = new ConsoleTable("JiraId","Name","LocalState","DefaultState","UsedIn: " + ActiveConfig.defaultProject);
+                foreach (var jStatus in ActiveConfig.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
                 {
                     JiraStatus  defStat = ActiveConfig.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
-                    string userChanged = string.Empty;                    
-                    if (jStatus.Type != defStat.Type )
+                    string usedIn = string.Empty;                    
+                    if (jStatus.DefaultInUse)
                     {
-                        userChanged = "YES";
+                        usedIn = "YES";
                     }
-                    table.AddRow(jStatus.StatusId, jStatus.StatusName,Enum.GetName(typeof(StatusType),jStatus.Type),Enum.GetName(typeof(StatusType),defStat.Type),userChanged);
+                    table.AddRow(jStatus.StatusId, jStatus.StatusName,Enum.GetName(typeof(StatusType),jStatus.Type),Enum.GetName(typeof(StatusType),defStat.Type),usedIn);
                 }
                 table.Write();                
                 ConsoleUtil.WriteStdLine(" -- PRESS ANY KEY -- ",StdLine.slResponse,false);
@@ -68,9 +68,17 @@ namespace JiraCon
 
                 return true;                                
             }
-            else if (key == ConsoleKey.F)
+            else if (key == ConsoleKey.R)
             {
-
+                ConsoleUtil.WriteStdLine("PRESS 'Y' TO RESET LOCAL STATUS CONFIGS TO MATCH CURRENT JIRA PROPERTIES?",StdLine.slResponse,false);
+                if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                {
+                    ActiveConfig.DefaultStatusConfigs.Clear();
+                    ActiveConfig.StatusConfigs.Clear();
+                    ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
+                    JTISConfigHelper.UpdateDefaultStatusConfigs(true);
+                }
+                return true;
             }
 
             else if (key == ConsoleKey.B)
