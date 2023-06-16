@@ -24,11 +24,10 @@ namespace JiraCon
             lines.AddConsoleLine("(A) Analyze Issue(s) Time In Status", StdLine.slMenuDetail);
             lines.AddConsoleLine("(M) Show Change History for 1 or more Cards", StdLine.slMenuDetail);
             lines.AddConsoleLine("(J) Show JSON for 1 or more Cards", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(F) Create Extract Files", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(W) Create Work Metrics Analysis from JQL Query", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(E) Epic Analysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
+            // lines.AddConsoleLine("(F) Create Extract Files", StdLine.slMenuDetail);
+            // lines.AddConsoleLine("(W) Create Work Metrics Analysis from JQL Query", StdLine.slMenuDetail);
+            // lines.AddConsoleLine("(E) Epic Analysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
             lines.AddConsoleLine("");
-            lines.AddConsoleLine("(I) View Item Status values for work metrics", StdLine.slMenuDetail);
             lines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
             lines.AddConsoleLine("(D) Dev/Misc Menu", StdLine.slMenuDetail);
             lines.AddConsoleLine("Enter selection or X to exit.", StdLine.slResponse );
@@ -118,38 +117,30 @@ namespace JiraCon
                 }
                 return true;
             }
-            else if (key == ConsoleKey.W)
-            {
-                string jql = MainClass.GetJQL();
-                int startHour = 7;
-                int endHour = 18;
-                if (jql != null)
-                {
-                    var dic = MainClass.GetBusinessHours();
-                    startHour = dic["start"];
-                    endHour = dic["end"];
+            // else if (key == ConsoleKey.W)
+            // {
+            //     string jql = MainClass.GetJQL();
+            //     int startHour = 7;
+            //     int endHour = 18;
+            //     if (jql != null)
+            //     {
+            //         var dic = MainClass.GetBusinessHours();
+            //         startHour = dic["start"];
+            //         endHour = dic["end"];
 
-                    MainClass.CreateWorkMetricsFile(jql,startHour,endHour);
+            //         MainClass.CreateWorkMetricsFile(jql,startHour,endHour);
 
-                    ConsoleUtil.PressAnyKeyToContinue();
-                }
-                return true;
+            //         ConsoleUtil.PressAnyKeyToContinue();
+            //     }
+            //     return true;
 
-            }
-            else if (key == ConsoleKey.E)
-            {
-                var epicAnalysis = new EpicAnalysis();
-                epicAnalysis.Analyze();
-                return true;
-            }
-            else if (key == ConsoleKey.I)
-            {
-                MainClass.ShowItemStatusConfig();
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Press any key to continue.");
-                Console.ReadKey(true);
-                return true;
-            }
+            // }
+            // else if (key == ConsoleKey.E)
+            // {
+            //     var epicAnalysis = new EpicAnalysis();
+            //     epicAnalysis.Analyze();
+            //     return true;
+            // }
             else if (key == ConsoleKey.J)
             {
                 ConsoleUtil.WriteLine("");

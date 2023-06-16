@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Linq;
 using System.Xml.Schema;
 using System.ComponentModel.DataAnnotations;
@@ -332,56 +333,7 @@ namespace JiraCon
 
         }
 
-        public static List<JItemStatus> GetItemStatusConfig()
-        {
 
-            var ret = new List<JItemStatus>();
-            string fName = string.Format("CONFIG_ISSUE_STATUS_{0:00}.txt",JTISConfigHelper.config.configId);
-            string path = Path.Combine(JTISRootPath, fName);
-
-            if (!File.Exists(path))
-            {
-                ConsoleUtil.WriteLine("Missing config file: " + path, ConsoleColor.Red, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine("File will be generated with defaults but you will need to verify 'CalendarWork' and 'ActiveWork' in file: " + path,ConsoleColor.Red, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine("Press any key to continue");
-                var ok = Console.ReadKey(true);
-
-                var jItemStatuses = JiraUtil.JiraRepo.GetJItemStatusDefaults();
-                ret = jItemStatuses;
-                using (StreamWriter writer = new StreamWriter(path))
-                {
-                    writer.WriteLine("##statusName, statusId, categoryKey, categoryName, calendarWork, activeWork");
-                    foreach (JItemStatus jis in jItemStatuses)
-                    {
-                        writer.WriteLine(string.Format("{0}|{1}|{2}|{3}|{4}|{5}", jis.StatusName, jis.StatusId, jis.CategoryKey, jis.CategoryName, jis.CalendarWork, jis.ActiveWork));
-                    }
-                }
-            }
-            else
-            {
-                using (StreamReader reader = new StreamReader(path))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        if (line.StartsWith(value: "#"))
-                        {
-                            continue;
-                        }
-                        string[] arr = line.Split(separator: '|');
-                        JItemStatus newJIS = new JItemStatus();
-                        newJIS.StatusName = arr[0];
-                        newJIS.StatusId = arr[1];
-                        newJIS.CategoryKey = arr[2];
-                        newJIS.CategoryName = arr[3];
-                        newJIS.CalendarWork = (arr[4].ToLower() == "true") ? true : false;
-                        newJIS.ActiveWork = (arr[5].ToLower() == "true") ? true : false;
-                        ret.Add(newJIS);
-                    }
-                }
-            }
-            return ret;
-        }        
 
         internal static void ViewAll()
         {
@@ -400,27 +352,7 @@ namespace JiraCon
             ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******",ConsoleUtil.StdForecolor(StdLine.slOutputTitle), ConsoleUtil.StdBackcolor(StdLine.slOutputTitle), false);
             ConsoleUtil.WriteLine("");
             ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
-            var ok = Console.ReadKey(true);
-
-
-            // ConsoleUtil.WriteLine(text: "********** ISSUE STATUS TIME METRICS CONFIG *********", ConsoleColor.Yellow, ConsoleColor.Black, clearScreen: false);
-            // ConsoleUtil.WriteLine(text: "");
-            // ConsoleUtil.WriteLine(text: "All issue statuses. These are determined automatically via the Issue Status Cagetory from Jira, unless otherwise annotated. To add or remove overrides, use the Config menu option for 'Override Issue Status Time Metrics'.");
-            // ConsoleUtil.WriteLine(text: "");
-            // ConsoleUtil.WriteLine(string.Format("Path = {0}", Path.Combine(personalFolder, configIssueStatus)));
-
-            table = new ConsoleTable("Name","Category Key/Name","CalendarWork","ActiveWork");
-            foreach (var jis in JiraUtil.JiraRepo.JItemStatuses)
-            {
-                table.AddRow(jis.StatusName, string.Format("{0}/{1}",jis.CategoryKey, jis.CategoryName), jis.CalendarWork, jis.ActiveWork);
-            }
-            table.Write();
-            ConsoleUtil.WriteLine(text: "");
-            ConsoleUtil.WriteLine(text: "********** END ISSUE STATUS TIME METRICS CONFIG *****", ConsoleColor.Yellow, ConsoleColor.Black, false);
-            ConsoleUtil.WriteLine(text: "");
-            
-            ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
-            ok = Console.ReadKey(true);
+            Console.ReadKey(true);
         }
 
         internal static void DeleteConfig()
@@ -471,6 +403,45 @@ namespace JiraCon
                     SaveConfigList();
                 }
             }
+        }
+
+        public static string? GetSavedJQL(string title = "SELECT SAVED JQL")
+        {
+            string? retJql = string.Empty;
+            ConsoleUtil.Lines.AddConsoleLine(title,StdLine.slResponse,false );
+            if (JTISConfigHelper.config.SavedJQLCount > 0)
+            {
+                for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
+                {
+                    JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
+                    ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
+                    ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                }
+            }
+            else 
+            {
+                ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+            }
+            ConsoleUtil.Lines.WriteQueuedLines(false);
+            if (JTISConfigHelper.config.SavedJQLCount > 0)
+            {
+                var jqlId = ConsoleUtil.GetConsoleInput<int>("Enter JQL item number (number after 'NAME') to select. Enter zero ('0') to cancel",false);
+                if (jqlId > 0 && jqlId <= JTISConfigHelper.config.SavedJQLCount)
+                {
+                    JQLConfig? tmpJQL = JTISConfigHelper.config.SavedJQL.Single(x=>x.jqlId == jqlId);
+
+                    if (tmpJQL != null) 
+                    {
+                        retJql = tmpJQL.jql;
+                    }
+                }
+            }
+            else 
+            {
+                ConsoleUtil.WriteStdLine("PRESS ANY KEY TO CONTINUE",StdLine.slResponse,false);
+                Console.ReadKey(true);
+            }
+            return retJql;
         }
     }
 }

@@ -12,8 +12,6 @@ namespace JiraCon
         private List<JField> _fieldList = new List<JField>();
         private string _epicLinkFieldKey = string.Empty;
         private string _featureTeamChoicesFieldKey = string.Empty;
-        private List<JItemStatus>? _itemStatuses ;
-
         public JiraRepo(string server, string userName, string password)
         {
 
@@ -38,25 +36,6 @@ namespace JiraCon
                 _featureTeamChoicesFieldKey = jField.Key;
             }
 
-        }
-
-        public void ConfigureItemStatuses()
-        {
-            var itemStatusConfig = JTISConfigHelper.GetItemStatusConfig();
-            _itemStatuses = itemStatusConfig;
-
-        }
-
-        public List<JItemStatus> JItemStatuses
-        {
-            get
-            {
-                if (_itemStatuses == null || _itemStatuses.Count() == 0)
-                {
-                    ConfigureItemStatuses();
-                }
-                return _itemStatuses;
-            }
         }
 
         public string EpicLinkFieldName
@@ -130,42 +109,7 @@ namespace JiraCon
             return GetIssueTypeStatusesAsync(projKey, issueType).GetAwaiter().GetResult().ToList();
         }
 
-        public List<JItemStatus> GetJItemStatusDefaults()
-        {
-            var ret = new List<JItemStatus>();
 
-            string data = GetItemStatusesAsync().GetAwaiter().GetResult();
-
-            //Console.Write(data);
-
-            JArray json = JArray.Parse(data);
-
-            for (int i = 0; i < json.Count; i++)
-            {
-                try
-                {
-                    JToken j = json[i];
-                    var id = j["id"].Value<string>();
-                    var name = j["name"].Value<string>();
-                    var catToken = j["statusCategory"].Value<JToken>();
-                    var catKey = catToken["key"].Value<string>();
-                    var catName = catToken["name"].Value<string>();
-
-                    if (!ret.Any(y=>y.StatusName.ToLower() == name.ToLower()))
-                    {
-                        ret.Add(new JItemStatus(name.ToLower(), id.ToLower(), catKey.ToLower(), catName.ToLower()));
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine(ex.Message);
-                    Console.Error.WriteLine(ex.StackTrace);
-                }
-            }
-
-            return ret.OrderBy(x=>x.StatusName).ToList();
-        }
 
         public List<JField> GetFields()
         {
@@ -515,125 +459,7 @@ namespace JiraCon
 
     }
 
-    public class JItemStatus
-    {
-        public string StatusName { get; set; }
-        public string StatusId  { get; set; }
-        public string CategoryKey { get; set; }
-        public string CategoryName { get; set; }
-        public bool CalendarWork { get; set; }
-        public bool ActiveWork { get; set; }
 
-        public JItemStatus()
-        {
-            StatusName = string.Empty;
-            StatusId = string.Empty;
-            CategoryKey = string.Empty;
-            CategoryName = string.Empty;
-
-        }
-
-        public JItemStatus(string name, string id, string categoryKey, string categoryName): this()
-        {
-            StatusName = name.ToLower();
-            StatusId = id.ToLower();
-            CategoryKey = categoryKey.ToLower();
-            CategoryName = categoryName.ToLower();
-
-            if (categoryKey.ToLower() == "done")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "error")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "undefined")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "new")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "ready for release")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "on hold")
-            {
-                CalendarWork = true;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "to be prioritized")
-            {
-                CalendarWork = false;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "ready for acceptance testing")
-            {
-                CalendarWork = true;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "acceptance testing")
-            {
-                CalendarWork = true;
-                ActiveWork = true;
-            }
-            else if (categoryKey.ToLower() == "resolving dependencies")
-            {
-                CalendarWork = true;
-                ActiveWork = false;
-            }
-            else if (categoryKey.ToLower() == "epic uat")
-            {
-                CalendarWork = true;
-                ActiveWork = false;
-            }
-            else
-            {
-                CalendarWork = true;
-                ActiveWork = GetIsActiveWorkState(name);
-            }
-        }
-
-        private bool GetIsActiveWorkState(string name)
-        {
-            name = name.ToLower();
-
-            List<string> activeStates = new List<string>();
-            activeStates.Add("in review");
-            activeStates.Add("dev in flight");
-            activeStates.Add("dev testing");
-            activeStates.Add("developer review");
-            activeStates.Add("qa test");
-            activeStates.Add("in qa");
-            activeStates.Add("in development");
-            activeStates.Add("in design");
-            activeStates.Add("in progress");
-            activeStates.Add("qa");
-            activeStates.Add("in dev");
-            activeStates.Add("code review");
-            activeStates.Add("in code review");
-            activeStates.Add("verifying");
-            activeStates.Add("grubhub verification");
-            activeStates.Add("in uat");
-            activeStates.Add("team qa");
-
-            return activeStates.Contains(name);
-
-        }
-
-        public override string ToString()
-        {
-            return string.Format("name: {0}, id: {1}, categoryKey: {2}, categoryName: {3}, Active Work: {4}, Calendar Work: {5}", StatusName, StatusId, CategoryKey, CategoryName,ActiveWork,CalendarWork);
-        }
-    }
 
     public class JField
     {

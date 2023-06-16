@@ -79,6 +79,12 @@ namespace JiraCon
                 }
                 return true;                
             }
+            else if (key == ConsoleKey.I)
+            {
+                AnalyzeIssues analize = new AnalyzeIssues(AnalysisType.atIssues);
+
+                return true;
+            }
  
 
             return true;

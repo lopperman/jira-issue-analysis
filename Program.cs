@@ -1,8 +1,5 @@
-﻿using System;
-using Atlassian.Jira;
-using JConsole.Utilities;
+﻿using Atlassian.Jira;
 using Newtonsoft.Json;
-using Terminal.Gui;
 
 namespace JiraCon
 {
@@ -144,141 +141,130 @@ namespace JiraCon
             {
                 return null;
             }
-
-
         }
 
-        public static void ShowItemStatusConfig()
-        {
-            List<JItemStatus> ordered = JiraUtil.JiraRepo.JItemStatuses.OrderBy(x => x.StatusName).ToList();
-            foreach (JItemStatus item in ordered)
-            {
-                ConsoleUtil.WriteLine(item.ToString());
-            }
-        }
+        // public static void CreateWorkMetricsFile(string jql, int startHour, int endHour)
+        // {
+        //     CreateWorkMetricsFile(jql, startHour, endHour, string.Empty);
+        // }
 
-        public static void CreateWorkMetricsFile(string jql, int startHour, int endHour)
-        {
-            CreateWorkMetricsFile(jql, startHour, endHour, string.Empty);
-        }
+        // public static void CreateWorkMetricsFile(string jql, int startHour, int endHour, string epicKey)
+        // {
 
-        public static void CreateWorkMetricsFile(string jql, int startHour, int endHour, string epicKey)
-        {
+        //     try
+        //     {
+        //         DateTime now = DateTime.Now;
+        //         string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
 
-            try
-            {
-                DateTime now = DateTime.Now;
-                string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+        //         string workMetricsFile = String.Format("JiraCon_WorkMetrics_{0}", fileNameSuffix);
+        //         if (epicKey != null && epicKey.Length > 0)
+        //         {
+        //             workMetricsFile = String.Format("JiraCon_WorkMetrics_Epic_{0}_{1}", epicKey, fileNameSuffix);
+        //         }
 
-                string workMetricsFile = String.Format("JiraCon_WorkMetrics_{0}", fileNameSuffix);
-                if (epicKey != null && epicKey.Length > 0)
-                {
-                    workMetricsFile = String.Format("JiraCon_WorkMetrics_Epic_{0}_{1}", epicKey, fileNameSuffix);
-                }
+        //         ConsoleUtil.WriteLine(string.Format("getting issues from JQL:{0}", Environment.NewLine));
+        //         ConsoleUtil.WriteLine(string.Format("{0}", jql));
+        //         ConsoleUtil.WriteLine("");
 
-                ConsoleUtil.WriteLine(string.Format("getting issues from JQL:{0}", Environment.NewLine));
-                ConsoleUtil.WriteLine(string.Format("{0}", jql));
-                ConsoleUtil.WriteLine("");
+        //         var issues = JiraUtil.JiraRepo.GetIssues(jql);
 
-                var issues = JiraUtil.JiraRepo.GetIssues(jql);
+        //         ConsoleUtil.WriteLine(string.Format("Retrieved {0} issues", issues.Count()));
 
-                ConsoleUtil.WriteLine(string.Format("Retrieved {0} issues", issues.Count()));
+        //         List<JIssue> jissues = new List<JIssue>();
 
-                List<JIssue> jissues = new List<JIssue>();
+        //         foreach (var issue in issues)
+        //         {
+        //             ConsoleUtil.WriteLine(string.Format("getting changelogs for {0}", issue.Key.Value));
+        //             JIssue newIssue = new JIssue(issue);
+        //             newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
 
-                foreach (var issue in issues)
-                {
-                    ConsoleUtil.WriteLine(string.Format("getting changelogs for {0}", issue.Key.Value));
-                    JIssue newIssue = new JIssue(issue);
-                    newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
+        //             jissues.Add(newIssue);
+        //         }
 
-                    jissues.Add(newIssue);
-                }
+        //         var extractFolder = JTISConfigHelper.JTISRootPath;
 
-                var extractFolder = JTISConfigHelper.JTISRootPath;
+        //         ConsoleUtil.WriteLine("Calculating work time metrics ...");
 
-                ConsoleUtil.WriteLine("Calculating work time metrics ...");
+        //         var metrics = new WorkMetrics(JiraUtil.JiraRepo,startHour,endHour);
 
-                var metrics = new WorkMetrics(JiraUtil.JiraRepo,startHour,endHour);
+        //         SortedDictionary<string, string> forceIgnoreReasons = new SortedDictionary<string, string>();
+        //         //build workMetrics ONLY FOR PARENTS AND SUB-TASKS, then go back and update exclusions for parent/sub-tasks
+        //         var tempMetrics = new WorkMetrics(JiraUtil.JiraRepo, startHour, endHour);
+        //         foreach (JIssue j in jissues)
+        //         {
+        //             if (j.SubTasks.Count > 0)
+        //             {
+        //                 var workMetrics = tempMetrics.AddIssue(j, jissues);
+        //                 double parentActiveWorkTotal = workMetrics.Sum(item => item.Total8HourAdjBusinessHours);
 
-                SortedDictionary<string, string> forceIgnoreReasons = new SortedDictionary<string, string>();
-                //build workMetrics ONLY FOR PARENTS AND SUB-TASKS, then go back and update exclusions for parent/sub-tasks
-                var tempMetrics = new WorkMetrics(JiraUtil.JiraRepo, startHour, endHour);
-                foreach (JIssue j in jissues)
-                {
-                    if (j.SubTasks.Count > 0)
-                    {
-                        var workMetrics = tempMetrics.AddIssue(j, jissues);
-                        double parentActiveWorkTotal = workMetrics.Sum(item => item.Total8HourAdjBusinessHours);
+        //                 List<WorkMetric> subTaskWorkMetrics = new List<WorkMetric>();
+        //                 foreach (var subtask in j.SubTasks)
+        //                 {
+        //                     if (jissues.Any(x=>x.Key == subtask.Key))
+        //                     {
+        //                         subTaskWorkMetrics.AddRange(tempMetrics.AddIssue(jissues.Single(x=>x.Key == subtask.Key), jissues));
+        //                     }
+        //                 }
+        //                 var subTasksActiveWorkTotal = subTaskWorkMetrics.Sum(item => item.Total8HourAdjBusinessHours);
+        //                 if (parentActiveWorkTotal > subTasksActiveWorkTotal)
+        //                 {
+        //                     //use parent, ignore subtasks
+        //                     foreach (var subtask in j.SubTasks)
+        //                     { 
+        //                         forceIgnoreReasons.Add(subtask.Key, string.Format("Parent {0} active work time ({1}) is greater than combined sub-task active work time ({2})", j.Key, Math.Round(parentActiveWorkTotal, 2), Math.Round(subTasksActiveWorkTotal, 2)));
+        //                     }
 
-                        List<WorkMetric> subTaskWorkMetrics = new List<WorkMetric>();
-                        foreach (var subtask in j.SubTasks)
-                        {
-                            if (jissues.Any(x=>x.Key == subtask.Key))
-                            {
-                                subTaskWorkMetrics.AddRange(tempMetrics.AddIssue(jissues.Single(x=>x.Key == subtask.Key), jissues));
-                            }
-                        }
-                        var subTasksActiveWorkTotal = subTaskWorkMetrics.Sum(item => item.Total8HourAdjBusinessHours);
-                        if (parentActiveWorkTotal > subTasksActiveWorkTotal)
-                        {
-                            //use parent, ignore subtasks
-                            foreach (var subtask in j.SubTasks)
-                            { 
-                                forceIgnoreReasons.Add(subtask.Key, string.Format("Parent {0} active work time ({1}) is greater than combined sub-task active work time ({2})", j.Key, Math.Round(parentActiveWorkTotal, 2), Math.Round(subTasksActiveWorkTotal, 2)));
-                            }
+        //                 }
+        //                 else
+        //                 {
+        //                     //use subtasks, ignore parent
+        //                     var subTaskKeys = string.Join("*", j.SubTasks.Select(x => x.Key).ToList());
 
-                        }
-                        else
-                        {
-                            //use subtasks, ignore parent
-                            var subTaskKeys = string.Join("*", j.SubTasks.Select(x => x.Key).ToList());
+        //                     forceIgnoreReasons.Add(j.Key, string.Format("subtasks {0} active work time ({1}) is greater than parent active work time ({2})", subTaskKeys, Math.Round(subTasksActiveWorkTotal, 2), Math.Round(parentActiveWorkTotal, 2)));
+        //                 }
+        //             }
 
-                            forceIgnoreReasons.Add(j.Key, string.Format("subtasks {0} active work time ({1}) is greater than parent active work time ({2})", subTaskKeys, Math.Round(subTasksActiveWorkTotal, 2), Math.Round(parentActiveWorkTotal, 2)));
-                        }
-                    }
+        //         }
 
-                }
+        //         foreach (var kvp in forceIgnoreReasons)
+        //         {
+        //             metrics.AddForceIgnore(kvp.Key, kvp.Value);
+        //         }
 
-                foreach (var kvp in forceIgnoreReasons)
-                {
-                    metrics.AddForceIgnore(kvp.Key, kvp.Value);
-                }
+        //         using (StreamWriter writer = new StreamWriter(Path.Combine(extractFolder,workMetricsFile)))
+        //         {
+        //                 writer.WriteLine("key,type,created,featureTeam,summary,epicKey,parentIssueKey,currentStatus,labels,start,end,status,activeWork,calendarWork,totalBusinessDays,totalBusinessHours_8HourDay,transitionAfterHours,exclude,reason");
+        //             foreach (JIssue j in jissues)
+        //             {
+        //                 ConsoleUtil.WriteLine(string.Format("analyzing {0} - {1}", j.Key, j.IssueType));
+        //                 var workMetrics = metrics.AddIssue(j, jissues);
+        //                 ConsoleUtil.WriteLine("key,type,created,featureTeam,summary,epicKey,parentIssueKey,currentStatus,labels,start,end,status,activeWork,calendarWork,totalBusinessDays,totalBusinessHours_8HourDay,transitionAfterHours,exclude,reason");
+        //                 foreach (var wm in workMetrics)
+        //                 {
+        //                     string text = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}",
+        //                         j.Key, j.IssueType, j.CreateDate.Value.ToShortDateString(), j.FeatureTeamChoices, JHelper.RemoveCommas(j.Summary),
+        //                         j.EpicLinkKey,j.ParentIssueKey, JHelper.RemoveCommas(j.StatusName),
+        //                         JHelper.RemoveCommas(j.LabelsToString),wm.Start, wm.End,
+        //                         wm.ItemStatus.StatusName, wm.ItemStatus.ActiveWork, wm.ItemStatus.CalendarWork,
+        //                         wm.TotalBusinessDays,wm.Total8HourAdjBusinessHours,wm.TransitionAfterHours,
+        //                         wm.Exclude,JHelper.RemoveCommas(wm.ExcludeReasons));
+        //                     writer.WriteLine(text);
+        //                     ConsoleUtil.WriteLine(text) ;
+        //                 }
+        //             }
 
-                using (StreamWriter writer = new StreamWriter(Path.Combine(extractFolder,workMetricsFile)))
-                {
-                        writer.WriteLine("key,type,created,featureTeam,summary,epicKey,parentIssueKey,currentStatus,labels,start,end,status,activeWork,calendarWork,totalBusinessDays,totalBusinessHours_8HourDay,transitionAfterHours,exclude,reason");
-                    foreach (JIssue j in jissues)
-                    {
-                        ConsoleUtil.WriteLine(string.Format("analyzing {0} - {1}", j.Key, j.IssueType));
-                        var workMetrics = metrics.AddIssue(j, jissues);
-                        ConsoleUtil.WriteLine("key,type,created,featureTeam,summary,epicKey,parentIssueKey,currentStatus,labels,start,end,status,activeWork,calendarWork,totalBusinessDays,totalBusinessHours_8HourDay,transitionAfterHours,exclude,reason");
-                        foreach (var wm in workMetrics)
-                        {
-                            string text = string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}",
-                                j.Key, j.IssueType, j.CreateDate.Value.ToShortDateString(), j.FeatureTeamChoices, JHelper.RemoveCommas(j.Summary),
-                                j.EpicLinkKey,j.ParentIssueKey, JHelper.RemoveCommas(j.StatusName),
-                                JHelper.RemoveCommas(j.LabelsToString),wm.Start, wm.End,
-                                wm.ItemStatus.StatusName, wm.ItemStatus.ActiveWork, wm.ItemStatus.CalendarWork,
-                                wm.TotalBusinessDays,wm.Total8HourAdjBusinessHours,wm.TransitionAfterHours,
-                                wm.Exclude,JHelper.RemoveCommas(wm.ExcludeReasons));
-                            writer.WriteLine(text);
-                            ConsoleUtil.WriteLine(text) ;
-                        }
-                    }
+        //         }
 
-                }
+        //         ConsoleUtil.WriteLine(string.Format("data has been written to {0}/{1}",extractFolder,workMetricsFile));
 
-                ConsoleUtil.WriteLine(string.Format("data has been written to {0}/{1}",extractFolder,workMetricsFile));
-
-            }
-            catch (Exception ex)
-            {
-                ConsoleUtil.WriteLine("*** An error has occurred ***", ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.Message, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.StackTrace, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-            }
-        }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         ConsoleUtil.WriteLine("*** An error has occurred ***", ConsoleColor.DarkRed, ConsoleColor.Gray, false);
+        //         ConsoleUtil.WriteLine(ex.Message, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
+        //         ConsoleUtil.WriteLine(ex.StackTrace, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
+        //     }
+        // }
 
 
         public static void CreateExtractFiles(string jql, bool includeCommentsAndDesc)
