@@ -29,6 +29,7 @@ Utility to determine amount of time a jira issue has spend in any status
  - Supports selecting issues for Time Analysis by entering list of issue keys, or by entering JQL, or by entering an Epic Key (will analyze all children of an Epic)
  - Provides views/extracts of various Jira configurations, including list of status configurations for a project, list of issue types, etc
 
+![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/IssueStatusMapping.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showChangeHistory_1.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showChangeHistory_2.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showChangeHistory_3.png?raw=true)
