@@ -83,21 +83,33 @@ namespace JiraCon
                         {
                             if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
                             {
-                                var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID && x.Type == StatusType.stActiveState );
+                                var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
                                 if (stCfg != null)
                                 {
-                                    if (firstActiveCLI == null)
+                                    if (stCfg.Type == StatusType.stPassiveState )
                                     {
-                                        firstActiveCLI = sc.LogItem;
+                                        sc.LogItem.TrackType = StatusType.stPassiveState ;
                                     }
-                                    else 
+                                    else if (stCfg.Type == StatusType.stEnd)
                                     {
-                                        if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
+                                        sc.LogItem.TrackType = StatusType.stEnd ;
+
+                                    }
+                                    else if (stCfg.Type == StatusType.stActiveState )
+                                    {   
+                                        sc.LogItem.TrackType = StatusType.stActiveState;
+                                        if (firstActiveCLI == null)
                                         {
                                             firstActiveCLI = sc.LogItem;
                                         }
+                                        else 
+                                        {
+                                            if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
+                                            {
+                                                firstActiveCLI = sc.LogItem;
+                                            }
+                                        }
                                     }
-
                                 }
                             }
                         }
