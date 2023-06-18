@@ -44,6 +44,7 @@ namespace JiraCon
         public string ToValue { get; set; }
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
         public StatusType TrackType {get;set;}
+        [JsonIgnore]
         public JIssueChangeLog? ChangeLog {get;private set;}
 
         public T GetToValue<T>()

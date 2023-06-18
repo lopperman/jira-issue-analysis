@@ -9,6 +9,8 @@ namespace JiraCon
     {
         private IssueChangeLog? _changeLog;
         private List<JIssueChangeLogItem>? _items ;
+
+        [JsonIgnore]
         public JIssue? JIss {get;private set;}
 
         public JIssueChangeLog()
