@@ -61,7 +61,13 @@ namespace  JiraCon
                 return CreatedDt;
             }
         }
-        public DateTime? EndDt {get;set;}
+        public DateTime? EndDt 
+        {
+            get
+            {
+                return this.LogItem.ChangeLog.EndDate;
+            }
+        }
         public string FromId
         {
             get

@@ -58,36 +58,22 @@ namespace JiraCon
                 string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                 if (arr.Length >= 1)
                 {
-                    bool canWriteCSV = false;
-                    ConsoleUtil.WriteLine("Would you like to include changes to card description and comments? (enter Y to include)");
-                    resp = Console.ReadKey(true);
                     List<JIssue>? retIssues;
-                    if (resp.Key == ConsoleKey.Y)
-                    {
-                        retIssues = MainClass.AnalyzeIssues(keys,true);
-                    }
-                    else
-                    {
-                        canWriteCSV = true;
-                        retIssues = MainClass.AnalyzeIssues(keys,false);                    
-                    }
+                    retIssues = MainClass.AnalyzeIssues(keys);                    
                     if (retIssues != null)
                     {
-                        if (canWriteCSV)
+                        ConsoleUtil.WriteStdLine("Enter 'Y' to save output to csv file, otherwise press any key",StdLine.slResponse,false);
+                        resp = Console.ReadKey(true);
+                        if (resp.Key == ConsoleKey.Y)
                         {
-                            ConsoleUtil.WriteLine("Enter 'Y' to save output to csv file, otherwise press any key");
-                            resp = Console.ReadKey(true);
-                            if (resp.Key == ConsoleKey.Y)
-                            {
-                                MainClass.WriteChangeLogCSV(retIssues);                                
-                            }
+                            MainClass.WriteChangeLogCSV(retIssues);                                
+                            ConsoleUtil.WriteLine("");
+                            ConsoleUtil.WriteStdLine("Press any key to continue.",StdLine.slResponse,false);
+                            Console.ReadKey(true);
                         }
                     }
                 }
 
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Press any key to continue.");
-                Console.ReadKey(true);
                 return true;
             }
             else if (key == ConsoleKey.F)

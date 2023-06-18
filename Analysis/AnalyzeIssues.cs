@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Atlassian.Jira;
@@ -76,7 +78,11 @@ namespace JiraCon
                 
                 foreach (StateCalc sc in issCalc.StateCalcs)
                 {
-                    if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
+                    if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedField || sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedFlag )
+                    {
+                        sc.LogItem.TrackType = StatusType.stPassiveState ;
+                    }
+                    else if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
                     {
                         //if change is TO and Active State, then check
                         if (sc.LogItem.ToId != null)
@@ -119,6 +125,7 @@ namespace JiraCon
                 {
                     firstActiveCLI.TrackType = StatusType.stStart;
                 }
+                CalculateEndDates();
             }
             foreach (IssueCalcs issCalcs in JCalcs)
             {
@@ -163,7 +170,50 @@ namespace JiraCon
 
         }
 
+        private void CalculateEndDates()
+        {
+            foreach (IssueCalcs issCalcs in JCalcs)
+            {
+                var allStateCalcs = issCalcs.StateCalcs;
+                foreach (var sc1 in allStateCalcs)
+                {
+                    var srcChangeLogId = sc1.LogItem.ChangeLog.Id;
+                    //status, blockedfield, blockedflag
+                    var srcChangeLogType = sc1.LogItem.ChangeLogType ;
+                    // if (srcChangeLogType == ChangeLogTypeEnum.clStatus || srcChangeLogType == ChangeLogTypeEnum.clBlockedField || srcChangeLogType == ChangeLogTypeEnum.clBlockedFlag)
+                    if (srcChangeLogType == ChangeLogTypeEnum.clStatus )
+                    {
+                        foreach (var sc2 in allStateCalcs)
+                        {
+                            var tarChangeLogId = sc2.LogItem.ChangeLog.Id;
+                            //status, blockedfield, blockedflag
+                            var tarChangeLogType = sc2.LogItem.ChangeLogType ;
+                            if (tarChangeLogId != srcChangeLogId)
+                            {
+                                if (sc2.LogItem.FieldName == sc1.LogItem.FieldName && tarChangeLogType == ChangeLogTypeEnum.clStatus )
+                                {
+                                    if (sc2.LogItem.ChangeLog.CreatedDate > sc1.LogItem.ChangeLog.CreatedDate)
+                                    {
+                                        if (sc1.LogItem.ChangeLog.EndDate == null)
+                                        {
+                                            sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
+                                        }
+                                        else 
+                                        {
+                                            if (sc2.LogItem.ChangeLog.CreatedDate < sc1.LogItem.ChangeLog.EndDate)
+                                            {
+                                                sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
+                                            }
+                                        }
+                                    }    
+                                }
 
+                            }
+                        }
+                    }
+                }
+            }
+        }
         private string? SelectSavedJQL()
         {
             string title = string.Empty;

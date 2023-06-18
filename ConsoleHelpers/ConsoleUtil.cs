@@ -168,6 +168,10 @@ namespace JiraCon
         {
             WriteAppend(text, defForeground, defBackground,endOfLine);
         }
+        public static void WriteAppend(string text, StdLine lnType, bool endOfLine)
+        {
+            WriteAppend(text,StdForecolor(lnType),StdBackcolor(lnType),endOfLine);
+        }
 
         public static void WriteAppend(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor)
         {
@@ -181,11 +185,14 @@ namespace JiraCon
             
             Console.ForegroundColor = foregroundColor;
             Console.BackgroundColor = backgroundColor;
-            Console.Write(text);
             if (endOfLine)
             {
-                Console.ResetColor();
-                Console.WriteLine();
+                Console.Write(text);
+                ConsoleUtil.WriteLine("",false);
+            }
+            else 
+            {
+                Console.Write(text);
             }
         }
 

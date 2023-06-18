@@ -494,13 +494,13 @@ namespace JiraCon
 
 
 
-        public static List<JIssue> AnalyzeIssues(string cardNumbers, bool includeDescAndComments)
+        public static List<JIssue> AnalyzeIssues(string cardNumbers)
         {
             var retIssues = new List<JIssue>();
             string[] arr = cardNumbers.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < arr.Length; i++)
             {
-                JIssue? nIssue = AnalyzeOneIssue(arr[i], includeDescAndComments);
+                JIssue? nIssue = AnalyzeOneIssue(arr[i]);
                 if (nIssue != null) 
                 {
                     retIssues.Add(nIssue);
@@ -509,10 +509,10 @@ namespace JiraCon
             return retIssues;
         }
 
-        public static JIssue? AnalyzeOneIssue(string key, bool includeDescAndComments) 
+        public static JIssue? AnalyzeOneIssue(string key) 
         {
             ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("***** Jira Card: " + key, ConsoleColor.DarkBlue, ConsoleColor.White, false);
+            ConsoleUtil.WriteStdLine("***** Jira Card: " + key, StdLine.slOutputTitle, false);
 
             JIssue? retJIssue = null;
             Issue tmpIssue;
@@ -537,7 +537,7 @@ namespace JiraCon
                 return null;
             }   
             
-            ConsoleUtil.WriteLine(string.Format("***** loading change logs for {0}-({1}):",key,tmpIssue.Summary));
+            ConsoleUtil.WriteStdLine(string.Format("***** loading change logs for {0}-({1}):",key,tmpIssue.Summary),StdLine.slOutputTitle ,false);
 
             retJIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tmpIssue));
 
@@ -547,37 +547,23 @@ namespace JiraCon
             {
 
                 JIssueChangeLog changeLog = retJIssue.ChangeLogs[i];
-
-
                 foreach (JIssueChangeLogItem cli in changeLog.Items)
                 {
-                    if (cli.FieldName.ToLower().StartsWith("desc") || cli.FieldName.ToLower().StartsWith("comment"))
-                    {
-                        if (includeDescAndComments)
-                        {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName), true);
-                            ConsoleUtil.WriteAppend(string.Format("\t{0} changed from ", cli.FieldName), true);
-                            ConsoleUtil.WriteAppend(string.Format("{0}", cli.FromValue), ConsoleColor.DarkGreen, Console.BackgroundColor, true);
-                            ConsoleUtil.WriteAppend(string.Format("\t{0} changed to ", cli.FieldName), true);
-                            ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue), ConsoleColor.Green, Console.BackgroundColor, true);
-                        }
-                    }
-                    else
+                    if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                     {
                         if (cli.FieldName.ToLower().StartsWith("status"))
                         {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
+                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),StdLine.slOutput ,false);
                             ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue),ConsoleColor.White,ConsoleColor.Red,true);
                         }
                         else if (cli.FieldName.ToLower().StartsWith("label"))
                         {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),false);
+                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),StdLine.slOutput ,false);
                             ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue), ConsoleColor.White, ConsoleColor.Blue);
                         }
-
                         else
                         {
-                            ConsoleUtil.WriteLine($"{tmpIssue.Key} - Changed On {changeLog.CreatedDate}, {cli.FieldName} field changed from '{cli.FromValue}' to '{cli.ToValue}'");
+                            ConsoleUtil.WriteStdLine($"{tmpIssue.Key} - Changed On {changeLog.CreatedDate}, {cli.FieldName} field changed from '{cli.FromValue}' to '{cli.ToValue}'",StdLine.slOutput,false);
                         }
                     }
                 }

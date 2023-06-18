@@ -28,6 +28,7 @@ namespace JiraCon
         public string Id { get; set; }
         public string Author { get; set; }
         public DateTime CreatedDate { get; set; }
+        public DateTime? EndDate {get;set;}
 
         public List<JIssueChangeLogItem> Items
         {
