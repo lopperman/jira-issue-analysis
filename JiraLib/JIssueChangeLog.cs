@@ -9,6 +9,7 @@ namespace JiraCon
     {
         private IssueChangeLog? _changeLog;
         private List<JIssueChangeLogItem>? _items ;
+        public JIssue? JIss {get;private set;}
 
         public JIssueChangeLog()
         {
@@ -17,9 +18,10 @@ namespace JiraCon
             CreatedDate = DateTime.MinValue;
         }
 
-        public JIssueChangeLog(IssueChangeLog changeLog):this()
+        public JIssueChangeLog(JIssue parentIssue, IssueChangeLog changeLog):this()
         {
             _changeLog = changeLog;
+            JIss = parentIssue ;
             Initialize();
         }
 
@@ -47,7 +49,7 @@ namespace JiraCon
             CreatedDate = _changeLog.CreatedDate;
             foreach (var i in _changeLog.Items)
             {
-                Items.Add(new JIssueChangeLogItem(i));
+                Items.Add(new JIssueChangeLogItem(this, i));
             }
 
         }

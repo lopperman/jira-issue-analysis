@@ -30,6 +30,10 @@ namespace JiraCon
 
         public void AddConsoleLine(string text, StdLine lineType)
         {
+            if (lineType == StdLine.slCode)
+            {
+                text = string.Format("  |*| {0}",text);
+            }
             AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType));
         }
         public void AddConsoleLine(string text, StdLine lineType, bool writePartial)

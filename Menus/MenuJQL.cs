@@ -31,8 +31,7 @@ namespace JiraCon
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Previous Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
-
+            lines.AddConsoleLine("(X) Exit", StdLine.slResponse);            
             lines.WriteQueuedLines(true,true);
             lines = null;
         }
@@ -56,7 +55,7 @@ namespace JiraCon
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
                         ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slCode);
                     }
                 }
                 else 
@@ -69,14 +68,14 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.D)
             {
-                ConsoleUtil.Lines.AddConsoleLine(" ** SAVED JQL **",StdLine.slOutputTitle );
+                ConsoleUtil.Lines.AddConsoleLine(" ** SAVED JQL **",StdLine.slCode );
                 if (JTISConfigHelper.config.SavedJQLCount > 0)
                 {
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
                         ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slCode);
                     }
                 }
                 else 
@@ -90,10 +89,12 @@ namespace JiraCon
                     if (deleteJqlId > 0 && deleteJqlId <= JTISConfigHelper.config.SavedJQLCount)
                     {
                         JQLConfig? delCfg = JTISConfigHelper.config.SavedJQL.Single(x=>x.jqlId == deleteJqlId);
-
                         if (delCfg != null) 
                         {
-                            ConsoleUtil.WriteStdLine(string.Format("PRESS 'Y' TO DELETE SAVED JQL: {0}",delCfg.jqlName),StdLine.slResponse,false);
+                            ConsoleUtil.WriteStdLine(string.Format("PRESS 'Y' TO DELETE SAVED JQL BELOW",delCfg.jqlName),StdLine.slResponse,false);
+                            ConsoleUtil.WriteStdLine(string.Format("{0:00} - {1}",delCfg.jqlId, delCfg.jqlName),StdLine.slCode,false);
+                            ConsoleUtil.WriteStdLine(string.Format("{0}",delCfg.jql),StdLine.slCode,false);
+
                             if (Console.ReadKey(true).Key == ConsoleKey.Y)
                             {
                                 JTISConfigHelper.config.SavedJQL.Remove(delCfg);
@@ -105,7 +106,7 @@ namespace JiraCon
                                     }
                                 }
                                 JTISConfigHelper.SaveConfigList();
-                                ConsoleUtil.WriteStdLine(string.Format("DELETED SAVED JQL: {0} - PRESS ANY KEY",delCfg.jqlName),StdLine.slResponse,false);
+                                ConsoleUtil.WriteStdLine(string.Format("SAVED JQL: {0} WAS DELETED - PRESS ANY KEY",delCfg.jqlName),StdLine.slResponse,false);
                                 Console.ReadKey(true);
                             }
                         }

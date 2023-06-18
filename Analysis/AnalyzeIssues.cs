@@ -39,23 +39,20 @@ namespace JiraCon
             string? data = string.Empty;
             if (_type == AnalysisType.atIssues)
             {
-                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE ISSUE KEYS (E.G. WWT-100 WWT-101) SEPARATED BY SPACES",StdLine.slResponse,false);
-                ConsoleUtil.WriteStdLine("(IF YOU WISH TO CANCEL OR SELECT A SAVED LIST OF ISSUES, PRESS 'ENTER')",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE ISSUE KEYS (E.G. WWT-100 WWT-101) SEPARATED BY SPACES, OR PRESS 'ENTER'",StdLine.slResponse,false);
             }
             else if (_type == AnalysisType.atJQL)
             {
-                ConsoleUtil.WriteStdLine("ENTER JQL TO FILTER ISSUES",StdLine.slResponse,false);
-                ConsoleUtil.WriteStdLine("(IF YOU WISH TO CANCEL OR SELECT A SAVED LIST OF JQL, PRESS 'ENTER')",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("ENTER JQL TO FILTER ISSUES, OR PRESS 'ENTER'",StdLine.slResponse,false);
             }
             else if (_type == AnalysisType.atEpics)
             {
-                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE EPICS SEPARATED BY SPACES",StdLine.slResponse,false);
-                ConsoleUtil.WriteStdLine("(IF YOU WISH TO CANCEL OR SELECT A SAVED LIST OF EPICS, PRESS 'ENTER')",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE EPICS SEPARATED BY SPACES, OR PRESS 'ENTER'",StdLine.slResponse,false);
             }
             data = Console.ReadLine();
             if (data == null || data.Length == 0)
             {
-                ConsoleUtil.WriteStdLine("PRESS 'Y' TO SELECT A SAVED LIST OF JQL - ANY OTHER KEY TO CANCEL",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("'Y' TO SELECT SAVED JQL, OR PRESS 'ENTER'",StdLine.slResponse,false);
                 if (Console.ReadKey().Key == ConsoleKey.Y)
                 {
                     data = SelectSavedJQL();
@@ -73,57 +70,47 @@ namespace JiraCon
             }
             foreach (JIssue iss in JIssues)
             {
-                JCalcs.Add(new IssueCalcs(iss));
-            }
-
-            foreach (var jc in JCalcs)
-            {
-                JIssueChangeLogItem? firstActive = null;
-                JIssueChangeLog? firstParent = null;
-
-                foreach (JIssueChangeLog  cl in jc.IssueObj.ChangeLogs )
+                var issCalc = new IssueCalcs(iss);
+                JCalcs.Add(issCalc);
+                JIssueChangeLogItem? firstActiveCLI = null;
+                
+                foreach (StateCalc sc in issCalc.StateCalcs)
                 {
-                    foreach (var cli in cl.Items )
+                    if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
                     {
-                        if (cli.ChangeLogType == ChangeLogTypeEnum.clStatus )
+                        //if change is TO and Active State, then check
+                        if (sc.LogItem.ToId != null)
                         {
-                            int tmpID;
-                            if (int.TryParse(cli.ToId, out tmpID))
+                            if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
                             {
-                                if (tmpID > 0)
+                                var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID && x.Type == StatusType.stActiveState );
+                                if (stCfg != null)
                                 {
-                                    var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID && x.Type == StatusType.stActiveState );
-                                    if (stCfg != null)
+                                    if (firstActiveCLI == null)
                                     {
-                                        if (firstActive == null)
+                                        firstActiveCLI = sc.LogItem;
+                                    }
+                                    else 
+                                    {
+                                        if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
                                         {
-                                            firstActive = cli;
-                                            firstParent = cl;
-                                        }
-                                        else 
-                                        {
-                                            if (cl.CreatedDate < firstParent.CreatedDate)
-                                            {
-                                                firstActive = cli;
-                                                firstParent = cl;
-                                            }
+                                            firstActiveCLI = sc.LogItem;
                                         }
                                     }
+
                                 }
                             }
-
                         }
-
                     }
-
                 }
-
-                if (firstActive != null)
+                if (firstActiveCLI != null) 
                 {
-                    firstActive.TrackType = StatusType.stStart ;
+                    firstActiveCLI.TrackType = StatusType.stStart;
                 }
-
-                foreach (var ln in jc.StateCalcStringList())
+            }
+            foreach (IssueCalcs issCalcs in JCalcs)
+            {
+                foreach (var ln in issCalcs.StateCalcStringList())
                 {
                     ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
                 }
@@ -159,10 +146,11 @@ namespace JiraCon
                 }
                 ConsoleUtil.WriteStdLine(string.Format("Saved to: {0}{1}{2}",csvPath,Environment.NewLine,"PRESS ANY KEY TO CONTINUE"),StdLine.slResponse,false);
                 Console.ReadKey(true);
-
             }
 
+
         }
+
 
         private string? SelectSavedJQL()
         {
@@ -177,7 +165,7 @@ namespace JiraCon
                     title = "SELECT SAVED LIST (SPACE-DELIMITED EPIC KEYS) - ANALYSIS WILL RUN ON ALL CHILDREN LINKED TO EPIC(S)";
                     break;
                 case AnalysisType.atJQL:
-                    title = "SELECT SAVED JQL QUERY (MUST BE VALID JQL) - ANALYSIS WILL RUN ON ISSUES RETURNED FROM QUERY";
+                    title = "SELECT SAVED JQL QUERY (MUST BE VALID JQL) - ANALYSIS WILL RUN ON ALL EPIC 'CHILDREN'";
                     break;
                 default:
                     title = string.Empty;
@@ -191,6 +179,7 @@ namespace JiraCon
             if (ret != null && ret.Length > 0)
             {
                 ConsoleUtil.WriteStdLine("PRESS 'Y' TO USE THE FOLLOWING SAVED JQL/QUERY - ANY OTHER KEY TO CANCEL",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine(ret,StdLine.slCode,false);
                 if (Console.ReadKey().Key == ConsoleKey.Y)
                 {
                     return ret;

@@ -29,9 +29,10 @@ namespace JiraCon
 
         }
 
-        public JIssueChangeLogItem(IssueChangeLogItem item): this()
+        public JIssueChangeLogItem(JIssueChangeLog jIssChangeLog, IssueChangeLogItem item): this()
         {
             _item = item;
+            ChangeLog = jIssChangeLog;
             Initialize();
         }
 
@@ -43,6 +44,7 @@ namespace JiraCon
         public string ToValue { get; set; }
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
         public StatusType TrackType {get;set;}
+        public JIssueChangeLog? ChangeLog {get;private set;}
 
         public T GetToValue<T>()
         {

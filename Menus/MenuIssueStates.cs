@@ -81,50 +81,37 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.I)
             {
-                AnalyzeIssues analyze = new AnalyzeIssues(AnalysisType.atIssues);
-                int issueCount = 0;
-                if (analyze.HasSearchData)
-                {
-                    issueCount = analyze.GetData();
-                } 
-                if (issueCount > 0)
-                {
-                    analyze.ClassifyStates();
-                }
+                NewAnalysis(AnalysisType.atIssues);
                 return true;
             }
             else if (key == ConsoleKey.P)
             {
-                AnalyzeIssues analyze = new AnalyzeIssues(AnalysisType.atEpics);
-                int issueCount = 0;
-                if (analyze.HasSearchData)
-                {
-                    issueCount = analyze.GetData();
-                } 
-                if (issueCount > 0)
-                {
-                    analyze.ClassifyStates();
-                }
+                NewAnalysis(AnalysisType.atEpics);
                 return true;
 
             }
             else if (key == ConsoleKey.Q)
             {
-                AnalyzeIssues analyze = new AnalyzeIssues(AnalysisType.atJQL);
-                int issueCount = 0;
-                if (analyze.HasSearchData)
-                {
-                    issueCount = analyze.GetData();
-                } 
-                if (issueCount > 0)
-                {
-                    analyze.ClassifyStates();
-                }
+                NewAnalysis(AnalysisType.atJQL);
                 return true;
             }
  
 
             return true;
+        }
+
+        private void NewAnalysis(AnalysisType anType)
+        {
+            AnalyzeIssues analyze = new AnalyzeIssues(anType);
+            int issueCount = 0;
+            if (analyze.HasSearchData)
+            {
+                issueCount = analyze.GetData();
+            } 
+            if (issueCount > 0)
+            {
+                analyze.ClassifyStates();
+            }
         }
     }
 }

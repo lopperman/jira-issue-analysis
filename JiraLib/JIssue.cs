@@ -420,7 +420,7 @@ namespace JiraCon
 
         public void AddChangeLog(IssueChangeLog changeLog)
         {
-            ChangeLogs.Add(new JIssueChangeLog(changeLog));
+            ChangeLogs.Add(new JIssueChangeLog(this, changeLog));
         }
 
         public List<JIssueChangeLog> ChangeLogs

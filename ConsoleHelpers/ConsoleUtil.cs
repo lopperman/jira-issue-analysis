@@ -34,7 +34,8 @@ namespace JiraCon
         slResponse, 
         slError,
         slOutputTitle, 
-        slOutput
+        slOutput, 
+        slCode 
     }
     public static class ConsoleUtil
     {
@@ -56,6 +57,8 @@ namespace JiraCon
                     return ConsoleColor.DarkBlue;
                 case StdLine.slOutputTitle:
                     return ConsoleColor.White;
+                case StdLine.slCode:
+                    return ConsoleColor.Gray;
                 default:
                     return ConsoleColor.Black;
             }
@@ -78,6 +81,8 @@ namespace JiraCon
                     return ConsoleColor.White;
                 case StdLine.slOutputTitle:
                     return ConsoleColor.DarkBlue;
+                case StdLine.slCode:
+                    return ConsoleColor.Black ;
                 default:
                     return ConsoleColor.White;
             }
@@ -109,6 +114,10 @@ namespace JiraCon
 
         public static void WriteStdLine(string text, StdLine msgType, bool clearScreen)
         {
+            if (msgType == StdLine.slCode)
+            {
+                text = string.Format("    |*| {0}",text);
+            }
             WriteLine(text, StdForecolor(msgType), StdBackcolor(msgType), clearScreen);
         }
 
