@@ -62,7 +62,9 @@ namespace JiraCon
                     case "in progress":
                         return StatusType.stActiveState;
                     case "to do":
-                        return StatusType.stPassiveState;                        
+                        return StatusType.stPassiveState;       
+                    case "ignore":
+                        return StatusType.stIgnoreState;                 
                     default:
                         return StatusType.stUnknown;;
                 }
