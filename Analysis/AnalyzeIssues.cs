@@ -14,7 +14,8 @@ namespace JiraCon
         _atUnknown = -1, 
         atJQL = 1, 
         atIssues = 2, 
-        atEpics = 3
+        atEpics = 3, 
+        atIssueSummary = 4
     }
 
     public class AnalyzeIssues
@@ -46,6 +47,10 @@ namespace JiraCon
             if (_type == AnalysisType.atIssues)
             {
                 ConsoleUtil.WriteStdLine("ENTER 1 OR MORE ISSUE KEYS (E.G. WWT-100 WWT-101) SEPARATED BY SPACES, OR PRESS 'ENTER'",StdLine.slResponse,false);
+            }
+            else if (_type == AnalysisType.atIssueSummary)
+            {
+                ConsoleUtil.WriteStdLine("ENTER 1 ISSUE-KEY (E.G. WWT-100), OR PRESS 'ENTER'",StdLine.slResponse,false);
             }
             else if (_type == AnalysisType.atJQL)
             {
@@ -150,14 +155,21 @@ namespace JiraCon
 
         public void WriteToConsole()
         {
-            bool addConsoleHeader = true;
-            foreach (IssueCalcs issCalcs in JCalcs)
+            if (_type==AnalysisType.atIssueSummary)
             {
-                foreach (var ln in issCalcs.StateCalcStringList(addConsoleHeader))
+                WriteIssueSummary();
+            }
+            else 
+            {
+                bool addConsoleHeader = true;
+                foreach (IssueCalcs issCalcs in JCalcs)
                 {
-                    ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
+                    foreach (var ln in issCalcs.StateCalcStringList(addConsoleHeader))
+                    {
+                        ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
+                    }
+                    addConsoleHeader = false;
                 }
-                addConsoleHeader = false;
             }
         }
 
@@ -413,6 +425,10 @@ namespace JiraCon
                         toJQL = BuildJQLKeyInList(searchData);
                         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
                         break;
+                    case AnalysisType.atIssueSummary:
+                        toJQL = BuildJQLKeyInList(searchData);
+                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+                        break;
                     case AnalysisType.atEpics:
                         toJQL = BuildJQLForEpicChildren(searchData);
                         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
@@ -479,24 +495,101 @@ namespace JiraCon
         {
             string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
             StringBuilder sb = new StringBuilder();
+            string defProj = JTISConfigHelper.config.defaultProject;
             sb.Append("key in (");
             int added = 0;
             if (cards.Length > 0)
             {
                 for (int i = 0; i < cards.Length; i ++)
                 {
-                    if (added == 0)
+                    var tKey = cards[i];
+                    if (!tKey.Contains("-"))
                     {
-                        sb.AppendFormat("{0}",cards[i]);
+                        tKey = string.Format("{0}-{1}",defProj,tKey);
+                    }
+                    if (added == 0)
+                    {                        
+                        sb.AppendFormat("{0}",tKey);
                     }
                     else 
                     {
-                        sb.AppendFormat(",{0}",cards[i]);
+                        sb.AppendFormat(",{0}",tKey);
                     }
                 }
                 sb.Append(")");
             }
             return sb.ToString();
         }
+
+        private void WriteIssueSummary()
+        {
+            foreach (var ic in JCalcs)
+            {
+                ConsoleUtil.WriteStdLine(String.Format("JTIS SUMMARY FOR ISSUE: {0}",ic.IssueObj.Key),StdLine.slOutputTitle);
+                ConsoleUtil.WriteStdLine(String.Format("TITLE: {0}",ic.IssueObj.Summary),StdLine.slOutput);
+                ConsoleUtil.WriteStdLine(String.Format("CURRENT STATUS: {0}",ic.IssueObj.StatusName),StdLine.slOutput);
+                var scStart = ic.StateCalcs.FirstOrDefault(x=>x.ActivityType == StatusType.stStart);
+                if (scStart != null)
+                {
+                    ConsoleUtil.WriteStdLine(String.Format("ACTIVE WORK STARTED: {0}",scStart.CreatedDt),StdLine.slOutput);
+                }
+                else 
+                {
+                    ConsoleUtil.WriteStdLine("ACTIVE WORK HAS NOT STARTED",StdLine.slCode);
+                }
+                //status, first entered, last entered, last exit, entered count, active/passive/etc, caltime, bustime
+                List<StatusSummary> ssList = new List<StatusSummary>();
+                foreach (StateCalc sc in ic.StateCalcs)
+                {
+                    StatusSummary ss = new StatusSummary();
+                    if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
+                    {
+                        if (ssList.Exists(x=>x.Status == sc.ToValue))
+                        {
+                            ss = ssList.First(x=>x.Status == sc.ToValue);
+                        }
+                        else 
+                        {
+                            ss.Status = sc.ToValue;
+                            ss.Key = sc.LogItem.ChangeLog.JIss.Key;
+                            ss.FirstEntry = sc.CreatedDt;
+                            ss.LastEntry = sc.CreatedDt;
+                            ss.TrackType = sc.LogItem.TrackType;
+                            if (sc.EndDt.HasValue){ss.LastEntry=sc.EndDt;}
+                            ssList.Add(ss);
+                        }
+                        if (sc.CreatedDt < ss.FirstEntry.Value){ss.FirstEntry = sc.CreatedDt;}
+                        if (sc.EndDt.HasValue)
+                        {
+                            if (ss.LastExit.HasValue == false){ss.LastExit=sc.EndDt;}
+                            else if (ss.LastExit.Value < sc.EndDt.Value){ss.LastExit = sc.EndDt.Value;}
+                        }
+                        ss.EntryCount +=1;
+                        ss.CalTime = ss.CalTime.Add(sc.LogItem.TotalCalendarTime);
+                        ss.BusTime = ss.BusTime.Add(sc.LogItem.TotalBusinessTime);
+                        ss.BlockTime = ss.BlockTime.Add(sc.LogItem.TotalBlockedBusinessTime);
+                    }
+                }
+                foreach (var statSumm in ssList)
+                {
+                    ConsoleUtil.WriteStdLine(string.Format("  STATUS: {0}",statSumm.Status),StdLine.slOutputTitle );
+                    ConsoleUtil.WriteStdLine(string.Format("  First Entry: {0}, Last Entry: {1}",statSumm.FirstEntry, statSumm.LastEntry),StdLine.slOutput );
+                    ConsoleUtil.WriteStdLine(string.Format("  Last Exit: {0}",statSumm.LastExit),StdLine.slOutput );
+                    ConsoleUtil.WriteStdLine(string.Format("  Entry Count: {0}",statSumm.EntryCount),StdLine.slOutput );
+                    ConsoleUtil.WriteStdLine(string.Format("  -- TIMESPANS --  ",statSumm.Status),StdLine.slOutputTitle );
+                    ConsoleUtil.WriteStdLine(string.Format("  -- THIS STATUS IS COUNTED AS: {0} --  ",statSumm.TrackType),StdLine.slOutputTitle );
+
+                    ConsoleUtil.WriteStdLine(string.Format("  CALENDAR DAYS: {0:00}, HOURS: {1:00}",statSumm.CalTime.TotalDays,statSumm.CalTime.TotalHours),StdLine.slOutput );
+                    ConsoleUtil.WriteStdLine(string.Format("  BUSINESS DAYS: {0:00}, HOURS: {1:00}",statSumm.BusTime.TotalDays,statSumm.BusTime.TotalHours),StdLine.slOutput );
+                    ConsoleUtil.WriteStdLine(string.Format("  BLOCKED DAYS: {0:00}, HOURS: {1:00}",statSumm.BlockTime.TotalDays,statSumm.BlockTime.TotalHours),StdLine.slOutput );
+
+
+                }
+                ConsoleUtil.PressAnyKeyToContinue();
+
+            }
+        }
+
+
     }
 }

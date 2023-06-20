@@ -29,9 +29,10 @@ namespace JiraCon
             lines.AddConsoleLine("(M) Manage Saved JQL", StdLine.slMenuDetail);
             lines.AddConsoleLine("(S) Manage Issue Status Classification", StdLine.slMenuDetail);
             lines.AddConsoleLine("-------------------------------   ", StdLine.slCode );
-            lines.AddConsoleLine("(I) Analyze: Enter Issue(s)", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(E) Analyze: Issues in an Epic", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(J) Analyze: Issues from JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(V) View Summary for 1 Issue", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(I) Get Data for 1 or more Issue(s)", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(E) Get data for Issues in an Epic", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(J) Get data for Issues from JQL Query", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
@@ -80,6 +81,11 @@ namespace JiraCon
                 }
                 return true;                
             }
+            else if (key == ConsoleKey.V)
+            {
+                NewAnalysis(AnalysisType.atIssueSummary);
+                return true;
+            }
             else if (key == ConsoleKey.I)
             {
                 NewAnalysis(AnalysisType.atIssues);
@@ -114,14 +120,18 @@ namespace JiraCon
                 }
             } 
             if (issueCount > 0)
-            {
-                analyze.ClassifyStates();
+            {                
+                analyze.ClassifyStates();                
                 analyze.WriteToConsole();
                 ConsoleUtil.WriteStdLine("---",StdLine.slResponse,false);
-                ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
-                if (Console.ReadKey(true).Key == ConsoleKey.Y)
+
+                if (anType != AnalysisType.atIssueSummary)
                 {
-                    analyze.WriteToCSV();
+                    ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
+                    if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                    {
+                        analyze.WriteToCSV();
+                    }
                 }
 
             }

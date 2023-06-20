@@ -35,6 +35,8 @@ Utility to determine amount of time a jira issue has spend in any status
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showChangeHistory_3.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showChangeHistory_4.png?raw=true)
 ---
+![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/SingleIssueSummary.png?raw=true)
+---
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/showJson.png?raw=true)
 ---
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/itemStatusValues.png?raw=true)
