@@ -26,11 +26,11 @@ namespace JiraCon
 //            lines.AddConsoleLine("-- [SHOW STATUS SELECTION & CLASSIFICATION] -- ", StdLine.slOutputTitle );
             lines.AddConsoleLine("(A) Edit Analysis Configuration", StdLine.slMenuDetail);
             lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slOutputTitle );
-            lines.AddConsoleLine("(J) Manage Saved JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(M) Manage Saved JQL", StdLine.slMenuDetail);
             lines.AddConsoleLine("(S) Manage Issue Status Classification", StdLine.slMenuDetail);
             lines.AddConsoleLine("(I) Analyze: Enter Issue(s)", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(P) Analyze: Issues in an Epic", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(Q) Analyze: Issues from JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(E) Analyze: Issues in an Epic", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(J) Analyze: Issues from JQL", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
@@ -71,7 +71,7 @@ namespace JiraCon
                 }
                 return true;                
             }
-            else if (key == ConsoleKey.J)
+            else if (key == ConsoleKey.M)
             {
                 while (MenuManager.DoMenu(new MenuJQL(ActiveConfig)))
                 {
@@ -84,13 +84,13 @@ namespace JiraCon
                 NewAnalysis(AnalysisType.atIssues);
                 return true;
             }
-            else if (key == ConsoleKey.P)
+            else if (key == ConsoleKey.E)
             {
                 NewAnalysis(AnalysisType.atEpics);
                 return true;
 
             }
-            else if (key == ConsoleKey.Q)
+            else if (key == ConsoleKey.J)
             {
                 NewAnalysis(AnalysisType.atJQL);
                 return true;

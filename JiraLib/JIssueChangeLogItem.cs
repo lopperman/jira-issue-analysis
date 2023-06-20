@@ -85,6 +85,13 @@ namespace JiraCon
                 return EndDt.Subtract(StartDt);
             }
         }
+        public TimeSpan TotalCalendarBlockedTime
+        {
+            get
+            {
+                return this.ChangeLog.BlockedTimeSpan;
+            }
+        }
         public TimeSpan TotalBusinessTime
         {
             get
@@ -103,6 +110,13 @@ namespace JiraCon
 
             }
         }        
+        public TimeSpan TotalBlockedBusinessTime
+        {
+            get
+            {
+                return ChangeLog.BlockedBusinessTimeSpan;
+            }
+        }
 
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
         public StatusType TrackType {get;set;}

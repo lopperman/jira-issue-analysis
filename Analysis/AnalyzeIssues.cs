@@ -132,6 +132,7 @@ namespace JiraCon
             foreach (var ic in JCalcs)
             {
                 PopulateBlockers(ic);
+                AddBlockerAdjustments(ic);
                 if (ic.Blockers.Count > 0)
                 {
                     foreach (var b in ic.Blockers)
@@ -143,13 +144,14 @@ namespace JiraCon
                 }
             }
 
-
+            bool addConsoleHeader = true;
             foreach (IssueCalcs issCalcs in JCalcs)
             {
-                foreach (var ln in issCalcs.StateCalcStringList())
+                foreach (var ln in issCalcs.StateCalcStringList(addConsoleHeader))
                 {
                     ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
                 }
+                addConsoleHeader = false;
             }
             ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
             if (Console.ReadKey(true).Key == ConsoleKey.Y)
@@ -179,6 +181,20 @@ namespace JiraCon
                             }
                         }
                     }
+                    
+                    writer.WriteLine();
+                    writer.WriteLine("BLOCKERS");
+                    writer.WriteLine();
+                    writer.WriteLine(string.Format("{0},{1},{2},{3}","IssueKey","StartDt","EndDt","BlockerFieldName"));
+
+                    foreach (var jc in JCalcs)
+                    {
+                        foreach (var b in jc.Blockers)
+                        {
+                            writer.WriteLine(string.Format("{0},{1},{2},{3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName));
+                        }
+                    }
+
                 }
                 ConsoleUtil.WriteStdLine(string.Format("Saved to: {0}{1}{2}",csvPath,Environment.NewLine,"PRESS ANY KEY TO CONTINUE"),StdLine.slResponse,false);
                 Console.ReadKey(true);
@@ -202,6 +218,21 @@ namespace JiraCon
                 return true;
             }
             return false;
+        }
+
+        private void AddBlockerAdjustments(IssueCalcs ic)
+        {
+            if (ic.Blockers.Count > 0)
+            {
+                foreach (var cl in ic.IssueObj.ChangeLogs)
+                {
+                    if (ic.Blockers.Exists(x=>x.IssueKey==ic.IssueObj.Key))
+                    {
+                        var issueBlockers = ic.Blockers.Where(x=>x.IssueKey==ic.IssueObj.Key).ToList();
+                        cl.CheckBlockers(issueBlockers);
+                    }
+                }
+            }
         }
 
         private void PopulateBlockers(IssueCalcs ic)

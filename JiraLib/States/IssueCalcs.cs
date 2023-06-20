@@ -31,11 +31,11 @@ namespace  JiraCon
                 {
                     if (addHeader == true &&  addedHeader == false)
                     {
-                        ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}","Key","CurrentStatus","ChangeLogId", "ChangeLogType", "StartDt","EndDt","CalDays","BusDays", "FromId","FromValue","ToId","ToValue", "TrackType" ));                    
+                        ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14}","Key","CurrentStatus","ChangeLogId", "ChangeLogType", "StartDt","EndDt","CalDays","BusDays","BlockedBusDays","TotBlockedDays", "FromId","FromValue","ToId","ToValue", "TrackType" ));                    
                         addedHeader = true;
                     }
                     StateCalc c = StateCalcs[i];
-                    ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}",IssueObj.Key,IssueObj.StatusName,c.LogItem.ChangeLog.Id, c.LogItem.ChangeLogType, c.StartDt,c.EndDt,c.LogItem.TotalCalendarTime.Days, c.LogItem.TotalBusinessTime.Days,  c.FromId,c.FromValue,c.ToId,c.ToValue,  c.LogItem.TrackType   ));                    
+                    ret.Add(string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14}",IssueObj.Key,IssueObj.StatusName,c.LogItem.ChangeLog.Id, c.LogItem.ChangeLogType, c.StartDt,c.EndDt,c.LogItem.TotalCalendarTime.Days, c.LogItem.TotalBusinessTime.Days, Math.Round(c.LogItem.TotalCalendarBlockedTime.TotalDays,2),Math.Round(c.LogItem.TotalBlockedBusinessTime.TotalDays,2),c.FromId,c.FromValue,c.ToId,c.ToValue,  c.LogItem.TrackType   ));                    
                 }
             }
 
@@ -61,7 +61,7 @@ namespace  JiraCon
 
         private void PopulateBlockers()
         {
-            
+
         }
     }
 }
