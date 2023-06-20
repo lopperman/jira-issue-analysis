@@ -24,6 +24,8 @@ namespace JiraCon
         public List<JIssue> JIssues {get; private set;}
         public List<IssueCalcs> JCalcs {get; private set;}
 
+        public bool GetDataFail {get;private set;}
+
         public bool HasSearchData
         {
             get
@@ -57,7 +59,7 @@ namespace JiraCon
             if (data == null || data.Length == 0)
             {
                 ConsoleUtil.WriteStdLine("'Y' TO SELECT SAVED JQL, OR PRESS 'ENTER'",StdLine.slResponse,false);
-                if (Console.ReadKey().Key == ConsoleKey.Y)
+                if (Console.ReadKey(true).Key == ConsoleKey.Y)
                 {
                     data = SelectSavedJQL();
                 }                
@@ -67,7 +69,6 @@ namespace JiraCon
 
         public void ClassifyStates()
         {
-            bool addedHeader = false ;
             if (JIssues.Count == 0)
             {
                 return;
@@ -133,17 +134,22 @@ namespace JiraCon
             {
                 PopulateBlockers(ic);
                 AddBlockerAdjustments(ic);
-                if (ic.Blockers.Count > 0)
-                {
-                    foreach (var b in ic.Blockers)
-                    {
-                        ConsoleUtil.WriteStdLine(string.Format("Added blocker for {0}: Start {1}, End {2}, Field {3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName),StdLine.slCode ,false);
-                    }
-                    // ConsoleUtil.WriteStdLine("PRESS ANY KEY",StdLine.slResponse  ,false);
-                    // Console.ReadKey(true);
-                }
+                // if (ic.Blockers.Count > 0)
+                // {
+                //     foreach (var b in ic.Blockers)
+                //     {
+                //         ConsoleUtil.WriteStdLine(string.Format("Added blocker for {0}: Start {1}, End {2}, Field {3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName),StdLine.slCode ,false);
+                //     }
+                // }
             }
 
+
+
+
+        }
+
+        public void WriteToConsole()
+        {
             bool addConsoleHeader = true;
             foreach (IssueCalcs issCalcs in JCalcs)
             {
@@ -153,6 +159,11 @@ namespace JiraCon
                 }
                 addConsoleHeader = false;
             }
+        }
+
+        public void WriteToCSV()
+        {
+            bool addedHeader = false ;
             ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
             if (Console.ReadKey(true).Key == ConsoleKey.Y)
             {
@@ -199,8 +210,6 @@ namespace JiraCon
                 ConsoleUtil.WriteStdLine(string.Format("Saved to: {0}{1}{2}",csvPath,Environment.NewLine,"PRESS ANY KEY TO CONTINUE"),StdLine.slResponse,false);
                 Console.ReadKey(true);
             }
-
-
         }
 
         private bool FromIdNull(JIssueChangeLogItem item)
@@ -383,7 +392,7 @@ namespace JiraCon
             {
                 ConsoleUtil.WriteStdLine("PRESS 'Y' TO USE THE FOLLOWING SAVED JQL/QUERY - ANY OTHER KEY TO CANCEL",StdLine.slResponse,false);
                 ConsoleUtil.WriteStdLine(ret,StdLine.slCode,false);
-                if (Console.ReadKey().Key == ConsoleKey.Y)
+                if (Console.ReadKey(true).Key == ConsoleKey.Y)
                 {
                     return ret;
                 }
@@ -393,39 +402,47 @@ namespace JiraCon
 
         public int GetData()
         {
-            List<Issue> issues = new List<Issue>();
-            ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slOutputTitle ,false);
-            string toJQL = string.Empty;
-            switch(_type)
+            try 
             {
-                case AnalysisType.atIssues:
-                    toJQL = BuildJQLKeyInList(searchData);
-                    issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-                    break;
-                case AnalysisType.atEpics:
-                    toJQL = BuildJQLForEpicChildren(searchData);
-                    issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-
-                    break;
-                case AnalysisType.atJQL:
-                    issues = JiraUtil.JiraRepo.GetIssues(searchData);
-                    break;
-                default:
-                    break;
-            }
-            if (issues.Count > 0)
-            {
-                ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slOutputTitle ,false);
-                foreach (var issue in issues)
+                List<Issue> issues = new List<Issue>();
+                ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
+                string toJQL = string.Empty;
+                switch(_type)
                 {
-                    JIssue newIssue = new JIssue(issue);
-                    ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slOutputTitle ,false);
-                    newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
-                    JIssues.Add(newIssue);
+                    case AnalysisType.atIssues:
+                        toJQL = BuildJQLKeyInList(searchData);
+                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+                        break;
+                    case AnalysisType.atEpics:
+                        toJQL = BuildJQLForEpicChildren(searchData);
+                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+
+                        break;
+                    case AnalysisType.atJQL:
+                        issues = JiraUtil.JiraRepo.GetIssues(searchData);
+                        break;
+                    default:
+                        break;
+                }
+                if (issues.Count > 0)
+                {
+                    ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slCode ,false);
+                    foreach (var issue in issues)
+                    {
+                        JIssue newIssue = new JIssue(issue);
+                        ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
+                        newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
+                        JIssues.Add(newIssue);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",searchData),ex:ex);
+                GetDataFail = true;
+            }
             return JIssues.Count;
-            
+
         }
 
         private string BuildJQLForEpicChildren(string srchData)

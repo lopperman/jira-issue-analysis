@@ -32,7 +32,7 @@ namespace JiraCon
         {
             if (lineType == StdLine.slCode)
             {
-                text = string.Format("  |*| {0}",text);
+                text = string.Format("  ||  {0}",text);
             }
             AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType));
         }
@@ -82,7 +82,7 @@ namespace JiraCon
             if (addTitle)
             {
                 string title = "  JiraTIS - (https://github.com/lopperman/jiraTimeInStatus  ";
-                ConsoleUtil.WriteLine(title,ConsoleColor.White,ConsoleColor.DarkGray,false);
+                ConsoleUtil.WriteStdLine(title,StdLine.slTitle);
             }
             for (int i = 0; i < _lines.Count; i++)
             {
@@ -92,7 +92,11 @@ namespace JiraCon
                 {
                     Console.ForegroundColor = l.Foreground;
                     Console.BackgroundColor = l.Background;
-
+                }
+                else 
+                {
+                    Console.ForegroundColor = defForeground;
+                    Console.BackgroundColor = defBackground;
                 }
                 if (l.WritePartialLine)
                 {
@@ -102,7 +106,7 @@ namespace JiraCon
                     }
                     else 
                     {
-                        ConsoleUtil.WriteAppend(l.Text);
+                        ConsoleUtil.WriteAppend(l.Text,defForeground,defBackground);
                     }
                     // Console.Write(l.Text);
                 }
@@ -110,11 +114,11 @@ namespace JiraCon
                 {
                     if (l.UseColors)
                     {
-                        ConsoleUtil.WriteLine(l.Text,l.Foreground,l.Background,false);
+                        ConsoleUtil.WriteStdLine(l.Text,l.Foreground,l.Background);
                     }
                     else 
                     {
-                        ConsoleUtil.WriteLine(l.Text);
+                        ConsoleUtil.WriteStdLine(l.Text,defForeground,defBackground);
                     }
                 }
             }

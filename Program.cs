@@ -1,4 +1,5 @@
-﻿using Atlassian.Jira;
+﻿using System.Data.SqlTypes;
+using Atlassian.Jira;
 using Newtonsoft.Json;
 
 namespace JiraCon
@@ -80,25 +81,25 @@ namespace JiraCon
 
             while (true)
             {
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter (Y) to change the defaults for business hours? (7AM-6PM)");
+                ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+                ConsoleUtil.WriteStdLine("Enter (Y) to change the defaults for business hours? (7AM-6PM)",StdLine.slResponse);
                 var keys = Console.ReadKey(true);
 
                 try
                 {
                     if (keys.Key == ConsoleKey.Y)
                     {
-                        ConsoleUtil.WriteLine("Enter Hour for Business Start (0-23)");
+                        ConsoleUtil.WriteStdLine("Enter Hour for Business Start (0-23)",StdLine.slResponse);
                         string read = Console.ReadLine();
                         int start = Convert.ToInt32(read);
 
-                        ConsoleUtil.WriteLine("Enter Hour for Business End (0-23)");
+                        ConsoleUtil.WriteStdLine("Enter Hour for Business End (0-23)",StdLine.slResponse);
                         read = Console.ReadLine();
                         int end = Convert.ToInt32(read);
 
                         if (end > start && start >=0 && end <=23)
                         {
-                            ConsoleUtil.WriteLine(string.Format("Enter (Y) to use {0} to {1} as business hours?", start, end));
+                            ConsoleUtil.WriteStdLine(string.Format("Enter (Y) to use {0} to {1} as business hours?", start, end),StdLine.slResponse);
                             keys = Console.ReadKey(true);
                             if (keys.Key == ConsoleKey.Y)
                             {
@@ -126,12 +127,11 @@ namespace JiraCon
 
         public static string GetJQL()
         {
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
+            ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+            ConsoleUtil.WriteStdLine("Enter or paste JQL then press enter to continue.",StdLine.slResponse);
             var jql = Console.ReadLine();
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine(string.Format("Enter (Y) to use this JQL:  {0}", jql));
-            ConsoleUtil.WriteLine("");
+            ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+            ConsoleUtil.WriteStdLine(string.Format("Enter (Y) to use this JQL:  {0}", jql),StdLine.slResponse);
             var keys = Console.ReadKey(true);
             if (keys.Key == ConsoleKey.Y)
             {
@@ -281,19 +281,19 @@ namespace JiraCon
                 string extractConfigFile = String.Format("JiraCon_ExtractConfig_{0}", fileNameSuffix);
 
 
-                ConsoleUtil.WriteLine(string.Format("getting issues from JQL:{0}",Environment.NewLine));
-                ConsoleUtil.WriteLine(string.Format("{0}", jql));
-                ConsoleUtil.WriteLine("");
+                ConsoleUtil.WriteStdLine("getting issues from JQL:",StdLine.slCode);
+                ConsoleUtil.WriteStdLine(string.Format("{0}", jql),StdLine.slCode);
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
 
                 var issues = JiraUtil.JiraRepo.GetIssues(jql);
 
-                ConsoleUtil.WriteLine(string.Format("Retrieved {0} issues", issues.Count()));
+                ConsoleUtil.WriteStdLine(string.Format("Retrieved {0} issues", issues.Count()),StdLine.slCode);
 
                 List<JIssue> jissues = new List<JIssue>();
 
                 foreach (var issue in issues)
                 {
-                    ConsoleUtil.WriteLine(string.Format("getting changelogs for {0}", issue.Key.Value));
+                    ConsoleUtil.WriteStdLine(string.Format("getting changelogs for {0}", issue.Key.Value),StdLine.slCode);
                     JIssue newIssue = new JIssue(issue);
                     newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
 
@@ -302,36 +302,34 @@ namespace JiraCon
 
                 var extractFolder = JTISConfigHelper.JTISRootPath;
 
-                ConsoleUtil.WriteLine("Calculating QA Failures ...");
+                ConsoleUtil.WriteStdLine("Calculating QA Failures ...",StdLine.slCode);
                 CreateQAFailExtract(jissues, Path.Combine(extractFolder, qaFailFile));
-                ConsoleUtil.WriteLine(string.Format("Created qa failures file ({0})", qaFailFile));
+                ConsoleUtil.WriteStdLine(string.Format("Created qa failures file ({0})", qaFailFile),StdLine.slCode);
 
-                ConsoleUtil.WriteLine("Calculating cycle times...");
+                ConsoleUtil.WriteStdLine("Calculating cycle times...",StdLine.slCode);
                 CreateCycleTimeExtract(jissues, Path.Combine(extractFolder, cycleTimeFile));
-                ConsoleUtil.WriteLine(string.Format("Created cycle time file ({0})", cycleTimeFile));
+                ConsoleUtil.WriteStdLine(string.Format("Created cycle time file ({0})", cycleTimeFile),StdLine.slCode);
 
-                ConsoleUtil.WriteLine("Calculating velocities ...");
+                ConsoleUtil.WriteStdLine("Calculating velocities ...",StdLine.slCode);
                 CreateVelocityExtract(jissues, Path.Combine(extractFolder, velocityFile));
-                ConsoleUtil.WriteLine(string.Format("Created velocity file ({0})", velocityFile));
+                ConsoleUtil.WriteStdLine(string.Format("Created velocity file ({0})", velocityFile),StdLine.slCode);
 
-                ConsoleUtil.WriteLine("Organizing change logs ...");
+                ConsoleUtil.WriteStdLine("Organizing change logs ...",StdLine.slCode);
                 CreateChangeLogExtract(jissues, Path.Combine(extractFolder, changeHistoryFile),includeCommentsAndDesc);
-                ConsoleUtil.WriteLine(string.Format("Created change log file ({0})", changeHistoryFile));
+                ConsoleUtil.WriteStdLine(string.Format("Created change log file ({0})", changeHistoryFile),StdLine.slCode);
 
-                ConsoleUtil.WriteLine("writing config for this extract process ...");
+                ConsoleUtil.WriteStdLine("writing config for this extract process ...",StdLine.slCode);
                 CreateConfigExtract(Path.Combine(extractFolder, extractConfigFile),jql);
 
-                ConsoleUtil.WriteLine(string.Format("Created config file ({0})", extractConfigFile));
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("Files are located in: {0}", extractFolder));
-                ConsoleUtil.WriteLine("");
+                ConsoleUtil.WriteStdLine(string.Format("Created config file ({0})", extractConfigFile),StdLine.slCode);
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
+                ConsoleUtil.WriteStdLine(string.Format("Files are located in: {0}", extractFolder),StdLine.slCode);
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
 
             }
             catch (Exception ex)
             {
-                ConsoleUtil.WriteLine("*** An error has occurred ***", ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.Message, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.StackTrace, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
+                ConsoleUtil.WriteError("*** An error has occurred ***",ex:ex);
             }
         }
 
@@ -339,22 +337,22 @@ namespace JiraCon
         {
             try
             {
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine(string.Format("getting issues from JQL:{0}", Environment.NewLine));
-                ConsoleUtil.WriteLine(string.Format("{0}", jql));
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Querying JIRA ...");
-                ConsoleUtil.WriteLine("");
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
+                ConsoleUtil.WriteStdLine("getting issues from JQL:", StdLine.slCode);
+                ConsoleUtil.WriteStdLine(string.Format("{0}", jql),StdLine.slCode);
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
+                ConsoleUtil.WriteStdLine("Querying JIRA ...",StdLine.slCode);
+                ConsoleUtil.WriteStdLine("",StdLine.slCode);
 
                 var issues = JiraUtil.JiraRepo.GetIssues(jql);
 
-                ConsoleUtil.WriteLine(string.Format("Retrieved {0} issues", issues.Count()));
+                ConsoleUtil.WriteStdLine(string.Format("Retrieved {0} issues", issues.Count()),StdLine.slCode);
 
                 List<JIssue> jissues = new List<JIssue>();
 
                 foreach (var issue in issues)
                 {
-                    ConsoleUtil.WriteLine(string.Format("getting changelogs for {0}", issue.Key.Value));
+                    ConsoleUtil.WriteStdLine(string.Format("getting changelogs for {0}", issue.Key.Value),StdLine.slCode);
                     JIssue newIssue = new JIssue(issue);
                     newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
 
@@ -371,7 +369,7 @@ namespace JiraCon
                 string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.json", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
                 string jsonFile = String.Format("JiraCon_JSON_{0}", fileNameSuffix);
 
-                ConsoleUtil.WriteLine(string.Format("saving JSON to {0}", Path.Combine(extractFolder,jsonFile)));
+                ConsoleUtil.WriteStdLine(string.Format("saving JSON to {0}", Path.Combine(extractFolder,jsonFile)),StdLine.slCode);
 
                 using (StreamWriter w = new StreamWriter(Path.Combine(extractFolder,jsonFile)))
                 {
@@ -381,15 +379,15 @@ namespace JiraCon
                     }
                 }
 
-                ConsoleUtil.WriteLine("file saved successfully");
+                ConsoleUtil.WriteStdLine("file saved successfully",StdLine.slResponse);
 
 
             }
             catch (Exception ex)
             {
-                ConsoleUtil.WriteLine("*** An error has occurred ***", ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.Message, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
-                ConsoleUtil.WriteLine(ex.StackTrace, ConsoleColor.DarkRed, ConsoleColor.Gray, false);
+                ConsoleUtil.WriteError("*** An error has occurred ***");
+                ConsoleUtil.WriteError(ex.Message);
+                ConsoleUtil.WriteError(ex.StackTrace);
             }
         }
 
@@ -511,8 +509,8 @@ namespace JiraCon
 
         public static JIssue? AnalyzeOneIssue(string key) 
         {
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteStdLine("***** Jira Card: " + key, StdLine.slOutputTitle, false);
+            ConsoleUtil.WriteStdLine("",StdLine.slCode);
+            ConsoleUtil.WriteStdLine("Jira Card: " + key, StdLine.slCode);
 
             JIssue? retJIssue = null;
             Issue tmpIssue;
@@ -529,7 +527,7 @@ namespace JiraCon
             {
                 if (retJIssue == null) 
                 {
-                    ConsoleUtil.WriteLine("***** Jira Card: " + key + " NOT FOUND!", ConsoleColor.DarkRed, ConsoleColor.White, false);
+                    ConsoleUtil.WriteError("***** Jira Card: " + key + " NOT FOUND!");
                 }
             }
             if (retJIssue == null)
@@ -541,7 +539,7 @@ namespace JiraCon
 
             retJIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tmpIssue));
 
-            ConsoleUtil.WriteLine(string.Format("Found {0} change logs for {1}", retJIssue.ChangeLogs.Count, key));
+            ConsoleUtil.WriteStdLine(string.Format("Found {0} change logs for {1}", retJIssue.ChangeLogs.Count, key),StdLine.slOutputTitle);
 
             for (int i = 0; i < retJIssue.ChangeLogs.Count; i++)
             {
@@ -626,8 +624,10 @@ namespace JiraCon
                     }
                 }
            }
-            ConsoleUtil.WriteLine(String.Format("file saved to: {0}",filePath),ConsoleColor.DarkCyan,ConsoleColor.White,false);
             writer.Close();
+
+            ConsoleUtil.WriteStdLine(String.Format("file saved to: {0}",filePath),StdLine.slCode);
+            ConsoleUtil.PressAnyKeyToContinue();
             return filePath;
         }
 

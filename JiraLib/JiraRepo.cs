@@ -417,7 +417,7 @@ namespace JiraCon
             }
             catch
             {
-                ConsoleUtil.WriteLine("ERROR GETTING ISSUE: " + key,ConsoleColor.DarkRed,ConsoleColor.Yellow,false);
+                ConsoleUtil.WriteError("ERROR GETTING ISSUE: " + key);
                 return null;
             }
 

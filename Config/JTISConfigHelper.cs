@@ -163,7 +163,7 @@ namespace JiraCon
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
-                    ConsoleUtil.WriteLine("Config file has been deleted. Run program again to create new config file. Press any key to exit.", ConsoleColor.White, ConsoleColor.DarkMagenta, true);
+                    ConsoleUtil.WriteStdLine("Config file has been deleted. Run program again to create new config file. Press any key to exit.", StdLine.slResponse, true);
                     Console.ReadKey(true);
                 }
             }
@@ -294,30 +294,31 @@ namespace JiraCon
             JTISConfig? chCfg = null; 
             if (msg==null || msg.Length == 0)
             {
-                msg = "ENTER CONFIG ID:";
+                msg = "ENTER CONFIG ID, OR '0' TO EXIT";
             }
-            ConsoleUtil.WriteLine("** CHOOSE CONFIG **",StdForecolor(StdLine.slOutputTitle), StdBackcolor(StdLine.slOutputTitle));
+            ConsoleUtil.WriteStdLine("** JIRA CONFIGURATIONS **",StdLine.slOutputTitle ,true);
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
-                ConsoleUtil.WriteLine(cfgNames[i],ConsoleColor.DarkBlue,ConsoleColor.Yellow,false);
+                ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slOutput);
             }
-            int cfgResp = 0;
+            int? cfgResp ;
             if (JTISConfigHelper.config == null)
             {
-                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,false);
+                //cfgResp = ConsoleUtil.ReadConsoleLine<int>(true);
+                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,allowNull:true);                
             }
             else 
             {
                 cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,true);
             }            
             
-            if (cfgResp == 0)
+            if (cfgResp == 0 || cfgResp == null)
             {
                 ConsoleUtil.ByeByeForced();
             }
 
-            chCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
+            chCfg = JTISConfigHelper.GetConfigFromList(cfgResp.Value);
             if (chCfg !=null )
             {
                 if (JTISConfigHelper.config != null)
@@ -348,11 +349,9 @@ namespace JiraCon
             table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
             table.AddRow(JTISConfigHelper.config.userName, JTISConfigHelper.config.apiToken, JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
             table.Write();
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("********** END LOGIN CONFIG ******",ConsoleUtil.StdForecolor(StdLine.slOutputTitle), ConsoleUtil.StdBackcolor(StdLine.slOutputTitle), false);
-            ConsoleUtil.WriteLine("");
-            ConsoleUtil.WriteLine("PRESS ANY KEY TO CONTINUE");
-            Console.ReadKey(true);
+            ConsoleUtil.WriteStdLine("",StdLine.slCode);
+            ConsoleUtil.PressAnyKeyToContinue();
+
         }
 
         internal static void DeleteConfig()
@@ -360,11 +359,11 @@ namespace JiraCon
             JTISConfig? delCfg = null; 
             JTISConfig? changeToCfg = null;
 
-            ConsoleUtil.WriteLine("** DELETE JIRA CONFIG ** ", ConsoleColor.DarkRed,ConsoleColor.Yellow, true);
+            ConsoleUtil.WriteStdLine("** DELETE JIRA CONFIG ** ", StdLine.slError, true);
             var cfgNames = JTISConfigHelper.ConfigNameList;
             for (int i = 0; i < cfgNames.Count; i ++)
             {
-                ConsoleUtil.WriteLine(cfgNames[i]);
+                ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slCode);
             }
             var cfgResp = ConsoleUtil.GetConsoleInput<int>("Enter the config number you want to DELETE");
             delCfg = JTISConfigHelper.GetConfigFromList(cfgResp);
@@ -377,8 +376,8 @@ namespace JiraCon
                     {
                         if (changeToCfg.configId == delCfg.configId)
                         {
-                            ConsoleUtil.WriteLine("You cannot use the config you are trying to delete! Press any key to continue");
-                            Console.ReadKey(true);
+                            ConsoleUtil.WriteStdLine("You cannot use the config you are trying to delete!",StdLine.slError);
+                            ConsoleUtil.PressAnyKeyToContinue();
                             return;
                         }
                         else 

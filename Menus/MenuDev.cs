@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 
 
 
@@ -21,7 +22,10 @@ namespace JiraCon
             lines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, StdLine.slMenuName);
             lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
             lines.AddConsoleLine("(V) View Console Fore/Back Colors", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(A) DEVTEST1()", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(S) View Configured Console Styles", StdLine.slMenuDetail);
+
+            lines.AddConsoleLine("(D) DEVTEST1()", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(T) DEVTEST2()", StdLine.slMenuDetail);
 
             lines.AddConsoleLine("");
             lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
@@ -53,7 +57,7 @@ namespace JiraCon
                             ConsoleColor ccBack = (ConsoleColor)iBack;
                             
                             string clrTest = string.Format("BackColor: {0}, ForeColor: {1}, Testing Standing Console Colors",ccBack,ccFore);
-                            ConsoleUtil.WriteLine(clrTest,ccFore, ccBack, false);
+                            ConsoleUtil.WriteStdLine(clrTest,ccFore, ccBack);
                         }
                     }
                     Console.WriteLine("** PRESS ANY KEY TO SEE NEXT BACKCOLOR **");
@@ -62,6 +66,22 @@ namespace JiraCon
                 Console.WriteLine("** PRESS ANY KEY TO RETURN TO CONFIG MENU **");
                 Console.ReadKey(true);
                 return true;                    
+            }
+            else if (key == ConsoleKey.S)
+            {
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLES",StdLine.slOutputTitle,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: TITLE",StdLine.slTitle,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: MENU NAME",StdLine.slMenuName,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: MENU DETAIL",StdLine.slMenuDetail,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: RESPONSE NEEDED",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: ERROR",StdLine.slError,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: OUTPUT TITLE",StdLine.slOutputTitle,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: OUTPUT",StdLine.slOutput,false);
+                ConsoleUtil.WriteStdLine("CONFIGURED CONSOLE LINE STYLE FOR: CODE",StdLine.slCode,false);
+                Console.WriteLine();
+                ConsoleUtil.WriteStdLine("PRESS ANY KEY",StdLine.slResponse,false);
+                Console.ReadKey(true);
+                return true;
             }
             else if (key == ConsoleKey.X)
             {
@@ -75,14 +95,28 @@ namespace JiraCon
             {
                 return false;
             }
-            else if (key == ConsoleKey.A)
+            else if (key == ConsoleKey.D)
             {
                 DevTest1();
                 Console.WriteLine("** PRESS ANY KEY **");
                 Console.ReadKey(true);
                 return true;
             }            
+            else if (key == ConsoleKey.T)
+            {
+                DevTest2();
+                ConsoleUtil.PressAnyKeyToContinue();
+                return true;
+            }            
             return true;
+        }
+
+        private void DevTest2()
+        {
+            ConsoleUtil.WriteStdLine("READ LINE",StdLine.slInfo);
+            var input = Console.ReadLine();
+            ConsoleUtil.WriteStdLine("WRITE AFTER READ LINE",StdLine.slInfo);
+            ConsoleUtil.WriteStdLine(string.Format("You entered: '{0}'",input),StdLine.slInfo);
         }
 
         private void DevTest1()

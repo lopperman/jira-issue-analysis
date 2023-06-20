@@ -25,9 +25,10 @@ namespace JiraCon
 
 //            lines.AddConsoleLine("-- [SHOW STATUS SELECTION & CLASSIFICATION] -- ", StdLine.slOutputTitle );
             lines.AddConsoleLine("(A) Edit Analysis Configuration", StdLine.slMenuDetail);
-            lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slOutputTitle );
+            lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slCode );
             lines.AddConsoleLine("(M) Manage Saved JQL", StdLine.slMenuDetail);
             lines.AddConsoleLine("(S) Manage Issue Status Classification", StdLine.slMenuDetail);
+            lines.AddConsoleLine("-------------------------------   ", StdLine.slCode );
             lines.AddConsoleLine("(I) Analyze: Enter Issue(s)", StdLine.slMenuDetail);
             lines.AddConsoleLine("(E) Analyze: Issues in an Epic", StdLine.slMenuDetail);
             lines.AddConsoleLine("(J) Analyze: Issues from JQL", StdLine.slMenuDetail);
@@ -107,10 +108,22 @@ namespace JiraCon
             if (analyze.HasSearchData)
             {
                 issueCount = analyze.GetData();
+                if (analyze.GetDataFail)
+                {
+                    ConsoleUtil.PressAnyKeyToContinue();
+                }
             } 
             if (issueCount > 0)
             {
                 analyze.ClassifyStates();
+                analyze.WriteToConsole();
+                ConsoleUtil.WriteStdLine("---",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
+                if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                {
+                    analyze.WriteToCSV();
+                }
+
             }
         }
     }

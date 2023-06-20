@@ -54,7 +54,7 @@ namespace JiraCon
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("{0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
                         ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slCode);
                     }
                 }
@@ -203,9 +203,9 @@ namespace JiraCon
                 string tmpJql = string.Empty;
                 tmpJql = ConsoleUtil.GetConsoleInput<string>("Enter JQL");                
                 tmpName = ConsoleUtil.GetConsoleInput<string>("Enter short name to describe JQL");                
-                ConsoleUtil.WriteLine(string.Format("Name: {0}",tmpName));
-                ConsoleUtil.WriteLine(string.Format("JQL: {0}",tmpJql));
-                ConsoleUtil.WriteLine(string.Format("Press 'Y' to save, otherwise press any key"));
+                ConsoleUtil.WriteStdLine(string.Format("Name: {0}",tmpName),StdLine.slCode);
+                ConsoleUtil.WriteStdLine(string.Format("JQL: {0}",tmpJql),StdLine.slCode);
+                ConsoleUtil.WriteStdLine(string.Format("Press 'Y' to save, otherwise press any key"),StdLine.slCode);
                 resp = Console.ReadKey(true);
                 if (resp.Key == ConsoleKey.Y)
                 {

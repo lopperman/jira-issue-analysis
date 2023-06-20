@@ -48,8 +48,7 @@ namespace JiraCon
 
             if (key == ConsoleKey.M)
             {
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or ENTER to cancel", ConsoleColor.Black, ConsoleColor.White, false);
+                ConsoleUtil.WriteStdLine("Enter 1 or more card keys separated by a space (e.g. POS-123 POS-456 BAM-789), or ENTER to cancel", StdLine.slResponse, false);
                 var keys = Console.ReadLine().ToUpper();
                 if (string.IsNullOrWhiteSpace(keys))
                 {
@@ -67,9 +66,7 @@ namespace JiraCon
                         if (resp.Key == ConsoleKey.Y)
                         {
                             MainClass.WriteChangeLogCSV(retIssues);                                
-                            ConsoleUtil.WriteLine("");
-                            ConsoleUtil.WriteStdLine("Press any key to continue.",StdLine.slResponse,false);
-                            Console.ReadKey(true);
+                            ConsoleUtil.PressAnyKeyToContinue();
                         }
                     }
                 }
@@ -78,8 +75,8 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.F)
             {                
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteStdLine("Enter or paste JQL, or ENTER to return",StdLine.slOutputTitle,false);
+                ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+                ConsoleUtil.WriteStdLine("Enter or paste JQL, or ENTER to return",StdLine.slResponse,false);
                 var jql = Console.ReadLine();
                 if (jql.Length > 0)
                 {
@@ -95,9 +92,7 @@ namespace JiraCon
                             includeCommentsAndDesc = true;
                         }
                         MainClass.CreateExtractFiles(jql,includeCommentsAndDesc);
-                        ConsoleUtil.WriteLine("");
-                        ConsoleUtil.WriteStdLine("Press any key to continue.",StdLine.slResponse,false);
-                        Console.ReadKey(true);
+                        ConsoleUtil.PressAnyKeyToContinue();
                     }
 
                 }
@@ -105,20 +100,18 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.J)
             {
-                ConsoleUtil.WriteLine("");
-                ConsoleUtil.WriteLine("Enter or paste JQL then press enter to continue.");
+                ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+                ConsoleUtil.WriteStdLine("Enter or paste JQL then press enter to continue.",StdLine.slResponse);
                 var jql = Console.ReadLine();
                 if (jql.Length > 0)
                 {
-                    ConsoleUtil.WriteLine("");
-                    ConsoleUtil.WriteLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql));
+                    ConsoleUtil.WriteStdLine("",StdLine.slResponse);
+                    ConsoleUtil.WriteStdLine(string.Format("Enter (Y) to use the following JQL?\r\n***** {0}", jql),StdLine.slResponse);
                     var keys = Console.ReadKey(true);
                     if (keys.Key == ConsoleKey.Y)
                     {
                         MainClass.ShowJSON(jql);
-                        ConsoleUtil.WriteLine("");
-                        ConsoleUtil.WriteLine("Press any key to continue.");
-                        Console.ReadKey(true);
+                        ConsoleUtil.PressAnyKeyToContinue();
                     }
                 }
                 return true;
