@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Atlassian.Jira;
+using Spectre.Console;
 
 namespace JiraCon
 {
@@ -443,13 +444,34 @@ namespace JiraCon
                 if (issues.Count > 0)
                 {
                     ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slCode ,false);
-                    foreach (var issue in issues)
-                    {
-                        JIssue newIssue = new JIssue(issue);
-                        ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
-                        newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
-                        JIssues.Add(newIssue);
-                    }
+
+                    AnsiConsole.Progress()
+                        .Start(ctx => 
+                        {
+                            // Define tasks
+                            // var task1 = ctx.AddTask("[green]Reticulating splines[/]");
+                            var task1 = ctx.AddTask("[blue]loading change logs[/]");
+                            task1.MaxValue = issues.Count;
+
+                            foreach (var issue in issues)
+                            {
+                                JIssue newIssue = new JIssue(issue);
+                                // ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
+                                newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
+                                JIssues.Add(newIssue);
+                                task1.Increment(1);
+                            }
+                        });
+
+
+
+                    // foreach (var issue in issues)
+                    // {
+                    //     JIssue newIssue = new JIssue(issue);
+                    //     ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
+                    //     newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
+                    //     JIssues.Add(newIssue);
+                    // }
                 }
             }
             catch(Exception ex)
