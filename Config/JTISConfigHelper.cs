@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using JConsole.ConsoleHelpers.ConsoleTables;
 using static JiraCon.ConsoleUtil;
+using Spectre.Console;
 
 namespace JiraCon
 {
@@ -294,43 +295,29 @@ namespace JiraCon
             JTISConfig? chCfg = null; 
             if (msg==null || msg.Length == 0)
             {
-                msg = "ENTER CONFIG ID, OR '0' TO EXIT";
+                msg = "SELECT CONFIG ID";
             }
             ConsoleUtil.WriteStdLine("** JIRA CONFIGURATIONS **",StdLine.slOutputTitle ,true);
             var cfgNames = JTISConfigHelper.ConfigNameList;
-            for (int i = 0; i < cfgNames.Count; i ++)
-            {
-                ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slOutput);
-            }
-            int? cfgResp ;
-            if (JTISConfigHelper.config == null)
-            {
-                //cfgResp = ConsoleUtil.ReadConsoleLine<int>(true);
-                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,allowNull:true);                
-            }
-            else 
-            {
-                cfgResp = ConsoleUtil.GetConsoleInput<int>(msg,true);
-            }            
-            
-            if (cfgResp == 0 || cfgResp == null)
+            cfgNames.Add("00 | EXIT");
+            string[] choices = cfgNames.Select(x=>x.ToString()).ToArray();
+            string cfgResp = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title(msg)
+                    .PageSize(10)
+                    .MoreChoicesText("(Move up and down to reveal more choices)")
+                    .AddChoices(choices));
+
+            if (string.IsNullOrEmpty(cfgResp))
             {
                 ConsoleUtil.ByeByeForced();
             }
-
-            chCfg = JTISConfigHelper.GetConfigFromList(cfgResp.Value);
-            if (chCfg !=null )
+            chCfg = JTISConfigHelper.cfgList.SingleOrDefault(x=>x.ToString()==cfgResp);
+            if (chCfg == null)
             {
-                if (JTISConfigHelper.config != null)
-                {
-                    JTISConfigHelper.config = null;
-                }
-                return chCfg;
+                ConsoleUtil.ByeByeForced();
             }
-            else 
-            {
-                return null;
-            }
+            return chCfg;
 
         }
 

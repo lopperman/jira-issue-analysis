@@ -14,6 +14,7 @@
     <!-- <PackageReference Include="JsonFx" Version="2.0.1209.2802" /> -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Spectre.Console" Version="0.47.0" />
     <PackageReference Include="Terminal.Gui" Version="1.12.1" />
   </ItemGroup>
 

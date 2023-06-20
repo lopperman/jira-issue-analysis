@@ -120,6 +120,7 @@ namespace JiraCon
 
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
         public StatusType TrackType {get;set;}
+        
         [JsonIgnore]
         public JIssueChangeLog? ChangeLog {get;private set;}
 

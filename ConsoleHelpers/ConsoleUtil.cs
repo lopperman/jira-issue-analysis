@@ -5,6 +5,7 @@ using System.Collections;
 using System.Runtime.ExceptionServices;
 using System;
 using System.Text;
+using Spectre.Console;
 
 
 // GOOD COLOR COMBINATIONS
@@ -222,49 +223,51 @@ namespace JiraCon
             }
             return ret;
         }
-        public static T GetConsoleInput<T>(string? message = null, bool requireConfirmation = false, bool allowNull = false, bool clearScreen = false) where T:IConvertible
+        public static T GetConsoleInput<T>(string? message = null, bool requireConfirmation = false, bool allowNull = false, bool clearScreen = false, T defaultValue = default(T)) where T:IConvertible
         {
             if (clearScreen)
             {
                 Console.Clear();
             }
-            if (message!=null && message.Length > 0)
-            {
-                WriteStdLine(message,StdLine.slResponse);
-            }
-            Console.ResetColor();
-            var rslt = Console.ReadLine();
-            bool isError = false;
-            var ret = ConvertString<T>(rslt, out isError);
-            if (isError)
-            {
-                WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", rslt),StdLine.slResponse);
-                return GetConsoleInput<T>(requireConfirmation:requireConfirmation,allowNull:allowNull);
-            }
-            if (allowNull == false && (ret == null || ret.ToString().Length == 0))
-            {
-                return GetConsoleInput<T>(message,requireConfirmation,allowNull,clearScreen);
-            }
-            
-            // if (ret.Cast<T> == null)
+            return AnsiConsole.Ask<T>(message,defaultValue);
+
+            // if (message!=null && message.Length > 0)
             // {
-            //     WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", ret),StdLine.slResponse);
+            //     WriteStdLine(message,StdLine.slResponse);
+            // }
+            // Console.ResetColor();
+            // var rslt = Console.ReadLine();
+            // bool isError = false;
+            // var ret = ConvertString<T>(rslt, out isError);
+            // if (isError)
+            // {
+            //     WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", rslt),StdLine.slResponse);
             //     return GetConsoleInput<T>(requireConfirmation:requireConfirmation,allowNull:allowNull);
             // }
-            if (requireConfirmation)
-            {
-                WriteStdLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdLine.slResponse);
-                var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.X)
-                {
-                    ConsoleUtil.ByeByeForced();
-                }
-                if (key.Key != ConsoleKey.Y)
-                {
-                    return GetConsoleInput<T>(message);
-                }
-            }
-            return (T)Convert.ChangeType(ret,typeof(T));
+            // if (allowNull == false && (ret == null || ret.ToString().Length == 0))
+            // {
+            //     return GetConsoleInput<T>(message,requireConfirmation,allowNull,clearScreen);
+            // }
+            
+            // // if (ret.Cast<T> == null)
+            // // {
+            // //     WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", ret),StdLine.slResponse);
+            // //     return GetConsoleInput<T>(requireConfirmation:requireConfirmation,allowNull:allowNull);
+            // // }
+            // if (requireConfirmation)
+            // {
+            //     WriteStdLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdLine.slResponse);
+            //     var key = Console.ReadKey(true);
+            //     if (key.Key == ConsoleKey.X)
+            //     {
+            //         ConsoleUtil.ByeByeForced();
+            //     }
+            //     if (key.Key != ConsoleKey.Y)
+            //     {
+            //         return GetConsoleInput<T>(message);
+            //     }
+            // }
+            // return (T)Convert.ChangeType(ret,typeof(T));
             // try 
             // {
             //     T retVal = (T)Convert.ChangeType(ret,typeof(T));
@@ -279,7 +282,9 @@ namespace JiraCon
 
         public static T GetConsoleInput<T>(string message) where T:IConvertible 
         {
-            return GetConsoleInput<T>(message,true);
+            return AnsiConsole.Ask<T>(message);
+
+            //return GetConsoleInput<T>(message,true);
             // WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
             // var ret = Console.ReadLine();            
             // if (string.IsNullOrWhiteSpace(ret))

@@ -184,6 +184,11 @@ namespace JiraCon
         //     Dispose(disposing: false);
         // }
 
+        public override string ToString()
+        {
+            return string.Format("{0:00} | {1}",this.configId,this.configName);
+        }
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

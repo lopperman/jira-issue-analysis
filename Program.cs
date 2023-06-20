@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlTypes;
+using System.Text.Json;
 using Atlassian.Jira;
 using Newtonsoft.Json;
 
@@ -337,12 +338,10 @@ namespace JiraCon
         {
             try
             {
-                ConsoleUtil.WriteStdLine("",StdLine.slCode);
                 ConsoleUtil.WriteStdLine("getting issues from JQL:", StdLine.slCode);
                 ConsoleUtil.WriteStdLine(string.Format("{0}", jql),StdLine.slCode);
                 ConsoleUtil.WriteStdLine("",StdLine.slCode);
                 ConsoleUtil.WriteStdLine("Querying JIRA ...",StdLine.slCode);
-                ConsoleUtil.WriteStdLine("",StdLine.slCode);
 
                 var issues = JiraUtil.JiraRepo.GetIssues(jql);
 
@@ -373,6 +372,9 @@ namespace JiraCon
 
                 using (StreamWriter w = new StreamWriter(Path.Combine(extractFolder,jsonFile)))
                 {
+                    // var jOpt = new JsonSerializerOptions();
+                    // jOpt.MaxDepth = 2;
+                    // jOpt.WriteIndented = true;
                     foreach (var jiss in jissues)
                     {
                         w.WriteLine(JsonConvert.SerializeObject(jiss, Formatting.Indented));

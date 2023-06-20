@@ -70,7 +70,6 @@ namespace JiraCon
                         }
                     }
                 }
-
                 return true;
             }
             else if (key == ConsoleKey.F)

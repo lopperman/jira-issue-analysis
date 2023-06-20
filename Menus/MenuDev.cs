@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
-
-
+using Spectre.Console;
 
 namespace JiraCon
 {
@@ -113,24 +112,68 @@ namespace JiraCon
 
         private void DevTest2()
         {
-            ConsoleUtil.WriteStdLine("READ LINE",StdLine.slInfo);
-            var input = Console.ReadLine();
-            ConsoleUtil.WriteStdLine("WRITE AFTER READ LINE",StdLine.slInfo);
-            ConsoleUtil.WriteStdLine(string.Format("You entered: '{0}'",input),StdLine.slInfo);
+            var resp = AnsiConsole.Confirm("Save file to csv?",defaultValue:false);
+            Console.WriteLine("Response: " + resp);
+            var age = AnsiConsole.Ask<int>("how old are you?",21);
+
+            
+
+            var favorites = AnsiConsole.Prompt(
+                new MultiSelectionPrompt<string>()
+                    .PageSize(10)
+                    .Title("What are your [green]favorite fruits[/]?")
+                    .MoreChoicesText("[blue](Move up and down to reveal more fruits)[/]")
+                    .InstructionsText("[blue](Press [blue][/] to toggle a fruit, [green][/] to accept)[/]")
+                    .AddChoiceGroup("Berries", new[]
+                    {
+                        "Blackcurrant", "Blueberry", "Cloudberry",
+                        "Elderberry", "Honeyberry", "Mulberry"
+                    })
+                    .AddChoices(new[]
+                    {
+                        "Apple", "Apricot", "Avocado", "Banana",
+                        "Cherry", "Cocunut", "Date", "Dragonfruit", "Durian",
+                        "Egg plant",  "Fig", "Grape", "Guava",
+                        "Jackfruit", "Jambul", "Kiwano", "Kiwifruit", "Lime", "Lylo",
+                        "Lychee", "Melon", "Nectarine", "Orange", "Olive"
+                    }));
+
+            var fruit = favorites.Count == 1 ? favorites[0] : null;
+            if (string.IsNullOrWhiteSpace(fruit))
+            {
+                fruit = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Ok, but if you could only choose [green]one[/]?")
+                        .MoreChoicesText("[blue](Move up and down to reveal more fruits)[/]")
+                        .AddChoices(favorites));
+            }
+
+            AnsiConsole.MarkupLine("You selected: [yellow]{0}[/]", fruit);
+
+            // Ask for the user's favorite fruit
+            fruit = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("What's your [green]favorite fruit[/]?")
+                    .PageSize(10)
+                    .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
+                    .AddChoices(new[] {
+                        "Apple", "Apricot", "Avocado", 
+                        "Banana", "Blackcurrant", "Blueberry",
+                        "Cherry", "Cloudberry", "Cocunut",
+                    }));
+
+            // Echo the fruit back to the terminal
+            AnsiConsole.WriteLine($"I agree. {fruit} is tasty!");
+
+
+
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
         private void DevTest1()
         {
-            var tmpIssue = JiraUtil.JiraRepo.GetIssue("WWT-292"); 
-            if (tmpIssue.Labels != null) 
-            {
-                Console.WriteLine(string.Format("Labels Count {0}",tmpIssue.Labels.Count ));
-            }
-            var labels = JiraUtil.JiraRepo.GetIssueLabelsAsync("WWT-292").GetAwaiter().GetResult();
-                Console.WriteLine(string.Format("Labels Count {0}",tmpIssue.Labels.Count ));
 
-            //return GetSubTasksAsync(issue).GetAwaiter().GetResult().ToList();
-
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
     }
