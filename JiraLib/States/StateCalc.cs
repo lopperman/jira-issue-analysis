@@ -34,6 +34,22 @@ namespace  JiraCon
 
         }
 
+        public StatusType ActivityType
+        {
+            get
+            {
+                return LogItem.TrackType;                 
+            }
+        }
+
+        public ChangeLogTypeEnum ChangeLogType
+        {
+            get
+            {
+                return LogItem.ChangeLogType;
+            }
+        }
+
         public DateTime CreatedDt {get;set;}
         public string FromValue
         {

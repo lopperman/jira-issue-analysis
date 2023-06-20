@@ -36,12 +36,74 @@ namespace JiraCon
             Initialize();
         }
 
+        [JsonIgnore]
+        public IssueChangeLogItem? Base
+        {
+            get
+            {
+                return _item;
+            }
+        }
+
+        private DateTime? tempEndDt {get;set;}
         public string FieldName { get; set; }
         public string FieldType { get; set; }
         public string? FromId { get; set; }
         public string? FromValue { get; set; }
         public string ToId { get; set; }
         public string ToValue { get; set; }
+        public DateTime StartDt 
+        {
+            get
+            {
+                return ChangeLog.CreatedDate;
+            }
+        }
+        public DateTime EndDt 
+        {
+            get
+            {
+                if (ChangeLog.EndDate != null)
+                {
+                    return ChangeLog.EndDate.Value;
+                }
+                else 
+                {
+                    if (tempEndDt == null)
+                    {
+                        tempEndDt = DateTime.Now;
+                    }
+                    return tempEndDt.Value;
+                }
+            }
+        }
+        
+        public TimeSpan TotalCalendarTime
+        {
+            get
+            {
+                return EndDt.Subtract(StartDt);
+            }
+        }
+        public TimeSpan TotalBusinessTime
+        {
+            get
+            {
+                var ts = TotalCalendarTime;
+                var tStart = StartDt.Date;
+                do
+                {
+                    if (tStart.DayOfWeek == DayOfWeek.Saturday || tStart.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        ts = ts.Add(new TimeSpan(-24,0,0));
+                    }
+                    tStart = tStart.AddDays(1);
+                } while (tStart <= EndDt.Date);
+                return ts;
+
+            }
+        }        
+
         public ChangeLogTypeEnum ChangeLogType {get;set;} 
         public StatusType TrackType {get;set;}
         [JsonIgnore]

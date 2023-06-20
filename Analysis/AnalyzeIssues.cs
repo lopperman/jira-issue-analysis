@@ -1,3 +1,5 @@
+using System.Net.NetworkInformation;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
@@ -127,6 +129,21 @@ namespace JiraCon
                 }
                 CalculateEndDates();
             }
+            foreach (var ic in JCalcs)
+            {
+                PopulateBlockers(ic);
+                if (ic.Blockers.Count > 0)
+                {
+                    foreach (var b in ic.Blockers)
+                    {
+                        ConsoleUtil.WriteStdLine(string.Format("Added blocker for {0}: Start {1}, End {2}, Field {3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName),StdLine.slCode ,false);
+                    }
+                    // ConsoleUtil.WriteStdLine("PRESS ANY KEY",StdLine.slResponse  ,false);
+                    // Console.ReadKey(true);
+                }
+            }
+
+
             foreach (IssueCalcs issCalcs in JCalcs)
             {
                 foreach (var ln in issCalcs.StateCalcStringList())
@@ -168,6 +185,99 @@ namespace JiraCon
             }
 
 
+        }
+
+        private bool FromIdNull(JIssueChangeLogItem item)
+        {
+            if (item.Base.FromId == null || item.Base.FromId.Length ==0)
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool ToIdNull(JIssueChangeLogItem item)
+        {
+            if (item.Base.ToId == null || item.Base.ToId.Length ==0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void PopulateBlockers(IssueCalcs ic)
+        {
+            //identify all change log that 'START' a blocker
+            List<Blocker> tmpStartingBlockers = new List<Blocker>();
+            List<Blocker> tmpEndingBlockers = new List<Blocker>();
+
+            foreach (var cl in ic.IssueObj.ChangeLogs)
+            {
+                foreach (var cli in cl.Items)
+                {
+                    // ConsoleUtil.WriteStdLine(string.Format("Key: {0}, FieldName: {7}, Start:{1}, End: {2}, FromId: {3}, FromValue:{4}, ToId: {5}, ToValue: {6}",cl.JIss.Key,cli.StartDt,cli.EndDt,cli.FromId,cli.FromValue,cli.ToId,cli.ToValue, cli.FieldName),StdLine.slCode,false);
+                    if (cli.FieldName.ToLower()=="flagged"   )
+                    {
+                        if (cli.ToValue.ToLower()=="impediment")
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, cli.ChangeLogType, cli.FieldName );
+                            tmpStartingBlockers.Add(newBlocker);
+                        }      
+                        else if (cli.FromValue.ToLower()=="impediment")
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt,cli.ChangeLogType,cli.FieldName,cli.StartDt);
+                            tmpEndingBlockers.Add(newBlocker);
+                        }                                          
+                    }
+                    else if (cli.FieldName.ToLower()=="priority")
+                    {
+                        if (cli.ToValue.ToLower() == "blocked")                        
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            tmpStartingBlockers.Add(newBlocker);
+                        }                        
+                        if (cli.FromValue.ToLower() == "blocked")                        
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            tmpEndingBlockers.Add(newBlocker);
+                        }                        
+
+                    }
+                }
+            }
+            if (tmpStartingBlockers.Count > 0)
+            {
+                tmpStartingBlockers = tmpStartingBlockers.OrderBy(x=>x.StartDt).ToList();
+                foreach (var blocker in tmpStartingBlockers)
+                {
+                    if (tmpEndingBlockers.Count > 0)
+                    {
+                        foreach (var endBlocker in tmpEndingBlockers)
+                        {
+                            if (endBlocker.BlockerFieldName == blocker.BlockerFieldName && endBlocker.StartDt > blocker.StartDt)
+                            {
+                                if (blocker.EndDt == null)
+                                {
+                                    blocker.EndDt = endBlocker.StartDt;
+                                }
+                                else 
+                                {
+                                    if (endBlocker.StartDt < blocker.EndDt.Value)
+                                    {
+                                        blocker.EndDt = endBlocker.StartDt;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //slap on 'now' if blocker does not have an end dt 
+                    if (blocker.EndDt == null)
+                    {
+                        blocker.EndDt = DateTime.Now;
+                    }                                           
+                    ic.Blockers.Add(blocker);
+                }
+
+            }            
         }
 
         private void CalculateEndDates()

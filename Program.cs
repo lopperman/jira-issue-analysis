@@ -368,7 +368,7 @@ namespace JiraCon
                 }
 
                 DateTime now = DateTime.Now;
-                string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.txt", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+                string fileNameSuffix = string.Format("_{0:0000}{1}{2:00}_{3}.json", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
                 string jsonFile = String.Format("JiraCon_JSON_{0}", fileNameSuffix);
 
                 ConsoleUtil.WriteLine(string.Format("saving JSON to {0}", Path.Combine(extractFolder,jsonFile)));

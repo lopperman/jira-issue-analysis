@@ -20,6 +20,18 @@ namespace JiraCon
             return Enumerable.Range(0, 1 + (dtmFinishDate - dtmCurrent).Days).Count(intDay => workDay(dtmCurrent.AddDays(intDay)));
         }
 
+        public static double BusinessDays(this DateTime first, DateTime other)
+        {
+            Func<DateTime, bool> aDay = checkDate => (checkDate.DayOfWeek == DayOfWeek.Sunday || checkDate.DayOfWeek == DayOfWeek.Saturday);
+            var weekendCount = Enumerable.Range(0,(first-other).Days).Count(intDay=>aDay(first.AddDays(intDay)));
+            return (first-other).Days - weekendCount;
+            // Func<DateTime, bool> workDay = first => 
+            // (
+            //     first.DayOfWeek == DayOfWeek.Saturday || first.DayOfWeek == DayOfWeek.Sunday
+            // );
+            // return Enumerable.Range(0, 1 + (first-other).Days).Count(intDay=> workDay(first.AddDays(intDay)));
+        }
+
         public static void testDT()
         {
             DateTime dt = DateTime.Now;

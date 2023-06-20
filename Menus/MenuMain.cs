@@ -103,30 +103,6 @@ namespace JiraCon
                 }
                 return true;
             }
-            // else if (key == ConsoleKey.W)
-            // {
-            //     string jql = MainClass.GetJQL();
-            //     int startHour = 7;
-            //     int endHour = 18;
-            //     if (jql != null)
-            //     {
-            //         var dic = MainClass.GetBusinessHours();
-            //         startHour = dic["start"];
-            //         endHour = dic["end"];
-
-            //         MainClass.CreateWorkMetricsFile(jql,startHour,endHour);
-
-            //         ConsoleUtil.PressAnyKeyToContinue();
-            //     }
-            //     return true;
-
-            // }
-            // else if (key == ConsoleKey.E)
-            // {
-            //     var epicAnalysis = new EpicAnalysis();
-            //     epicAnalysis.Analyze();
-            //     return true;
-            // }
             else if (key == ConsoleKey.J)
             {
                 ConsoleUtil.WriteLine("");
