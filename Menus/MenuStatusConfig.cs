@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using System.Linq;
 using JConsole.ConsoleHelpers.ConsoleTables;
+using Spectre.Console;
 
 namespace JiraCon
 {
@@ -53,11 +54,7 @@ namespace JiraCon
                 JTISConfigHelper.UpdateDefaultStatusConfigs();
 
                 WriteJiraStatuses();
-
-                ConsoleUtil.WriteStdLine(" -- PRESS ANY KEY -- ",StdLine.slResponse,false);
-                Console.ReadKey(true);
-
-
+                ConsoleUtil.PressAnyKeyToContinue();
                 return true;                                
             }
             else if (key == ConsoleKey.E)
@@ -137,7 +134,11 @@ namespace JiraCon
 
         private void WriteJiraStatuses(string? searchTerm = null)
         {
-            var table = new ConsoleTable("JiraId","Name","LocalState","DefaultState","UsedIn: " + ActiveConfig.defaultProject,"Override");
+
+            var usedInCol = string.Format("UsedIn: {0}",ActiveConfig.defaultProject);
+            Table table = new Table();
+            table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
+
             foreach (var jStatus in ActiveConfig.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
             {
                 bool includeStatus = false;
@@ -156,20 +157,56 @@ namespace JiraCon
                 {
                     JiraStatus  defStat = ActiveConfig.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
                     string usedIn = string.Empty;   
-                    string overridden = string.Empty;                 
+                    string overridden = string.Empty;      
+                    string locState = Enum.GetName(typeof(StatusType),jStatus.Type);     
                     if (jStatus.DefaultInUse)
                     {
                         usedIn = "YES";
                     }
                     if (jStatus.Type != defStat.Type)
                     {
-                        overridden = "***";
-                    }                    
-                    table.AddRow(jStatus.StatusId, jStatus.StatusName,Enum.GetName(typeof(StatusType),jStatus.Type),Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden);
+                        overridden = "[red on yellow]***[/]";
+                        locState = string.Format("[default on yellow]{0}[/]",locState);
+                    }
+                    table.AddRow(new string[]{jStatus.StatusId.ToString(), jStatus.StatusName,locState,Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden});
                 }
             }
-            table.Options.NumberAlignment = Alignment.Right;                
-            table.Write();                
+            AnsiConsole.Write(table);
+
+
+            // var table = new ConsoleTable("JiraId","Name","LocalState","DefaultState","UsedIn: " + ActiveConfig.defaultProject,"Override");
+            // foreach (var jStatus in ActiveConfig.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
+            // {
+            //     bool includeStatus = false;
+            //     if (searchTerm == null || searchTerm.Length == 0)
+            //     {
+            //         includeStatus = true;
+            //     }
+            //     else 
+            //     {
+            //         if (jStatus.StatusName.ToLower().Contains(searchTerm.ToLower()))
+            //         {
+            //             includeStatus = true;
+            //         }
+            //     }
+            //     if (includeStatus)
+            //     {
+            //         JiraStatus  defStat = ActiveConfig.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
+            //         string usedIn = string.Empty;   
+            //         string overridden = string.Empty;                 
+            //         if (jStatus.DefaultInUse)
+            //         {
+            //             usedIn = "YES";
+            //         }
+            //         if (jStatus.Type != defStat.Type)
+            //         {
+            //             overridden = "***";
+            //         }                    
+            //         table.AddRow(jStatus.StatusId, jStatus.StatusName,Enum.GetName(typeof(StatusType),jStatus.Type),Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden);
+            //     }
+            // }
+            // table.Options.NumberAlignment = Alignment.Right;                
+            // table.Write();                
 
         }
     }

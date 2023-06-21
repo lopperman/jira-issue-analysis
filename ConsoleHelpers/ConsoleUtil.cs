@@ -1,4 +1,5 @@
-﻿using System.Data.SqlTypes;
+﻿using System.Data.Common;
+using System.Data.SqlTypes;
 using System.Runtime.CompilerServices;
 using System.Reflection.Metadata;
 using System.Collections;
@@ -6,6 +7,7 @@ using System.Runtime.ExceptionServices;
 using System;
 using System.Text;
 using Spectre.Console;
+
 
 
 // GOOD COLOR COMBINATIONS
@@ -41,8 +43,35 @@ namespace JiraCon
         slCode, 
         slInfo
     }
+
     public static class ConsoleUtil
     {
+        public static Style StdStyle(StdLine input)
+        {
+            switch(input)
+            {
+                case StdLine.slTitle:
+                    return new Style(Color.White,Color.Grey19,Decoration.Bold);
+                case StdLine.slMenuName:
+                    return new Style(Color.Blue3,Color.SteelBlue1_1 ,Decoration.Italic);
+                case StdLine.slMenuDetail:
+                    return new Style(Color.Blue3,Color.LightYellow3 );
+                case StdLine.slResponse:
+                    return new Style(Color.White,Color.DarkBlue,Decoration.Bold);
+                case StdLine.slError:
+                    return new Style(Color.Red1,Color.LightCyan1,Decoration.Bold);
+                case StdLine.slOutput:
+                    return new Style(Color.Blue3,Color.White);
+                case StdLine.slOutputTitle:
+                    return new Style(Color.Blue3,Color.Grey89,Decoration.Bold & Decoration.Underline);
+                case StdLine.slCode:
+                    return new Style(Color.Black,Color.Grey82);
+                case StdLine.slInfo:
+                    return new Style(Color.Black,Color.Yellow2);
+                default:
+                    return new Style(Color.Blue3,Color.White);
+            }            
+        }
         public static ConsoleColor StdForecolor(StdLine lineType )
         {
             switch(lineType)
@@ -140,9 +169,11 @@ namespace JiraCon
 
         public static void PressAnyKeyToContinue()
         {
-            WriteStdLine("       --- --- --- ---       ",StdLine.slResponse );
-            WriteStdLine("  PRESS ANY KEY TO CONTINUE  ",StdLine.slResponse);
-            var key = Console.ReadKey(true);
+            Markup l1 = new Markup("  --- --- --- --- --- ---  ",new Style(Color.Default,Color.Default));
+            Markup l2 = new Markup(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
+            AnsiConsole.Write(new Rows(l1,l2));
+
+            Console.ReadKey(true);
         }
 
         public static void WriteStdLine(string text, ConsoleColor fontColor, ConsoleColor backColor,bool clearScreen = false)
@@ -229,7 +260,13 @@ namespace JiraCon
             {
                 Console.Clear();
             }
-            return AnsiConsole.Ask<T>(message,defaultValue);
+            message = string.Format("[bold white on darkblue]{0}[/]",message);
+            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
+            return AnsiConsole.Ask<T>(message);
+
+            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
+            // return AnsiConsole.Ask<T>(mk.ToString());
+
 
             // if (message!=null && message.Length > 0)
             // {
@@ -282,8 +319,10 @@ namespace JiraCon
 
         public static T GetConsoleInput<T>(string message) where T:IConvertible 
         {
+            message = string.Format("[bold white on darkblue]{0}[/]",message);
+            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
             return AnsiConsole.Ask<T>(message);
-
+            
             //return GetConsoleInput<T>(message,true);
             // WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
             // var ret = Console.ReadLine();            

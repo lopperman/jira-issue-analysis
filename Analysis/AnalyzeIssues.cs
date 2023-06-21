@@ -446,32 +446,26 @@ namespace JiraCon
                     ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slCode ,false);
 
                     AnsiConsole.Progress()
+                        .Columns(new ProgressColumn[]
+                        {
+                            new TaskDescriptionColumn(), 
+                            new PercentageColumn(),
+                            new ElapsedTimeColumn(), 
+                            new SpinnerColumn()
+                        })
                         .Start(ctx => 
                         {
-                            // Define tasks
-                            // var task1 = ctx.AddTask("[green]Reticulating splines[/]");
                             var task1 = ctx.AddTask("[blue]loading change logs[/]");
                             task1.MaxValue = issues.Count;
-
                             foreach (var issue in issues)
                             {
                                 JIssue newIssue = new JIssue(issue);
-                                // ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
                                 newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
                                 JIssues.Add(newIssue);
+
                                 task1.Increment(1);
                             }
                         });
-
-
-
-                    // foreach (var issue in issues)
-                    // {
-                    //     JIssue newIssue = new JIssue(issue);
-                    //     ConsoleUtil.WriteStdLine(String.Format("Building Change Logs for {0} {1}",newIssue.Key,newIssue.Summary),StdLine.slCode ,false);
-                    //     newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
-                    //     JIssues.Add(newIssue);
-                    // }
                 }
             }
             catch(Exception ex)

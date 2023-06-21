@@ -11,6 +11,7 @@
           "Atlassian.SDK": "13.0.0",
           "Microsoft.Extensions.Configuration.Json": "7.0.0",
           "Newtonsoft.Json": "13.0.3",
+          "Spectre.Console": "0.47.0",
           "Terminal.Gui": "1.12.1"
         },
         "runtime": {
@@ -157,6 +158,17 @@
           }
         }
       },
+      "Spectre.Console/0.47.0": {
+        "dependencies": {
+          "System.Memory": "4.5.5"
+        },
+        "runtime": {
+          "lib/net7.0/Spectre.Console.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.47.0.0"
+          }
+        }
+      },
       "System.CodeDom/7.0.0": {
         "runtime": {
           "lib/net7.0/System.CodeDom.dll": {
@@ -184,6 +196,7 @@
           }
         }
       },
+      "System.Memory/4.5.5": {},
       "System.Text.Encodings.Web/7.0.0": {},
       "System.Text.Json/7.0.0": {
         "dependencies": {
@@ -314,6 +327,13 @@
       "path": "restsharp/106.12.0",
       "hashPath": "restsharp.106.12.0.nupkg.sha512"
     },
+    "Spectre.Console/0.47.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wz8mszcZr0cSOo8GyoG9e2DFW0SkMT8/n78Q/lIXX7EbCtHNXOoOKWpJ9Str+rCYtmQOGGyDutZzubrUHK/XkA==",
+      "path": "spectre.console/0.47.0",
+      "hashPath": "spectre.console.0.47.0.nupkg.sha512"
+    },
     "System.CodeDom/7.0.0": {
       "type": "package",
       "serviceable": true,
@@ -327,6 +347,13 @@
       "sha512": "sha512-pHg4hGr/dn5wYdJ+kolMY4gkCIzFDRj/HFqoPq7e5h7OGii6BCBmS2/+ysC2SSoB5WvIDS29DMM5DowxxSY/oA==",
       "path": "system.management/7.0.1",
       "hashPath": "system.management.7.0.1.nupkg.sha512"
+    },
+    "System.Memory/4.5.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw==",
+      "path": "system.memory/4.5.5",
+      "hashPath": "system.memory.4.5.5.nupkg.sha512"
     },
     "System.Text.Encodings.Web/7.0.0": {
       "type": "package",

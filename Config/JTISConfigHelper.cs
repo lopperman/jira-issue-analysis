@@ -230,29 +230,62 @@ namespace JiraCon
 
         public static void UpdateDefaultStatusConfigs(bool clearLocal = false)
         {
-            List<JiraStatus> statusAll = GetJiraStatuses(false);
-            List<JiraStatus> statusProj = GetJiraStatuses(true);
+            List<JiraStatus>? statusAll ; 
+            List<JiraStatus>? statusProj;
 
-            for (int i = 0; i < statusAll.Count; i ++)
-            {
-                if (statusProj.Exists(x=>x.StatusId == statusAll[i].StatusId))
+            AnsiConsole.Progress()
+                .Columns(new ProgressColumn[]
                 {
-                    statusAll[i].DefaultInUse = true;
-                }
-            }
+                    new TaskDescriptionColumn(), 
+                    new PercentageColumn(),
+                    new ElapsedTimeColumn(), 
+                    new SpinnerColumn()
+                })
+                .Start(ctx => 
+                {
+                    var task1 = ctx.AddTask("[blue on white]Get Jira Statuses[/]");
+                    var task2 = ctx.AddTask("[blue on white]Check Default Project Statuses[/]");        
+                    var task3 = ctx.AddTask("[blue on white]Check Missing Status Configs[/]");        
 
-            config.DefaultStatusConfigs.Clear();
-            config.DefaultStatusConfigs = statusAll;
-            if (clearLocal)
-            {
-                config.StatusConfigs.Clear();
-                config.StatusConfigs = statusAll;
-            }
-            else 
-            {
-                FillMissingStatusConfigs();
-            }
-            JTISConfigHelper.SaveConfigList();
+
+                    task1.MaxValue = 2;
+                    statusAll = GetJiraStatuses(false);
+                    task1.Increment(1);
+                    statusProj = GetJiraStatuses(true);
+                    task1.Increment(1);
+
+                    task2.MaxValue = statusAll.Count;
+                    for (int i = 0; i < statusAll.Count; i ++)
+                    {
+                        if (statusProj.Exists(x=>x.StatusId == statusAll[i].StatusId))
+                        {
+                            statusAll[i].DefaultInUse = true;
+                        }
+                        task2.Increment(1);                        
+                    }
+
+                    task3.MaxValue = 3;
+
+                    config.DefaultStatusConfigs.Clear();
+                    config.DefaultStatusConfigs = statusAll;
+                    task3.Increment(1);
+                    if (clearLocal)
+                    {
+                        config.StatusConfigs.Clear();
+                        config.StatusConfigs = statusAll;
+                        task3.Increment(1);
+                    }
+                    else 
+                    {
+                        FillMissingStatusConfigs();
+                        task3.Increment(1);
+                    }
+                    JTISConfigHelper.SaveConfigList();
+                    task3.Increment(1);
+                });
+
+
+
         }
 
         private static void FillMissingStatusConfigs()
