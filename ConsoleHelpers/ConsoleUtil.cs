@@ -1,32 +1,6 @@
-﻿using System.Data.Common;
-using System.Data.SqlTypes;
-using System.Runtime.CompilerServices;
-using System.Reflection.Metadata;
-using System.Collections;
-using System.Runtime.ExceptionServices;
-using System;
-using System.Text;
+﻿using System.Net.Mime;
+using Microsoft.Extensions.Configuration;
 using Spectre.Console;
-
-
-
-// GOOD COLOR COMBINATIONS
-// ** BLACK BACKGROUND ** DarkGreen, DarkCyan (bluish), DarkMagenta, Green, Cyan (bluish), Red, Magenta, Yellow, White
-// ** DARKBLUE BACKGROUND ** Gray, Green, Cyan, Red, Magenta, Yellow, White
-// ** DARKGREEN BACKGROUND ** Black, DarkBlue, Gray, Blue, Yellow, White
-// ** DARKCYAN BACKGROUND ** Black, DarkBlue, GRay, Blue, Yellow, White
-// ** DARKRED BACKGROUND ** Black, Gray, Cyan, Red, Magenta, Yellow, White
-// ** DARKMAGENTA BACKGROUND ** Black, DarkBlue, Gray, Yellow, White
-// ** DARKYELLOW BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
-// ** GRAY BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkGray, Blue, Red
-// ** DARKGRAY BACKGROUND ** Gray, Green, Cyan, Red, Magenta, Yellow, White
-// ** BLUE BACKGROUND ** Gray, Cyan, Red, Magenta, Yellow, White
-// ** GREEN BACKGROUND ** Black, DarkBlue, DarkRed, DarkMagenta, Blue, Red, Yellow, White
-// ** CYAN BACKGROUND ** Black, DarkBlue, DarkRed, DarkMagenta, DarkGray, Blue, Red, Magenta
-// ** RED BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
-// ** MAGENTA BACKGROUND ** Black, DarkBlue, Blue, Yellow, White
-// ** YELLOW BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkGray, Blue, Red, Magenta
-// ** WHITE BACKGROUND ** Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, DarkGray, Blue, Red, Magenta
 
 
 namespace JiraCon
@@ -46,6 +20,17 @@ namespace JiraCon
 
     public static class ConsoleUtil
     {
+
+        // public static string TextMarkup(string txt, Style style, bool performEscape = true)
+        // {
+        //     if (performEscape)
+        //     {txt = Markup.Escape(txt);}
+        //     else 
+        //     {txt = Markup.Remove(txt);}
+            
+            
+        // }
+
         public static Style StdStyle(StdLine input)
         {
             switch(input)
@@ -136,37 +121,6 @@ namespace JiraCon
             }
         }
 
-        // public static T? ReadConsoleLine<T>(bool allowNone = false) where T:IConvertible
-        // {
-        //     var input = Console.ReadLine();
-        //     T? ret;
-        //     try
-        //     {
-        //         if (input == null || input.Length==0)
-        //         {
-        //             if (allowNone==false)
-        //             {
-        //                 return ReadConsoleLine<T>(allowNone);
-        //             }
-        //             else 
-        //             {
-        //                 return default(T);
-        //             }
-        //         }                
-        //         ret = (T)Convert.ChangeType(input,typeof(T));
-        //     }
-        //     catch 
-        //     {
-        //         WriteStdLine(string.Format("'{0}' is not a valid response - try again"),StdLine.slError);
-        //         return ReadConsoleLine<T>(allowNone);
-        //     }
-
-
-        //     ret = (T)Convert.ChangeType(input,typeof(T));
-        //     return ret;
-
-        // }
-
         public static void PressAnyKeyToContinue()
         {
             Markup l1 = new Markup("  --- --- --- --- --- ---  ",new Style(Color.Default,Color.Default));
@@ -190,18 +144,65 @@ namespace JiraCon
             Console.WriteLine();
 
         }
+
+        public static void WriteMarkup(string text,Style style, bool clearScreen = false)
+        {
+            try 
+            {
+                if (clearScreen){Console.Clear();}
+                if (string.IsNullOrEmpty(text))
+                {
+                    Console.Write("");
+                }
+                else 
+                {
+                    Markup m = new Markup(text,style);
+                    AnsiConsole.Write(new Rows(m));
+                }
+            }
+            catch 
+            {
+                ConsoleUtil.WriteError($"Error Writing ConsoleUtil.WriteMarkup ({text})");
+            }
+        }
+
+        public static void WriteAppTitle()
+        {
+            AnsiConsole.Clear();
+            // var cfgMgr = new ConfigurationManager();
+            // cfgMgr.AddConfiguration(new Confi)
+            // var appTitle = Config
+            var title = "[bold]JIRA Time In Status[/][dim] by Paul Brower @ [link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
+            var panel = new Panel(title);
+            panel.Border = BoxBorder.Rounded;
+            panel.HeaderAlignment(Justify.Center );
+            panel.BorderColor(Color.Grey15);
+            AnsiConsole.Write(panel);
+
+        }
+        public static void WriteMarkupLine(string text,Style style, bool clearScreen = false)
+        {
+            if (!string.IsNullOrEmpty(text))
+            {
+                WriteMarkup(text,style,clearScreen);
+            }
+            Console.WriteLine();
+        }
         public static void WriteStdLine(string text, StdLine msgType, bool clearScreen = false)
         {
             if (msgType == StdLine.slCode)
             {
-                text = string.Format("  ||  {0}",text);
+                text = string.Format("  {0}",text);
             }
-            WriteStdLine(text,StdForecolor(msgType),StdBackcolor(msgType),clearScreen);
+            if (clearScreen){Console.Clear();}
+            AnsiConsole.MarkupLine(text,StdStyle(msgType));
+            // WriteStdLine(text,StdForecolor(msgType),StdBackcolor(msgType),clearScreen);
         }
 
         public static void WriteError(string text, bool clearScreen = false, Exception? ex =  null)
         {
-            WriteStdLine(text,StdLine.slError);
+            if (clearScreen){Console.Clear();}
+            AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
             if (ex != null)
             {
                 WriteError(ex.Message);
@@ -210,28 +211,35 @@ namespace JiraCon
         }
         public static void WriteAppend(string text, StdLine lnType, bool endOfLine = false)
         {
-            WriteAppend(text,StdForecolor(lnType),StdBackcolor(lnType),endOfLine);
-        }
-
-
-        public static void WriteAppend(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor, bool endOfLine = false)
-        {
-
-            Console.ResetColor();
-            
-            Console.ForegroundColor = foregroundColor;
-            Console.BackgroundColor = backgroundColor;
-
             if (endOfLine)
             {
-                Console.Write(text);
-                ConsoleUtil.WriteStdLine("",foregroundColor,backgroundColor);
+                AnsiConsole.MarkupLine(text,StdStyle(lnType));
             }
             else 
             {
-                Console.Write(text);
+                AnsiConsole.Markup(text,StdStyle(lnType));
             }
         }
+
+
+        // public static void WriteAppend(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor, bool endOfLine = false)
+        // {
+
+        //     Console.ResetColor();
+            
+        //     Console.ForegroundColor = foregroundColor;
+        //     Console.BackgroundColor = backgroundColor;
+
+        //     if (endOfLine)
+        //     {
+        //         Console.Write(text);
+        //         ConsoleUtil.WriteStdLine("",foregroundColor,backgroundColor);
+        //     }
+        //     else 
+        //     {
+        //         Console.Write(text);
+        //     }
+        // }
         private static T? ConvertString<T>(string item, out bool isError) where T:IConvertible
         {
             T? ret = default(T);
@@ -356,7 +364,7 @@ namespace JiraCon
         public static bool ByeBye()
         {
             var lines = new ConsoleLines();
-            lines.AddConsoleLine("Press 'Y' to exit, otherwise press any key to continue",StdLine.slResponse);
+            lines.AddConsoleLine("Press 'Y' to exit, otherwise press any key to continue",ConsoleUtil.StdStyle(StdLine.slResponse));
             lines.WriteQueuedLines(false);
             if (Console.ReadKey(true).Key !=ConsoleKey.Y)
             {
@@ -364,7 +372,7 @@ namespace JiraCon
             }
             else 
             {
-                lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+                lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleUtil.StdStyle(StdLine.slResponse));
                 lines.WriteQueuedLines(true);
                 return true;
             }
@@ -373,7 +381,7 @@ namespace JiraCon
         public static void ByeByeForced()
         {
             var lines = new ConsoleLines();
-            lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleColor.DarkBlue, ConsoleColor.Yellow);
+            lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleUtil.StdStyle(StdLine.slResponse));
             lines.WriteQueuedLines(false);
             Environment.Exit(0);
         }        

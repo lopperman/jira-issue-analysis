@@ -1,5 +1,21 @@
+using System.Text.RegularExpressions;
 namespace JiraCon
 {
+
+    // public static class StringUtil
+    // {
+    //     public static string? CheckBrackets(this string? data)
+    //     {
+    //         if (data != null)
+    //         {
+    //             if (data.Contains("(empty)"))
+    //             {
+    //                 var cnt = Regex.Matches(data,"(empty)");
+    //             }
+    //         }
+    //     }
+    // }
+
     public static class DateUtil
     {
 

@@ -17,6 +17,7 @@
     <PackageReference Include="Spectre.Console" Version="0.47.0" />
     <PackageReference Include="Spectre.Console.Json" Version="0.47.0" />
     <PackageReference Include="Terminal.Gui" Version="1.12.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

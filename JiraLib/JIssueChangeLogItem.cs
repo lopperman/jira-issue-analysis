@@ -142,7 +142,7 @@ namespace JiraCon
                 FieldType = _item.FieldType;
                 if (_item.FromId == null)
                 {
-                    FromId = "[empty]";
+                    FromId = "(empty)";
                 }
                 else 
                 {
@@ -150,7 +150,7 @@ namespace JiraCon
                 }
                 if (_item.FromValue == null)
                 {
-                    FromValue = "[empty]";
+                    FromValue = "(empty)";
                 }
                 else 
                 {
@@ -158,7 +158,7 @@ namespace JiraCon
                 }
                 if (_item.ToId == null)
                 {
-                    ToId = "[empty]";
+                    ToId = "(empty)";
                 }
                 else 
                 {
@@ -166,7 +166,7 @@ namespace JiraCon
                 }
                 if (_item.ToValue == null)
                 {
-                    ToValue = "[empty]";
+                    ToValue = "(empty)";
                 }
                 else 
                 {

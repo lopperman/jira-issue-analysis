@@ -20,18 +20,18 @@ namespace JiraCon
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
 
-            lines.AddConsoleLine(" ---------------------------- " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("|  ISSUE STATUS CONFIG Menu  |" + " " + cfgName, StdLine.slMenuName);
-            lines.AddConsoleLine(" ---------------------------- " + padd, StdLine.slMenuName);
+            lines.AddConsoleLine(" ---------------------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("|  ISSUE STATUS CONFIG Menu  |" + " " + cfgName, ConsoleUtil.StdStyle(StdLine.slMenuName ));
+            lines.AddConsoleLine(" ---------------------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
 
-            lines.AddConsoleLine("(V) View All", StdLine.slMenuDetail);            
-            lines.AddConsoleLine("(R) Reset Status Configs to Match Jira", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(E) Edit Local State", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(V) View All", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(R) Reset Status Configs to Match Jira", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(E) Edit Local State", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
 
 
-            lines.AddConsoleLine("");
-            lines.AddConsoleLine("(B) Back to Previous Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
+            lines.AddConsoleLine("",ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(B) Back to Previous Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("Enter selection or (X) to exit.", ConsoleUtil.StdStyle(StdLine.slResponse));
 
             lines.WriteQueuedLines(true,true);
             lines = null;

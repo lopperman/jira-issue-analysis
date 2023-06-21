@@ -1,6 +1,8 @@
 
 
 
+using Spectre.Console;
+
 namespace JiraCon
 {
 
@@ -18,19 +20,19 @@ namespace JiraCon
             var cfgName = string.Format("Connected: {0} ",ActiveConfig.configName);
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
-            lines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("|  Main Menu  |" + " " + cfgName, StdLine.slMenuName);
-            lines.AddConsoleLine(" ------------- " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("(A) Analyze Issue(s) Time In Status", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(M) Show Change History for 1 or more Cards", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(J) Show JSON for 1 or more Cards", StdLine.slMenuDetail);
+            lines.AddConsoleLine(" ------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("|  Main Menu  |" + " " + cfgName, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine(" ------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("(A) Analyze Issue(s) Time In Status", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(M) Show Change History for 1 or more Cards", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(J) Show JSON for 1 or more Cards", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
             // lines.AddConsoleLine("(F) Create Extract Files", StdLine.slMenuDetail);
             // lines.AddConsoleLine("(W) Create Work Metrics Analysis from JQL Query", StdLine.slMenuDetail);
             // lines.AddConsoleLine("(E) Epic Analysis - Find and Analyze - Yep, this exists", StdLine.slMenuDetail);
-            lines.AddConsoleLine("");
-            lines.AddConsoleLine("(C) Config Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(D) Dev/Misc Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or X to exit.", StdLine.slResponse );
+            lines.AddConsoleLine("",ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(C) Config Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(D) Dev/Misc Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("Enter selection or X to exit.", ConsoleUtil.StdStyle(StdLine.slResponse));
             lines.WriteQueuedLines(true,true);
             lines = null;
         }

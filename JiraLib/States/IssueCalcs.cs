@@ -9,6 +9,8 @@ namespace  JiraCon
         public List<StateCalc> StateCalcs {get;set;}
         public List<Blocker> Blockers {get;set;}
 
+        public StateCalc? FirstActiveStateCalc {get;set;}
+
         public IssueCalcs()
         {
             StateCalcs = new List<StateCalc>();

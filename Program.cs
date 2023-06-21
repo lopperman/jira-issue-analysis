@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Atlassian.Jira;
 using Newtonsoft.Json;
+using Spectre.Console;
 
 namespace JiraCon
 {
@@ -543,6 +544,15 @@ namespace JiraCon
 
             ConsoleUtil.WriteStdLine(string.Format("Found {0} change logs for {1}", retJIssue.ChangeLogs.Count, key),StdLine.slOutputTitle);
 
+            var tbl = new Table();
+            tbl.AddColumn("KEY");
+            tbl.AddColumn("FIELD");
+            tbl.AddColumn("CHANGED DT");
+            tbl.AddColumn("OLD VALUE");
+            tbl.AddColumn("NEW VALUE");
+
+
+
             for (int i = 0; i < retJIssue.ChangeLogs.Count; i++)
             {
 
@@ -551,31 +561,14 @@ namespace JiraCon
                 {
                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                     {
-                        if (cli.FieldName.ToLower().StartsWith("status"))
-                        {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),StdLine.slOutput ,false);
-                            ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue),ConsoleColor.White,ConsoleColor.Red,true);
-                        }
-                        else if (cli.FieldName.ToLower().StartsWith("label"))
-                        {
-                            ConsoleUtil.WriteAppend(string.Format("{0} - Changed On {1}, {2} field changed from '{3}' to ", tmpIssue.Key, changeLog.CreatedDate.ToString(), cli.FieldName, cli.FromValue),StdLine.slOutput ,false);
-                            ConsoleUtil.WriteAppend(string.Format("{0}", cli.ToValue), ConsoleColor.White, ConsoleColor.Blue);
-                        }
-                        else
-                        {
-                            ConsoleUtil.WriteStdLine($"{tmpIssue.Key} - Changed On {changeLog.CreatedDate}, {cli.FieldName} field changed from '{cli.FromValue}' to '{cli.ToValue}'",StdLine.slOutput,false);
-                        }
+                            string toVal = (cli.FieldName.ToLower()=="status") ? string.Format("[bold blue on white]{0}[/]",cli.ToValue) : cli.ToValue;
+                            string frVal = (cli.FieldName.ToLower()=="status") ? string.Format("[dim blue on white]{0}[/]",cli.FromValue) : cli.FromValue;
+                            tbl.AddRow(new string[]{ tmpIssue.Key.ToString(),cli.FieldName, changeLog.CreatedDate.ToString(),frVal,toVal});
                     }
                 }
             }
-
+            AnsiConsole.Write(tbl);
             return retJIssue ;
-
-            //ConsoleUtil.WriteLine("***** JSON for  " + key + " *****", ConsoleColor.Black, ConsoleColor.Cyan, false);
-            //ConsoleUtil.WriteLine(JsonConvert.SerializeObject(jIss,Formatting.Indented), ConsoleColor.DarkBlue, ConsoleColor.Cyan, false);
-
-            //ConsoleUtil.WriteLine("***** Jira Card: " + key + " END", ConsoleColor.DarkBlue, ConsoleColor.White, false);
-
         }
 
 

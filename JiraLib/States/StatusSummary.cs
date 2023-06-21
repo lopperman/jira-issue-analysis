@@ -15,7 +15,7 @@ namespace JiraCon
         public TimeSpan BusTime {get;set;}
         public TimeSpan BlockTime {get;set;}
         public DateTime StartDt {get;private set ;}
-        public StatusType TrackType {get;set;} 
+        public StatusType TrackType {get;set;}         
         public StatusSummary()
         {
             StartDt = DateTime.MinValue;

@@ -61,7 +61,7 @@ namespace  JiraCon
             {
                 if (value == null || value.Length == 0)
                 {
-                    _fromValue = "[EMPTY]";
+                    _fromValue = "(empty)";
                 }
                 else 
                 {
@@ -94,7 +94,7 @@ namespace  JiraCon
             {
                 if (value == null || value.Length == 0)
                 {
-                    _fromId = "[EMPTY]";
+                    _fromId = "(empty)";
                 }
                 else 
                 {
@@ -112,7 +112,7 @@ namespace  JiraCon
             {
                 if (value == null || value.Length == 0)
                 {
-                    _toValue = "[EMPTY]";
+                    _toValue = "(empty)";
                 }
                 else 
                 {
@@ -130,7 +130,7 @@ namespace  JiraCon
             {
                 if (value == null || value.Length == 0)
                 {
-                    _toId = "[EMPTY]";
+                    _toId = "(empty)";
                 }
                 else 
                 {

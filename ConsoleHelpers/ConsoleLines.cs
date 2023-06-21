@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Spectre.Console;
 using static JiraCon.ConsoleUtil;
 
 namespace JiraCon
@@ -28,37 +29,44 @@ namespace JiraCon
             }
         }
 
-        public void AddConsoleLine(string text, StdLine lineType)
+        // public void AddConsoleLine(string text, Style lineStyle)
+        // {
+        //     AddConsoleLine(text,lineStyle);
+        // }
+        public void AddConsoleLine(string text, Style lineStyle, bool writePartial = false)
         {
-            if (lineType == StdLine.slCode)
-            {
-                text = string.Format("  ||  {0}",text);
-            }
-            AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType));
-        }
-        public void AddConsoleLine(string text, StdLine lineType, bool writePartial)
-        {
-            AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType), writePartial);
-        }
-
-        public void AddConsoleLine(string text, ConsoleColor foreground, ConsoleColor background)
-        {
-            AddConsoleLine(text, foreground, background, false);
-        }
-        public void AddConsoleLine(string text, ConsoleColor foreground, ConsoleColor background, bool writePartial)
-        {
-            AddConsoleLine(new ConsoleLine(text, foreground, background));
+            var ln = new ConsoleLine(text,lineStyle,(!writePartial));
+            Lines.Add(Lines.Count,ln);
+            // AddConsoleLine(text,StdForecolor(lineType),StdBackcolor(lineType), writePartial);
         }
 
 
-        public void AddConsoleLine(string text)
-        {
-            AddConsoleLine(text, false);
-        }
-        public void AddConsoleLine(string text, bool writePartial)
-        {
-            AddConsoleLine(new ConsoleLine(text, writePartial));
-        }
+
+//         private void AddLine(ConsoleLine ln)
+//         {
+//             var kvp = new KeyValuePair<int,ConsoleLine>({1,ln};)
+// v
+//             _lines.Add(kvp);
+//         }
+
+        // public void AddConsoleLine(string text, ConsoleColor foreground, ConsoleColor background)
+        // {
+        //     AddConsoleLine(text, foreground, background, false);
+        // }
+        // public void AddConsoleLine(string text, ConsoleColor foreground, ConsoleColor background, bool writePartial)
+        // {
+        //     AddConsoleLine(new ConsoleLine(text, foreground, background));
+        // }
+
+
+        // public void AddConsoleLine(string text)
+        // {
+        //     AddConsoleLine(text, false);
+        // }
+        // public void AddConsoleLine(string text, bool writePartial)
+        // {
+        //     AddConsoleLine(new ConsoleLine(text, writePartial));
+        // }
 
 
         public void AddConsoleLine(ConsoleLine cl)
@@ -76,51 +84,51 @@ namespace JiraCon
             Console.ResetColor();
             if (clearScreen)
             {
-                Console.Clear();
-
+                AnsiConsole.Clear();
             }
             if (addTitle)
             {
-                string title = "  JiraTIS - (https://github.com/lopperman/jiraTimeInStatus  ";
-                ConsoleUtil.WriteStdLine(title,StdLine.slTitle);
+                AnsiConsole.Clear();
+                WriteAppTitle();
             }
             for (int i = 0; i < _lines.Count; i++)
             {
-                Console.ResetColor();
-                ConsoleLine l = _lines[i];
-                if (l.UseColors)
-                {
-                    Console.ForegroundColor = l.Foreground;
-                    Console.BackgroundColor = l.Background;
-                }
-                else 
-                {
-                    Console.ForegroundColor = defForeground;
-                    Console.BackgroundColor = defBackground;
-                }
-                if (l.WritePartialLine)
-                {
-                    if (l.UseColors)
-                    {
-                        ConsoleUtil.WriteAppend(l.Text,l.Foreground,l.Background);
-                    }
-                    else 
-                    {
-                        ConsoleUtil.WriteAppend(l.Text,defForeground,defBackground);
-                    }
-                    // Console.Write(l.Text);
-                }
-                else
-                {
-                    if (l.UseColors)
-                    {
-                        ConsoleUtil.WriteStdLine(l.Text,l.Foreground,l.Background);
-                    }
-                    else 
-                    {
-                        ConsoleUtil.WriteStdLine(l.Text,defForeground,defBackground);
-                    }
-                }
+                _lines[i].Write();
+            //     Console.ResetColor();
+            //     ConsoleLine l = _lines[i];
+            //     if (l.UseColors)
+            //     {
+            //         Console.ForegroundColor = l.Foreground;
+            //         Console.BackgroundColor = l.Background;
+            //     }
+            //     else 
+            //     {
+            //         Console.ForegroundColor = defForeground;
+            //         Console.BackgroundColor = defBackground;
+            //     }
+            //     if (l.WritePartialLine)
+            //     {
+            //         if (l.UseColors)
+            //         {
+            //             ConsoleUtil.WriteAppend(l.Text,l.Foreground,l.Background);
+            //         }
+            //         else 
+            //         {
+            //             ConsoleUtil.WriteAppend(l.Text,defForeground,defBackground);
+            //         }
+            //         // Console.Write(l.Text);
+            //     }
+            //     else
+            //     {
+            //         if (l.UseColors)
+            //         {
+            //             ConsoleUtil.WriteStdLine(l.Text,l.Foreground,l.Background);
+            //         }
+            //         else 
+            //         {
+            //             ConsoleUtil.WriteStdLine(l.Text,defForeground,defBackground);
+            //         }
+            //     }
             }
             _lines.Clear();
         }

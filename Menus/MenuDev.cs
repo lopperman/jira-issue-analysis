@@ -17,18 +17,18 @@ namespace JiraCon
             var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
-            lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, StdLine.slMenuName);
-            lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("(V) View Console Fore/Back Colors", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(S) View Configured Console Styles", StdLine.slMenuDetail);
+            lines.AddConsoleLine(" ------------ " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("|  DEV Menu  |" + " " + cfgName, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine(" ------------ " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("(V) View Console Fore/Back Colors", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(S) View Configured Console Styles", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
 
-            lines.AddConsoleLine("(D) DEVTEST1()", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(T) DEVTEST2()", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(D) DEVTEST1()", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(T) DEVTEST2()", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
 
-            lines.AddConsoleLine("");
-            lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
+            lines.AddConsoleLine("",ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(B) Back to Main Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("Enter selection or (X) to exit.", ConsoleUtil.StdStyle(StdLine.slResponse));
             lines.WriteQueuedLines(true,true);
             lines = null;
         }

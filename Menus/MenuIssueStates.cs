@@ -19,24 +19,24 @@ namespace JiraCon
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
 
-            lines.AddConsoleLine(" ----------------------- " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("|  Time in Status Menu  |" + " " + cfgName, StdLine.slMenuName);
-            lines.AddConsoleLine(" ----------------------- " + padd, StdLine.slMenuName);
+            lines.AddConsoleLine(" ----------------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("|  Time in Status Menu  |" + " " + cfgName, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine(" ----------------------- " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
 
 //            lines.AddConsoleLine("-- [SHOW STATUS SELECTION & CLASSIFICATION] -- ", StdLine.slOutputTitle );
-            lines.AddConsoleLine("(A) Edit Analysis Configuration", StdLine.slMenuDetail);
-            lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), StdLine.slCode );
-            lines.AddConsoleLine("(M) Manage Saved JQL", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(S) Manage Issue Status Classification", StdLine.slMenuDetail);
-            lines.AddConsoleLine("-------------------------------   ", StdLine.slCode );
-            lines.AddConsoleLine("(V) View Summary for 1 Issue", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(I) Get Data for 1 or more Issue(s)", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(E) Get data for Issues in an Epic", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(J) Get data for Issues from JQL Query", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(A) Edit Analysis Configuration", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine(string.Format("-- You have {0:00} Saved JQL Searches -- ",ActiveConfig.SavedJQLCount  ), ConsoleUtil.StdStyle(StdLine.slCode));
+            lines.AddConsoleLine("(M) Manage Saved JQL", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(S) Manage Issue Status Classification", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("-------------------------------   ", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(V) View Summary for 1 Issue", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(I) Get Data for 1 or more Issue(s)", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(E) Get data for Issues in an Epic", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(J) Get data for Issues from JQL Query", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
 
-            lines.AddConsoleLine("");
-            lines.AddConsoleLine("(B) Back to Main Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("Enter selection or (X) to exit.", StdLine.slResponse);            
+            lines.AddConsoleLine("",ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(B) Back to Main Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("Enter selection or (X) to exit.", ConsoleUtil.StdStyle(StdLine.slResponse ));
 
             lines.WriteQueuedLines(true,true);
             lines = null;

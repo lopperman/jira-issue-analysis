@@ -445,13 +445,14 @@ namespace JiraCon
                 {
                     ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slCode ,false);
 
-                    AnsiConsole.Progress()
+                    AnsiConsole.Progress()                        
                         .Columns(new ProgressColumn[]
                         {
                             new TaskDescriptionColumn(), 
                             new PercentageColumn(),
                             new ElapsedTimeColumn(), 
-                            new SpinnerColumn()
+                            new SpinnerColumn(), 
+
                         })
                         .Start(ctx => 
                         {
@@ -547,7 +548,12 @@ namespace JiraCon
                 var scStart = ic.StateCalcs.FirstOrDefault(x=>x.ActivityType == StatusType.stStart);
                 if (scStart != null)
                 {
+                    ic.FirstActiveStateCalc = scStart;
                     ConsoleUtil.WriteStdLine(String.Format("ACTIVE WORK STARTED: {0}",scStart.CreatedDt),StdLine.slOutput);
+                    var calendar = new Calendar(scStart.CreatedDt.Year, scStart.CreatedDt.Month);
+                    calendar.AddCalendarEvent(scStart.CreatedDt);
+                    calendar.HighlightStyle(Style.Parse("green bold"));
+                    AnsiConsole.Write(calendar);
                 }
                 else 
                 {
@@ -592,6 +598,13 @@ namespace JiraCon
                     ConsoleUtil.WriteStdLine(string.Format("  First Entry: {0}, Last Entry: {1}",statSumm.FirstEntry, statSumm.LastEntry),StdLine.slOutput );
                     ConsoleUtil.WriteStdLine(string.Format("  Last Exit: {0}",statSumm.LastExit),StdLine.slOutput );
                     ConsoleUtil.WriteStdLine(string.Format("  Entry Count: {0}",statSumm.EntryCount),StdLine.slOutput );
+                    
+                    var calendar = new Calendar(2020, 10);
+                    calendar.AddCalendarEvent(2020, 10, 11);
+                    calendar.HighlightStyle(Style.Parse("yellow bold"));
+                    AnsiConsole.Write(calendar);
+
+
                     ConsoleUtil.WriteStdLine(string.Format("  -- TIMESPANS --  ",statSumm.Status),StdLine.slOutputTitle );
                     ConsoleUtil.WriteStdLine(string.Format("  -- THIS STATUS IS COUNTED AS: {0} --  ",statSumm.TrackType),StdLine.slOutputTitle );
 

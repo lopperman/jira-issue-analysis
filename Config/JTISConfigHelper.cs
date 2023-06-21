@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Reflection.Metadata.Ecma335;
 using System.Linq;
 using System.Xml.Schema;
@@ -326,17 +327,24 @@ namespace JiraCon
         internal static JTISConfig? ChangeCurrentConfig(string? msg)
         {
             JTISConfig? chCfg = null; 
+            Console.Clear();
             if (msg==null || msg.Length == 0)
             {
-                msg = "SELECT CONFIG ID";
+                msg = "[bold black on lightyellow3]SELECT CONFIGURATION BY [underline]USING ARROW KEYS[/], THEN PRESS 'ENTER'[/]";
             }
-            ConsoleUtil.WriteStdLine("** JIRA CONFIGURATIONS **",StdLine.slOutputTitle ,true);
+            WriteAppTitle();
+            var panel = new Panel(msg);
+            panel.Border = BoxBorder.Rounded;
+            panel.Width = 20;
+            panel.HeaderAlignment(Justify.Center );
+            AnsiConsole.Write(panel);
+
             var cfgNames = JTISConfigHelper.ConfigNameList;
-            cfgNames.Add("00 | EXIT");
+            cfgNames.Add("[dim]00 | EXIT[/]");
             string[] choices = cfgNames.Select(x=>x.ToString()).ToArray();
             string cfgResp = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title(msg)
+                    // .Title(msg)
                     .PageSize(10)
                     .MoreChoicesText("(Move up and down to reveal more choices)")
                     .AddChoices(choices));
@@ -427,19 +435,19 @@ namespace JiraCon
         public static string? GetSavedJQL(string title = "SELECT SAVED JQL")
         {
             string? retJql = string.Empty;
-            ConsoleUtil.Lines.AddConsoleLine(title,StdLine.slResponse,false );
+            ConsoleUtil.Lines.AddConsoleLine(title,ConsoleUtil.StdStyle(StdLine.slResponse));
             if (JTISConfigHelper.config.SavedJQLCount > 0)
             {
                 for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                 {
                     JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-                    ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                    ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdStyle(StdLine.slOutput));
+                    ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdStyle(StdLine.slOutput));
                 }
             }
             else 
             {
-                ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdStyle(StdLine.slOutput));
             }
             ConsoleUtil.Lines.WriteQueuedLines(false);
             if (JTISConfigHelper.config.SavedJQLCount > 0)

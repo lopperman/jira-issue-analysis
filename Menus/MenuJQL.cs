@@ -19,19 +19,19 @@ namespace JiraCon
             string padd = new string('-',cfgName.Length + 1 );
             ConsoleLines lines = new ConsoleLines();
 
-            lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
-            lines.AddConsoleLine("|  JQL Menu  |" + " " + cfgName, StdLine.slMenuName);
-            lines.AddConsoleLine(" ------------ " + padd, StdLine.slMenuName);
+            lines.AddConsoleLine(" ------------ " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine("|  JQL Menu  |" + " " + cfgName, ConsoleUtil.StdStyle(StdLine.slMenuName));
+            lines.AddConsoleLine(" ------------ " + padd, ConsoleUtil.StdStyle(StdLine.slMenuName));
 
-            lines.AddConsoleLine("(V) View All Saved JQL", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(A) Add JQL", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(F) Find Saved JQL", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(D) Delete a Saved JQL", StdLine.slMenuDetail);
+            lines.AddConsoleLine("(V) View All Saved JQL", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(A) Add JQL", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(F) Find Saved JQL", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(D) Delete a Saved JQL", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
 
 
-            lines.AddConsoleLine("");
-            lines.AddConsoleLine("(B) Back to Previous Menu", StdLine.slMenuDetail);
-            lines.AddConsoleLine("(X) Exit", StdLine.slResponse);            
+            lines.AddConsoleLine("",ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(B) Back to Previous Menu", ConsoleUtil.StdStyle(StdLine.slMenuDetail));
+            lines.AddConsoleLine("(X) Exit", ConsoleUtil.StdStyle(StdLine.slResponse));
             lines.WriteQueuedLines(true,true);
             lines = null;
         }
@@ -54,13 +54,13 @@ namespace JiraCon
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("{0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slCode);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("{0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdStyle(StdLine.slOutputTitle));
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdStyle(StdLine.slCode));
                     }
                 }
                 else 
                 {
-                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdStyle(StdLine.slOutput));
                 }
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 Console.ReadKey(true);
@@ -68,19 +68,19 @@ namespace JiraCon
             }
             else if (key == ConsoleKey.D)
             {
-                ConsoleUtil.Lines.AddConsoleLine(" ** SAVED JQL **",StdLine.slCode );
+                ConsoleUtil.Lines.AddConsoleLine(" ** SAVED JQL **",ConsoleUtil.StdStyle(StdLine.slCode));
                 if (JTISConfigHelper.config.SavedJQLCount > 0)
                 {
                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)
                     {
                         JQLConfig tJql = JTISConfigHelper.config.SavedJQL[i];
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slCode);
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdStyle(StdLine.slOutputTitle));
+                        ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdStyle(StdLine.slCode));
                     }
                 }
                 else 
                 {
-                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdStyle(StdLine.slOutput));
                 }
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 if (JTISConfigHelper.config.SavedJQLCount > 0)
@@ -177,19 +177,19 @@ namespace JiraCon
                             if (isMatch)
                             {
                                 matchCount +=1;
-                                ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,StdLine.slOutputTitle);
-                                ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,StdLine.slOutput);
+                                ConsoleUtil.Lines.AddConsoleLine(string.Format("NAME: {0:00} - {1}",tJql.jqlId,tJql.jqlName) ,ConsoleUtil.StdStyle(StdLine.slOutput));
+                                ConsoleUtil.Lines.AddConsoleLine(string.Format("JQL: {0}",tJql.jql) ,ConsoleUtil.StdStyle(StdLine.slOutput));
                             }
                         }
                     }
                 }
                 else 
                 {
-                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine("Saved JQL does not exist for current config",ConsoleUtil.StdStyle(StdLine.slOutput));
                 }
                 if (matchCount == 0 && JTISConfigHelper.config.SavedJQLCount > 0)
                 {
-                    ConsoleUtil.Lines.AddConsoleLine("no matching jql was found",StdLine.slOutput);
+                    ConsoleUtil.Lines.AddConsoleLine("no matching jql was found",ConsoleUtil.StdStyle(StdLine.slOutput));
                 }
                 ConsoleUtil.Lines.WriteQueuedLines(false);
                 Console.ReadKey(true);
