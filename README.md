@@ -11,7 +11,7 @@
 [Latest Release](https://github.com/lopperman/jiraTimeInStatus/releases)
 ---
 Utility to determine amount of time a jira issue has spend in any status
-![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/v0-2-4-alpha.png?raw=true)
+![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/mainMenu_v0-2-4-alpha.png?raw=true)
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/configMenu.png?raw=true)
 
 ## Mac and PC Compatible
