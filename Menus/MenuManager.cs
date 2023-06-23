@@ -44,6 +44,10 @@ namespace JiraCon
                 case MenuItemEnum.miExit:
                     ConsoleUtil.ByeByeForced();
                     break;
+                case MenuItemEnum.miShowChangeHistoryCards:
+                    ShowChangeLog();
+                    ShowMenu(MenuEnum.meMain);
+                    break;
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
                     AnsiConsole.Write(new Rule());
@@ -55,7 +59,50 @@ namespace JiraCon
 
             }
         }
-        
+
+        private static void ShowChangeLog()
+        {
+            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]SPACE[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will automatically have '{JTISConfigHelper.config.defaultProject}-' added (e.g. '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]{Environment.NewLine}");
+            var keys = AnsiConsole.Prompt<string>(p);
+            if (keys != null && keys.Length>0)
+            {
+                string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                if (arr.Length >= 1)
+                {
+
+                    for (int i = 0; i < arr.Length; i ++)
+                    {
+                        if (!arr[i].Contains("-"))
+                        {
+                            arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
+                        }
+                    }
+                    List<JIssue>? retIssues;
+                    retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
+
+
+                    if (retIssues != null)
+                    {
+                        if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
+                        {
+                            string savedFilePath = string.Empty;
+                            AnsiConsole.Status()
+                                .Start($"Analyzing {arr.Length} issues ...", ctx=>
+                                {
+                                    ctx.Spinner(Spinner.Known.Dots);
+                                    ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                                    Thread.Sleep(100);
+
+                                ctx.Status("[italic]Saving to csv file ...[/]");
+                                savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
+                                });
+                            ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
+                        }
+                    }
+                }
+            }
+        }
+
         public static void ShowMenu(MenuEnum menu)
         {
             BuildMenuPanel(menu);

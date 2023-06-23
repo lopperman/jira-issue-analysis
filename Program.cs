@@ -589,7 +589,7 @@ namespace JiraCon
         {
 
             string fName = string.Format("changeLogs_{0}.csv",DateTime.Now.ToString("yyyyMMMdd_HHmmss"));
-            string filePath = Path.Combine(JTISConfigHelper.JTISRootPath,fName);
+            string filePath = Path.Combine(JTISConfigHelper.JTISRootPath);
             if (Directory.Exists(filePath)==false)
             {
                 Directory.CreateDirectory(filePath);
@@ -621,8 +621,8 @@ namespace JiraCon
            }
             writer.Close();
 
-            ConsoleUtil.WriteStdLine(String.Format("file saved to: {0}",filePath),StdLine.slCode);
-            ConsoleUtil.PressAnyKeyToContinue();
+            // ConsoleUtil.WriteStdLine(String.Format("file saved to: {0}",filePath),StdLine.slCode);
+            // ConsoleUtil.PressAnyKeyToContinue();
             return filePath;
         }
 

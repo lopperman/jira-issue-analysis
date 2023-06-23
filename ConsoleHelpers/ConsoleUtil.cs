@@ -112,12 +112,21 @@ namespace JiraCon
             }
         }
 
-        public static void PressAnyKeyToContinue()
+        public static void PressAnyKeyToContinue(string? msg = null)
         {
             AnsiConsole.WriteLine();
-//            Markup l1 = new Markup("  --- --- --- --- --- ---  ",new Style(Color.Default,Color.Default));
-            Markup l2 = new Markup(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
-            AnsiConsole.Write(new Rows(l2));
+            if (msg!=null)
+            {
+                msg = Markup.Remove(msg);
+                msg = $"[{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]  {Emoji.Known.Information}  {msg}[/]";
+                AnsiConsole.MarkupLine(msg);
+            }
+            WriteMarkupLine(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
+            // Markup l2 = new Markup(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
+            // AnsiConsole.MarkupLine()
+            // AnsiConsole.MarkupLine(l2.ToString());
+
+//            AnsiConsole.Write(new Rows(l2));
 
             Console.ReadKey(true);
         }
@@ -173,9 +182,13 @@ namespace JiraCon
         {
             if (!string.IsNullOrEmpty(text))
             {
-                WriteMarkup(text,style,clearScreen);
+                if (clearScreen){AnsiConsole.Clear();}
+                AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
+                // var m = new Markup(text,style);
+                // AnsiConsole.MarkupLine()
+                // WriteMarkup(text,style,clearScreen);
             }
-            Console.WriteLine();
+//            Console.WriteLine();
         }
         public static void WriteStdLine(string text, StdLine msgType, bool clearScreen = false)
         {
@@ -375,7 +388,14 @@ namespace JiraCon
             var panel = new Panel(title).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
             AnsiConsole.Write(panel);
             Environment.Exit(0);
-        }        
+        }    
+
+        public static bool Confirm(string msg, bool defResp )
+        {
+            msg = Markup.Remove(msg);
+            msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
+            return AnsiConsole.Confirm(msg,defResp);
+        }    
 
 
     }
