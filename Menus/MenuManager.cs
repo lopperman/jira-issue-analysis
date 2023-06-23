@@ -1,3 +1,4 @@
+using System.IO.Pipes;
 
 
 
@@ -64,6 +65,16 @@ namespace JiraCon
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
+                case MenuItemEnum.miStartRecordingSession:
+                    AnsiConsole.Record();
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
+                    ConsoleUtil.PressAnyKeyToContinue("Recording has started.  Select the menu to Save Session to file will stop the recording after file is saved");
+                    break;
+                case MenuItemEnum.miSaveSessionToFile:
+                    var fName = SaveSessionFile();
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
+                    ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
+                    break;
 
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
@@ -78,6 +89,19 @@ namespace JiraCon
             {
                 ShowMenu(finalMenu.Value);
             }
+        }
+
+        private static string SaveSessionFile()
+        {
+            string sessFile = Path.Combine(JTISConfigHelper.ConfigFolderPath,"SessionFiles");
+            if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
+            string fName = string.Format("SessionFile_{0}.html",DateTime.Now.ToString("yyyyMMMddHHmmss"));
+            sessFile = Path.Combine(sessFile,fName);
+            using (StreamWriter writer = new StreamWriter(sessFile,false))
+            {
+                writer.Write(AnsiConsole.ExportHtml());
+            }
+            return sessFile ;
         }
 
         private static void NewAnalysis(AnalysisType anType)
@@ -180,13 +204,13 @@ namespace JiraCon
             var keys = AnsiConsole.Prompt<string>(p);
             if (keys != null && keys.Length>0)
             {
-                string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] arr = keys.Split(' ',StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
+                // string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                 if (arr.Length >= 1)
                 {
-
                     for (int i = 0; i < arr.Length; i ++)
                     {
-                        if (!arr[i].Contains("-"))
+                        if (!arr[i].Contains('-'))
                         {
                             arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
                         }
@@ -317,6 +341,9 @@ namespace JiraCon
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Jira Connections"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Info: {JiraUtil.JiraRepo.ServerInfo.BaseUrl}"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
+
 
                 break;
                 case(MenuEnum.meDev):

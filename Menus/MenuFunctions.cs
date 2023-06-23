@@ -47,7 +47,9 @@ namespace JiraCon
         miSavedJQLRemove,
         miIssCfgView,
         miIssCfgEdit,
-        miIssCfgReset
+        miIssCfgReset, 
+        miSaveSessionToFile, 
+        miStartRecordingSession
     }
 
 

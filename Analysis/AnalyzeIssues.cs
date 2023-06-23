@@ -24,6 +24,7 @@ namespace JiraCon
     {
         private AnalysisType _type = AnalysisType._atUnknown;
         private string searchData = string.Empty;
+        private string[]? searchDataArr = null;
         public List<JIssue> JIssues {get; private set;}
         public List<IssueCalcs> JCalcs {get; private set;}
 
@@ -33,7 +34,7 @@ namespace JiraCon
         {
             get
             {
-                return (searchData != null && searchData.Length > 0);
+                return (searchData != null && searchData.Length > 0) || (searchDataArr != null && searchDataArr.Length > 0);
             }
         }
 
@@ -52,10 +53,10 @@ namespace JiraCon
             }
             else if (_type == AnalysisType.atIssueSummary)
             {
-                var tData = MenuManager.GetIssueNumbers();
+                string[]? tData = MenuManager.GetIssueNumbers();
                 if (tData != null)
                 {
-                    searchData = string.Join(" ",tData);
+                    searchDataArr = tData;
                     return;
                 }
 
@@ -431,7 +432,7 @@ namespace JiraCon
                         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
                         break;
                     case AnalysisType.atIssueSummary:
-                        toJQL = BuildJQLKeyInList(searchData);
+                        toJQL = BuildJQLKeyInListArr(searchDataArr);
                         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
                         break;
                     case AnalysisType.atEpics:
@@ -512,6 +513,36 @@ namespace JiraCon
             // }
         }
 
+        private string BuildJQLKeyInListArr(string[]? srchData)
+        {
+            if (srchData == null || srchData.Length == 0){return string.Empty;}
+            string[] cards = srchData;
+            StringBuilder sb = new StringBuilder();
+            string defProj = JTISConfigHelper.config.defaultProject;
+            sb.Append("key in (");
+            int added = 0;
+            for (int i = 0; i < cards.Length; i ++)
+            {
+                string tKey = cards[i];
+                if (!tKey.Contains('-'))
+                {
+                    tKey = string.Format("{0}-{1}",defProj,tKey);
+                }
+                if (added == 0)
+                {                        
+                    sb.AppendFormat("'{0}'",tKey);
+                    added +=1;
+                }
+                else 
+                {
+                    sb.AppendFormat(",'{0}'",tKey);
+                    added +=1;
+                }
+            }
+            sb.Append(")");
+
+            return sb.ToString();            
+        }
         private string BuildJQLKeyInList(string srchData)
         {
             string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
