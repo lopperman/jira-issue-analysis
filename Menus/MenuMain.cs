@@ -18,41 +18,6 @@ namespace JiraCon
             ActiveConfig = cfg;                        
         }
 
-        public void BuildMenu2()
-        {
-            var cfgName = string.Format("Connected: {0} ",ActiveConfig.configName);
-            ConsoleUtil.WriteAppTitle();
-            var menuInfo = string.Format("[bold {0} on {1}]  MAIN MENU [/][grey84 on {1}]| {2} [/]",StdLine.slMenuName.BackMkp(),StdLine.slMenuName.FontMkp(),cfgName);
-            var panel = new Panel(menuInfo);
-            
-            panel.Border = BoxBorder.Rounded;
-            panel.BorderColor( ConsoleUtil.StdStyle(StdLine.slMenuName).Foreground);
-            panel.HeaderAlignment(Justify.Center );
-            panel.Padding = new Padding(2, 0, 2, 0);
-            AnsiConsole.Write(panel);
-
-            var detList = new List<string>();
-                detList.Add(" 01: Analyze Issue(s) Time In Status");
-                detList.Add(" 02: Show Change History for 1 or more Cards");
-                detList.Add(" 03: Show JSON for 1 or more Cards");
-                detList.Add(" 04: Config Menu");
-                detList.Add(" 05: Dev/Misc Menu");
-                detList.Add(" [bold dim]EXIT[/]");
-
-
-            StringBuilder sb = new StringBuilder();
-            var mkFont = StdLine.slMenuDetail.FontMkp();
-            string menuTitle = string.Empty;
-            sb = sb.Append(handler: $"[{StdLine.slMenuDetail.FontMkp()} on {StdLine.slMenuDetail.BackMkp()}]").Append("[italic]USE [bold]ARROW KEYS[/] TO SELECT, THEN PRESS [bold]ENTER[/][/]");
-           string resp = AnsiConsole.Prompt<string>(new SelectionPrompt<string>()
-                    //.Title(sb.ToString())
-                    .AddChoices(detList.ToArray()));
-                    // .PageSize(10)
-                    // .MoreChoicesText("(Move up and down to reveal more choices)")
-                    // .AddChoices(menuRows));
-                    
-
-        }
 
         private void BuildMenu()
         {

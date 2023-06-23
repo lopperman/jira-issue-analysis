@@ -34,37 +34,22 @@ namespace JiraCon
         miTISIssueSummary, 
         miTISIssues, 
         miTISEpic, 
-        miTISJQL
+        miTISJQL, 
+        miJiraConfigAdd, 
+        miJiraConfigView, 
+        miJiraConfigRemove, 
+        miJiraServerInfo, 
+        miDev1, 
+        miDev2, 
+        miSavedJQLView, 
+        miSavedJQLAdd,         
+        miSavedJQLFind, 
+        miSavedJQLRemove,
+        miIssCfgView,
+        miIssCfgEdit,
+        miIssCfgReset
     }
 
-    public static class MenuFunctions
-    {
-
-        
-
-        //returns string that can be used with IRenderer for Font Color
-
-
-        // public static void Start(JTISConfig cfg)
-        // {
-        //     while (DoMenu(new MenuMain(cfg)))
-        //     {
-
-        //     }
-        // }
-        // public static bool DoMenu(IMenuConsole menu)
-        // {
-        //     if (menu.ActiveConfig != JTISConfigHelper.config )
-        //     {
-        //         menu.ActiveConfig = JTISConfigHelper.config;
-        //     }
-        //     while (menu.DoMenu())
-        //     {
-
-        //     }
-        //     return false;
-        // }
-    }
 
     public class MenuFunction 
     {
@@ -72,21 +57,20 @@ namespace JiraCon
 
         public string MenuName {get;private set;}
         public string? MenuNameMarkup {get; private set;}
-        public string? MenuDescription {get; private set;}
         public MenuItemEnum MenuItem {get; private set;}
 
-        public MenuFunction(MenuItemEnum menuItem, string menuTitle, string? menuTitleMarkup = null, string? menuDesc = null)
+        public MenuFunction(MenuItemEnum menuItem, string menuTitle, string menuTitleMarkup, bool dimItem = false, string? emoji = null)
         {
             MenuName = menuTitle;
-            MenuNameMarkup = menuTitleMarkup;
-            MenuDescription = menuDesc;
+            if (dimItem == true)
+            {
+                MenuNameMarkup = $"[dim]{menuTitleMarkup}[/]";
+            }
+            if (emoji == null){emoji = Emoji.Known.SmallBlueDiamond;}
+            if (emoji != null){emoji = $"{emoji}  ";}
+            MenuNameMarkup = $"{emoji ?? string.Empty}{menuTitleMarkup}";
             MenuItem = menuItem;
         }
-
-        // public void AssignFunc<T>(Func<object> onExecute)
-        // {
-        //     theFunc = onExecute;            
-        // }
 
         public override string ToString()
         {
