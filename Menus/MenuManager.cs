@@ -55,7 +55,6 @@ namespace JiraCon
 
         public static void ShowMenu(MenuEnum menu)
         {
-            ConsoleUtil.WriteAppTitle();
             BuildMenuPanel(menu);
             List<MenuFunction> menuItems = BuildMenuItems(menu);
             if (menuItems.Count > 0)
@@ -93,19 +92,40 @@ namespace JiraCon
 //                ConsoleUtil.PressAnyKeyToContinue();
                 MenuManager.Execute(mnu);            
             }
+            else 
+            {
+                string miName = Enum.GetName(typeof(MenuEnum),menu);
+                AnsiConsole.Write(new Rule());
+                AnsiConsole.Write(new Rule($"[{Color.DarkRed.ToString()} on {Color.LightYellow3.ToString()}] a handler for '{miName}' does not exist, reverting to main menu [/]"));
+                AnsiConsole.Write(new Rule());
+                ConsoleUtil.PressAnyKeyToContinue();
+                ShowMenu(MenuEnum.meMain);
+            }
 
         }
 
         private static void BuildMenuPanel(MenuEnum menu)
         {
-            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.Clear();
+
             var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
             var menuLabel = $"[bold black on lightyellow3]{menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
-            var panel = new Panel(menuLabel);
+
+            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jiraTimeInStatus]Paul Brower[/]{Environment.NewLine}{menuLabel}";
+//{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jiraTimeInStatus[/][/]{Environment.NewLine}{menuLabel}";            
+            var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
-            panel.BorderColor(Console.ForegroundColor);
-            panel.HeaderAlignment(Justify.Left);
+            panel.BorderColor(Color.Grey15);
+            panel.Expand = true;
             AnsiConsole.Write(panel);
+
+            // var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
+            // var menuLabel = $"[bold black on lightyellow3]{menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
+            // var panel = new Panel(menuLabel);
+            // panel.Border = BoxBorder.Rounded;
+            // panel.BorderColor(Console.ForegroundColor);
+            // panel.HeaderAlignment(Justify.Left);
+            // AnsiConsole.Write(panel);
         }
         public static List<MenuFunction> BuildMenuItems(MenuEnum menu)
         {
