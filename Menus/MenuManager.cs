@@ -19,50 +19,164 @@ namespace JiraCon
      
         private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("  {0} {0} {0}","-- "),Emoji.Known.WhiteSmallSquare);
      
-        public static void Execute(MenuFunction item)
+        public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
         {
+            MenuEnum? finalMenu = returnToMenu;
             switch (item.MenuItem)
             {
                 case MenuItemEnum.miMenu_Main:
-                    ShowMenu(MenuEnum.meMain);
+                    finalMenu = MenuEnum.meMain;
                     break;
                 case MenuItemEnum.miMenu_Config:
-                    ShowMenu(MenuEnum.meConfig);
+                    finalMenu = MenuEnum.meConfig;
                     break;
                 case MenuItemEnum.miMenu_Dev:
-                    ShowMenu(MenuEnum.meDev);
+                    finalMenu = MenuEnum.meDev;
                     break;
                 case MenuItemEnum.miMenu_IssueStates:
-                    ShowMenu(MenuEnum.meIssue_States);
+                    finalMenu = MenuEnum.meIssue_States;
                     break;
                 case MenuItemEnum.miMenu_JQL:
-                    ShowMenu(MenuEnum.meJQL);
+                    finalMenu = MenuEnum.meJQL;
                     break;
                 case MenuItemEnum.miMenu_StatusConfig:
-                    ShowMenu(MenuEnum.meStatus_Config);
+                    finalMenu = MenuEnum.meStatus_Config;
                     break;
                 case MenuItemEnum.miExit:
+                    finalMenu = null;
                     ConsoleUtil.ByeByeForced();
                     break;
                 case MenuItemEnum.miShowChangeHistoryCards:
                     ShowChangeLog();
-                    ShowMenu(MenuEnum.meMain);
+                    if (finalMenu == null){finalMenu = MenuEnum.meMain;}
                     break;
+                case MenuItemEnum.miIssCfgView:
+                    ViewIssueConfig();
+                    if (finalMenu == null){finalMenu = MenuEnum.meMain;}
+                    break;
+                case MenuItemEnum.miTISIssueSummary:
+                    NewAnalysis(AnalysisType.atIssueSummary);
+                    if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    break;
+                case MenuItemEnum.miJiraConfigView:
+                    JTISConfigHelper.ViewAll();
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    break;
+
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
                     AnsiConsole.Write(new Rule());
                     AnsiConsole.Write(new Rule($"[{Color.DarkRed.ToString()} on {Color.LightYellow3.ToString()}] a handler for '{miName}' does not exist, reverting to main menu [/]"));
                     AnsiConsole.Write(new Rule());
                     ConsoleUtil.PressAnyKeyToContinue();
-                    ShowMenu(MenuEnum.meMain);
+                    finalMenu = MenuEnum.meMain;
                     break;
+            }
+            if (finalMenu != null)
+            {
+                ShowMenu(finalMenu.Value);
+            }
+        }
+
+        private static void NewAnalysis(AnalysisType anType)
+        {
+            AnalyzeIssues analyze = new AnalyzeIssues(anType);
+            int issueCount = 0;
+            if (analyze.HasSearchData)
+            {
+                issueCount = analyze.GetData();
+                if (analyze.GetDataFail)
+                {
+                    ConsoleUtil.PressAnyKeyToContinue();
+                }
+            } 
+            if (issueCount > 0)
+            {                
+                analyze.ClassifyStates();                
+                analyze.WriteToConsole();
+
+                if (anType != AnalysisType.atIssueSummary)
+                {
+                    if (ConsoleUtil.Confirm("Save to csv file?",false))
+                    {
+                        var csvFileName = analyze.WriteToCSV();
+                        ConsoleUtil.PressAnyKeyToContinue($"File saved to: {csvFileName}");
+                    }
+                }
 
             }
         }
 
-        private static void ShowChangeLog()
+        private static void ViewIssueConfig()
         {
-            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]SPACE[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will automatically have '{JTISConfigHelper.config.defaultProject}-' added (e.g. '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]{Environment.NewLine}");
+
+            JTISConfigHelper.UpdateDefaultStatusConfigs();
+
+            AnsiConsole.Status()
+                .Start($"Getting Latest Issue Status data from Jira ...", ctx=>
+                {
+                    ctx.Spinner(Spinner.Known.Dots);
+                    ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                    Thread.Sleep(100);
+                    ctx.Status("[italic]Writing Local Issue Status Config ...[/]");
+                    WriteJiraStatuses();
+
+                });
+            ConsoleUtil.PressAnyKeyToContinue();                    
+
+        }
+
+        private static void WriteJiraStatuses(string? searchTerm = null)
+        {
+            var usedInCol = string.Format("UsedIn: {0}",JTISConfigHelper.config.defaultProject);
+            Table table = new Table();
+            table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
+            table.Columns[2].Alignment(Justify.Center);
+            table.Columns[3].Alignment(Justify.Center);
+            table.Columns[4].Alignment(Justify.Center);
+            table.Columns[5].Alignment(Justify.Center);
+
+            foreach (var jStatus in JTISConfigHelper.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
+            {
+                bool includeStatus = false;
+                if (searchTerm == null || searchTerm.Length == 0)
+                {
+                    includeStatus = true;
+                }
+                else 
+                {
+                    if (jStatus.StatusName.ToLower().Contains(searchTerm.ToLower()))
+                    {
+                        includeStatus = true;
+                    }
+                }
+                if (includeStatus)
+                {
+                    JiraStatus  defStat = JTISConfigHelper.config.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
+                    string usedIn = string.Empty;   
+                    string overridden = string.Empty;      
+                    string locState = Enum.GetName(typeof(StatusType),jStatus.Type);     
+                    if (jStatus.DefaultInUse)
+                    {
+                        usedIn = "YES";
+                    }
+                    if (jStatus.Type != defStat.Type)
+                    {
+                        
+                        overridden = string.Format("[bold red on yellow]{0}{0}{0}[/]",":triangular_Flag:");
+                        locState = string.Format("[bold blue on lightyellow3]{0}[/]",locState);
+                    }
+                    table.AddRow(new string[]{jStatus.StatusId.ToString(), jStatus.StatusName,locState,Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden});
+                }
+            }
+            AnsiConsole.Write(table);
+        }
+
+        public static string[]? GetIssueNumbers()
+        {
+            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]SPACE[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will automatically have '{JTISConfigHelper.config.defaultProject}-' added (e.g. '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]{Environment.NewLine}:");
             var keys = AnsiConsole.Prompt<string>(p);
             if (keys != null && keys.Length>0)
             {
@@ -76,29 +190,45 @@ namespace JiraCon
                         {
                             arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
                         }
-                    }
-                    List<JIssue>? retIssues;
-                    retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
+                    }      
+                    return arr;
+                }
+            }      
+            return null;
+        }
+        
+        private static void ShowChangeLog()
+        {
+            string[]? arr = GetIssueNumbers();
+            if (arr==null || arr.Length == 0){return;}
+            
+            for (int i = 0; i < arr.Length; i ++)
+            {
+                if (!arr[i].Contains("-"))
+                {
+                    arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
+                }
+            }
+            List<JIssue>? retIssues;
+            retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
 
 
-                    if (retIssues != null)
-                    {
-                        if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
+            if (retIssues != null)
+            {
+                if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
+                {
+                    string savedFilePath = string.Empty;
+                    AnsiConsole.Status()
+                        .Start($"Analyzing {arr.Length} issues ...", ctx=>
                         {
-                            string savedFilePath = string.Empty;
-                            AnsiConsole.Status()
-                                .Start($"Analyzing {arr.Length} issues ...", ctx=>
-                                {
-                                    ctx.Spinner(Spinner.Known.Dots);
-                                    ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
-                                    Thread.Sleep(100);
+                            ctx.Spinner(Spinner.Known.Dots);
+                            ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                            Thread.Sleep(100);
 
-                                ctx.Status("[italic]Saving to csv file ...[/]");
-                                savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
-                                });
-                            ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
-                        }
-                    }
+                        ctx.Status("[italic]Saving to csv file ...[/]");
+                        savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
+                        });
+                    ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
                 }
             }
         }

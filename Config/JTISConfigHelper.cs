@@ -385,19 +385,17 @@ namespace JiraCon
         internal static void ViewAll()
         {
 
-            ConsoleTable table = null;
-
-            // ConsoleUtil.WriteLine(text: "");
-            // ConsoleUtil.WriteLine(text: "********** LOGIN CONFIG **********", ConsoleColor.Yellow, ConsoleColor.Black, false);
-            // ConsoleUtil.WriteLine(text: "");
-            // ConsoleUtil.WriteLine(string.Format("Path = {0}",Path.Combine(personalFolder,configFileName)));
-
-            table = new ConsoleTable("loginName", "apiKey", "Jira Base Url", "Default Project");
-            table.AddRow(JTISConfigHelper.config.userName, JTISConfigHelper.config.apiToken, JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
-            table.Write();
-            ConsoleUtil.WriteStdLine("",StdLine.slCode);
-            ConsoleUtil.PressAnyKeyToContinue();
-
+            var tbl = new Table();
+            tbl.AddColumns("loginName", "apiKey", "Jira Base Url", "Default Project");
+            tbl.AddRow(JTISConfigHelper.config.userName, "**********", JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
+            for (int i = 0; i < JTISConfigHelper.cfgList.Count; i++)
+            {
+                if (JTISConfigHelper.cfgList[i].configId != JTISConfigHelper.config.configId)
+                {
+                    tbl.AddRow(JTISConfigHelper.cfgList[i].userName, "**********", JTISConfigHelper.cfgList[i].baseUrl, JTISConfigHelper.cfgList[i].defaultProject);
+                }
+            }
+            AnsiConsole.Write(tbl);
         }
 
         internal static void DeleteConfig()

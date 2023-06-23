@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Net.NetworkInformation;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -51,7 +52,14 @@ namespace JiraCon
             }
             else if (_type == AnalysisType.atIssueSummary)
             {
-                ConsoleUtil.WriteStdLine("ENTER 1 ISSUE-KEY (E.G. WWT-100), OR PRESS 'ENTER'",StdLine.slResponse,false);
+                var tData = MenuManager.GetIssueNumbers();
+                if (tData != null)
+                {
+                    searchData = string.Join(" ",tData);
+                    return;
+                }
+
+                // ConsoleUtil.WriteStdLine("ENTER 1 ISSUE-KEY (E.G. WWT-100), OR PRESS 'ENTER'",StdLine.slResponse,false);
             }
             else if (_type == AnalysisType.atJQL)
             {
@@ -174,55 +182,51 @@ namespace JiraCon
             }
         }
 
-        public void WriteToCSV()
+        public string WriteToCSV()
         {
             bool addedHeader = false ;
-            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
-            if (Console.ReadKey(true).Key == ConsoleKey.Y)
-            {
-                DateTime now = DateTime.Now;
-                string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
-                string csvPath = Path.Combine(JTISConfigHelper.JTISRootPath,fileName);
+//            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
+            DateTime now = DateTime.Now;
+            string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+            string csvPath = Path.Combine(JTISConfigHelper.JTISRootPath,fileName);
 
-                using (StreamWriter writer = new StreamWriter(csvPath))
+            using (StreamWriter writer = new StreamWriter(csvPath))
+            {                
+                foreach (var jc in JCalcs)
                 {
-                    
-                    foreach (var jc in JCalcs)
+                    if (addedHeader == false)
                     {
-                        if (addedHeader == false)
+                        addedHeader = true;
+                        foreach (var ln in jc.StateCalcStringList(true))
                         {
-                            addedHeader = true;
-                            foreach (var ln in jc.StateCalcStringList(true))
-                            {
-                                writer.WriteLine(ln);
-                            }
-                        }
-                        else 
-                        {
-                            foreach (var ln in jc.StateCalcStringList())
-                            {
-                                writer.WriteLine(ln);
-                            }
+                            writer.WriteLine(ln);
                         }
                     }
-                    
-                    writer.WriteLine();
-                    writer.WriteLine("BLOCKERS");
-                    writer.WriteLine();
-                    writer.WriteLine(string.Format("{0},{1},{2},{3}","IssueKey","StartDt","EndDt","BlockerFieldName"));
-
-                    foreach (var jc in JCalcs)
+                    else 
                     {
-                        foreach (var b in jc.Blockers)
+                        foreach (var ln in jc.StateCalcStringList())
                         {
-                            writer.WriteLine(string.Format("{0},{1},{2},{3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName));
+                            writer.WriteLine(ln);
                         }
                     }
-
                 }
-                ConsoleUtil.WriteStdLine(string.Format("Saved to: {0}{1}{2}",csvPath,Environment.NewLine,"PRESS ANY KEY TO CONTINUE"),StdLine.slResponse,false);
-                Console.ReadKey(true);
+                
+                writer.WriteLine();
+                writer.WriteLine("BLOCKERS");
+                writer.WriteLine();
+                writer.WriteLine(string.Format("{0},{1},{2},{3}","IssueKey","StartDt","EndDt","BlockerFieldName"));
+
+                foreach (var jc in JCalcs)
+                {
+                    foreach (var b in jc.Blockers)
+                    {
+                        writer.WriteLine(string.Format("{0},{1},{2},{3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName));
+                    }
+                }
+
             }
+            return csvPath;
+            
         }
 
         private bool FromIdNull(JIssueChangeLogItem item)
@@ -542,29 +546,56 @@ namespace JiraCon
         {
             foreach (var ic in JCalcs)
             {
-                ConsoleUtil.WriteStdLine(String.Format("JTIS SUMMARY FOR ISSUE: {0}",ic.IssueObj.Key),StdLine.slOutputTitle);
-                ConsoleUtil.WriteStdLine(String.Format("TITLE: {0}",ic.IssueObj.Summary),StdLine.slOutput);
-                ConsoleUtil.WriteStdLine(String.Format("CURRENT STATUS: {0}",ic.IssueObj.StatusName),StdLine.slOutput);
+                AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
+                var hdrLine = new Rule($"[bold]SUMMARY FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.Blue,Color.White)};
+                hdrLine.Justify(Justify.Left);
+//                hdrLine.Style.Decoration(Decoration.Bold);
+                AnsiConsole.Write(hdrLine);
+                hdrLine = new Rule($"{ic.IssueObj.Summary}"){Style=new Style(Color.Blue,Color.White)};
+                hdrLine.Justify(Justify.Left);
+                hdrLine.Style.Decoration(Decoration.Bold);
+                AnsiConsole.Write(hdrLine);
+                AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
+                AnsiConsole.MarkupLine($"[bold {StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}]CURRENT STATUS: {ic.IssueObj.StatusName}[/]");
+
                 var scStart = ic.StateCalcs.FirstOrDefault(x=>x.ActivityType == StatusType.stStart);
                 if (scStart != null)
                 {
                     ic.FirstActiveStateCalc = scStart;
-                    ConsoleUtil.WriteStdLine(String.Format("ACTIVE WORK STARTED: {0}",scStart.CreatedDt),StdLine.slOutput);
-                    var calendar = new Calendar(scStart.CreatedDt.Year, scStart.CreatedDt.Month);
-                    calendar.Culture("en-US");
-                    calendar.AddCalendarEvent(scStart.CreatedDt);
-                    calendar.HighlightStyle(Style.Parse("green bold"));
-                    AnsiConsole.Write(calendar);
+                    string tStartDt = scStart.StartDt.ToString("yyyy-MMM-dd HH:mm");
+                    try 
+                    {
+                        AnsiConsole.MarkupLine(string.Format("[bold {0} on {1}]ACTIVE WORK STARTED: {2}[/]",StdLine.slOutput.FontMkp(),StdLine.slOutput.BackMkp(),tStartDt));
+                    }
+                    catch 
+                    {
+                    }
                 }
                 else 
                 {
-                    ConsoleUtil.WriteStdLine("ACTIVE WORK HAS NOT STARTED",StdLine.slCode);
+                    AnsiConsole.MarkupLine($"[bold {StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}]ACTIVE WORK HAS NOT STARTED[/]");
                 }
+                AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
+
+                var tbl = new Table();
+                tbl.NoSafeBorder();
+                tbl.RoundedBorder();                
+                tbl.AddColumns(new TableColumn[]{
+                    new TableColumn(new Text("Status",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("Category",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()),
+                    new TableColumn(new Text("TotalDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("TotalBusDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("BlockedDays",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
+                    new TableColumn(new Text("StartedCount",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("FirstStart",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("LastExit",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered())
+                });
+                
                 //status, first entered, last entered, last exit, entered count, active/passive/etc, caltime, bustime
                 List<StatusSummary> ssList = new List<StatusSummary>();
                 foreach (StateCalc sc in ic.StateCalcs)
                 {
-                    StatusSummary ss = new StatusSummary();
+                    StatusSummary? ss = null;
                     if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
                     {
                         if (ssList.Exists(x=>x.Status == sc.ToValue))
@@ -573,15 +604,16 @@ namespace JiraCon
                         }
                         else 
                         {
+                            ss = new StatusSummary();
                             ss.Status = sc.ToValue;
                             ss.Key = sc.LogItem.ChangeLog.JIss.Key;
                             ss.FirstEntry = sc.CreatedDt;
                             ss.LastEntry = sc.CreatedDt;
                             ss.TrackType = sc.LogItem.TrackType;
-                            if (sc.EndDt.HasValue){ss.LastEntry=sc.EndDt;}
+                            if (sc.EndDt.HasValue){ss.LastEntry=sc.EndDt.Value;}
                             ssList.Add(ss);
                         }
-                        if (sc.CreatedDt < ss.FirstEntry.Value){ss.FirstEntry = sc.CreatedDt;}
+                        if (sc.StartDt < ss.FirstEntry.Value){ss.FirstEntry = sc.StartDt;}
                         if (sc.EndDt.HasValue)
                         {
                             if (ss.LastExit.HasValue == false){ss.LastExit=sc.EndDt;}
@@ -593,28 +625,83 @@ namespace JiraCon
                         ss.BlockTime = ss.BlockTime.Add(sc.LogItem.TotalBlockedBusinessTime);
                     }
                 }
+                var todoStyle = new Style(Color.DarkSlateGray1,Color.LightSlateGrey);
+                var inProgressStyle = new Style(Color.NavyBlue,Color.LightSlateGrey);
+                var doneStyle = new Style(Color.Green,Color.LightSlateGrey);
+
+                double activeCalDays = 0;
+                double activeBusDays = 0;
+                double activeBlockDays = 0;
+                double passiveCalDays = 0;
+                double passiveBusDays = 0;
+                double passiveBlockDays = 0;
+
+
                 foreach (var statSumm in ssList)
                 {
-                    ConsoleUtil.WriteStdLine(string.Format("  STATUS: {0}",statSumm.Status),StdLine.slOutputTitle );
-                    ConsoleUtil.WriteStdLine(string.Format("  First Entry: {0}, Last Entry: {1}",statSumm.FirstEntry, statSumm.LastEntry),StdLine.slOutput );
-                    ConsoleUtil.WriteStdLine(string.Format("  Last Exit: {0}",statSumm.LastExit),StdLine.slOutput );
-                    ConsoleUtil.WriteStdLine(string.Format("  Entry Count: {0}",statSumm.EntryCount),StdLine.slOutput );
-                    
-                    var calendar = new Calendar(2020, 10);
-                    calendar.AddCalendarEvent(2020, 10, 11);
-                    calendar.HighlightStyle(Style.Parse("yellow bold"));
-                    AnsiConsole.Write(calendar);
-
-
-                    ConsoleUtil.WriteStdLine(string.Format("  -- TIMESPANS --  ",statSumm.Status),StdLine.slOutputTitle );
-                    ConsoleUtil.WriteStdLine(string.Format("  -- THIS STATUS IS COUNTED AS: {0} --  ",statSumm.TrackType),StdLine.slOutputTitle );
-
-                    ConsoleUtil.WriteStdLine(string.Format("  CALENDAR DAYS: {0:00}, HOURS: {1:00}",statSumm.CalTime.TotalDays,statSumm.CalTime.TotalHours),StdLine.slOutput );
-                    ConsoleUtil.WriteStdLine(string.Format("  BUSINESS DAYS: {0:00}, HOURS: {1:00}",statSumm.BusTime.TotalDays,statSumm.BusTime.TotalHours),StdLine.slOutput );
-                    ConsoleUtil.WriteStdLine(string.Format("  BLOCKED DAYS: {0:00}, HOURS: {1:00}",statSumm.BlockTime.TotalDays,statSumm.BlockTime.TotalHours),StdLine.slOutput );
-
-
+                    var trackStyle = todoStyle;
+                    if (statSumm.TrackType==StatusType.stActiveState || statSumm.TrackType==StatusType.stStart){trackStyle=inProgressStyle;}
+                    if (statSumm.TrackType==StatusType.stEnd){trackStyle=doneStyle;}
+                    if (statSumm.TrackType == StatusType.stActiveState || statSumm.TrackType == StatusType.stStart)
+                    {
+                        activeCalDays += statSumm.CalTime.TotalDays;
+                        activeBusDays += statSumm.BusTime.TotalDays;
+                        activeBlockDays += statSumm.BlockTime.TotalDays;
+                    }
+                    else 
+                    {
+                        passiveCalDays += statSumm.CalTime.TotalDays;
+                        passiveBusDays += statSumm.BusTime.TotalDays;
+                        passiveBlockDays += statSumm.BlockTime.TotalDays;
+                    }
+                    tbl.AddRow(new Text[]{
+                        new Text($"{statSumm.Status}",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                        new Text($"{statSumm.TrackType}",trackStyle.Decoration(Decoration.Bold)).Centered(),
+                        new Text($"{statSumm.CalTime.TotalDays:##0.00}",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                        new Text($"{statSumm.BusTime.TotalDays:##0.00}",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                        new Text($"{statSumm.BlockTime.TotalDays:##0.00}",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                        new Text($"{statSumm.EntryCount}",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                        new Text($"{statSumm.FirstEntry}",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                        new Text($"{statSumm.LastExit}",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()
+                    });
                 }
+
+                tbl.AddEmptyRow();
+                tbl.AddRow(new Text[]{
+                    new Text("TOTALS",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text("** ACTIVE **",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text($"{activeCalDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{activeBusDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{activeBlockDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered()
+                });
+                tbl.AddRow(new Text[]{
+                    new Text("TOTALS",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text($"** PASSIVE **",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text($"{passiveCalDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{passiveBusDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{passiveBlockDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered()
+                });
+                tbl.AddEmptyRow();
+                tbl.AddRow(new Text[]{
+                    new Text("GRAND TOTAL",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text($"** ALL **",ConsoleUtil.StdStyle(StdLine.slResponse).Decoration(Decoration.Bold)).Centered(),
+                    new Text($"{activeCalDays+passiveCalDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{activeBusDays+passiveBusDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text($"{activeBlockDays+passiveBlockDays:0.00}",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered(),
+                    new Text("---",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Dim)).Centered()
+                });
+
+
+
+                AnsiConsole.Write(tbl);
                 ConsoleUtil.PressAnyKeyToContinue();
 
             }

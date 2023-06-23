@@ -14,14 +14,14 @@ namespace JiraCon
         public TimeSpan CalTime {get;set;}
         public TimeSpan BusTime {get;set;}
         public TimeSpan BlockTime {get;set;}
-        public DateTime StartDt {get;private set ;}
+        //public DateTime StartDt {get;set ;}
         public StatusType TrackType {get;set;}         
         public SortedDictionary<string,double> StatusCategoryDays {get; private set;}
         public SortedDictionary<string,double> StatusDays {get; private set;}
 
         public StatusSummary()
         {
-            StartDt = DateTime.MinValue;
+            
             Key = string.Empty;
             Status = string.Empty;
             StatusCategoryDays = new SortedDictionary<string, double>();
