@@ -2,20 +2,39 @@ using System.Text.RegularExpressions;
 namespace JiraCon
 {
 
-    // public static class StringUtil
-    // {
-    //     public static string? CheckBrackets(this string? data)
-    //     {
-    //         if (data != null)
-    //         {
-    //             if (data.Contains("(empty)"))
-    //             {
-    //                 var cnt = Regex.Matches(data,"(empty)");
-    //             }
-    //         }
-    //     }
-    // }
+        public static class ColorUtil
+        {
+            public static IEnumerable<T> ReverseEnumerable<T>(this IEnumerable<T> source)
+            {
+                if (source is null)
+                {
+                    throw new ArgumentNullException(nameof(source));
+                }
 
+                return source.Reverse();
+            }
+ 
+            public static string FontMkp(this StdLine line)
+            {            
+                var c = ConsoleUtil.StdStyle(line).Foreground;
+                return c.ToString();
+            }
+            public static Spectre.Console.Color FontColor(this StdLine line)
+            {            
+                return ConsoleUtil.StdStyle(line).Foreground;
+            }
+            public static string BackMkp(this StdLine line)
+            {            
+                var c = ConsoleUtil.StdStyle(line).Background;
+                return c.ToString();
+            }
+            public static Spectre.Console.Color BackColor(this StdLine line)
+            {            
+                return ConsoleUtil.StdStyle(line).Background;
+            }
+
+        }
+    
     public static class DateUtil
     {
 

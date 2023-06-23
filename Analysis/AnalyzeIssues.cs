@@ -551,6 +551,7 @@ namespace JiraCon
                     ic.FirstActiveStateCalc = scStart;
                     ConsoleUtil.WriteStdLine(String.Format("ACTIVE WORK STARTED: {0}",scStart.CreatedDt),StdLine.slOutput);
                     var calendar = new Calendar(scStart.CreatedDt.Year, scStart.CreatedDt.Month);
+                    calendar.Culture("en-US");
                     calendar.AddCalendarEvent(scStart.CreatedDt);
                     calendar.HighlightStyle(Style.Parse("green bold"));
                     AnsiConsole.Write(calendar);

@@ -50,9 +50,8 @@ namespace JiraCon
 
            if (key == ConsoleKey.V)
             {
-                ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
+                ConsoleUtil.WriteStdLine("[bold]PLEASE WAIT[/] -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slInfo,false);
                 JTISConfigHelper.UpdateDefaultStatusConfigs();
-
                 WriteJiraStatuses();
                 ConsoleUtil.PressAnyKeyToContinue();
                 return true;                                
@@ -138,6 +137,10 @@ namespace JiraCon
             var usedInCol = string.Format("UsedIn: {0}",ActiveConfig.defaultProject);
             Table table = new Table();
             table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
+            table.Columns[2].Alignment(Justify.Center);
+            table.Columns[3].Alignment(Justify.Center);
+            table.Columns[4].Alignment(Justify.Center);
+            table.Columns[5].Alignment(Justify.Center);
 
             foreach (var jStatus in ActiveConfig.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
             {
@@ -165,8 +168,9 @@ namespace JiraCon
                     }
                     if (jStatus.Type != defStat.Type)
                     {
-                        overridden = "[red on yellow]***[/]";
-                        locState = string.Format("[default on yellow]{0}[/]",locState);
+                        
+                        overridden = string.Format("[bold red on yellow]{0}{0}{0}[/]",":triangular_Flag:");
+                        locState = string.Format("[bold blue on lightyellow3]{0}[/]",locState);
                     }
                     table.AddRow(new string[]{jStatus.StatusId.ToString(), jStatus.StatusName,locState,Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden});
                 }

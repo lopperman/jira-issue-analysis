@@ -97,7 +97,6 @@ namespace JiraCon
             else if (key == ConsoleKey.D)
             {
                 DevTest1();
-                Console.WriteLine("** PRESS ANY KEY **");
                 Console.ReadKey(true);
                 return true;
             }            
@@ -172,8 +171,29 @@ namespace JiraCon
 
         private void DevTest1()
         {
+            MenuManager.ShowMenu(MenuEnum.meMain);
+            MenuManager.ShowMenu(MenuEnum.meIssue_States);
 
-            ConsoleUtil.PressAnyKeyToContinue();
+//             MenuFunction mf1 = new MenuFunction(MenuItemEnum.miMenu_Main,"Main Menu","Go to [bold]Main Menu[/]");
+//             MenuFunction mf2 = new MenuFunction(MenuItemEnum.miMenu_Config,"Config Menu","Go to [bold]Config Menu[/]");
+//             MenuFunction mf3 = new MenuFunction(MenuItemEnum.miMenu_Dev,"Dev Menu","Go to [bold]Dev Menu[/]");
+
+//             var mnu  = AnsiConsole.Prompt(
+//                 new SelectionPrompt<MenuFunction>()
+//                     .Title("What's your [green]favorite fruit[/]?")
+//                     .PageSize(10)
+//                     .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
+//                     .AddChoices(
+//                         mf1, 
+//                         mf2, 
+//                         mf3)                     
+//             );//()=>{return true;}
+// //            MenuManager.Execute(mnu);
+
+//             ConsoleUtil.WriteMarkupLine("Menu Enum: " + mnu.MenuItem ,ConsoleUtil.StdStyle(StdLine.slInfo));
+//             ConsoleUtil.WriteMarkupLine("Menu Name: " + mnu.MenuName  ,ConsoleUtil.StdStyle(StdLine.slInfo));
+
+//             ConsoleUtil.PressAnyKeyToContinue();
         }
 
     }

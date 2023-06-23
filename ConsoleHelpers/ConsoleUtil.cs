@@ -21,15 +21,6 @@ namespace JiraCon
     public static class ConsoleUtil
     {
 
-        // public static string TextMarkup(string txt, Style style, bool performEscape = true)
-        // {
-        //     if (performEscape)
-        //     {txt = Markup.Escape(txt);}
-        //     else 
-        //     {txt = Markup.Remove(txt);}
-            
-            
-        // }
 
         public static Style StdStyle(StdLine input)
         {
@@ -38,7 +29,7 @@ namespace JiraCon
                 case StdLine.slTitle:
                     return new Style(Color.White,Color.Grey19,Decoration.Bold);
                 case StdLine.slMenuName:
-                    return new Style(Color.Blue3,Color.SteelBlue1_1 ,Decoration.Italic);
+                    return new Style(Color.DarkBlue,Color.PaleTurquoise1 );
                 case StdLine.slMenuDetail:
                     return new Style(Color.Blue3,Color.LightYellow3 );
                 case StdLine.slResponse:
@@ -123,9 +114,10 @@ namespace JiraCon
 
         public static void PressAnyKeyToContinue()
         {
-            Markup l1 = new Markup("  --- --- --- --- --- ---  ",new Style(Color.Default,Color.Default));
+            AnsiConsole.WriteLine();
+//            Markup l1 = new Markup("  --- --- --- --- --- ---  ",new Style(Color.Default,Color.Default));
             Markup l2 = new Markup(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
-            AnsiConsole.Write(new Rows(l1,l2));
+            AnsiConsole.Write(new Rows(l2));
 
             Console.ReadKey(true);
         }
@@ -172,11 +164,14 @@ namespace JiraCon
             // var cfgMgr = new ConfigurationManager();
             // cfgMgr.AddConfiguration(new Confi)
             // var appTitle = Config
-            var title = "[bold]JIRA Time In Status[/][dim] by Paul Brower @ [link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
+            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
+//            panel.Width = Console.WindowWidth;
             panel.HeaderAlignment(Justify.Center );
+            
             panel.BorderColor(Color.Grey15);
+            panel.Expand = true;
             AnsiConsole.Write(panel);
 
         }

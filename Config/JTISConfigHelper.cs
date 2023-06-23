@@ -31,19 +31,31 @@ namespace JiraCon
             }
             set
             {
-                _config = value;
-                JiraUtil.CreateRestClient();
-                if (_config.DefaultStatusConfigs.Count == 0 || _config.DefaultStatusConfigs.Count != _config.StatusConfigs.Count )
-                {
-                    ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
-                    UpdateDefaultStatusConfigs();
-                }
-                else 
-                {
-                    FillMissingStatusConfigs();
-                }
+                AnsiConsole.Status()
+                    .Start($"Connecting to: {value.baseUrl}", ctx=>
+                    {
+                        ctx.Status("[bold]Please wait while a connection is established ...[/]");
+                        ctx.Spinner(Spinner.Known.Dots);
+                        ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                        Thread.Sleep(1000);
 
-
+                        _config = value;
+                        JiraUtil.CreateRestClient();
+                        if (_config.DefaultStatusConfigs.Count == 0 || _config.DefaultStatusConfigs.Count != _config.StatusConfigs.Count )
+                        {
+                            // ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
+                            ctx.Status("[italic]Checking Jira Issue Status Configuration[/]");
+                            Thread.Sleep(1000);
+                            UpdateDefaultStatusConfigs();
+                        }
+                        else 
+                        {
+                            ctx.Status("[italic]Checking Local Issue Status Configuration[/]");
+                            Thread.Sleep(1000);
+                            FillMissingStatusConfigs();
+                        }
+                    }
+                    );
             }
         }
 
@@ -342,9 +354,15 @@ namespace JiraCon
             var cfgNames = JTISConfigHelper.ConfigNameList;
             cfgNames.Add("[dim]00 | EXIT[/]");
             string[] choices = cfgNames.Select(x=>x.ToString()).ToArray();
+
+            var sg = new AnsiConsoleSettings();
+            sg.ColorSystem = ColorSystemSupport.Detect ;
+            var cs = AnsiConsole.Create(sg);
+            
             string cfgResp = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     // .Title(msg)
+                    // .HighlightStyle.Decoration(Decoration.Bold)
                     .PageSize(10)
                     .MoreChoicesText("(Move up and down to reveal more choices)")
                     .AddChoices(choices));
