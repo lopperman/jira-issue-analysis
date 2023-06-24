@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 
 
 
@@ -60,6 +61,13 @@ namespace JiraCon
         public string MenuName {get;private set;}
         public string? MenuNameMarkup {get; private set;}
         public MenuItemEnum MenuItem {get; private set;}
+
+        public MenuFunction()
+        {
+            MenuName = string.Empty;
+            MenuNameMarkup = string.Empty;
+            
+        }
 
         public MenuFunction(MenuItemEnum menuItem, string menuTitle, string menuTitleMarkup, bool dimItem = false, string? emoji = null)
         {

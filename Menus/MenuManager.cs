@@ -17,7 +17,6 @@ namespace JiraCon
 
     public static class MenuManager
     {
-     
         private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("  {0} {0} {0}","-- "),Emoji.Known.WhiteSmallSquare);
      
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
@@ -44,7 +43,7 @@ namespace JiraCon
                     finalMenu = MenuEnum.meStatus_Config;
                     break;
                 case MenuItemEnum.miExit:
-                    finalMenu = null;
+                    finalMenu = null;                    
                     ConsoleUtil.ByeByeForced();
                     break;
                 case MenuItemEnum.miShowChangeHistoryCards:
@@ -66,16 +65,28 @@ namespace JiraCon
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
                 case MenuItemEnum.miStartRecordingSession:
-                    AnsiConsole.Record();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
-                    ConsoleUtil.PressAnyKeyToContinue("Recording has started.  Select the menu to Save Session to file will stop the recording after file is saved");
+                    if (JTISConfigHelper.IsConsoleRecording)
+                    {
+                        ConsoleUtil.PressAnyKeyToContinue("Recording is already in progress");
+                    }
+                    else 
+                    {
+                        JTISConfigHelper.IsConsoleRecording = true;
+                        AnsiConsole.Record();
+                        ConsoleUtil.PressAnyKeyToContinue("Recording has started");
+                    }
                     break;
                 case MenuItemEnum.miSaveSessionToFile:
                     var fName = SaveSessionFile();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
                     ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
                     break;
-
+                case MenuItemEnum.miSavedJQLView:
+                    JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
+                    if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    break;
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
                     AnsiConsole.Write(new Rule());
@@ -91,7 +102,7 @@ namespace JiraCon
             }
         }
 
-        private static string SaveSessionFile()
+        public static string SaveSessionFile()
         {
             string sessFile = Path.Combine(JTISConfigHelper.ConfigFolderPath,"SessionFiles");
             if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
@@ -257,8 +268,28 @@ namespace JiraCon
             }
         }
 
+        private static void CheckMinConsoleSize(int cWidth, int cHeight)
+        {
+            AnsiConsole.WriteLine("checking minimum console ");
+            AnsiConsole.WriteLine($"Current Width: {Console.WindowWidth}");
+            AnsiConsole.WriteLine($"Current Height: {Console.WindowHeight}");
+            if (Console.WindowWidth < cWidth || Console.WindowHeight < cHeight)
+            {
+                try 
+                {                    
+                    Console.SetWindowSize(cWidth,cHeight);
+                }
+                catch
+                {
+                    ConsoleUtil.PressAnyKeyToContinue($"Please adjust size of console window  Width and Height to {cWidth} X {cHeight} for the best experience");
+                }
+            }
+
+        }
         public static void ShowMenu(MenuEnum menu)
         {
+            CheckMinConsoleSize(100,40);
+
             BuildMenuPanel(menu);
             List<MenuFunction> menuItems = BuildMenuItems(menu);
             if (menuItems.Count > 0)
@@ -303,7 +334,9 @@ namespace JiraCon
             var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
 
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
-            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jiraTimeInStatus]Paul Brower[/]{Environment.NewLine}{menuLabel}";
+
+
+            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jiraTimeInStatus]Paul Brower[/]{ConsoleUtil.RecordingInfo}{Environment.NewLine}{menuLabel}";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);
@@ -343,8 +376,6 @@ namespace JiraCon
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Info: {JiraUtil.JiraRepo.ServerInfo.BaseUrl}"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
-
-
                 break;
                 case(MenuEnum.meDev):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"Developer Test 1"));

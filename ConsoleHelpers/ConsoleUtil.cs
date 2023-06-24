@@ -168,10 +168,24 @@ namespace JiraCon
             }
         }
 
+        public static string RecordingInfo
+        {
+            get
+            {
+                if (JTISConfigHelper.IsConsoleRecording == false) 
+                {
+                    return string.Empty;
+                }
+                else 
+                {
+                    return " ** [bold red on lightyellow3]RECORDING IN PROGRESS[/] ** ";
+                }
+            }
+        }
         public static void WriteAppTitle()
         {
             AnsiConsole.Clear();
-            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
+            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);
@@ -383,6 +397,15 @@ namespace JiraCon
 
         public static void ByeByeForced()
         {
+            if (JTISConfigHelper.IsConsoleRecording)
+            {
+                if (Confirm("Save recorded session to file?",true))
+                {
+                    var fName = MenuManager.SaveSessionFile();
+                    ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");                    
+                }
+            }
+
             ConsoleUtil.WriteAppTitle();
             AnsiConsole.MarkupLine("   :llama:  :llama:  :llama:  ");
             var title = $"{Environment.NewLine}[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] :smiling_face_with_sunglasses: HAVE A GREAT DAY! :smiling_face_with_sunglasses:[/]{Environment.NewLine}";

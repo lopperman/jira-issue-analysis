@@ -13,7 +13,11 @@ namespace JiraCon
 
                 return source.Reverse();
             }
- 
+
+            public static Spectre.Console.Style? CStyle(this StdLine line)
+            {
+                return ConsoleUtil.StdStyle(line);
+            }
             public static string FontMkp(this StdLine line)
             {            
                 var c = ConsoleUtil.StdStyle(line).Foreground;

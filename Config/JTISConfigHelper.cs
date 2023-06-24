@@ -21,12 +21,16 @@ namespace JiraCon
     
     public static class JTISConfigHelper
     {
+        public static bool IsInitialized {get;set;}
+        public static bool IsConsoleRecording {get;set;}
         private static JTISConfig? _config ;
 
         public static JTISConfig? config
         {
             get
             {
+
+
                 return _config;
             }
             set
@@ -338,6 +342,18 @@ namespace JiraCon
 
         internal static JTISConfig? ChangeCurrentConfig(string? msg)
         {
+
+            if (IsInitialized == false)
+            {
+                IsInitialized = true;
+                if (ConsoleUtil.Confirm("Record console session?",false))
+                {
+                    IsConsoleRecording = true ;
+                    AnsiConsole.Record();
+                    ConsoleUtil.PressAnyKeyToContinue("Recording started. You'll have the option to save the recording when you quit using the EXIT Menu Option. You can also save the recording using the Configuration menu.");
+                }
+            }
+
             JTISConfig? chCfg = null; 
             Console.Clear();
             if (msg==null || msg.Length == 0)
