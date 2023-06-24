@@ -1,8 +1,6 @@
 using System.Xml.Linq;
 using System.Linq;
 
-
-
 namespace JiraCon
 {
     public class MenuJQL : IMenuConsole
