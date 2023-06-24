@@ -11,6 +11,7 @@ namespace JiraCon
             ActiveConfig = cfg;                        
         }
         
+        
         public void BuildMenu()
         {
             var cfgName = string.Format("Connected: {0} ",JTISConfigHelper.config.configName);
