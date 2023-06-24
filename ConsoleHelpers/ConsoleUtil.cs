@@ -20,7 +20,7 @@ namespace JiraCon
 
     public static class ConsoleUtil
     {
-
+            
 
         public static Style StdStyle(StdLine input)
         {

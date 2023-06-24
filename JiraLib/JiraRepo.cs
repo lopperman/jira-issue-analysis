@@ -17,6 +17,7 @@ namespace JiraCon
 
             JiraRestClientSettings settings = new JiraRestClientSettings();
             settings.EnableUserPrivacyMode = true;
+            
             _jira = Atlassian.Jira.Jira.CreateRestClient(server, userName, password,settings);
 
             _jira.Issues.MaxIssuesPerRequest = 500;
