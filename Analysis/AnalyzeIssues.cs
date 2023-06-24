@@ -606,7 +606,8 @@ namespace JiraCon
                 {
                     AnsiConsole.MarkupLine($"[bold {StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}]ACTIVE WORK HAS NOT STARTED[/]");
                 }
-                AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
+                // AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
+                AnsiConsole.WriteLine();
 
                 var tbl = new Table();
                 tbl.NoSafeBorder();
@@ -733,6 +734,25 @@ namespace JiraCon
 
 
                 AnsiConsole.Write(tbl);
+
+                AnsiConsole.WriteLine();
+                hdrLine = new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White)};
+                hdrLine.Style.Decoration(Decoration.Bold);
+                hdrLine.Justify(Justify.Left);
+                AnsiConsole.Write(hdrLine);
+                // if (ic.Blockers.Count > 0)
+                // {
+                //     tbl = new Table()
+                //     tbl.AddColumns("Issue Key","BlockStart","BlockEnd")
+                //     foreach (var block in ic.Blockers)
+                //     {
+                //         block.
+                //     }
+                // }
+                
+                AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
+
+
                 ConsoleUtil.PressAnyKeyToContinue();
 
             }

@@ -264,7 +264,7 @@ namespace JiraCon
             if (menuItems.Count > 0)
             {
                 var sp = new SelectionPrompt<MenuFunction>();
-                sp.PageSize = 10;
+                sp.PageSize = 16;
                 sp.AddChoices(menuItems);
                 if (menu == MenuEnum.meMain)
                 {

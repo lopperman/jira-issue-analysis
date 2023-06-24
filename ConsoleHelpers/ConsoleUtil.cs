@@ -31,7 +31,8 @@ namespace JiraCon
                 case StdLine.slMenuName:
                     return new Style(Color.DarkBlue,Color.PaleTurquoise1 );
                 case StdLine.slMenuDetail:
-                    return new Style(Color.Blue3,Color.LightYellow3 );
+                    return new Style(AnsiConsole.Foreground,AnsiConsole.Background);
+                    // return new Style(Color.Blue3,Color.LightYellow3 );
                 case StdLine.slResponse:
                     return new Style(Color.White,Color.DarkBlue,Decoration.Bold);
                 case StdLine.slError:
