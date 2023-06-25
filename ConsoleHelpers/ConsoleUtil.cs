@@ -140,10 +140,25 @@ namespace JiraCon
                 }
             }
         }
+        public static string TimeZoneAlert
+        {
+            get
+            {
+                if (JTISConfigHelper.config != null)
+                {
+                    if (JTISConfigHelper.config.DefaultTimeZoneDisplay == false)
+                    {
+                        var tzi = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
+                        return $" ** [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ** ";
+                    }
+                }
+                return string.Empty;
+            }
+        }
         public static void WriteAppTitle()
         {
             AnsiConsole.Clear();
-            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";
+            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{TimeZoneAlert}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);

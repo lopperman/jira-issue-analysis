@@ -682,5 +682,124 @@ namespace JiraCon
             }
             return isValid;
         }
+
+        internal static void ChangeTimeZone()
+        {
+            string? searchTerm = string.Empty;
+            string curTZ = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
+            searchTerm = ConsoleUtil.GetInput<string>($"Date/Time data from Jira is currently displaying as TimeZone: {curTZ}{Environment.NewLine}To change displayed times to another time zone, enter search text (e.g. 'Pacific') and you will be able to select from the filtered results, or press 'ENTER' to cancel",allowEmpty:true);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                List<TimeZoneInfo> zones = TimeZoneInfo.GetSystemTimeZones().ToList();
+                if (zones.Exists(x=>x.DisplayName.Contains(searchTerm,StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    List<TimeZoneInfo> results = zones.Where(x=>x.DisplayName.Contains(searchTerm,StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    if (results.Count > 50)
+                    {
+                        ConsoleUtil.WriteError($"{results.Count} results were returned. Try entering a difference search expression.");
+                        ChangeTimeZone();
+                        return;
+                    }
+                    var sp = new SelectionPrompt<TimeZoneInfo>();
+                    sp.Title("Select Time Zone - (Required - can cancel after selection)");
+                    sp.PageSize = 20;
+                    sp.AddChoices(results.ToArray());
+                    var selTZ = AnsiConsole.Prompt(sp);
+                    if (ConsoleUtil.Confirm($"Change Time-Zone displayed for Jira data to: {selTZ.DisplayName}?",false))
+                    {
+                        JTISConfigHelper.config.TimeZoneDisplay = selTZ;
+                        ConsoleUtil.PressAnyKeyToContinue($"Jira Configuration '{JTISConfigHelper.config.configName}' has been updated to display time zone ** {selTZ.DisplayName} ** ");
+                    }
+
+
+                // var sp = new SelectionPrompt<MenuFunction>();
+                
+                // sp.PageSize = 16;
+                // sp.AddChoices(menuItems);
+                // if (menu == MenuEnum.meMain)
+                // {
+                //     sp.AddChoiceGroup(
+                //             menuSeparator, 
+                //             new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to other Jira Site","[dim]Connect to other Jira Site[/]"),
+                //             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
+                // }
+                // else 
+                // {
+                //     sp.AddChoiceGroup(
+                //             menuSeparator, 
+                //             new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"),
+                //             new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to different Jira","[dim]Connect to other Jira Site[/]"),
+                //             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
+
+                // }                    
+                // var mnu = AnsiConsole.Prompt(sp);
+
+                }
+
+            }
+
+
+            //             List<JiraStatus>? statusAll ; 
+            // List<JiraStatus>? statusProj;
+
+            // AnsiConsole.Progress()
+            //     .Columns(new ProgressColumn[]
+            //     {
+            //         new TaskDescriptionColumn(), 
+            //         new PercentageColumn(),
+            //         new ElapsedTimeColumn(), 
+            //         new SpinnerColumn()
+            //     })
+            //     .Start(ctx => 
+            //     {
+            //         var task1 = ctx.AddTask("[blue on white]Get Jira Statuses[/]");
+            //         var task2 = ctx.AddTask("[blue on white]Check Default Project Statuses[/]");        
+            //         var task3 = ctx.AddTask("[blue on white]Check Missing Status Configs[/]");        
+
+
+            //         task1.MaxValue = 2;
+            //         statusAll = GetJiraStatuses(false);
+            //         task1.Increment(1);
+            //         statusProj = GetJiraStatuses(true);
+            //         task1.Increment(1);
+
+            //         task2.MaxValue = statusAll.Count;
+            //         for (int i = 0; i < statusAll.Count; i ++)
+            //         {
+            //             if (statusProj.Exists(x=>x.StatusId == statusAll[i].StatusId))
+            //             {
+            //                 statusAll[i].DefaultInUse = true;
+            //             }
+            //             task2.Increment(1);                        
+            //         }
+
+            //         task3.MaxValue = 3;
+
+            //         config.ResetOnlineIssueStatusCfg();
+            //         foreach (var stCfg in statusAll)
+            //         {
+            //             config.UpdateStatusCfgOnline(stCfg);
+            //         }
+            //         task3.Increment(1);
+            //         if (clearLocal || config.StatusConfigs.Count == 0)
+            //         {
+            //             config.ResetLocalIssueStatusCfg();
+            //             foreach (var tmpStCfg in statusAll)
+            //             {
+            //                 config.UpdateStatusCfgLocal(tmpStCfg);
+            //             }
+            //             task3.Increment(1);
+            //         }
+            //         else 
+            //         {
+            //             FillMissingStatusConfigs();
+            //             task3.Increment(1);
+            //         }
+            //         JTISConfigHelper.SaveConfigList();
+            //         task3.Increment(1);
+            //     });
+
+        }
     }
 }

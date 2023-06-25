@@ -10,6 +10,12 @@ using Spectre.Console;
 namespace JiraCon
 {
 
+    public enum VisualSnapshotType
+    {
+        vsProject = 1, 
+        vsEpic = 2, 
+        vsCustom = 3
+    }
     public enum MenuEnum
     {
         meMain = 1, 
@@ -28,6 +34,8 @@ namespace JiraCon
         miMenu_IssueStates, 
         miMenu_StatusConfig, 
         miMenu_JQL, 
+        miChangeTimeZoneDisplay, 
+        miVisualSnapshotAll, 
         miExit, 
         miShowChangeHistoryCards, 
         miShowJSONCards, 

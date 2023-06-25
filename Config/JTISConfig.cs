@@ -32,6 +32,10 @@ namespace JiraCon
 
         public JTISConfig()
         {
+            if (TimeZoneDisplay == null)
+            {
+                TimeZoneDisplay = TimeZoneInfo.Local;
+            }
         }
 
         [JsonPropertyName("cfgId")]
@@ -47,6 +51,52 @@ namespace JiraCon
         [JsonPropertyName("projectKey")]
         public string? defaultProject {get;set;}
         [JsonPropertyName("savedJQL")]
+
+        // public bool LocalTimeDisplay 
+        // {
+        //     get 
+        //     {
+        //         if (_displayTimeZone == null) 
+        //         {
+        //             return true;
+        //         }
+        //         else 
+        //         {
+        //             return TimeZoneInfo.Local.Equals(_displayTimeZone);
+        //         }
+        //     }
+        //     set
+        //     {
+        //         if (value == true)
+        //         {
+        //             _displayTimeZone = null;
+        //         }
+        //     }
+        // }
+        public  TimeZoneInfo? TimeZoneDisplay {get;set;}
+        public bool DefaultTimeZoneDisplay
+        {
+            get
+            {
+                if (TimeZoneDisplay == null) {TimeZoneDisplay = TimeZoneInfo.Local;}
+                return TimeZoneDisplay.Equals(TimeZoneInfo.Local);
+            }
+        }
+        public string TimeZoneDisplayInfo
+        {
+            get
+            {
+                if (DefaultTimeZoneDisplay)
+                {
+                    return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
+                }
+                else 
+                {
+                    return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
+                }
+            }
+        }
+
         public IReadOnlyList<JQLConfig> SavedJQL 
         {
             get 

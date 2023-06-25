@@ -44,6 +44,24 @@ namespace JiraCon
                 case MenuItemEnum.miMenu_StatusConfig:
                     finalMenu = MenuEnum.meStatus_Config;
                     break;
+                case MenuItemEnum.miDev1:
+                    var menuDev1 = new MenuDev(JTISConfigHelper.config);
+                    menuDev1.DevTest1();
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    break;
+                case MenuItemEnum.miDev2:
+                    var menuDev2 = new MenuDev(JTISConfigHelper.config);
+                    menuDev2.DevTest2();
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    break;
+                case MenuItemEnum.miChangeTimeZoneDisplay:
+                    JTISConfigHelper.ChangeTimeZone();
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
+                    break;
+                case MenuItemEnum.miVisualSnapshotAll:
+                    finalMenu = MenuEnum.meMain;
+                    var visAll = new VisualSnapshot(VisualSnapshotType.vsProject);
+                    break;
                 case MenuItemEnum.miExit:
                     finalMenu = null;                    
                     ConsoleUtil.ByeByeForced();
@@ -356,7 +374,7 @@ namespace JiraCon
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
 
 
-            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{Environment.NewLine}{menuLabel}";
+            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}{menuLabel}";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);
@@ -384,16 +402,21 @@ namespace JiraCon
             switch (menu)
             {
                 case (MenuEnum.meMain):
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Analyze Issues(s)"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"View ChangeLog for Issue(s)"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
+                    ret.Add(menuSeparator);
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
                 break;
                 case(MenuEnum.meConfig):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Info: {JiraUtil.JiraRepo.ServerInfo.BaseUrl}"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
                 break;
@@ -459,6 +482,4 @@ namespace JiraCon
 
 
     }
-
-
 }

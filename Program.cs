@@ -14,11 +14,8 @@ namespace JiraCon
 
         private static void DevQuick()
         {
+            
 
-            var test1 = ConsoleUtil.GetInput<int>("(required) how old are you?");
-            AnsiConsole.WriteLine($"test1 = : {test1}");
-            var test2 = ConsoleUtil.GetInput<string>("(optional) how old are you?",allowEmpty:true);
-            AnsiConsole.WriteLine($"test2 = : {test2}");
 
             ConsoleUtil.PressAnyKeyToContinue();
         }

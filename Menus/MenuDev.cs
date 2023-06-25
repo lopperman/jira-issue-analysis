@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.InteropServices;
+using Atlassian.Jira;
 using Spectre.Console;
 
 namespace JiraCon
@@ -109,7 +111,7 @@ namespace JiraCon
             return true;
         }
 
-        private void DevTest2()
+        public void DevTest2()
         {
             var resp = AnsiConsole.Confirm("Save file to csv?",defaultValue:false);
             Console.WriteLine("Response: " + resp);
@@ -169,31 +171,24 @@ namespace JiraCon
             ConsoleUtil.PressAnyKeyToContinue();
         }
 
-        private void DevTest1()
+        public void DevTest1()
         {
-            MenuManager.ShowMenu(MenuEnum.meMain);
-            MenuManager.ShowMenu(MenuEnum.meIssue_States);
+            // var j = JiraUtil.JiraRepo.GetJira();
+            // j.RestClient.Settings.JsonSerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+            // j.RestClient.Settings.JsonSerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.          
 
-//             MenuFunction mf1 = new MenuFunction(MenuItemEnum.miMenu_Main,"Main Menu","Go to [bold]Main Menu[/]");
-//             MenuFunction mf2 = new MenuFunction(MenuItemEnum.miMenu_Config,"Config Menu","Go to [bold]Config Menu[/]");
-//             MenuFunction mf3 = new MenuFunction(MenuItemEnum.miMenu_Dev,"Dev Menu","Go to [bold]Dev Menu[/]");
+            var iss = JiraUtil.JiraRepo.GetIssue("WWT-360");
+            AnsiConsole.MarkupLineInterpolated($"Updated ToUniversalTime {iss.Updated.Value.ToUniversalTime()}") ;
+            AnsiConsole.MarkupLineInterpolated($"Updated ToLongTimeString {iss.Updated.Value.ToLongTimeString()}") ;
+            AnsiConsole.MarkupLineInterpolated($"Updated ToLocalTime {iss.Updated.Value.ToLocalTime()}") ;
 
-//             var mnu  = AnsiConsole.Prompt(
-//                 new SelectionPrompt<MenuFunction>()
-//                     .Title("What's your [green]favorite fruit[/]?")
-//                     .PageSize(10)
-//                     .MoreChoicesText("[grey](Move up and down to reveal more fruits)[/]")
-//                     .AddChoices(
-//                         mf1, 
-//                         mf2, 
-//                         mf3)                     
-//             );//()=>{return true;}
-// //            MenuManager.Execute(mnu);
+            DateTime dateTime = iss.Updated.Value.ToUniversalTime();
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            DateTime dateTimeInTimeZone = TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZoneInfo);
+            AnsiConsole.MarkupLineInterpolated($"California Time {dateTimeInTimeZone.ToLongTimeString()}") ;
 
-//             ConsoleUtil.WriteMarkupLine("Menu Enum: " + mnu.MenuItem ,ConsoleUtil.StdStyle(StdLine.slInfo));
-//             ConsoleUtil.WriteMarkupLine("Menu Name: " + mnu.MenuName  ,ConsoleUtil.StdStyle(StdLine.slInfo));
 
-//             ConsoleUtil.PressAnyKeyToContinue();
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
     }

@@ -1,10 +1,13 @@
-﻿using Atlassian.Jira;
+﻿using System.Linq;
+using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
 
 namespace JiraCon
 {
+
+    
     public class JiraRepo: IJiraRepo
     {
         private Jira _jira;
@@ -19,6 +22,9 @@ namespace JiraCon
             settings.EnableUserPrivacyMode = true;
             
             _jira = Atlassian.Jira.Jira.CreateRestClient(server, userName, password,settings);
+
+            
+
 
             _jira.Issues.MaxIssuesPerRequest = 500;
 
@@ -310,6 +316,41 @@ namespace JiraCon
             return result;
         }
 
+        public List<Issue> GetIssuesSummary(string projectKey, params string[] fieldNames)
+        {
+            List<Issue> issues = new List<Issue>();
+
+            int incr = 0;
+            int total = 0;
+
+            IssueSearchOptions searchOptions = new IssueSearchOptions($"project={projectKey}");
+            searchOptions.AdditionalFields = fieldNames;
+            // searchOptions.FetchBasicFields = basicFields;
+
+            searchOptions.MaxIssuesPerRequest = _jira.Issues.MaxIssuesPerRequest;
+
+            do
+            {
+                searchOptions.StartAt = incr;
+
+                Task<IPagedQueryResult<Issue>> results = _jira.Issues.GetIssuesFromJqlAsync(searchOptions);
+                results.Wait();
+
+                total = results.Result.TotalItems;
+
+                foreach (Issue i in results.Result)
+                {
+                    issues.Add((Issue)i);
+                }
+
+                incr += results.Result.Count();
+            }
+            while (incr < total);
+
+            return issues;
+
+        }
+
         public List<Issue> GetIssues(string jql, bool basicFields, params string[] additionalFields)
         {
             List<Issue> issues = new List<Issue>();
@@ -463,7 +504,9 @@ namespace JiraCon
 
 
     public class JField
-    {
+    {   
+        
+         
         public JField()
         {
             ID = string.Empty;
