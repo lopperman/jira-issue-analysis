@@ -19,6 +19,9 @@ namespace JiraCon
         {
 
             JiraRestClientSettings settings = new JiraRestClientSettings();
+            // settings.JsonSerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Unspecified;
+            // settings.JsonSerializerSettings.DateParseHandling = DateParseHandling.DateTime ;
+            // settings.JsonSerializerSettings
             settings.EnableUserPrivacyMode = true;
             
             _jira = Atlassian.Jira.Jira.CreateRestClient(server, userName, password,settings);
