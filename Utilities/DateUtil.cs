@@ -20,21 +20,19 @@ namespace JiraCon
             }
             public static string FontMkp(this StdLine line)
             {            
-                var c = ConsoleUtil.StdStyle(line).Foreground;
-                return c.ToString();
+                return line.CStyle().Foreground.ToString();
             }
             public static Spectre.Console.Color FontColor(this StdLine line)
             {            
-                return ConsoleUtil.StdStyle(line).Foreground;
+                return line.CStyle().Foreground;
             }
             public static string BackMkp(this StdLine line)
             {            
-                var c = ConsoleUtil.StdStyle(line).Background;
-                return c.ToString();
+                return line.CStyle().Background.ToString();
             }
             public static Spectre.Console.Color BackColor(this StdLine line)
             {            
-                return ConsoleUtil.StdStyle(line).Background;
+                return line.CStyle().Background;
             }
 
         }

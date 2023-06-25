@@ -44,63 +44,12 @@ namespace JiraCon
                 case StdLine.slCode:
                     return new Style(Color.Black,Color.Grey82);
                 case StdLine.slInfo:
-                    return new Style(Color.Black,Color.Yellow2);
+                    return new Style(Color.Blue,Color.Cornsilk1);
                 default:
                     return new Style(Color.Blue3,Color.White);
             }            
         }
-        public static ConsoleColor StdForecolor(StdLine lineType )
-        {
-            switch(lineType)
-            {
-                case StdLine.slTitle:
-                    return ConsoleColor.White;
-                case StdLine.slMenuName:
-                    return ConsoleColor.Blue;
-                case StdLine.slMenuDetail:
-                    return ConsoleColor.Black ;
-                case StdLine.slResponse:
-                    return ConsoleColor.Yellow;
-                case StdLine.slError:
-                    return ConsoleColor.Red;
-                case StdLine.slOutput:
-                    return ConsoleColor.DarkBlue;
-                case StdLine.slOutputTitle:
-                    return ConsoleColor.White;
-                case StdLine.slCode:
-                    return ConsoleColor.Gray;
-                case StdLine.slInfo:
-                    return ConsoleColor.Gray;
-                default:
-                    return ConsoleColor.Black;
-            }
-        } 
-        public static ConsoleColor StdBackcolor(StdLine lineType )
-        {
-            switch(lineType)
-            {
-                case StdLine.slTitle:
-                    return ConsoleColor.DarkGray;
-                case StdLine.slMenuName:
-                    return ConsoleColor.Cyan;
-                case StdLine.slMenuDetail:
-                    return ConsoleColor.White ;
-                case StdLine.slResponse:
-                    return ConsoleColor.DarkBlue;
-                case StdLine.slError:
-                    return ConsoleColor.Yellow;
-                case StdLine.slOutput:
-                    return ConsoleColor.White;
-                case StdLine.slOutputTitle:
-                    return ConsoleColor.DarkBlue;
-                case StdLine.slCode:
-                    return ConsoleColor.Black ;
-                case StdLine.slInfo:
-                    return ConsoleColor.Black ;
-                default:
-                    return ConsoleColor.White;
-            }
-        } 
+
         static ConsoleLines consoleLines = new ConsoleLines();
         public static ConsoleColor defBackground = Console.BackgroundColor;
         public static ConsoleColor defForeground = Console.ForegroundColor;
@@ -116,18 +65,26 @@ namespace JiraCon
         public static void PressAnyKeyToContinue(string? msg = null)
         {
             AnsiConsole.WriteLine();
+            var mk = new List<Markup>();
+            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]  PRESS ANY KEY TO CONTINUE  [/]");            
+            Rows? rws = null;
             if (msg!=null)
             {
                 msg = Markup.Remove(msg);
-                msg = $"[{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]  {Emoji.Known.Information}  {msg}[/]";
-                AnsiConsole.MarkupLine(msg);
+                msg = $"{Emoji.Known.BlackSquareButton}  [{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]{msg}[/]{Environment.NewLine}";
+                rws = new Rows(new Markup(msg),finalMsg);
+                // mk.Add(new Markup(msg));
+                //AnsiConsole.MarkupLine(msg);
             }
-            WriteMarkupLine(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
-            // Markup l2 = new Markup(" PRESS ANY KEY TO CONTINUE ",StdStyle(StdLine.slResponse));
-            // AnsiConsole.MarkupLine()
-            // AnsiConsole.MarkupLine(l2.ToString());
-
-//            AnsiConsole.Write(new Rows(l2));
+            else 
+            {
+                rws = new Rows(finalMsg);
+            }
+            
+            var p = new Panel(rws);
+            p.BorderColor(Style.Parse("blue dim").Foreground);
+            p.Border(BoxBorder.Heavy);            
+            AnsiConsole.Write(p);
 
             Console.ReadKey(true);
         }
@@ -416,9 +373,40 @@ namespace JiraCon
 
         public static bool Confirm(string msg, bool defResp )
         {
+            AnsiConsole.WriteLine();
+            var r = new Rule();
+            r.Style=Style.Parse("red dim");
+            AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
             msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
+            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]");      
+
             return AnsiConsole.Confirm(msg,defResp);
+      
+
+            // var mk = new List<Markup>();
+            // var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]  PRESS ANY KEY TO CONTINUE  [/]");            
+            // Rows? rws = null;
+            // if (msg!=null)
+            // {
+            //     msg = Markup.Remove(msg);
+            //     msg = $"{Emoji.Known.BlackSquareButton}  [{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]{msg}[/]{Environment.NewLine}";
+            //     rws = new Rows(new Markup(msg),finalMsg);
+            //     // mk.Add(new Markup(msg));
+            //     //AnsiConsole.MarkupLine(msg);
+            // }
+            // else 
+            // {
+            //     rws = new Rows(finalMsg);
+            // }
+            
+            // var p = new Panel(rws);
+            // p.BorderColor(Style.Parse("blue dim").Foreground);
+            // p.Border(BoxBorder.Heavy);            
+            // AnsiConsole.Write(p);            
+            // msg = Markup.Remove(msg);
+            // msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
+            // return AnsiConsole.Confirm(msg,defResp);
         }    
 
 

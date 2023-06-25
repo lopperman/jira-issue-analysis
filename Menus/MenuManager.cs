@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.IO.Pipes;
 
 
@@ -62,7 +63,11 @@ namespace JiraCon
                 case MenuItemEnum.miJiraConfigView:
                     JTISConfigHelper.ViewAll();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
-                    ConsoleUtil.PressAnyKeyToContinue();
+                    if (ConsoleUtil.Confirm("SHOW API KEYS?",false))
+                    {
+                        JTISConfigHelper.ViewAll(true);
+                        ConsoleUtil.PressAnyKeyToContinue();
+                    }
                     break;
                 case MenuItemEnum.miStartRecordingSession:
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
@@ -85,7 +90,6 @@ namespace JiraCon
                 case MenuItemEnum.miSavedJQLView:
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
                     if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
-                    ConsoleUtil.PressAnyKeyToContinue();
                     break;
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
@@ -276,8 +280,10 @@ namespace JiraCon
             if (Console.WindowWidth < cWidth || Console.WindowHeight < cHeight)
             {
                 try 
-                {                    
-                    Console.SetWindowSize(cWidth,cHeight);
+                {   
+                    #if WINDOWS                 
+                        Console.SetWindowSize(cWidth,cHeight);
+                    #endif
                 }
                 catch
                 {

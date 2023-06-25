@@ -56,7 +56,7 @@ namespace JiraCon
 
     public class MenuFunction 
     {
-        private Func<object>? theFunc;
+        // private Func<object>? theFunc;
 
         public string MenuName {get;private set;}
         public string? MenuNameMarkup {get; private set;}

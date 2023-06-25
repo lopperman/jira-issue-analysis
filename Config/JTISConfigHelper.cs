@@ -398,20 +398,55 @@ namespace JiraCon
 
 
 
-        internal static void ViewAll()
+        internal static void ViewAll(bool showAPIKey = false)
         {
+            var cfg = JTISConfigHelper.config;
 
-            var tbl = new Table();
-            tbl.AddColumns("loginName", "apiKey", "Jira Base Url", "Default Project");
-            tbl.AddRow(JTISConfigHelper.config.userName, "**********", JTISConfigHelper.config.baseUrl, JTISConfigHelper.config.defaultProject);
-            for (int i = 0; i < JTISConfigHelper.cfgList.Count; i++)
+            foreach (var c in JTISConfigHelper.cfgList)
             {
-                if (JTISConfigHelper.cfgList[i].configId != JTISConfigHelper.config.configId)
-                {
-                    tbl.AddRow(JTISConfigHelper.cfgList[i].userName, "**********", JTISConfigHelper.cfgList[i].baseUrl, JTISConfigHelper.cfgList[i].defaultProject);
-                }
+                var grid = new Grid();
+                var gc1 = new GridColumn();
+                gc1.Alignment(Justify.Center);
+                gc1.Padding(0,0,1,1);
+                gc1.Width(4);
+                var gc2 = new GridColumn();
+                gc2.Alignment(Justify.Left);
+                gc1.Padding(0,0,1,1);
+                gc2.Width(20);
+                var gc3 = new GridColumn();
+                gc3.Alignment(Justify.Left);
+                gc1.Padding(0,0,1,1);
+                gc3.Width(25);
+                var gc4 = new GridColumn();
+                gc4.Alignment(Justify.Left);
+                gc1.Padding(0,0,1,1);
+                var gc5 = new GridColumn();
+                gc5.Alignment(Justify.Left);
+                gc1.Padding(0,0,0,1);
+                grid.Expand();
+                grid.AddColumns(gc1,gc2,gc3,gc4,gc5);
+                grid.AddRow(new Markup[]{
+                    new Markup("[bold blue]ID[/]"), 
+                    new Markup("[bold blue]USER NAME[/]"), 
+                    new Markup("[bold blue]BASE URL[/]"), 
+                    new Markup("[bold blue]DEF PRJ[/]"), 
+                    new Markup("[bold blue]API KEY[/]") 
+                    }); 
+                grid.AddRow(new Markup[]{
+                    new Markup(String.Format("[blue on lightskyblue1]{0:00}[/]",c.configId)), 
+                    new Markup(String.Format("[blue on lightskyblue1]{0}[/]",c.userName)), 
+                    new Markup(String.Format("[blue on lightskyblue1]{0}[/]",c.baseUrl)), 
+                    new Markup(String.Format("[blue on lightskyblue1]{0}[/]",c.defaultProject)),                 
+                    new Markup(String.Format("[blue on lightskyblue1]{0}[/]",showAPIKey ? c.apiToken : "*| concealed |*")) 
+                    }); 
+                var p = new Panel(grid);
+                p.Border(BoxBorder.Rounded);
+                p.BorderColor(Style.Parse("blue dim").Foreground);
+                p.Expand();
+                p.SafeBorder();
+
+                AnsiConsole.Write(p);
             }
-            AnsiConsole.Write(tbl);
         }
 
         internal static void DeleteConfig()
