@@ -1,24 +1,12 @@
-using System.Security.Cryptography;
-using System.Reflection.Metadata.Ecma335;
-using System.Linq;
-using System.Xml.Schema;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Diagnostics;
-using System.Threading;
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using JConsole.ConsoleHelpers.ConsoleTables;
 using static JiraCon.ConsoleUtil;
 using Spectre.Console;
 
 namespace JiraCon
 {
-    
+
     public static class JTISConfigHelper
     {
         public static bool IsInitialized {get;set;}
@@ -64,6 +52,13 @@ namespace JiraCon
         }
 
         private static List<JTISConfig> cfgList = new List<JTISConfig>();
+        public static IReadOnlyList<JTISConfig> Configs 
+        {
+            get
+            {
+                return cfgList;
+            }
+        }
         public static string? JTISConfigFilePath {get;set;}
         public static string configFileName = "JiraTISCfg.json";
         public static string JTISRootPath
@@ -109,7 +104,41 @@ namespace JiraCon
         {
             get
             {
-                return cfgList.Count;
+                return  cfgList.Count;
+            }
+        }
+
+        private static void ResequenceConfigIds()
+        {
+            if (cfgList.Count > 0)
+            {
+                bool foundDefault = false;
+                bool isDirty = false;
+                for (int i = 0; i < cfgList.Count; i++)
+                {
+                    var tCfg = cfgList[i];
+                    if (tCfg.configId == 0)
+                    {
+                        foundDefault = true;
+                    }
+                    else
+                    {
+                        if (tCfg.configId != (i+1))
+                        {
+                            isDirty = true;
+                            tCfg.configId = i + 1;
+                        }
+                    }
+                }
+                if (foundDefault == false)
+                {
+                    cfgList.Add(CreateDefaultConfig());
+                    isDirty = true;
+                }
+                if (isDirty)
+                {
+                    SaveConfigList();
+                }
             }
         }
 
@@ -123,7 +152,15 @@ namespace JiraCon
                 {
                     for (int i = 0; i < cfgList.Count; i++)
                     {
-                        tmpRet.Add(string.Format("{0:00} | {1}",cfgList[i].configId,cfgList[i].configName));
+                        if (cfgList[i].configId != 0)
+                        {
+                            tmpRet.Add(string.Format("{0:00} | {1}",cfgList[i].configId,cfgList[i].configName));
+                        }
+                    }
+                    var cfgDef = cfgList.SingleOrDefault(x=>x.configId == 0);
+                    if (cfgDef != null)
+                    {
+                        tmpRet.Add(string.Format("{0:00} | {1}",cfgDef.configId,cfgDef.configName));
                     }
                 }
                 return tmpRet;
@@ -327,22 +364,62 @@ namespace JiraCon
                 }
             }
         }
-        public static void ReadConfigList()
+
+        public static List<JTISConfig>? ReadConfigFile(string filePath)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            string data = string.Empty;
-            using (StreamReader reader = new StreamReader(ConfigFilePath))
+            List<JTISConfig>? retList = null;
+
+            try 
             {
-                data = reader.ReadToEnd();
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                string data = string.Empty;
+                using (StreamReader reader = new StreamReader(ConfigFilePath))
+                {
+                    data = reader.ReadToEnd();
+                }
+                var desObj = JsonConvert.DeserializeObject<List<JTISConfig>>(data);            
+                if (desObj != null)
+                {
+                    retList = desObj;
+                }
+
             }
-            var desObj = JsonConvert.DeserializeObject<List<JTISConfig>>(data);
-            cfgList = desObj;
+            catch (Exception ex)
+            {
+                ConsoleUtil.WriteError($"Error Reading '{filePath}'",false,ex);
+            }
+
+            return retList;
+        }
+        public static bool ReadConfigList(string? cfgFilePath = null)
+        {
+            var retVal = false;
+            List<JTISConfig>? desObj = ReadConfigFile(cfgFilePath ?? ConfigFilePath);
+            if (desObj != null)
+            {
+                cfgList = desObj;
+                if (cfgList.Exists(x=>x.configId == 0)==false)
+                {
+                    cfgList.Add(CreateDefaultConfig());
+                    SaveConfigList();
+                }
+                retVal = true;
+            }
+            return retVal;
+            // JsonSerializerSettings settings = new JsonSerializerSettings();
+            // settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            // string data = string.Empty;
+            // using (StreamReader reader = new StreamReader(ConfigFilePath))
+            // {
+            //     data = reader.ReadToEnd();
+            // }
+            // var desObj = JsonConvert.DeserializeObject<List<JTISConfig>>(data);
         }
 
         internal static JTISConfig? ChangeCurrentConfig(string? msg)
         {
-
+            
             if (IsInitialized == false)
             {
                 IsInitialized = true;
@@ -368,7 +445,6 @@ namespace JiraCon
             AnsiConsole.Write(panel);
 
             var cfgNames = JTISConfigHelper.ConfigNameList;
-            cfgNames.Add("[dim]00 | EXIT[/]");
             string[] choices = cfgNames.Select(x=>x.ToString()).ToArray();
 
             var sg = new AnsiConsoleSettings();
@@ -425,6 +501,7 @@ namespace JiraCon
                 gc1.Padding(0,0,0,1);
                 grid.Expand();
                 grid.AddColumns(gc1,gc2,gc3,gc4,gc5);
+                grid.AddEmptyRow();
                 grid.AddRow(new Markup[]{
                     new Markup("[bold blue]ID[/]"), 
                     new Markup("[bold blue]USER NAME[/]"), 
@@ -440,9 +517,12 @@ namespace JiraCon
                     new Markup(String.Format("[blue on lightskyblue1]{0}[/]",showAPIKey ? c.apiToken : "*| concealed |*")) 
                     }); 
                 var p = new Panel(grid);
+                p.Header($"config file: {JTISConfigHelper.ConfigFilePath}");
+                p.HeaderAlignment(Justify.Left);
                 p.Border(BoxBorder.Rounded);
                 p.BorderColor(Style.Parse("blue dim").Foreground);
                 p.Expand();
+                p.PadTop(1);
                 p.SafeBorder();
 
                 AnsiConsole.Write(p);
@@ -536,6 +616,59 @@ namespace JiraCon
                 Console.ReadKey(true);
             }
             return retJql;
+        }
+
+        private static JTISConfig CreateDefaultConfig()
+        {
+            var newCfg = new JTISConfig();
+            newCfg.apiToken = "***";
+            newCfg.baseUrl = "https://github.com/lopperman/jira-issue-analysis";
+            newCfg.defaultProject = "***";
+            newCfg.userName = "***";
+            newCfg.configName = "CFG00 - ADD NEW CONFIG";
+            newCfg.configId = 0;
+            return newCfg;
+        }
+
+        internal static bool ValidateConfigFileArg(string argVal)
+        {
+            //IF FILE EXIST, CONFIRM FORMAT
+            //IF FILE DOES NOT EXIST, CREATE IT WITH A 'FAKE MUST ADD' CONFIG AND RETURN TRUE
+            bool isValid = false;
+            try 
+            {
+                if (Path.GetExtension(argVal) != null && String.Compare(Path.GetExtension(argVal),".json")==0)
+                {
+                    if (File.Exists(argVal) == false)
+                    {
+                        cfgList.Add(CreateDefaultConfig());
+                        if (string.Compare(argVal,ConfigFilePath,false)!=0)
+                        {
+                            JTISConfigFilePath = argVal;
+                        }
+                        SaveConfigList();
+                        ConsoleUtil.PressAnyKeyToContinue($"ADDED NEW CONFIG FILE: {ConfigFilePath}");
+                        isValid = true;
+                    }
+                    else 
+                    {
+                        if (ReadConfigList(argVal))
+                        {
+                        if (string.Compare(argVal,ConfigFilePath,false)!=0)
+                        {
+                            JTISConfigFilePath = argVal;
+                        }
+                            isValid = true;
+                        }
+                    }
+                }
+            }
+            catch(Exception ex) 
+            {
+                ConsoleUtil.WriteError($"Error validating '{argVal}' as a filePath",false,ex);
+                isValid = false;
+            }
+            return isValid;
         }
     }
 }

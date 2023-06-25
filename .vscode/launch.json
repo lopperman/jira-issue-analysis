@@ -16,6 +16,17 @@
             "stopAtEntry": false
         },
         {
+            "name": "DEV",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net7.0/JiraStates.dll",
+            "args": ["DEV"],
+            "cwd": "${workspaceFolder}",
+            "console":"integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"

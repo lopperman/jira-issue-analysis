@@ -18,7 +18,8 @@ namespace JiraCon
 
     public static class MenuManager
     {
-        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("  {0} {0} {0}","-- "),Emoji.Known.WhiteSmallSquare);
+        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}{0}{0}{0}{0}",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
+//        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
         {
@@ -294,7 +295,7 @@ namespace JiraCon
         }
         public static void ShowMenu(MenuEnum menu)
         {
-            CheckMinConsoleSize(100,40);
+            // CheckMinConsoleSize(100,40);
 
             BuildMenuPanel(menu);
             List<MenuFunction> menuItems = BuildMenuItems(menu);
@@ -315,7 +316,7 @@ namespace JiraCon
                     sp.AddChoiceGroup(
                             menuSeparator, 
                             new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"),
-                            new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to other Jira Site","[dim]Connect to other Jira Site[/]"),
+                            new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to different Jira","[dim]Connect to other Jira Site[/]"),
                             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
 
                 }                    
@@ -342,7 +343,7 @@ namespace JiraCon
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
 
 
-            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jiraTimeInStatus]Paul Brower[/]{ConsoleUtil.RecordingInfo}{Environment.NewLine}{menuLabel}";
+            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{Environment.NewLine}{menuLabel}";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);
@@ -377,7 +378,7 @@ namespace JiraCon
                 case(MenuEnum.meConfig):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Jira Connections"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Info: {JiraUtil.JiraRepo.ServerInfo.BaseUrl}"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));

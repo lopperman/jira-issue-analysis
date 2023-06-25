@@ -143,7 +143,7 @@ namespace JiraCon
         public static void WriteAppTitle()
         {
             AnsiConsole.Clear();
-            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jiraTimeInStatus[/][/]";
+            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);

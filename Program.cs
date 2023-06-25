@@ -12,34 +12,64 @@ namespace JiraCon
         //private static string[] _args = null;
         static string projectKey = string.Empty ;
 
+        private static void DevQuick()
+        {
+            var s1 = "Json";
+            var s2 = "json";
+            var rslt = string.Compare(s1,s2,true);
+            AnsiConsole.MarkupLineInterpolated($"CompareTo: '{s1}' to '{s2}' = {rslt}");
+
+            // AnsiConsole.MarkupLineInterpolated($"[bold yellow]Ansi Console Markup {DateTime.Now}[/]");
+            // AnsiConsole.MarkupLineInterpolated($"[bold yellow]Ansi Console Markup [/]");
+            ConsoleUtil.PressAnyKeyToContinue();
+        }
+
         //Valid Args are either empty, or a single arg which is the filepath to your desired config file
         public static void Main(string[] args) 
         {
+            if (args.Length == 1 && args[0].ToUpper()=="DEV")
+            {
+                DevQuick();
+                return;                
+            }
+
             bool requireManualConfig = false ;
-            
-            if (args == null || args.Length == 0)
+            if (args!=null && args.Length == 1)
             {
-                if (File.Exists(JTISConfigHelper.ConfigFilePath))
+                if (JTISConfigHelper.ValidateConfigFileArg(args[0])==false)
                 {
-                    JTISConfigHelper.ReadConfigList();
+                    return;
                 }
-            }            
-            else 
-            {
-                if (File.Exists(args[0]))
+                else 
                 {
                     JTISConfigHelper.JTISConfigFilePath = args[0];
-                    JTISConfigHelper.ReadConfigList();
                 }
             }
-            if (JTISConfigHelper.ConfigCount == 1)
+            if (args == null || args.Length == 0)
             {
-                JTISConfigHelper.config  = JTISConfigHelper.GetConfigFromList(1);
+                if (JTISConfigHelper.ValidateConfigFileArg(JTISConfigHelper.ConfigFilePath)==false) 
+                {
+                    return;
+                }
             }
-            else if (JTISConfigHelper.ConfigCount > 1)
+            if (File.Exists(JTISConfigHelper.ConfigFilePath))
+            {
+                JTISConfigHelper.ReadConfigList();
+            }
+            else 
+            {
+                return;
+            }
+
+            // if (JTISConfigHelper.ConfigCount > 1)
+            // {
+            //     JTISConfigHelper.config  = JTISConfigHelper.GetConfigFromList(1);
+            // }
+            if (JTISConfigHelper.Configs.Count > 0)
+            // if (JTISConfigHelper.ConfigCount == 1 && JTISConfigHelper.Configs.ToList().Exists(x=>x.configId == 0))
             {
                 var changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
-                if (changeCfg != null && changeCfg.ValidConfig==true)
+                if (changeCfg != null && changeCfg.configId > 0)
                 {
                     JTISConfigHelper.config = changeCfg;
                 }
@@ -64,12 +94,7 @@ namespace JiraCon
 
             MenuManager.Start(JTISConfigHelper.config);
 
-            // bool showMenu = true;
 
-            // while (showMenu)
-            // {
-            //     showMenu = MainMenu();
-            // }
             ConsoleUtil.ByeByeForced();
         }
 

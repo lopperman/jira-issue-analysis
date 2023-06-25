@@ -67,7 +67,7 @@ namespace JiraCon
         {
             get
             {
-                return SavedJQL.Count();
+                return SavedJQL.Count;
             }
         }
 
@@ -78,6 +78,10 @@ namespace JiraCon
             {
 
                 bool tmpValid = true;
+                if (configId == 0)
+                {
+                    return tmpValid;
+                }
 
                 if (userName == null || userName.Length == 0)
                 {
