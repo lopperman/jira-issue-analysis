@@ -84,6 +84,7 @@ namespace JiraCon
             var p = new Panel(rws);
             p.BorderColor(Style.Parse("blue dim").Foreground);
             p.Border(BoxBorder.Heavy);            
+            p.Expand();
             AnsiConsole.Write(p);
 
             Console.ReadKey(true);
