@@ -179,14 +179,16 @@ namespace JiraCon
 
         public static JTISConfig? CreateConfig()
         {
+            
             JTISConfig? retCfg = null;
 
-            string? tmpUserName = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter username (email address) for Jira login:");
-            string? tmpApiToken = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter API token for Jira login:");
-            string? tmpUrl = ConsoleUtil.GetConsoleInput<string>("Missing config -- please enter base url for Jira instance:");
-            string? tmpProject = ConsoleUtil.GetConsoleInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:");
+            string? tmpUserName = ConsoleUtil.GetInput<string>("Missing config -- please enter username (email address) for Jira login:",allowEmpty:true);
+            string? tmpApiToken = ConsoleUtil.GetInput<string>("Missing config -- please enter API token for Jira login:",allowEmpty:true);
+            string? tmpUrl = ConsoleUtil.GetInput<string>("Missing config -- please enter base url for Jira instance:",allowEmpty:true);
+            string? tmpProject = ConsoleUtil.GetInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:",allowEmpty:true);
 
-            if (tmpUserName != null && tmpApiToken != null && tmpUrl != null & tmpProject != null)
+            // if (string.IsNullOrEmpty(tmpUserName) == false && tmpApiToken != null && tmpUrl != null & tmpProject != null)
+            if (string.IsNullOrEmpty(tmpUserName) == false && string.IsNullOrEmpty(tmpApiToken) == false && string.IsNullOrEmpty(tmpUrl) == false && string.IsNullOrEmpty(tmpProject) == false)
             {
                 retCfg = new JTISConfig();
                 retCfg.configId = cfgList.Count + 1;
@@ -195,16 +197,15 @@ namespace JiraCon
                 retCfg.baseUrl = tmpUrl;
                 retCfg.defaultProject = tmpProject;
                 retCfg.configName = MakeConfigName(retCfg);
-                cfgList.Add(retCfg);
-                SaveConfigList();
+                if (retCfg.ValidConfig)
+                {
+                    cfgList.Add(retCfg);
+                    SaveConfigList();
+                    return retCfg;
+                }
+            }
+            return null;
 
-                //retCfg.SaveToFile(ConfigFilePath,1);
-                return retCfg;                
-            }
-            else 
-            {
-                return null;
-            }
         }
 
         public static void  DeleteConfigFile(string? filePath)
@@ -239,6 +240,10 @@ namespace JiraCon
                 {
                     writer.Write(data);
                 }                                
+                foreach (var tcfg in cfgList)
+                {
+                    tcfg.IsDirty = false;
+                }
             }
         }
 
@@ -320,13 +325,19 @@ namespace JiraCon
 
                     task3.MaxValue = 3;
 
-                    config.DefaultStatusConfigs.Clear();
-                    config.DefaultStatusConfigs = statusAll;
-                    task3.Increment(1);
-                    if (clearLocal)
+                    config.ResetOnlineIssueStatusCfg();
+                    foreach (var stCfg in statusAll)
                     {
-                        config.StatusConfigs.Clear();
-                        config.StatusConfigs = statusAll;
+                        config.UpdateStatusCfgOnline(stCfg);
+                    }
+                    task3.Increment(1);
+                    if (clearLocal || config.StatusConfigs.Count == 0)
+                    {
+                        config.ResetLocalIssueStatusCfg();
+                        foreach (var tmpStCfg in statusAll)
+                        {
+                            config.UpdateStatusCfgLocal(tmpStCfg);
+                        }
                         task3.Increment(1);
                     }
                     else 
@@ -345,7 +356,6 @@ namespace JiraCon
         private static void FillMissingStatusConfigs()
         {
             JTISConfig cfg = JTISConfigHelper.config;
-            bool isChanged = false;
 
             if (cfg.DefaultStatusConfigs.Count > 0 )
             {
@@ -354,11 +364,10 @@ namespace JiraCon
                     var dflt = cfg.DefaultStatusConfigs[i];
                     if (cfg.StatusConfigs.SingleOrDefault(x=>x.StatusId  == dflt.StatusId )==null)
                     {
-                        isChanged = true;
-                        cfg.StatusConfigs.Add(new JiraStatus(dflt.StatusId,dflt.StatusName,dflt.CategoryKey,dflt.CategoryName, dflt.DefaultInUse));
+                        cfg.UpdateStatusCfgLocal(dflt);
                     }
                 }
-                if (isChanged)
+                if (cfg.IsDirty)
                 {
                     JTISConfigHelper.SaveConfigList();
                 }
@@ -419,7 +428,10 @@ namespace JiraCon
 
         internal static JTISConfig? ChangeCurrentConfig(string? msg)
         {
-            
+            if (config != null && config.IsDirty)
+            {
+                SaveConfigList();
+            }
             if (IsInitialized == false)
             {
                 IsInitialized = true;

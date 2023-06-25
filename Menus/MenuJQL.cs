@@ -96,7 +96,7 @@ namespace JiraCon
 
                             if (Console.ReadKey(true).Key == ConsoleKey.Y)
                             {
-                                JTISConfigHelper.config.SavedJQL.Remove(delCfg);
+                                JTISConfigHelper.config.DeleteJQL(delCfg);
                                 if (JTISConfigHelper.config.SavedJQLCount > 0)
                                 {
                                     for (int i = 0; i < JTISConfigHelper.config.SavedJQLCount; i ++)

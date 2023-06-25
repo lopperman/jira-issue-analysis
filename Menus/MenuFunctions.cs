@@ -79,6 +79,11 @@ namespace JiraCon
             if (emoji == null){emoji = Emoji.Known.SmallBlueDiamond;}
             if (emoji != null){emoji = $"{emoji}  ";}
             MenuNameMarkup = $"{emoji ?? string.Empty}{menuTitleMarkup}";
+            if (MenuNameMarkup.ToLower().Contains("menu:"))
+            {
+                var nwMain = "Menu:";
+                MenuNameMarkup = MenuNameMarkup.Replace("Menu:",$"[bold]{nwMain}[/]",ignoreCase:true,CultureInfo.InvariantCulture);
+            }
             MenuItem = menuItem;
         }
 

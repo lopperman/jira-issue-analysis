@@ -27,23 +27,13 @@ namespace JiraCon
         // private const string CFG_FIELD_PROJECT = "project";
         private bool _validConn = false;
         private bool disposedValue;
+        [JsonIgnore]
+        public bool IsDirty {get;set;}
 
         public JTISConfig()
         {
-            SavedJQL = new List<JQLConfig>();
-            StatusConfigs = new List<JiraStatus>();
-            DefaultStatusConfigs = new List<JiraStatus>();
         }
 
-        public JTISConfig(int cfgId, string cfgName, string loginName, string authToken, string url, string project): this()
-        {
-            configId = cfgId;
-            configName = cfgName;
-            userName=loginName;
-            apiToken=authToken;
-            baseUrl=url;
-            defaultProject=project;
-        }
         [JsonPropertyName("cfgId")]
         public int? configId {get; set;}
         [JsonPropertyName("cfgName")]
@@ -57,10 +47,32 @@ namespace JiraCon
         [JsonPropertyName("projectKey")]
         public string? defaultProject {get;set;}
         [JsonPropertyName("savedJQL")]
-        public List<JQLConfig> SavedJQL {get; set;}
-        public List<JiraStatus> StatusConfigs {get; set;}
-        public List<JiraStatus> DefaultStatusConfigs {get;set;}
+        public IReadOnlyList<JQLConfig> SavedJQL 
+        {
+            get 
+            {
+                return _savedJQL;
+            }
+        }
+        public IReadOnlyList<JiraStatus> StatusConfigs 
+        {
+            get
+            {
+                return _statusConfigs;
+            }
+        }
+        public IReadOnlyList<JiraStatus> DefaultStatusConfigs 
+        {
+            get
+            {
+                return _defaultStatusConfigs;
+            }
+        }
         
+        private List<JQLConfig> _savedJQL = new List<JQLConfig>();
+        private List<JiraStatus> _statusConfigs = new List<JiraStatus>();
+        private List<JiraStatus> _defaultStatusConfigs = new List<JiraStatus>();
+
 
         [JsonIgnore]
         public int SavedJQLCount
@@ -126,7 +138,8 @@ namespace JiraCon
         public void AddJQL(JQLConfig jc)
         {
             jc.jqlId = SavedJQLCount + 1;
-            SavedJQL.Add(jc);
+            _savedJQL.Add(jc);
+            IsDirty = true;
         }
         public void AddJQL(string shortName, string saveJql )
         {
@@ -135,7 +148,8 @@ namespace JiraCon
         }
         public void DeleteJQL(JQLConfig cfg)
         {
-            SavedJQL.Remove(cfg);
+            IsDirty = true;
+            _savedJQL.Remove(cfg);
             if (SavedJQLCount > 0)
             {
                 for (int i = 0; i < SavedJQLCount; i ++)
@@ -143,6 +157,34 @@ namespace JiraCon
                     SavedJQL[i].jqlId = i + 1;
                 }
             }
+        }
+        public void UpdateStatusCfgLocal(JiraStatus jStatus)
+        {
+            if (_statusConfigs.Exists(x=>x.StatusId == jStatus.StatusId))
+            {
+                _statusConfigs.RemoveAll(x=>x.StatusId == jStatus.StatusId);
+            }
+            _statusConfigs.Add(jStatus);
+            IsDirty = true;
+        }
+        public void ResetLocalIssueStatusCfg()
+        {
+            _statusConfigs.Clear();
+            IsDirty = true;
+        }
+        public void ResetOnlineIssueStatusCfg()
+        {
+            _defaultStatusConfigs.Clear();
+            IsDirty = true;
+        }
+        public void UpdateStatusCfgOnline(JiraStatus jStatus)
+        {
+            if (_defaultStatusConfigs.Exists(x=>x.StatusId == jStatus.StatusId))
+            {
+                _defaultStatusConfigs.RemoveAll(x=>x.StatusId == jStatus.StatusId);
+            }
+            _defaultStatusConfigs.Add(jStatus);
+            IsDirty = true;
         }
         public JQLConfig? GetJQLConfig(int jqlId)
         {
@@ -180,13 +222,6 @@ namespace JiraCon
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~JTISConfig()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public override string ToString()
         {

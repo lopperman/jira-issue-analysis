@@ -107,8 +107,8 @@ namespace JiraCon
                 ConsoleUtil.WriteStdLine("PRESS 'Y' TO RESET LOCAL STATUS CONFIGS TO MATCH CURRENT JIRA PROPERTIES?",StdLine.slResponse,false);
                 if (Console.ReadKey(true).Key == ConsoleKey.Y)
                 {
-                    ActiveConfig.DefaultStatusConfigs.Clear();
-                    ActiveConfig.StatusConfigs.Clear();
+                    ActiveConfig.ResetLocalIssueStatusCfg();
+                    ActiveConfig.ResetOnlineIssueStatusCfg();
                     ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
                     JTISConfigHelper.UpdateDefaultStatusConfigs(true);
                 }

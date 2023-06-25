@@ -54,7 +54,7 @@ namespace JiraCon
                     break;
                 case MenuItemEnum.miIssCfgView:
                     ViewIssueConfig();
-                    if (finalMenu == null){finalMenu = MenuEnum.meMain;}
+                    if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miTISIssueSummary:
                     NewAnalysis(AnalysisType.atIssueSummary);
@@ -92,6 +92,16 @@ namespace JiraCon
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
                     if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
                     break;
+                case MenuItemEnum.miChangeConnection:
+                    finalMenu = MenuEnum.meMain;
+                    var newCfg = JTISConfigHelper.ChangeCurrentConfig("Choose a Jira Configuration, or 'ADD NEW'");
+                    if (newCfg != null)
+                    {
+                        JTISConfigHelper.config = newCfg;
+                        ConsoleUtil.PressAnyKeyToContinue($"CONNECTED TO: {JTISConfigHelper.config.ToString()}");
+                    }
+
+                break;
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
                     AnsiConsole.Write(new Rule());
@@ -297,11 +307,14 @@ namespace JiraCon
         {
             // CheckMinConsoleSize(100,40);
 
+            
+
             BuildMenuPanel(menu);
             List<MenuFunction> menuItems = BuildMenuItems(menu);
             if (menuItems.Count > 0)
             {
                 var sp = new SelectionPrompt<MenuFunction>();
+                
                 sp.PageSize = 16;
                 sp.AddChoices(menuItems);
                 if (menu == MenuEnum.meMain)

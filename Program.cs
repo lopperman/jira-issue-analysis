@@ -14,13 +14,12 @@ namespace JiraCon
 
         private static void DevQuick()
         {
-            var s1 = "Json";
-            var s2 = "json";
-            var rslt = string.Compare(s1,s2,true);
-            AnsiConsole.MarkupLineInterpolated($"CompareTo: '{s1}' to '{s2}' = {rslt}");
 
-            // AnsiConsole.MarkupLineInterpolated($"[bold yellow]Ansi Console Markup {DateTime.Now}[/]");
-            // AnsiConsole.MarkupLineInterpolated($"[bold yellow]Ansi Console Markup [/]");
+            var test1 = ConsoleUtil.GetInput<int>("(required) how old are you?");
+            AnsiConsole.WriteLine($"test1 = : {test1}");
+            var test2 = ConsoleUtil.GetInput<string>("(optional) how old are you?",allowEmpty:true);
+            AnsiConsole.WriteLine($"test2 = : {test2}");
+
             ConsoleUtil.PressAnyKeyToContinue();
         }
 
@@ -61,21 +60,20 @@ namespace JiraCon
                 return;
             }
 
-            // if (JTISConfigHelper.ConfigCount > 1)
-            // {
-            //     JTISConfigHelper.config  = JTISConfigHelper.GetConfigFromList(1);
-            // }
             if (JTISConfigHelper.Configs.Count > 0)
-            // if (JTISConfigHelper.ConfigCount == 1 && JTISConfigHelper.Configs.ToList().Exists(x=>x.configId == 0))
             {
-                var changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
+                JTISConfig? changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
                 if (changeCfg != null && changeCfg.configId > 0)
                 {
                     JTISConfigHelper.config = changeCfg;
                 }
             }
+            else 
+            {
+                return;
+            }
 
-            if (JTISConfigHelper.config==null || JTISConfigHelper.config.ValidConfig==false)
+            if (JTISConfigHelper.config==null)
             {
                 requireManualConfig = true;
             }
@@ -85,14 +83,18 @@ namespace JiraCon
                 JTISConfig? manualConfig = JTISConfigHelper.CreateConfig(); 
                 if (manualConfig != null)
                 {
-                    if (manualConfig.ValidConfig)
-                    {
-                        JTISConfigHelper.config = manualConfig;
-                    }
+                    JTISConfigHelper.config = manualConfig;
                 }
             }
+            if (JTISConfigHelper.config != null)
+            {
+                MenuManager.Start(JTISConfigHelper.config);
+            }
+            else 
+            {
+                
+            }
 
-            MenuManager.Start(JTISConfigHelper.config);
 
 
             ConsoleUtil.ByeByeForced();

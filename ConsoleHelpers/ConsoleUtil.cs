@@ -355,6 +355,11 @@ namespace JiraCon
 
         public static void ByeByeForced()
         {
+            if (JTISConfigHelper.config != null && JTISConfigHelper.config.IsDirty)
+            {
+                JTISConfigHelper.SaveConfigList();
+            }
+
             if (JTISConfigHelper.IsConsoleRecording)
             {
                 if (Confirm("Save recorded session to file?",true))
@@ -372,6 +377,47 @@ namespace JiraCon
             Environment.Exit(0);
         }    
 
+        public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false) 
+        {
+            T retVal = default(T);
+
+            AnsiConsole.WriteLine();
+            var r = new Rule();
+            r.Style=Style.Parse("red dim");
+            AnsiConsole.Write(r);
+            msg = Markup.Remove(msg);
+            if (allowEmpty)
+            {
+                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} [dim][[Optional]][/] {msg} [/]{Environment.NewLine}";
+                retVal = AnsiConsole.Prompt<T>(
+                    new TextPrompt<T>(msg)
+                        .AllowEmpty());
+            }
+            else 
+            {
+                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg} [/]{Environment.NewLine}";
+                retVal = AnsiConsole.Prompt<T>(
+                    new TextPrompt<T>(msg));
+            }
+
+                    
+
+            // if (defVal !=null)
+            // {
+            //     retVal = AnsiConsole.Ask<T?>(msg,defVal);
+            //     AnsiConsole.Ask<string>()
+            // }
+            // else 
+            // {
+            //     retVal = AnsiConsole.Ask<T>(msg);
+            // }
+            if (allowEmpty == false && retVal == null )
+            {
+                PressAnyKeyToContinue("[[Empty] is not allowed, please try again");
+                return GetInput<T>(msg,defVal,allowEmpty);
+            }
+            return retVal;
+        }
         public static bool Confirm(string msg, bool defResp )
         {
             AnsiConsole.WriteLine();
@@ -380,34 +426,8 @@ namespace JiraCon
             AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
             msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
-            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]");      
-
+            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
             return AnsiConsole.Confirm(msg,defResp);
-      
-
-            // var mk = new List<Markup>();
-            // var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]  PRESS ANY KEY TO CONTINUE  [/]");            
-            // Rows? rws = null;
-            // if (msg!=null)
-            // {
-            //     msg = Markup.Remove(msg);
-            //     msg = $"{Emoji.Known.BlackSquareButton}  [{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]{msg}[/]{Environment.NewLine}";
-            //     rws = new Rows(new Markup(msg),finalMsg);
-            //     // mk.Add(new Markup(msg));
-            //     //AnsiConsole.MarkupLine(msg);
-            // }
-            // else 
-            // {
-            //     rws = new Rows(finalMsg);
-            // }
-            
-            // var p = new Panel(rws);
-            // p.BorderColor(Style.Parse("blue dim").Foreground);
-            // p.Border(BoxBorder.Heavy);            
-            // AnsiConsole.Write(p);            
-            // msg = Markup.Remove(msg);
-            // msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
-            // return AnsiConsole.Confirm(msg,defResp);
         }    
 
 
