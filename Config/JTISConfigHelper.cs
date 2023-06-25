@@ -435,6 +435,8 @@ namespace JiraCon
             if (IsInitialized == false)
             {
                 IsInitialized = true;
+                //AnsiConsole.Clear();
+                WriteAppTitle ();
                 if (ConsoleUtil.Confirm("Record console session?",false))
                 {
                     IsConsoleRecording = true ;
@@ -709,6 +711,7 @@ namespace JiraCon
                     if (ConsoleUtil.Confirm($"Change Time-Zone displayed for Jira data to: {selTZ.DisplayName}?",false))
                     {
                         JTISConfigHelper.config.TimeZoneDisplay = selTZ;
+                        JTISConfigHelper.SaveConfigList();
                         ConsoleUtil.PressAnyKeyToContinue($"Jira Configuration '{JTISConfigHelper.config.configName}' has been updated to display time zone ** {selTZ.DisplayName} ** ");
                     }
 
