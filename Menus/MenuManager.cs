@@ -55,6 +55,11 @@ namespace JiraCon
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
 /////////////////////////////////////
+                case MenuItemEnum.miIssCfgEdit:
+                    IssueStatesUtil.EditIssueStatus();
+                    if (finalMenu == null){finalMenu = MenuEnum.meStatus_Config;}
+                    break;
+
                 case MenuItemEnum.miChangeTimeZoneDisplay:
                     JTISConfigHelper.ChangeTimeZone();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
@@ -201,58 +206,14 @@ namespace JiraCon
                     ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
                     Thread.Sleep(100);
                     ctx.Status("[italic]Writing Local Issue Status Config ...[/]");
-                    WriteJiraStatuses();
+                    IssueStatesUtil.WriteJiraStatuses();
 
                 });
             ConsoleUtil.PressAnyKeyToContinue();                    
 
         }
 
-        private static void WriteJiraStatuses(string? searchTerm = null)
-        {
-            var usedInCol = string.Format("UsedIn: {0}",JTISConfigHelper.config.defaultProject);
-            Table table = new Table();
-            table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
-            table.Columns[2].Alignment(Justify.Center);
-            table.Columns[3].Alignment(Justify.Center);
-            table.Columns[4].Alignment(Justify.Center);
-            table.Columns[5].Alignment(Justify.Center);
 
-            foreach (var jStatus in JTISConfigHelper.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
-            {
-                bool includeStatus = false;
-                if (searchTerm == null || searchTerm.Length == 0)
-                {
-                    includeStatus = true;
-                }
-                else 
-                {
-                    if (jStatus.StatusName.ToLower().Contains(searchTerm.ToLower()))
-                    {
-                        includeStatus = true;
-                    }
-                }
-                if (includeStatus)
-                {
-                    JiraStatus  defStat = JTISConfigHelper.config.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
-                    string usedIn = string.Empty;   
-                    string overridden = string.Empty;      
-                    string locState = Enum.GetName(typeof(StatusType),jStatus.Type);     
-                    if (jStatus.DefaultInUse)
-                    {
-                        usedIn = "YES";
-                    }
-                    if (jStatus.Type != defStat.Type)
-                    {
-                        
-                        overridden = string.Format("[bold red on yellow]{0}{0}{0}[/]",":triangular_Flag:");
-                        locState = string.Format("[bold blue on lightyellow3]{0}[/]",locState);
-                    }
-                    table.AddRow(new string[]{jStatus.StatusId.ToString(), jStatus.StatusName,locState,Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden});
-                }
-            }
-            AnsiConsole.Write(table);
-        }
 
         public static string[]? GetIssueNumbers()
         {

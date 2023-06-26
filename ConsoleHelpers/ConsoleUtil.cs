@@ -201,7 +201,7 @@ namespace JiraCon
             // WriteStdLine(text,StdForecolor(msgType),StdBackcolor(msgType),clearScreen);
         }
 
-        public static void WriteError(string text, bool clearScreen = false, Exception? ex =  null)
+        public static void WriteError(string text, bool clearScreen = false, Exception? ex =  null, bool pause = false)
         {
             if (clearScreen){Console.Clear();}
             AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
@@ -209,6 +209,10 @@ namespace JiraCon
             {
                 WriteError(ex.Message);
                 WriteError(ex.StackTrace);
+            }
+            if (pause)
+            {
+                PressAnyKeyToContinue();
             }
         }
         public static void WriteAppend(string text, StdLine lnType, bool endOfLine = false)

@@ -1,12 +1,10 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Dynamic;
-using System.IO;
+using System.Linq;
 using System;
 using System.Text.Json.Serialization;
 
 namespace JiraCon
 {
-   public enum StatusType
+    public enum StatusType
     {
         stActiveState = 1, 
         stPassiveState = 2, 
@@ -19,22 +17,24 @@ namespace JiraCon
     }    
     public class JTISConfig: IDisposable
     {
-        // private const string CFG_FIELD_ID = "configId";
-        // private const string CFG_FIELD_NAME = "configName";
-        // private const string CFG_FIELD_USERNAME = "username";
-        // private const string CFG_FIELD_APITOKEN = "apitoken";
-        // private const string CFG_FIELD_BASEURL = "jiraurl";
-        // private const string CFG_FIELD_PROJECT = "project";
         private bool _validConn = false;
         private bool disposedValue;
+
+        [JsonIgnore]
+        private TimeZoneInfo? _timeZoneInfo = null;
+        public string? TimeZoneId {get;set;}
+
         [JsonIgnore]
         public bool IsDirty {get;set;}
 
+
+
         public JTISConfig()
         {
-            if (TimeZoneDisplay == null)
+            if (_timeZoneInfo == null)
+
             {
-                TimeZoneDisplay = TimeZoneInfo.Local;
+                UpdateDisplayTimeZone(TimeZoneInfo.Local);
             }
         }
 
@@ -52,28 +52,10 @@ namespace JiraCon
         public string? defaultProject {get;set;}
         [JsonPropertyName("savedJQL")]
 
-        // public bool LocalTimeDisplay 
-        // {
-        //     get 
-        //     {
-        //         if (_displayTimeZone == null) 
-        //         {
-        //             return true;
-        //         }
-        //         else 
-        //         {
-        //             return TimeZoneInfo.Local.Equals(_displayTimeZone);
-        //         }
-        //     }
-        //     set
-        //     {
-        //         if (value == true)
-        //         {
-        //             _displayTimeZone = null;
-        //         }
-        //     }
-        // }
+
+        [JsonIgnore()]
         public  TimeZoneInfo? TimeZoneDisplay {get;set;}
+
         public bool DefaultTimeZoneDisplay
         {
             get
@@ -82,18 +64,51 @@ namespace JiraCon
                 return TimeZoneDisplay.Equals(TimeZoneInfo.Local);
             }
         }
-        public string TimeZoneDisplayInfo
+        public string TimeZoneDisplayInfo()
         {
-            get
+            if (_timeZoneInfo == null)
             {
-                if (DefaultTimeZoneDisplay)
+                if (!string.IsNullOrEmpty(TimeZoneId ))
                 {
-                    return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
+                    var tzAttach = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(x=>x.Id == TimeZoneId);
+                    if (tzAttach != null)
+                    {
+                        _timeZoneInfo = tzAttach;
+                    }
                 }
-                else 
+                if (_timeZoneInfo == null) 
                 {
-                    return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
+                    UpdateDisplayTimeZone(TimeZoneInfo.Local);
                 }
+            }
+            if (DefaultTimeZoneDisplay)
+            {
+                return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
+            }
+            else 
+            {
+                return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
+            }
+        }
+        public void UpdateDisplayTimeZone(TimeZoneInfo tzInfo)
+        {
+            bool tzDirty = false;
+            if (_timeZoneInfo == null)
+            {
+                tzDirty = true;
+            }
+            else 
+            {
+                if (_timeZoneInfo.Equals(tzInfo)==false)               
+                {
+                    tzDirty = true;
+                }
+            }
+            _timeZoneInfo = tzInfo;
+            TimeZoneId = tzInfo.Id;
+            if (tzDirty)
+            {
+                JTISConfigHelper.SaveConfigList();
             }
         }
 
