@@ -38,6 +38,7 @@ namespace JiraCon
         miVisualSnapshotAll, 
         miExit, 
         miShowChangeHistoryCards, 
+        miShowChangeHistoryJQL, 
         miShowJSONCards, 
         miChangeConnection, 
         miTISIssueSummary, 

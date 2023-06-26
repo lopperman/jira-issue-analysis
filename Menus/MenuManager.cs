@@ -54,6 +54,7 @@ namespace JiraCon
                     menuDev2.DevTest2();
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
+/////////////////////////////////////
                 case MenuItemEnum.miChangeTimeZoneDisplay:
                     JTISConfigHelper.ChangeTimeZone();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
@@ -67,18 +68,29 @@ namespace JiraCon
                     ConsoleUtil.ByeByeForced();
                     break;
                 case MenuItemEnum.miShowChangeHistoryCards:
-                    ShowChangeLog();
+                    ShowChangeLog(MenuItemEnum.miShowChangeHistoryCards);
+                    if (finalMenu == null){finalMenu = MenuEnum.meMain;}
+                    break;
+                case MenuItemEnum.miShowChangeHistoryJQL:
+                    ShowChangeLog(MenuItemEnum.miShowChangeHistoryJQL);
                     if (finalMenu == null){finalMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miIssCfgView:
                     ViewIssueConfig();
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     break;
+
                 case MenuItemEnum.miTISIssueSummary:
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
+                case MenuItemEnum.miTISJQL:
+                    NewAnalysis(AnalysisType.atJQL);                    
+                    ConsoleUtil.PressAnyKeyToContinue();
+                    if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
+                    break;
+
                 case MenuItemEnum.miJiraConfigView:
                     JTISConfigHelper.ViewAll();
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
@@ -165,14 +177,14 @@ namespace JiraCon
                 analyze.ClassifyStates();                
                 analyze.WriteToConsole();
 
-                if (anType != AnalysisType.atIssueSummary)
-                {
-                    if (ConsoleUtil.Confirm("Save to csv file?",false))
-                    {
-                        var csvFileName = analyze.WriteToCSV();
-                        ConsoleUtil.PressAnyKeyToContinue($"File saved to: {csvFileName}");
-                    }
-                }
+                // if (anType != AnalysisType.atIssueSummary)
+                // {
+                //     if (ConsoleUtil.Confirm("Save to csv file?",false))
+                //     {
+                //         var csvFileName = analyze.WriteToCSV();
+                //         ConsoleUtil.PressAnyKeyToContinue($"File saved to: {csvFileName}");
+                //     }
+                // }
 
             }
         }
@@ -265,40 +277,79 @@ namespace JiraCon
             return null;
         }
         
-        private static void ShowChangeLog()
+        private static void ShowChangeLog(MenuItemEnum mItem)
         {
-            string[]? arr = GetIssueNumbers();
-            if (arr==null || arr.Length == 0){return;}
-            
-            for (int i = 0; i < arr.Length; i ++)
+            List<JIssue>? retIssues= new List<JIssue>();
+            if (mItem == MenuItemEnum.miShowChangeHistoryCards)
             {
-                if (!arr[i].Contains("-"))
+                string[]? arr = GetIssueNumbers();
+                if (arr==null || arr.Length == 0){return;}
+                retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
+            }
+            else if (mItem == MenuItemEnum.miShowChangeHistoryJQL)
+            {
+                string? tJQL = ConsoleUtil.GetInput<string>("ENTER JQL STATEMENT TO SELECT ITEMS",allowEmpty:true);
+                if (!string.IsNullOrWhiteSpace(tJQL))
                 {
-                    arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
+                    if (ConsoleUtil.Confirm($"Use the following JQL?{Environment.NewLine}{tJQL}",true))
+                    {
+                        retIssues = JiraUtil.GetJIssues(tJQL);
+                    }
                 }
             }
-            List<JIssue>? retIssues;
-            retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
-
-
-            if (retIssues != null)
+            if (retIssues.Count > 0)
             {
-                if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
+                foreach (var jIss in retIssues)
                 {
-                    string savedFilePath = string.Empty;
-                    AnsiConsole.Status()
-                        .Start($"Analyzing {arr.Length} issues ...", ctx=>
-                        {
-                            ctx.Spinner(Spinner.Known.Dots);
-                            ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
-                            Thread.Sleep(100);
-
-                        ctx.Status("[italic]Saving to csv file ...[/]");
-                        savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
-                        });
-                    ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
+                    var p = new Panel($"Change Logs For {jIss.Key}, (Status: {jIss.StatusName}");
+                    p.Border = BoxBorder.Rounded;
+                    p.BorderColor(Color.Blue);
+                    AnsiConsole.Write(p);
                 }
+
+                // var tbl = new Table();
+                // tbl.AddColumn("KEY");
+                // tbl.AddColumn("FIELD");
+                // tbl.AddColumn("CHANGED DT");
+                // tbl.AddColumn("OLD VALUE");
+                // tbl.AddColumn("NEW VALUE");
+
+                // for (int i = 0; i < retJIssue.ChangeLogs.Count; i++)
+                // {
+
+                //     JIssueChangeLog changeLog = retJIssue.ChangeLogs[i];
+                //     foreach (JIssueChangeLogItem cli in changeLog.Items)
+                //     {
+                //         if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
+                //         {
+                //                 string toVal = (cli.FieldName.ToLower()=="status") ? string.Format("[bold blue on white]{0}[/]",cli.ToValue) : cli.ToValue;
+                //                 string frVal = (cli.FieldName.ToLower()=="status") ? string.Format("[dim blue on white]{0}[/]",cli.FromValue) : cli.FromValue;
+                //                 tbl.AddRow(new string[]{ tmpIssue.Key.ToString(),cli.FieldName, changeLog.CreatedDate.ToString(),frVal,toVal});
+                //         }
+                //     }
+                // }
+                // AnsiConsole.Write(tbl);
+
+
+
+
+                // if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
+                // {
+                //     string savedFilePath = string.Empty;
+                //     AnsiConsole.Status()
+                //         .Start($"Analyzing {arr.Length} issues ...", ctx=>
+                //         {
+                //             ctx.Spinner(Spinner.Known.Dots);
+                //             ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                //             Thread.Sleep(100);
+
+                //         ctx.Status("[italic]Saving to csv file ...[/]");
+                //         savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
+                //         });
+                //     ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
+                // }
             }
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
         private static void CheckMinConsoleSize(int cWidth, int cHeight)
@@ -402,13 +453,14 @@ namespace JiraCon
             switch (menu)
             {
                 case (MenuEnum.meMain):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Analyze Issues(s)"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"View ChangeLog for Issue(s)"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"ChangeLog for Issues (Enter Issue #'s))"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryJQL,"ChangeLog for Issues (JQL))"));
                     ret.Add(menuSeparator);
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
+                    // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
+                    // ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
                 break;
                 case(MenuEnum.meConfig):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));

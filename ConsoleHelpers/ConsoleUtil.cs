@@ -82,7 +82,7 @@ namespace JiraCon
             }
             
             var p = new Panel(rws);
-            p.BorderColor(Style.Parse("blue dim").Foreground);
+            p.BorderColor(Style.Parse("dim blue").Foreground);
             p.Border(BoxBorder.Heavy);            
             p.Expand();
             AnsiConsole.Write(p);
@@ -180,12 +180,24 @@ namespace JiraCon
         }
         public static void WriteStdLine(string text, StdLine msgType, bool clearScreen = false)
         {
+            var ogText = Markup.Remove(text);
             if (msgType == StdLine.slCode)
             {
                 text = string.Format("  {0}",text);
             }
             if (clearScreen){Console.Clear();}
-            AnsiConsole.MarkupLine(text,StdStyle(msgType));
+
+            try 
+            {
+                AnsiConsole.MarkupLine(text,StdStyle(msgType));
+            }
+            catch (Exception ex)
+            {
+                WriteError("Write Std Line Error - retrying ",ex:ex);
+                AnsiConsole.ResetColors();
+                AnsiConsole.WriteLine(ogText);
+            }
+
             // WriteStdLine(text,StdForecolor(msgType),StdBackcolor(msgType),clearScreen);
         }
 
@@ -398,7 +410,7 @@ namespace JiraCon
 
             AnsiConsole.WriteLine();
             var r = new Rule();
-            r.Style=Style.Parse("red dim");
+            r.Style=Style.Parse("dim red");
             AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
             if (allowEmpty)
@@ -437,7 +449,7 @@ namespace JiraCon
         {
             AnsiConsole.WriteLine();
             var r = new Rule();
-            r.Style=Style.Parse("red dim");
+            r.Style=Style.Parse("dim red");
             AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
             msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";

@@ -534,7 +534,7 @@ namespace JiraCon
                 p.Header($"config file: {JTISConfigHelper.ConfigFilePath}");
                 p.HeaderAlignment(Justify.Left);
                 p.Border(BoxBorder.Rounded);
-                p.BorderColor(Style.Parse("blue dim").Foreground);
+                p.BorderColor(Style.Parse("dim blue").Foreground);
                 p.Expand();
                 p.PadTop(1);
                 p.SafeBorder();

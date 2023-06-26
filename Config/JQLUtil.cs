@@ -21,7 +21,7 @@ namespace JiraCon
                     var _jql = new Panel(jql.jql);
                     _jql.Header($" {jql.jqlId:00} - Saved as: {jql.jqlName} ",Justify.Left);
                     _jql.Border = BoxBorder.Rounded;
-                    _jql.BorderColor(Style.Parse("blue dim").Foreground);
+                    _jql.BorderColor(Style.Parse("dim blue").Foreground);
                     _jql.Expand();
                     _jql.SafeBorder();
                     AnsiConsole.Write(_jql);
