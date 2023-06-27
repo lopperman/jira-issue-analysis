@@ -34,7 +34,8 @@ namespace JiraCon
                     return new Style(AnsiConsole.Foreground,AnsiConsole.Background);
                     // return new Style(Color.Blue3,Color.LightYellow3 );
                 case StdLine.slResponse:
-                    return new Style(Color.White,Color.DarkBlue,Decoration.Bold);
+                    // return new Style(Color.White,Color.DarkBlue,Decoration.Bold);
+                    return new Style(Color.White,Color.Blue3_1,Decoration.Bold);
                 case StdLine.slError:
                     return new Style(Color.Red1,Color.LightCyan1,Decoration.Bold);
                 case StdLine.slOutput:

@@ -6,6 +6,7 @@ using Spectre.Console;
 
 namespace JiraCon
 {
+    
 
     public static class JTISConfigHelper
     {

@@ -1,19 +1,19 @@
 
-using JiraCon;
+// using JiraCon;
 
-namespace JTIS.JTISObject
-{
-    public interface IJTISObject
-    {
-        public void BuildJQL();
-        public int Count {get;}
-        public int RenderedCount {get;}
-        public void Render(bool? renderToEnd = false);
-        public void CancelRender();
+// namespace JTIS.JTISObject
+// {
+//     public interface IJTISObject
+//     {
+//         public void BuildJQL();
+//         public int Count {get;}
+//         public int RenderedCount {get;}
+//         public void Render(bool? renderToEnd = false);
+//         public void CancelRender();
 
-        public bool HasExport {get;set;}
-        public string Export();
-        public MenuEnum ExitMenu {get;}
+//         public bool HasExport {get;set;}
+//         public string Export();
+//         public MenuEnum ExitMenu {get;}
 
-    }
-}
+//     }
+// }

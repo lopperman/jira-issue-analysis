@@ -8,7 +8,7 @@ namespace JiraCon
         }
         public VisualSnapshot(VisualSnapshotType snapshotType):this()
         {
-            SnapshotType = snapshotType;
+            SnapshotType = snapshotType;                        
             Summarize();
         }
         private void Summarize()

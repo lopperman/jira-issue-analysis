@@ -19,11 +19,18 @@ namespace JiraCon
 
     public static class MenuManager
     {
+        private static MenuEnum lastMenu = MenuEnum.meMain;
         private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}{0}{0}{0}{0}",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
 //        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
         {
+            if (item.MenuItem == MenuItemEnum.miSeparator)
+            {
+                ShowMenu(lastMenu);
+                return;
+            }
+
             MenuEnum? finalMenu = returnToMenu;
             switch (item.MenuItem)
             {
@@ -56,6 +63,11 @@ namespace JiraCon
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
 /////////////////////////////////////
+                case MenuItemEnum.miShowJSONCards:
+                    JHelper.ShowIssueJSON();
+                    if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
+                    break;
+
                 case MenuItemEnum.miIssCfgEdit:
                     IssueStatesUtil.EditIssueStatus();
                     if (finalMenu == null){finalMenu = MenuEnum.meStatus_Config;}
@@ -67,6 +79,7 @@ namespace JiraCon
                     break;
                 case MenuItemEnum.miVisualSnapshotAll:
                     finalMenu = MenuEnum.meMain;
+                    ConsoleUtil.PressAnyKeyToContinue("IN DEVELOPMENT");
                     var visAll = new VisualSnapshot(VisualSnapshotType.vsProject);
                     break;
                 case MenuItemEnum.miExit:
@@ -85,8 +98,7 @@ namespace JiraCon
                     ViewIssueConfig();
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     break;
-
-                case MenuItemEnum.miTISIssueSummary:
+                case MenuItemEnum.miTISIssues:
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     break;
@@ -123,6 +135,7 @@ namespace JiraCon
                         }
                     }
                     break;
+/// SAVED JQL ///                    
                 case MenuItemEnum.miSavedJQLView:
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
                     if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
@@ -131,6 +144,12 @@ namespace JiraCon
                     JQLUtil.AddJQL();
                     if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
                     break;
+                case MenuItemEnum.miSavedJQLRemove:
+                    JQLUtil.RemoveJQL(JTISConfigHelper.config);
+                    if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
+                    break;
+
+/// (END) SAVED JQL ///
                 case MenuItemEnum.miChangeConnection:
                     finalMenu = MenuEnum.meMain;
                     var newCfg = JTISConfigHelper.ChangeCurrentConfig("Choose a Jira Configuration, or 'ADD NEW'");
@@ -222,10 +241,10 @@ namespace JiraCon
         }
         public static void ShowMenu(MenuEnum menu)
         {
-            // CheckMinConsoleSize(100,40);
-
             
 
+            
+            lastMenu = menu;
             BuildMenuPanel(menu);
             List<MenuFunction> menuItems = BuildMenuItems(menu);
             if (menuItems.Count > 0)
@@ -301,10 +320,10 @@ namespace JiraCon
             switch (menu)
             {
                 case (MenuEnum.meMain):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Analyze Issues(s)"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"ChangeLog for Issues (Enter Issue #'s))"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryJQL,"ChangeLog for Issues (JQL))"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"ChangeLog for Issues (Enter Issue #'s)"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryJQL,"ChangeLog for Issues (JQL)"));
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
@@ -326,12 +345,13 @@ namespace JiraCon
 
                 break;
                 case(MenuEnum.meIssue_States):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssueSummary,"Create Issue Summary"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISJQL,"Get Issue(s) Data by JQL Query"));
+                    ret.Add(menuSeparator);
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowJSONCards,"Show Issue(s) JSON"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
                 break;
                 case(MenuEnum.meJQL):

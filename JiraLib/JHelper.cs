@@ -1,5 +1,12 @@
-﻿using System;
-
+﻿using System.Net.Mime;
+using System.ComponentModel.Design.Serialization;
+using System;
+using JTIS.ManagedObjects;
+using Spectre.Console;
+using Atlassian.Jira;
+using Spectre.Console.Json;
+using Newtonsoft.Json;
+using JTIS.Console;
 
 namespace JiraCon
 {
@@ -86,6 +93,60 @@ namespace JiraCon
             }
 
             return businessDays;
+        }
+
+        public static void ShowIssueJSON()
+        {
+            var searchJQL = ConsoleInput.IssueKeysToJQL();
+            if (string.IsNullOrWhiteSpace(searchJQL)) return;
+
+            List<Issue> issues = new List<Issue>();
+
+            var pr = new Progress(AnsiConsole.Console);
+                pr.AutoClear(true);
+                pr.AutoRefresh(true);
+                pr.HideCompleted(false);
+                pr.Columns(new ProgressColumn[]
+                {
+                    new TaskDescriptionColumn(), 
+                    new ProgressBarColumn(), 
+                    new ElapsedTimeColumn(), 
+                    new SpinnerColumn(Spinner.Known.BouncingBar).Style(new Style(Color.Blue3_1,Color.LightSkyBlue1)), 
+                })
+                .Start(async ctx => 
+                {
+                    var tsk1 = ctx.AddTask($"[bold blue on white]Querying Jira[/]",true,2);
+                    var tsk2 = ctx.AddTask($"[dim blue on white]---[/]",true,2);
+                    tsk1.Increment(1);
+                    issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
+                    tsk1.Increment(1);
+
+                    if (issues.Count > 0)
+                    {
+                        tsk1.Description=string.Format($"[dim blue on white]Querying Jira[/]");
+
+                        tsk2.MaxValue = issues.Count + 1;
+                        foreach (var iss in issues)
+                        {
+                            tsk2.Description=$"[bold blue on white]Parsing to Json: {iss.Key.Value}[/]";
+                            //await iss.GetChangeLogsAsync();
+                            tsk2.Increment(1);
+                        }
+                    }
+
+                });    
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+                foreach (var iss in issues)       
+                {
+                    string data = JsonConvert.SerializeObject(iss,Formatting.None,settings);
+                    //var json = new JsonText(data)
+                    app.ShowJson($"Issue: {iss.Key.Value}",data);
+                    ConsoleUtil.PressAnyKeyToContinue();
+                }
+
+
         }
     }
 

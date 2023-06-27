@@ -41,7 +41,6 @@ namespace JiraCon
         miShowChangeHistoryJQL, 
         miShowJSONCards, 
         miChangeConnection, 
-        miTISIssueSummary, 
         miTISIssues, 
         miTISEpic, 
         miTISJQL, 

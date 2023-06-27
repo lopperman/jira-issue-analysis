@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlTypes;
 using System.Text.Json;
 using Atlassian.Jira;
+using JTIS.Console;
 using Newtonsoft.Json;
 using Spectre.Console;
 
@@ -14,6 +15,9 @@ namespace JiraCon
 
         private static void DevQuick()
         {
+
+            //app.testJson();
+            return;
             Action a1 = ()=> {
                 AnsiConsole.WriteLine("test a1");
                 Thread.Sleep(2000);

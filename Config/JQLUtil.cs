@@ -5,7 +5,36 @@ namespace JiraCon
     public static class JQLUtil
     {
         
-        public static void ViewSavedJQL(JTISConfig cfg)
+        public static void RemoveJQL(JTISConfig cfg)
+        {
+            if (cfg.SavedJQLCount == 0)
+            {
+                ConsoleUtil.WriteError("You don't have any saved JQL",pause:true);
+                return;
+            }
+            ViewSavedJQL(cfg,false);
+            var tbl = new Table();
+            tbl.AddColumns("jqlId","jqlName","jql");
+            foreach (var jqlCfg in cfg.SavedJQL)
+            {
+                tbl.AddRow(new Text[]{
+                    new Text($"[bold blue on lightyellow3]{jqlCfg.jqlId}[/]"), 
+                    new Text($"[bold]{jqlCfg.jqlName}[/]"), 
+                    new Text($"[dim]{jqlCfg.jql}[/]")                    
+                    });
+            }
+            var delId = ConsoleUtil.GetInput<int>("Enter the jqlId you wish to delete");
+            if (delId > 0)
+            {
+                var delItem = cfg.SavedJQL.FirstOrDefault(x=>x.jqlId == delId);
+                if (ConsoleUtil.Confirm($"[bold]Delete[/] saved JQL: {delItem.jqlId:00} - {delItem.jqlName}?",true))
+                {
+                    cfg.DeleteJQL(delItem);
+                    ConsoleUtil.WaitWhileSimple("Saving config file",JTISConfigHelper.SaveConfigList);
+                }
+            }
+        }
+        public static void ViewSavedJQL(JTISConfig cfg, bool pause = true)
         {
             if (cfg.SavedJQLCount == 0)
             {
@@ -27,7 +56,10 @@ namespace JiraCon
                     _jql.SafeBorder();
                     AnsiConsole.Write(_jql);
                 }
-                ConsoleUtil.PressAnyKeyToContinue($"{cfg.SavedJQLCount} results");
+                if (pause)
+                {
+                    ConsoleUtil.PressAnyKeyToContinue($"{cfg.SavedJQLCount} results");
+                }
             }
         }
 
