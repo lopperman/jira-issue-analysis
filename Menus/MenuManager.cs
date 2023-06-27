@@ -73,11 +73,11 @@ namespace JiraCon
                     ConsoleUtil.ByeByeForced();
                     break;
                 case MenuItemEnum.miShowChangeHistoryCards:
-                    ShowChangeLog(MenuItemEnum.miShowChangeHistoryCards);
+                    var chl1 = new ChangeLogsMgr(AnalysisType.atIssues);
                     if (finalMenu == null){finalMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miShowChangeHistoryJQL:
-                    ShowChangeLog(MenuItemEnum.miShowChangeHistoryJQL);
+                    var chl2 = new ChangeLogsMgr(AnalysisType.atJQL);
                     if (finalMenu == null){finalMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miIssCfgView:
@@ -215,103 +215,8 @@ namespace JiraCon
 
 
 
-        public static string[]? GetIssueNumbers()
-        {
-            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]SPACE[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will automatically have '{JTISConfigHelper.config.defaultProject}-' added (e.g. '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]{Environment.NewLine}:");
-            var keys = AnsiConsole.Prompt<string>(p);
-            if (keys != null && keys.Length>0)
-            {
-                string[] arr = keys.Split(' ',StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
-                // string[] arr = keys.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                if (arr.Length >= 1)
-                {
-                    for (int i = 0; i < arr.Length; i ++)
-                    {
-                        if (!arr[i].Contains('-'))
-                        {
-                            arr[i] = $"{JTISConfigHelper.config.defaultProject}-{arr[i]}";
-                        }
-                    }      
-                    return arr;
-                }
-            }      
-            return null;
-        }
         
-        private static void ShowChangeLog(MenuItemEnum mItem)
-        {
-            List<JIssue>? retIssues= new List<JIssue>();
-            if (mItem == MenuItemEnum.miShowChangeHistoryCards)
-            {
-                string[]? arr = GetIssueNumbers();
-                if (arr==null || arr.Length == 0){return;}
-                retIssues = MainClass.AnalyzeIssues(string.Join(" ",arr));
-            }
-            else if (mItem == MenuItemEnum.miShowChangeHistoryJQL)
-            {
-                string? tJQL = ConsoleUtil.GetInput<string>("ENTER JQL STATEMENT TO SELECT ITEMS",allowEmpty:true);
-                if (!string.IsNullOrWhiteSpace(tJQL))
-                {
-                    if (ConsoleUtil.Confirm($"Use the following JQL?{Environment.NewLine}{tJQL}",true))
-                    {
-                        retIssues = JiraUtil.GetJIssues(tJQL);
-                    }
-                }
-            }
-            if (retIssues.Count > 0)
-            {
-                foreach (var jIss in retIssues)
-                {
-                    var p = new Panel($"Change Logs For {jIss.Key}, (Status: {jIss.StatusName}");
-                    p.Border = BoxBorder.Rounded;
-                    p.BorderColor(Color.Blue);
-                    AnsiConsole.Write(p);
-                }
 
-                // var tbl = new Table();
-                // tbl.AddColumn("KEY");
-                // tbl.AddColumn("FIELD");
-                // tbl.AddColumn("CHANGED DT");
-                // tbl.AddColumn("OLD VALUE");
-                // tbl.AddColumn("NEW VALUE");
-
-                // for (int i = 0; i < retJIssue.ChangeLogs.Count; i++)
-                // {
-
-                //     JIssueChangeLog changeLog = retJIssue.ChangeLogs[i];
-                //     foreach (JIssueChangeLogItem cli in changeLog.Items)
-                //     {
-                //         if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
-                //         {
-                //                 string toVal = (cli.FieldName.ToLower()=="status") ? string.Format("[bold blue on white]{0}[/]",cli.ToValue) : cli.ToValue;
-                //                 string frVal = (cli.FieldName.ToLower()=="status") ? string.Format("[dim blue on white]{0}[/]",cli.FromValue) : cli.FromValue;
-                //                 tbl.AddRow(new string[]{ tmpIssue.Key.ToString(),cli.FieldName, changeLog.CreatedDate.ToString(),frVal,toVal});
-                //         }
-                //     }
-                // }
-                // AnsiConsole.Write(tbl);
-
-
-
-
-                // if (ConsoleUtil.Confirm("Save to csv file?",false)==true)
-                // {
-                //     string savedFilePath = string.Empty;
-                //     AnsiConsole.Status()
-                //         .Start($"Analyzing {arr.Length} issues ...", ctx=>
-                //         {
-                //             ctx.Spinner(Spinner.Known.Dots);
-                //             ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
-                //             Thread.Sleep(100);
-
-                //         ctx.Status("[italic]Saving to csv file ...[/]");
-                //         savedFilePath = MainClass.WriteChangeLogCSV(retIssues);
-                //         });
-                //     ConsoleUtil.PressAnyKeyToContinue($"results were saved to [bold]{Environment.NewLine}{savedFilePath}[/]");
-                // }
-            }
-            ConsoleUtil.PressAnyKeyToContinue();
-        }
 
         private static void CheckMinConsoleSize(int cWidth, int cHeight)
         {

@@ -23,8 +23,8 @@ namespace JiraCon
     public class AnalyzeIssues
     {
         private AnalysisType _type = AnalysisType._atUnknown;
-        private string searchData = string.Empty;
-        private string[]? searchDataArr = null;
+        private string searchJQL = string.Empty;
+        
         public List<JIssue> JIssues {get; private set;}
         public List<IssueCalcs> JCalcs {get; private set;}
 
@@ -34,7 +34,7 @@ namespace JiraCon
         {
             get
             {
-                return (searchData != null && searchData.Length > 0) || (searchDataArr != null && searchDataArr.Length > 0);
+                return (searchJQL != null && searchJQL.Length > 0);
             }
         }
 
@@ -49,34 +49,27 @@ namespace JiraCon
             string? data = string.Empty;
             if (_type == AnalysisType.atIssues)
             {
-                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE ISSUE KEYS (E.G. WWT-100 WWT-101) SEPARATED BY SPACES, OR PRESS 'ENTER'",StdLine.slResponse,false);
+                searchJQL = ConsoleInput.IssueKeysToJQL();
             }
             else if (_type==AnalysisType.atJQL)
             {
-                //ConsoleUtil.WriteStdLine("ENTER JQL STATEMENT TO SELECT ITEMS",StdLine.slResponse,false);
                 string? tJQL = ConsoleUtil.GetInput<string>("ENTER JQL STATEMENT TO SELECT ITEMS",allowEmpty:true);
                 if (!string.IsNullOrWhiteSpace(tJQL))
                 {
                     if (ConsoleUtil.Confirm($"Use the following JQL?{Environment.NewLine}{tJQL}",true))
                     {
-                        searchData = tJQL;
+                        searchJQL = tJQL;
                     }
                 }
             }
             else if (_type == AnalysisType.atIssueSummary)
             {
-                string[]? tData = MenuManager.GetIssueNumbers();
-                if (tData != null)
-                {
-                    searchDataArr = tData;
-                    return;
-                }
-
-                // ConsoleUtil.WriteStdLine("ENTER 1 ISSUE-KEY (E.G. WWT-100), OR PRESS 'ENTER'",StdLine.slResponse,false);
+                searchJQL = ConsoleInput.IssueKeysToJQL();
             }
             else if (_type == AnalysisType.atEpics)
             {
-                ConsoleUtil.WriteStdLine("ENTER 1 OR MORE EPICS SEPARATED BY SPACES, OR PRESS 'ENTER'",StdLine.slResponse,false);
+                ConsoleUtil.PressAnyKeyToContinue("NOT IMPLEMENTED");
+                
             }
             // data = Console.ReadLine();
             // if (data == null || data.Length == 0)
@@ -165,9 +158,6 @@ namespace JiraCon
                 //     }
                 // }
             }
-
-
-
 
         }
 
@@ -432,33 +422,49 @@ namespace JiraCon
             try 
             {
                 List<Issue> issues = new List<Issue>();
-                ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
-                string toJQL = string.Empty;
-                switch(_type)
+                if (string.IsNullOrWhiteSpace(searchJQL))
                 {
-                    case AnalysisType.atIssues:
-                        toJQL = BuildJQLKeyInList(searchData);
-                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-                        break;
-                    case AnalysisType.atIssueSummary:
-                        toJQL = BuildJQLKeyInListArr(searchDataArr);
-                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-                        break;
-                    case AnalysisType.atEpics:
-                        toJQL = BuildJQLForEpicChildren(searchData);
-                        issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-
-                        break;
-                    case AnalysisType.atJQL:
-                        issues = JiraUtil.JiraRepo.GetIssues(searchData);
-                        break;
-                    default:
-                        break;
+                    return 0;
                 }
+                ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
+
+                // string toJQL = string.Empty;
+                // switch(_type)
+                // {
+                //     case AnalysisType.atIssues:
+                //         toJQL = BuildJQLKeyInList(searchData);
+                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+                //         break;
+                //     case AnalysisType.atIssueSummary:
+                //         toJQL = BuildJQLKeyInListArr(searchDataArr);
+                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+                //         break;
+                //     case AnalysisType.atEpics:
+                //         toJQL = BuildJQLForEpicChildren(searchData);
+                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
+
+                //         break;
+                //     case AnalysisType.atJQL:
+                //         issues = JiraUtil.JiraRepo.GetIssues(searchData);
+                //         break;
+                //     default:
+                //         break;
+                // }
+
+
+                AnsiConsole.Status()
+                    .Start($"Querying Jira", ctx=>
+                    {
+                        ctx.Status("[bold]Retrieving items ...[/]");
+                        ctx.Spinner(Spinner.Known.Dots);
+                        ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                        Thread.Sleep(1000);
+                        issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
+                    });
+
                 if (issues.Count > 0)
                 {
-                    ConsoleUtil.WriteStdLine(String.Format("{0} issues found",issues.Count),StdLine.slCode ,false);
-
+                    ConsoleUtil.WriteStdLine(String.Format("Retrieved {0} issues ",issues.Count),StdLine.slCode ,false);
                     AnsiConsole.Progress()                        
                         .Columns(new ProgressColumn[]
                         {
@@ -470,14 +476,13 @@ namespace JiraCon
                         })
                         .Start(ctx => 
                         {
-                            var task1 = ctx.AddTask("[blue]loading change logs[/]");
+                            var task1 = ctx.AddTask($"[blue] loading change logs for {issues.Count} issues [/]");
                             task1.MaxValue = issues.Count;
                             foreach (var issue in issues)
                             {
                                 JIssue newIssue = new JIssue(issue);
                                 newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
                                 JIssues.Add(newIssue);
-
                                 task1.Increment(1);
                             }
                         });
@@ -485,7 +490,7 @@ namespace JiraCon
             }
             catch(Exception ex)
             {
-                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",searchData),ex:ex);
+                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",searchJQL),ex:ex);
                 GetDataFail = true;
             }
             return JIssues.Count;

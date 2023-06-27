@@ -14,8 +14,10 @@ namespace JiraCon
 
         private static void DevQuick()
         {
-            
-
+            string pp = "WWT-";
+            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","100 200 300 201",' ',$"{pp}"));
+            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","100, 200, 300, 201",',', $"{pp}"));
+            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","WWT-1 00, 200, 300, 201",',', $"{pp}"));
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
@@ -608,81 +610,37 @@ namespace JiraCon
         //**********************************************************************************************************************************************************************************************
 
 
+        // /// <summary>
+        // /// Build CSV file.
+        // /// Importing into MS Excel (delimited by ",") works nicely, but I'm also planning on adding a JSON option. 
+        // /// </summary>
+        // /// <param name="cards"></param>
+        // /// <param name="filePath"></param>
+        // public static void WriteCSVFile(List<JiraCard> cards, string filePath)
+        // {
+        //     if (File.Exists(filePath))
+        //     {
+        //         File.Delete(filePath);
+        //     }
 
-        public static string WriteChangeLogCSV(List<JIssue> issues)
-        {
+        //     StreamWriter writer = new StreamWriter(filePath, false);
+        //     writer.WriteLine("id{0}key{0}cardType{0}status{0}description{0}created{0}updated{0}changeLogId{0}changeLogDt{0}fieldName{0}fieldType{0}fromId{0}fromValue{0}toId{0}toValue{0}DevStart{0}DevDone{0}CycleTimeDays", ",");
 
-            string fName = string.Format("changeLogs_{0}.csv",DateTime.Now.ToString("yyyyMMMdd_HHmmss"));
-            string filePath = Path.Combine(JTISConfigHelper.JTISRootPath);
-            if (Directory.Exists(filePath)==false)
-            {
-                Directory.CreateDirectory(filePath);
-            }
-            filePath = Path.Combine(filePath,fName);
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-            var writer = new StreamWriter(filePath,false);
+        //     for (int i = 0; i < cards.Count; i ++)
+        //     {
+        //         var card = cards[i];
 
-            writer.WriteLine("jiraKEY,changeLogTime,fieldName,fromStatus,toStatus");
+        //         for (int j = 0; j < card.ChangeLogs.Count; j++)
+        //         {
+        //             var cLog = card.ChangeLogs[j];
 
-            for (int j = 0; j < issues.Count; j++)
-            {
-                var jIss = issues[j];
+        //             writer.WriteLine("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}", ",", card._id, card.Key, card.CardType, card.Status, "", card.Created, card.Updated, cLog._id, cLog.ChangeLogDt, cLog.FieldName, cLog.FieldType, cLog.FromId, CleanText(cLog.FromValue), cLog.ToId, CleanText(cLog.ToValue), card.DevStartDt.HasValue ? card.DevStartDt.Value.ToString() : "", card.DevDoneDt.HasValue ? card.DevDoneDt.Value.ToString() : "", card.CycleTime.HasValue ? card.CycleTime.ToString() : "");
+        //         }
 
-                for (int i = 0; i < jIss.ChangeLogs.Count; i++)
-                {
-                    JIssueChangeLog changeLog = jIss.ChangeLogs[i];
-                    foreach (JIssueChangeLogItem cli in changeLog.Items)
-                    {
-                        if (cli.FieldName.ToLower().StartsWith("status"))
-                        {
-                            writer.WriteLine(string.Format("{0},{1},{2},{3},{4}",jIss.Key,changeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
-                        }
-                    }
-                }
-           }
-            writer.Close();
+        //     }
 
-            // ConsoleUtil.WriteStdLine(String.Format("file saved to: {0}",filePath),StdLine.slCode);
-            // ConsoleUtil.PressAnyKeyToContinue();
-            return filePath;
-        }
-
-
-
-        /// <summary>
-        /// Build CSV file.
-        /// Importing into MS Excel (delimited by ",") works nicely, but I'm also planning on adding a JSON option. 
-        /// </summary>
-        /// <param name="cards"></param>
-        /// <param name="filePath"></param>
-        public static void WriteCSVFile(List<JiraCard> cards, string filePath)
-        {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-
-            StreamWriter writer = new StreamWriter(filePath, false);
-            writer.WriteLine("id{0}key{0}cardType{0}status{0}description{0}created{0}updated{0}changeLogId{0}changeLogDt{0}fieldName{0}fieldType{0}fromId{0}fromValue{0}toId{0}toValue{0}DevStart{0}DevDone{0}CycleTimeDays", ",");
-
-            for (int i = 0; i < cards.Count; i ++)
-            {
-                var card = cards[i];
-
-                for (int j = 0; j < card.ChangeLogs.Count; j++)
-                {
-                    var cLog = card.ChangeLogs[j];
-
-                    writer.WriteLine("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}{7}{0}{8}{0}{9}{0}{10}{0}{11}{0}{12}{0}{13}{0}{14}{0}{15}{0}{16}{0}{17}{0}{18}", ",", card._id, card.Key, card.CardType, card.Status, "", card.Created, card.Updated, cLog._id, cLog.ChangeLogDt, cLog.FieldName, cLog.FieldType, cLog.FromId, CleanText(cLog.FromValue), cLog.ToId, CleanText(cLog.ToValue), card.DevStartDt.HasValue ? card.DevStartDt.Value.ToString() : "", card.DevDoneDt.HasValue ? card.DevDoneDt.Value.ToString() : "", card.CycleTime.HasValue ? card.CycleTime.ToString() : "");
-                }
-
-            }
-
-            writer.Close();
-        }
+        //     writer.Close();
+        // }
 
         /// <summary>
         /// Clean out the mess that Jira includes in their description and comments fields. Was having some issues with that, so description and comments currently
@@ -690,17 +648,17 @@ namespace JiraCon
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static string CleanText(string text)
-        {
-            string ret = string.Empty;
+        // public static string CleanText(string text)
+        // {
+        //     string ret = string.Empty;
 
-            if (!String.IsNullOrEmpty(text))
-            {
-                //Regex rgx = new Regex("[^a-zA-Z0-9 -]");
-                //ret = rgx.Replace(text, "");
-                ret = text.Replace(",", string.Empty);
-            }
-            return ret;
-        }
+        //     if (!String.IsNullOrEmpty(text))
+        //     {
+        //         //Regex rgx = new Regex("[^a-zA-Z0-9 -]");
+        //         //ret = rgx.Replace(text, "");
+        //         ret = text.Replace(",", string.Empty);
+        //     }
+        //     return ret;
+        // }
     }
 }

@@ -173,19 +173,21 @@ namespace JiraCon
 
         public void DevTest1()
         {
+            var iss = JiraUtil.JiraRepo.GetJira().Issues.GetIssueAsync("WWT-291");
+
             // var j = JiraUtil.JiraRepo.GetJira();
             // j.RestClient.Settings.JsonSerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
             // j.RestClient.Settings.JsonSerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.          
 
-            var iss = JiraUtil.JiraRepo.GetIssue("WWT-360");
-            AnsiConsole.MarkupLineInterpolated($"Updated ToUniversalTime {iss.Updated.Value.ToUniversalTime()}") ;
-            AnsiConsole.MarkupLineInterpolated($"Updated ToLongTimeString {iss.Updated.Value.ToLongTimeString()}") ;
-            AnsiConsole.MarkupLineInterpolated($"Updated ToLocalTime {iss.Updated.Value.ToLocalTime()}") ;
+            // var iss = JiraUtil.JiraRepo.GetIssue("WWT-360");
+            // AnsiConsole.MarkupLineInterpolated($"Updated ToUniversalTime {iss.Updated.Value.ToUniversalTime()}") ;
+            // AnsiConsole.MarkupLineInterpolated($"Updated ToLongTimeString {iss.Updated.Value.ToLongTimeString()}") ;
+            // AnsiConsole.MarkupLineInterpolated($"Updated ToLocalTime {iss.Updated.Value.ToLocalTime()}") ;
 
-            DateTime dateTime = iss.Updated.Value.ToUniversalTime();
-            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-            DateTime dateTimeInTimeZone = TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZoneInfo);
-            AnsiConsole.MarkupLineInterpolated($"California Time {dateTimeInTimeZone.ToLongTimeString()}") ;
+            // DateTime dateTime = iss.Updated.Value.ToUniversalTime();
+            // TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            // DateTime dateTimeInTimeZone = TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZoneInfo);
+            // AnsiConsole.MarkupLineInterpolated($"California Time {dateTimeInTimeZone.ToLongTimeString()}") ;
 
 
             ConsoleUtil.PressAnyKeyToContinue();
