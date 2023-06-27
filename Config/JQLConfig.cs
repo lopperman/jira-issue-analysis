@@ -8,9 +8,6 @@ namespace JiraCon
 {
     public class JQLConfig
     {
-        // private const string JQL_ID = "jqlId";
-        // private const string JQL_NAME = "jqlName";
-        // private const string JQL_DATA = "jql";
         public JQLConfig()
         {
         }

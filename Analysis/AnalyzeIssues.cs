@@ -71,16 +71,6 @@ namespace JiraCon
                 ConsoleUtil.PressAnyKeyToContinue("NOT IMPLEMENTED");
                 
             }
-            // data = Console.ReadLine();
-            // if (data == null || data.Length == 0)
-            // {
-            //     ConsoleUtil.WriteStdLine("'Y' TO SELECT SAVED JQL, OR PRESS 'ENTER'",StdLine.slResponse,false);
-            //     if (Console.ReadKey(true).Key == ConsoleKey.Y)
-            //     {
-            //         data = SelectSavedJQL();
-            //     }                
-            // }
-            // searchData = data;
         }
 
         public void ClassifyStates()
@@ -150,13 +140,6 @@ namespace JiraCon
             {
                 PopulateBlockers(ic);
                 AddBlockerAdjustments(ic);
-                // if (ic.Blockers.Count > 0)
-                // {
-                //     foreach (var b in ic.Blockers)
-                //     {
-                //         ConsoleUtil.WriteStdLine(string.Format("Added blocker for {0}: Start {1}, End {2}, Field {3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName),StdLine.slCode ,false);
-                //     }
-                // }
             }
 
         }
@@ -255,7 +238,6 @@ namespace JiraCon
             {
                 foreach (var cli in cl.Items)
                 {
-                    // ConsoleUtil.WriteStdLine(string.Format("Key: {0}, FieldName: {7}, Start:{1}, End: {2}, FromId: {3}, FromValue:{4}, ToId: {5}, ToValue: {6}",cl.JIss.Key,cli.StartDt,cli.EndDt,cli.FromId,cli.FromValue,cli.ToId,cli.ToValue, cli.FieldName),StdLine.slCode,false);
                     if (cli.FieldName.ToLower()=="flagged"   )
                     {
                         if (cli.ToValue.ToLower()=="impediment")
@@ -288,6 +270,7 @@ namespace JiraCon
             if (tmpStartingBlockers.Count > 0)
             {
                 tmpStartingBlockers = tmpStartingBlockers.OrderBy(x=>x.StartDt).ToList();
+                
                 foreach (var blocker in tmpStartingBlockers)
                 {
                     if (tmpEndingBlockers.Count > 0)
@@ -317,8 +300,41 @@ namespace JiraCon
                     }                                           
                     ic.Blockers.Add(blocker);
                 }
+                if (ic.Blockers.Count > 1)
+                {
+                    RemoveBlockerOverlap(ic);
+                }
 
             }            
+        }
+
+        private void RemoveBlockerOverlap(IssueCalcs ic)
+        {
+            var bList = ic.Blockers.OrderBy(x=>x.StartDt).ToList();
+            foreach (var b1 in bList)
+            {                   
+                if (b1.Removed == false && bList.Any(x=>x.tmpID != b1.tmpID && x.StartDt <= b1.EndDt && x.Removed == false))
+                {   
+                    if (!b1.EndDt.HasValue) {b1.EndDt = DateTime.Now;}
+                
+                    var overlaps = bList.Where(x=>x.tmpID != b1.tmpID && x.StartDt <= b1.EndDt).ToList();
+                    foreach (var o1 in overlaps)
+                    {
+                        if (!o1.EndDt.HasValue) {o1.EndDt = DateTime.Now;}
+                        o1.Adjusted = true;
+                        var newStartDt = b1.EndDt.Value.AddSeconds(1);
+                        o1.AdjustmentNotes.Add($"Overlap - StartDt Changed from '{o1.StartDt}' to '{newStartDt}'");
+                        o1.StartDt = newStartDt;
+                        if (o1.EndDt.Value <= o1.StartDt)
+                        {
+                            o1.Removed = true;
+                        }
+                    }
+
+                }
+            }
+            var goodList = bList.Where(x=>x.Removed == false).ToList();
+            ic.Blockers = goodList;
         }
 
         private void CalculateEndDates()

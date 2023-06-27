@@ -1,12 +1,24 @@
+using System;
 
 
 namespace JiraCon
 {
     public class Blocker
     {
-        public DateTime StartDt {get;private set ;}
+        private Guid _id = Guid.NewGuid();
+        public Guid tmpID 
+        {
+            get 
+            {
+                return _id;
+            }
+        }
+        public bool Removed {get;set;}
+        public DateTime StartDt {get;set ;}
         public DateTime? EndDt {get; set;}
         public string IssueKey {get;private set;}
+        public bool Adjusted {get;set;}
+        public List<string> AdjustmentNotes = new List<string>();
 
         public ChangeLogTypeEnum BlockedType {get;set;}
         //we need to track blocker field name in order to find when then blocker was removed
