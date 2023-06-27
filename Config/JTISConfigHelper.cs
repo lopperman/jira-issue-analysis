@@ -23,31 +23,30 @@ namespace JiraCon
             }
             set
             {
-                AnsiConsole.Status()
-                    .Start($"Connecting to: {value.baseUrl}", ctx=>
-                    {
-                        ctx.Status("[bold]Please wait while a connection is established ...[/]");
-                        ctx.Spinner(Spinner.Known.Dots);
-                        ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
-                        Thread.Sleep(1000);
+                AnsiConsole.Status().Start($"Connecting to: {value.baseUrl}", ctx=>
+                {
+                    ctx.Status("[bold]Please wait while a connection is established ...[/]");
+                    ctx.Spinner(Spinner.Known.Dots);
+                    ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+                    Thread.Sleep(500);
+                    _config = value;
+                    JiraUtil.CreateRestClient();
+                });
 
-                        _config = value;
-                        JiraUtil.CreateRestClient();
-                        if (_config.DefaultStatusConfigs.Count == 0 || _config.DefaultStatusConfigs.Count != _config.StatusConfigs.Count )
-                        {
-                            // ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
-                            ctx.Status("[italic]Checking Jira Issue Status Configuration[/]");
-                            Thread.Sleep(1000);
-                            UpdateDefaultStatusConfigs();
-                        }
-                        else 
-                        {
-                            ctx.Status("[italic]Checking Local Issue Status Configuration[/]");
-                            Thread.Sleep(1000);
-                            FillMissingStatusConfigs();
-                        }
+                    if (_config.DefaultStatusConfigs.Count == 0 || _config.DefaultStatusConfigs.Count != _config.StatusConfigs.Count )
+                    {
+                        // ConsoleUtil.WriteStdLine("PLEASE WAIT -- COMPARING STATUS CONFIGS WITH DEFAULT LIST FROM JIRA ...",StdLine.slResponse,false);
+                        //ctx.Status("[italic]Checking Jira Issue Status Configuration[/]");
+                        Thread.Sleep(1000);
+                        UpdateDefaultStatusConfigs();
                     }
-                    );
+                    else 
+                    {
+                        //ctx.Status("[italic]Checking Local Issue Status Configuration[/]");
+                        Thread.Sleep(1000);
+                        FillMissingStatusConfigs();
+                    }
+                    
             }
         }
 

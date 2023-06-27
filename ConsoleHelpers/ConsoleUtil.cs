@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using System.Security.Cryptography;
+using Spectre.Console;
 
 
 namespace JiraCon
@@ -488,6 +489,62 @@ namespace JiraCon
                 ConsoleUtil.PressAnyKeyToContinue("Recording has started");
             }
         }
+
+        public static void WaitWhileSimple(string msg, Action action)
+        {
+            var st = new Status(AnsiConsole.Console);
+            st.Spinner(Spinner.Known.Dots);
+            st.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+            st.Start(msg, ctx => action.Invoke());
+        }
+
+        public static void StatusWait2(List<KeyValuePair<string,Action>> actions)
+        {
+                List<ProgressTask> tasks = new List<ProgressTask>();
+                List<Action> actionsList = new List<Action>();
+                List<string> msgList = new List<string>();
+                foreach (var kvp in actions)
+                {
+                    msgList.Add(kvp.Key);
+                    actionsList.Add(kvp.Value);
+                }
+
+                AnsiConsole.Progress().Columns(new ProgressColumn[]
+                {
+                    new TaskDescriptionColumn(), 
+                    new ElapsedTimeColumn(), 
+                    new SpinnerColumn(), 
+
+                })
+                .Start(ctx => 
+                {
+                    var actionArr = actionsList.ToArray();
+                    var msgArr = msgList.ToArray();
+                    for (int i = 0; i < actions.Count; i ++)
+                    {
+                        var tStg = new ProgressTaskSettings();
+                        tStg.AutoStart = false;
+                        tStg.MaxValue = 2;
+
+                        tasks.Add(ctx.AddTask($"[dim blue on white] {msgArr[i]} [/]",tStg));                            
+                    }
+                    var taskArr = tasks.ToArray();
+                    for (int i = 0; i < actions.Count; i ++)
+                    {
+                        var tmpTask = taskArr[i];
+                        tmpTask.Description = $"[blue on white] {msgArr[i]} [/]";
+                        Thread.Sleep(500);
+                        tmpTask.StartTask();
+                        tmpTask.Increment(1);
+                        actionArr[i].Invoke();
+                        tmpTask.Description = $"[dim blue on white] {msgArr[i]} [/]";
+                        tmpTask.Increment(1);
+                        tmpTask.StopTask();
+                    }
+
+                });            
+        }
+
     }
 
 }

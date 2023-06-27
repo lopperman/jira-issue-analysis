@@ -164,22 +164,6 @@ namespace JiraCon
         public void WriteToConsole()
         {
             WriteIssueSummary();
-            // if (_type==AnalysisType.atIssueSummary)
-            // {
-            //     WriteIssueSummary();
-            // }
-            // else 
-            // {
-            //     bool addConsoleHeader = true;
-            //     foreach (IssueCalcs issCalcs in JCalcs)
-            //     {
-            //         foreach (var ln in issCalcs.StateCalcStringList(addConsoleHeader))
-            //         {
-            //             ConsoleUtil.WriteStdLine(ln,StdLine.slOutput,false);
-            //         }
-            //         addConsoleHeader = false;
-            //     }
-            // }
         }
 
         public string WriteToCSV()
@@ -594,8 +578,6 @@ namespace JiraCon
                 AnsiConsole.Clear();
                 AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 AnsiConsole.Write(new Rule($"[bold]SUMMARY FOR: {ic.IssueObj.Key}  ({ic.IssueObj.StatusName})  [/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Left});
-                // hdrLine.Justify(Justify.Left);
-                // AnsiConsole.Write(hdrLine);
                 AnsiConsole.MarkupLineInterpolated($"\t[dim blue on white]{ic.IssueObj.Summary}[/]");
 
                 AnsiConsole.MarkupLineInterpolated($"\t[{StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}][dim]CURRENT STATUS:[/] {ic.IssueObj.StatusName}[/]");
@@ -607,7 +589,6 @@ namespace JiraCon
                     string tStartDt = scStart.StartDt.ToString("yyyy-MMM-dd HH:mm");
                     try 
                     {
-                        // AnsiConsole.MarkupLine(string.Format("[bold {0} on {1}]ACTIVE WORK STARTED: {2}[/]",StdLine.slOutput.FontMkp(),StdLine.slOutput.BackMkp(),tStartDt));
                         AnsiConsole.MarkupLineInterpolated($"\t[{StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}][dim]ACTIVE WORK STARTED:[/] {tStartDt}[/]");
                     }
                     catch 
@@ -616,22 +597,20 @@ namespace JiraCon
                 }
                 else 
                 {
-                    // AnsiConsole.MarkupLine($"[bold {StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}]ACTIVE WORK HAS NOT STARTED[/]");
                     AnsiConsole.MarkupLineInterpolated($"\t[{StdLine.slOutput.FontMkp()} on {StdLine.slOutput.BackMkp()}][dim]ACTIVE WORK HAS NOT STARTED:[/][/]");
                 }
-                // AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.White)});
-                // AnsiConsole.WriteLine();
 
                 var tbl = new Table();
                 tbl.NoSafeBorder();
+                tbl.Expand();
                 tbl.RoundedBorder();                
                 tbl.AddColumns(new TableColumn[]{
                     new TableColumn(new Text("Status",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
-                    new TableColumn(new Text("Category",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()),
-                    new TableColumn(new Text("TotalDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
-                    new TableColumn(new Text("TotalBusDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()),
-                    new TableColumn(new Text("BlockedDays",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
-                    new TableColumn(new Text("StartedCount",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text("Category",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()).Width(15),
+                    new TableColumn(new Text($"Total{Environment.NewLine}Days",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
+                    new TableColumn(new Text($"Total{Environment.NewLine}BusDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()),
+                    new TableColumn(new Text($"Blocked{Environment.NewLine}Days",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
+                    new TableColumn(new Text($"Started{Environment.NewLine}Count",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
                     new TableColumn(new Text("FirstStart",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
                     new TableColumn(new Text("LastExit",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered())
                 });
@@ -718,9 +697,9 @@ namespace JiraCon
                     new Text($" {activeCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered()
+                    new Text(" --- "),
+                    new Text(" --- "),
+                    new Text(" --- ")
                 });
                 tbl.AddRow(new Text[]{
                     new Text(" TOTALS ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
@@ -728,20 +707,20 @@ namespace JiraCon
                     new Text($" {passiveCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {passiveBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {passiveBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered()
+                    new Text(" --- "),
+                    new Text(" --- "),
+                    new Text(" --- ")
                 });
                 tbl.AddEmptyRow();
                 tbl.AddRow(new Text[]{
                     new Text(" GRAND TOTAL ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
                     new Text($" ** ALL ** ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
-                    new Text($" {activeCalDays+passiveCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
-                    new Text($" {activeBusDays+passiveBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
-                    new Text($" {activeBlockDays+passiveBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slResponse)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered(),
-                    new Text(" --- ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Dim)).Centered()
+                    new Text($" {activeCalDays+passiveCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {activeBusDays+passiveBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {activeBlockDays+passiveBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text(" --- "),
+                    new Text(" --- "),
+                    new Text(" --- ")
                 });
 
                 AnsiConsole.Write(tbl);

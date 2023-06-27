@@ -89,11 +89,9 @@ namespace JiraCon
                 case MenuItemEnum.miTISIssueSummary:
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
-                    ConsoleUtil.PressAnyKeyToContinue();
                     break;
                 case MenuItemEnum.miTISJQL:
-                    NewAnalysis(AnalysisType.atJQL);                    
-                    ConsoleUtil.PressAnyKeyToContinue();
+                    NewAnalysis(AnalysisType.atJQL);                                        
                     if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
                     break;
 
@@ -175,16 +173,6 @@ namespace JiraCon
             {                
                 analyze.ClassifyStates();                
                 analyze.WriteToConsole();
-
-                // if (anType != AnalysisType.atIssueSummary)
-                // {
-                //     if (ConsoleUtil.Confirm("Save to csv file?",false))
-                //     {
-                //         var csvFileName = analyze.WriteToCSV();
-                //         ConsoleUtil.PressAnyKeyToContinue($"File saved to: {csvFileName}");
-                //     }
-                // }
-
             }
         }
 

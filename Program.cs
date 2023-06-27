@@ -14,10 +14,32 @@ namespace JiraCon
 
         private static void DevQuick()
         {
-            string pp = "WWT-";
-            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","100 200 300 201",' ',$"{pp}"));
-            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","100, 200, 300, 201",',', $"{pp}"));
-            AnsiConsole.WriteLine(JQLBuilder.BuildInList("key","WWT-1 00, 200, 300, 201",',', $"{pp}"));
+            Action a1 = ()=> {
+                AnsiConsole.WriteLine("test a1");
+                Thread.Sleep(4000);
+            };
+            Action a2 = ()=> {
+                AnsiConsole.WriteLine("test a2 1");
+                Thread.Sleep(1000);
+                AnsiConsole.WriteLine("test a2 2");
+                Thread.Sleep(8000);
+            };
+            Action a3 = ()=> {
+                AnsiConsole.WriteLine("test a3 1");
+                Thread.Sleep(1000);
+                AnsiConsole.WriteLine("test a3 2");
+                Thread.Sleep(2000);
+                AnsiConsole.WriteLine("test a3 3");
+                Thread.Sleep(5000);
+            };
+
+            ConsoleUtil.WaitWhileSimple("please wait three seconds", a1);
+            var kvpList = new List<KeyValuePair<string,Action>>();
+            kvpList.Add( new KeyValuePair<string,Action>("key 1",a1));
+            kvpList.Add( new KeyValuePair<string,Action>("key 2",a2));
+            kvpList.Add( new KeyValuePair<string,Action>("key 3",a3));
+
+            ConsoleUtil.StatusWait2(kvpList);
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
