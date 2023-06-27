@@ -16,13 +16,13 @@ namespace JiraCon
         {
             Action a1 = ()=> {
                 AnsiConsole.WriteLine("test a1");
-                Thread.Sleep(4000);
+                Thread.Sleep(2000);
             };
             Action a2 = ()=> {
                 AnsiConsole.WriteLine("test a2 1");
                 Thread.Sleep(1000);
                 AnsiConsole.WriteLine("test a2 2");
-                Thread.Sleep(8000);
+                Thread.Sleep(3000);
             };
             Action a3 = ()=> {
                 AnsiConsole.WriteLine("test a3 1");
@@ -36,7 +36,7 @@ namespace JiraCon
             ConsoleUtil.WaitWhileSimple("please wait three seconds", a1);
             var kvpList = new List<KeyValuePair<string,Action>>();
             kvpList.Add( new KeyValuePair<string,Action>("key 1",a1));
-            kvpList.Add( new KeyValuePair<string,Action>("key 2",a2));
+            kvpList.Add( new KeyValuePair<string,Action>("generating temporary config for flux capacitor",a2));
             kvpList.Add( new KeyValuePair<string,Action>("key 3",a3));
 
             ConsoleUtil.StatusWait2(kvpList);

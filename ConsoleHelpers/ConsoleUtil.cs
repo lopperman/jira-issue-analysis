@@ -492,9 +492,11 @@ namespace JiraCon
 
         public static void WaitWhileSimple(string msg, Action action)
         {
-            var st = new Status(AnsiConsole.Console);
-            st.Spinner(Spinner.Known.Dots);
-            st.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
+            var st = new Status(AnsiConsole.Console);            
+            st.Spinner(Spinner.Known.BouncingBar);
+            // st.Spinner(Spinner.Known.Dots);
+
+            st.SpinnerStyle(new Style(Color.Blue3_1,Color.LightSkyBlue1));
             st.Start(msg, ctx => action.Invoke());
         }
 
@@ -509,12 +511,16 @@ namespace JiraCon
                     actionsList.Add(kvp.Value);
                 }
 
-                AnsiConsole.Progress().Columns(new ProgressColumn[]
+                var pr = new Progress(AnsiConsole.Console);
+                pr.AutoClear(true);
+                pr.AutoRefresh(true);
+                pr.HideCompleted(false);
+                pr.Columns(new ProgressColumn[]
                 {
                     new TaskDescriptionColumn(), 
+                    new ProgressBarColumn(), 
                     new ElapsedTimeColumn(), 
-                    new SpinnerColumn(), 
-
+                    new SpinnerColumn(Spinner.Known.BouncingBar).Style(new Style(Color.Blue3_1,Color.LightSkyBlue1)), 
                 })
                 .Start(ctx => 
                 {
