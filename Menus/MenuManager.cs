@@ -1,3 +1,4 @@
+using System.Resources;
 using System.Net.Http.Headers;
 using System.IO.Pipes;
 
@@ -107,24 +108,29 @@ namespace JiraCon
                     break;
                 case MenuItemEnum.miStartRecordingSession:
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
-                    if (JTISConfigHelper.IsConsoleRecording)
+                    ConsoleUtil.StartRecording();
+                    break;
+                case MenuItemEnum.miSaveSessionToFile:
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
+                    if (ConsoleUtil.IsConsoleRecording)
                     {
-                        ConsoleUtil.PressAnyKeyToContinue("Recording is already in progress");
+                        var fName = ConsoleUtil.SaveSessionFile();
+                        ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
                     }
                     else 
                     {
-                        JTISConfigHelper.IsConsoleRecording = true;
-                        AnsiConsole.Record();
-                        ConsoleUtil.PressAnyKeyToContinue("Recording has started");
+                        if (ConsoleUtil.Confirm($"Recording is not turned on. Turn on now?",defResp:false))
+                        {
+                            ConsoleUtil.StartRecording();
+                        }
                     }
-                    break;
-                case MenuItemEnum.miSaveSessionToFile:
-                    var fName = SaveSessionFile();
-                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
-                    ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
                     break;
                 case MenuItemEnum.miSavedJQLView:
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
+                    if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
+                    break;
+                case MenuItemEnum.miSavedJQLAdd:
+                    JQLUtil.AddJQL();
                     if (finalMenu == null){finalMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miChangeConnection:
@@ -152,18 +158,6 @@ namespace JiraCon
             }
         }
 
-        public static string SaveSessionFile()
-        {
-            string sessFile = Path.Combine(JTISConfigHelper.ConfigFolderPath,"SessionFiles");
-            if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
-            string fName = string.Format("SessionFile_{0}.html",DateTime.Now.ToString("yyyyMMMddHHmmss"));
-            sessFile = Path.Combine(sessFile,fName);
-            using (StreamWriter writer = new StreamWriter(sessFile,false))
-            {
-                writer.Write(AnsiConsole.ExportHtml());
-            }
-            return sessFile ;
-        }
 
         private static void NewAnalysis(AnalysisType anType)
         {

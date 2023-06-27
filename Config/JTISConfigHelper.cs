@@ -10,7 +10,7 @@ namespace JiraCon
     public static class JTISConfigHelper
     {
         public static bool IsInitialized {get;set;}
-        public static bool IsConsoleRecording {get;set;}
+        
         private static JTISConfig? _config ;
 
         public static JTISConfig? config

@@ -1,6 +1,4 @@
-﻿using System.Net.Mime;
-using Microsoft.Extensions.Configuration;
-using Spectre.Console;
+﻿using Spectre.Console;
 
 
 namespace JiraCon
@@ -21,7 +19,8 @@ namespace JiraCon
     public static class ConsoleUtil
     {
             
-
+        public static bool IsConsoleRecording {get;set;}
+        
         public static Style StdStyle(StdLine input)
         {
             switch(input)
@@ -130,13 +129,13 @@ namespace JiraCon
         {
             get
             {
-                if (JTISConfigHelper.IsConsoleRecording == false) 
+                if (IsConsoleRecording == false) 
                 {
                     return string.Empty;
                 }
                 else 
                 {
-                    return " ** [bold red on lightyellow3]RECORDING IN PROGRESS[/] ** ";
+                    return " ** [bold red on lightyellow3]RECORDING ON[/] ** ";
                 }
             }
         }
@@ -149,7 +148,8 @@ namespace JiraCon
                     if (JTISConfigHelper.config.DefaultTimeZoneDisplay == false)
                     {
                         var tzi = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
-                        return $" ** [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ** ";
+                        tzi = JTISConfigHelper.config.TimeZoneDisplay.StandardName;
+                        return $" [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ";
                     }
                 }
                 return string.Empty;
@@ -158,7 +158,7 @@ namespace JiraCon
         public static void WriteAppTitle()
         {
             AnsiConsole.Clear();
-            var title = $"JIRA Time In Status[dim] :llama: by Paul Brower[/]{RecordingInfo}{TimeZoneAlert}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";
+            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";            
             var panel = new Panel(title);
             panel.Border = BoxBorder.Rounded;
             panel.BorderColor(Color.Grey15);
@@ -391,11 +391,11 @@ namespace JiraCon
                 JTISConfigHelper.SaveConfigList();
             }
 
-            if (JTISConfigHelper.IsConsoleRecording)
+            if (IsConsoleRecording)
             {
                 if (Confirm("Save recorded session to file?",true))
                 {
-                    var fName = MenuManager.SaveSessionFile();
+                    var fName = SaveSessionFile();
                     ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");                    
                 }
             }
@@ -461,7 +461,33 @@ namespace JiraCon
             return AnsiConsole.Confirm(msg,defResp);
         }    
 
+        public static string SaveSessionFile()
+        {
+            string sessFile = Path.Combine(JTISConfigHelper.JTISRootPath,"SessionFiles");
+            if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
+            string fName = string.Format("SessionFile_{0}.html",DateTime.Now.ToString("yyyyMMMddHHmmss"));
+            sessFile = Path.Combine(sessFile,fName);
+            using (StreamWriter writer = new StreamWriter(sessFile,false))
+            {
+                writer.Write(AnsiConsole.ExportHtml());
+            }
+            IsConsoleRecording = false;
+            return sessFile ;
+        }
 
+        internal static void StartRecording()
+        {
+            if (IsConsoleRecording)
+            {
+                ConsoleUtil.PressAnyKeyToContinue("Recording is already in progress");
+            }
+            else 
+            {
+                IsConsoleRecording = true;
+                AnsiConsole.Record();
+                ConsoleUtil.PressAnyKeyToContinue("Recording has started");
+            }
+        }
     }
 
 }

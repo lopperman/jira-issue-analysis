@@ -1,11 +1,10 @@
 using Atlassian.Jira;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace JiraCon
 {
-
-
-    public class ChangeLogsMgr
+   public class ChangeLogsMgr
     {
         private readonly AnalysisType _analysisType;
         private List<Issue>? _issues;
@@ -16,24 +15,19 @@ namespace JiraCon
         public ChangeLogsMgr(AnalysisType analysisType)
         {
             this._analysisType = analysisType;
-            BuildSearch();
-            
-            ConsoleUtil.PressAnyKeyToContinue($"search jql: {searchJQL}");
-
-            if (!string.IsNullOrWhiteSpace(searchJQL))
+            bool doExport = false;
+            if (!BuildSearch()) return;
+            if (!PopulateIssues()) return;
+            if (!PopulateChangeLogs()) return;
+            if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
             {
-                PopulateIssues();
-                ConsoleUtil.PressAnyKeyToContinue($"issue count: {_issues.Count}");
+                Render();                
             }
-            if (_issues.Count > 0)
+            else 
             {
-                PopulateChangeLogs();
+                doExport = true;
             }
-            if (_jIssues.Count > 0)
-            {
-                Render();
-            }
-            if (ConsoleUtil.Confirm("Write data to csv file?",false))
+            if (ConsoleUtil.Confirm("Export to csv file?",doExport))
             {
                 Export();
             }
@@ -76,10 +70,11 @@ namespace JiraCon
         }
         private void WriteIssueHeader(JIssue ji)
         {
-            var p = new Panel($"Change Logs For {ji.Key}, (Status: {ji.StatusName}){Environment.NewLine}[dim]{ji.Summary}[/]");
+            var p = new Panel($"[bold]Change Logs For {ji.Key}, (Status: {ji.StatusName})[/]{Environment.NewLine}[dim]{ji.Summary}[/]");
             p.Border = BoxBorder.Rounded;
             p.Expand();
             p.BorderColor(Color.Blue);
+            p.HeavyBorder();
             p.Padding(2,1,1,2);
             AnsiConsole.Write(p);
         }
@@ -99,9 +94,22 @@ namespace JiraCon
                 {
                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                     {
-                        string toVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[bold blue on white] {cli.ToValue} [/]") : cli.ToValue;
-                        string frVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[dim blue on white] {cli.FromValue} [/]") : cli.FromValue;
-                        tbl.AddRow(new string[]{ji.Key.ToString(),cli.FieldName, changeLog.CreatedDate.ToString(),frVal,toVal});
+                        Markup? toVal;
+                        Markup? frVal;
+                        if ((cli.FieldName.ToLower()=="status"))
+                        {
+                            toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue} [/]");
+                            frVal = Markup.FromInterpolated($"[blue on white] {cli.FromValue} [/]");
+                        }
+                        else 
+                        {
+                            toVal = Markup.FromInterpolated($"{cli.ToValue}");
+                            frVal = Markup.FromInterpolated($"{cli.FromValue}");
+                        }
+                        // string toVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[bold blue on white] {cli.ToValue} [/]") : cli.ToValue;
+                        // string frVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[dim blue on white] {cli.FromValue} [/]") : cli.FromValue;
+                        tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), new Text(changeLog.CreatedDate.ToString()),frVal,toVal});
+                        
                     }
                 }
             }
@@ -146,7 +154,7 @@ namespace JiraCon
                 ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{ExportPath}[/]");
         }
 
-        private void PopulateChangeLogs()
+        private bool PopulateChangeLogs()
         {
             foreach (var tIss in _issues )            
             {
@@ -154,9 +162,10 @@ namespace JiraCon
                 jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
                 _jIssues.Add(jIss);
             }
+            return _jIssues.Count > 0;
         }
 
-        private void BuildSearch()
+        private bool BuildSearch()
         {
             switch(_analysisType)
             {
@@ -172,10 +181,12 @@ namespace JiraCon
                 default:
                     throw new NotImplementedException($"ChangeLogsMgs does not support AnalysisType: {Enum.GetName(typeof(AnalysisType),_analysisType)}");
             }
+            return (searchJQL != null && searchJQL.Length > 0);
         }
-        private void PopulateIssues()
+        private bool PopulateIssues()
         {
             _issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
+            return _issues.Count > 0;
         }
        
     }
