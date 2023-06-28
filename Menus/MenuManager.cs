@@ -40,9 +40,9 @@ namespace JiraCon
                 case MenuItemEnum.miMenu_Config:
                     finalMenu = MenuEnum.meConfig;
                     break;
-                case MenuItemEnum.miMenu_Dev:
-                    finalMenu = MenuEnum.meDev;
-                    break;
+                // case MenuItemEnum.miMenu_Dev:
+                //     finalMenu = MenuEnum.meDev;
+                //     break;
                 case MenuItemEnum.miMenu_IssueStates:
                     finalMenu = MenuEnum.meIssue_States;
                     break;
@@ -52,16 +52,16 @@ namespace JiraCon
                 case MenuItemEnum.miMenu_StatusConfig:
                     finalMenu = MenuEnum.meStatus_Config;
                     break;
-                case MenuItemEnum.miDev1:
-                    var menuDev1 = new MenuDev(JTISConfigHelper.config);
-                    menuDev1.DevTest1();
-                    ConsoleUtil.PressAnyKeyToContinue();
-                    break;
-                case MenuItemEnum.miDev2:
-                    var menuDev2 = new MenuDev(JTISConfigHelper.config);
-                    menuDev2.DevTest2();
-                    ConsoleUtil.PressAnyKeyToContinue();
-                    break;
+                // case MenuItemEnum.miDev1:
+                //     var menuDev1 = new MenuDev(JTISConfigHelper.config);
+                //     menuDev1.DevTest1();
+                //     ConsoleUtil.PressAnyKeyToContinue();
+                //     break;
+                // case MenuItemEnum.miDev2:
+                //     var menuDev2 = new MenuDev(JTISConfigHelper.config);
+                //     menuDev2.DevTest2();
+                //     ConsoleUtil.PressAnyKeyToContinue();
+                //     break;
 /////////////////////////////////////
                 case MenuItemEnum.miIssCfgEdit:
                     IssueStatesUtil.EditIssueStatus();
@@ -181,7 +181,14 @@ namespace JiraCon
             int issueCount = 0;
             if (analyze.HasSearchData)
             {
-                issueCount = analyze.GetData();
+                try 
+                {
+                    issueCount = analyze.GetData();
+                }
+                catch 
+                {
+                    ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
+                }
                 if (analyze.GetDataFail)
                 {
                     ConsoleUtil.PressAnyKeyToContinue();
@@ -337,11 +344,6 @@ namespace JiraCon
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
-                break;
-                case(MenuEnum.meDev):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"Developer Test 1"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"Developer Test 2"));
-
                 break;
                 case(MenuEnum.meIssue_States):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
