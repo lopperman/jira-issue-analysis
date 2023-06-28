@@ -1,5 +1,3 @@
-using System.Linq;
-using System;
 using System.Text.Json.Serialization;
 
 namespace JiraCon
@@ -15,103 +13,194 @@ namespace JiraCon
         // for any issue, 'Start' is the first active state that occurred
         // stStart = 5
     }    
+
+#region JTIS TIME ZONE
+    public static class JTISTimeZone
+    {
+        private static TimeZoneInfo? _timeZoneInfo = null;
+        private static int? cfgId;
+
+        public static TimeZoneInfo DisplayTimeZone
+        {
+            get
+            {
+                if (_timeZoneInfo != null)
+                {
+                    return _timeZoneInfo ;
+                }
+                else 
+                {
+                    return TimeZoneInfo.Local;
+                }
+            }
+        }
+
+        public static bool DefaultTimeZone
+        {
+            get{
+                return DisplayTimeZone.Id.Equals(TimeZoneInfo.Local.Id,StringComparison.OrdinalIgnoreCase);
+            }
+        }
+        public static void Reset()
+        {
+            _timeZoneInfo = null;
+            cfgId = 0;
+        }
+        public static void SetJTISTimeZone(JTISConfig cfg)
+        {
+            cfgId = cfg.configId;
+            _timeZoneInfo = null;
+            var lookupTZ = FindTimeZone(cfg.TimeZoneId);
+            if (lookupTZ != null)
+            {
+                _timeZoneInfo = lookupTZ;
+            }
+        }
+        private static TimeZoneInfo? FindTimeZone(string? id)
+        {
+            TimeZoneInfo? retTZ = null;
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+            else 
+            {
+                try 
+                {
+                    var findTZ = TimeZoneInfo.FindSystemTimeZoneById(id);
+                    if (findTZ != null)
+                    {
+                        retTZ = findTZ;
+                    }
+                }
+                catch (Exception exObj)
+                {
+                    ConsoleUtil.WriteError(string.Format("Error parsing TimeZone Id '{0}'",id),false,ex:exObj,pause:true);
+                }
+            }
+            return retTZ;
+        }
+    }
+#endregion
     public class JTISConfig: IDisposable
     {
         private bool _validConn = false;
         private bool disposedValue;
-
-        [JsonIgnore]
-        private TimeZoneInfo? _timeZoneInfo = null;
-        public string? TimeZoneId {get;set;}
+        
+        private string? _timeZoneId = null;
+        public string? TimeZoneId 
+        {
+            get
+            {
+                return _timeZoneId;
+            }
+            set 
+            {
+                JTISTimeZone.Reset();
+                _timeZoneId = value;
+                JTISTimeZone.SetJTISTimeZone(this);
+            }
+        }
+            
 
         [JsonIgnore]
         public bool IsDirty {get;set;}
 
-
-
         public JTISConfig()
         {
-            if (_timeZoneInfo == null)
-
-            {
-                UpdateDisplayTimeZone(TimeZoneInfo.Local);
-            }
         }
 
         [JsonPropertyName("cfgId")]
         public int? configId {get; set;}
+
         [JsonPropertyName("cfgName")]
         public string? configName {get; set;}
+
         [JsonPropertyName("loginName")]
         public string? userName {get; set;}
+
         [JsonPropertyName("securityToken")]
         public string? apiToken {get; set;}
+
         [JsonPropertyName("jiraBaseUrl")]
         public string? baseUrl {get; set;}
+
         [JsonPropertyName("projectKey")]
         public string? defaultProject {get;set;}
+
+        public bool DefaultTimeZoneDisplay()
+        {
+            return JTISTimeZone.DefaultTimeZone;
+        }
+
+        // public bool DefaultTimeZoneDisplay
+        // {
+        //     get
+        //     {
+        //         if (string.IsNullOrWhiteSpace(TimeZoneId))
+        //         {
+        //             return true;
+        //         }
+        //         else 
+        //         {
+        //             var tz = JTISTimeZone.SetJTISTimeZone
+        //         }
+        //         if (TimeZoneDisplay == null) {TimeZoneDisplay = TimeZoneInfo.Local;}
+        //         return TimeZoneDisplay.Equals(TimeZoneInfo.Local);
+        //     }
+        // }
+        // public string TimeZoneDisplayInfo()
+        // {
+        //     if (_timeZoneInfo == null)
+        //     {
+        //         if (!string.IsNullOrEmpty(TimeZoneId ))
+        //         {
+        //             var tzAttach = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(x=>x.Id == TimeZoneId);
+        //             if (tzAttach != null)
+        //             {
+        //                 _timeZoneInfo = tzAttach;
+        //             }
+        //         }
+        //         if (_timeZoneInfo == null) 
+        //         {
+        //             UpdateDisplayTimeZone(TimeZoneInfo.Local);
+        //         }
+        //     }
+        //     if (DefaultTimeZoneDisplay)
+        //     {
+        //         return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
+        //     }
+        //     else 
+        //     {
+        //         return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
+        //     }
+        // }
+        // public void UpdateDisplayTimeZone(TimeZoneInfo tzInfo)
+        // {
+        //     this.TimeZoneDisplay
+
+        //     bool tzDirty = false;
+        //     if (_timeZoneInfo == null)
+        //     {
+        //         tzDirty = true;
+        //     }
+        //     else 
+        //     {
+        //         if (_timeZoneInfo.Equals(tzInfo)==false)               
+        //         {
+        //             tzDirty = true;
+        //         }
+        //     }
+        //     _timeZoneInfo = tzInfo;
+        //     TimeZoneId = tzInfo.Id;
+        //     if (tzDirty)
+        //     {
+        //         JTISConfigHelper.SaveConfigList();
+        //     }
+        // }
+
         [JsonPropertyName("savedJQL")]
-
-
-        [JsonIgnore()]
-        public  TimeZoneInfo? TimeZoneDisplay {get;set;}
-
-        public bool DefaultTimeZoneDisplay
-        {
-            get
-            {
-                if (TimeZoneDisplay == null) {TimeZoneDisplay = TimeZoneInfo.Local;}
-                return TimeZoneDisplay.Equals(TimeZoneInfo.Local);
-            }
-        }
-        public string TimeZoneDisplayInfo()
-        {
-            if (_timeZoneInfo == null)
-            {
-                if (!string.IsNullOrEmpty(TimeZoneId ))
-                {
-                    var tzAttach = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(x=>x.Id == TimeZoneId);
-                    if (tzAttach != null)
-                    {
-                        _timeZoneInfo = tzAttach;
-                    }
-                }
-                if (_timeZoneInfo == null) 
-                {
-                    UpdateDisplayTimeZone(TimeZoneInfo.Local);
-                }
-            }
-            if (DefaultTimeZoneDisplay)
-            {
-                return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
-            }
-            else 
-            {
-                return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
-            }
-        }
-        public void UpdateDisplayTimeZone(TimeZoneInfo tzInfo)
-        {
-            bool tzDirty = false;
-            if (_timeZoneInfo == null)
-            {
-                tzDirty = true;
-            }
-            else 
-            {
-                if (_timeZoneInfo.Equals(tzInfo)==false)               
-                {
-                    tzDirty = true;
-                }
-            }
-            _timeZoneInfo = tzInfo;
-            TimeZoneId = tzInfo.Id;
-            if (tzDirty)
-            {
-                JTISConfigHelper.SaveConfigList();
-            }
-        }
-
         public IReadOnlyList<JQLConfig> SavedJQL 
         {
             get 

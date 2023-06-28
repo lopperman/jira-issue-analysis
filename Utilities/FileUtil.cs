@@ -30,29 +30,5 @@ namespace JiraCon
 
         }
 
-        // [Obsolete("Need to figure out how to deserialize Atlassian.Jira.Issue",true)]
-        // public static List<JIssue>? LoadFromJSON(string path)
-        // {
-        //     List<JIssue>? list = null;
-
-        //     JsonSerializerSettings settings = new JsonSerializerSettings();
-
-        //     try
-        //     {
-        //         string data = string.Empty;
-        //         using (StreamReader reader = new StreamReader(path))
-        //         {
-        //             data = reader.ReadToEnd();
-        //         }
-
-        //         list = JsonConvert.DeserializeObject<List<JIssue>>(data,settings);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         throw ex;
-        //     }
-
-        //     return list;
-        // }
     }
 }

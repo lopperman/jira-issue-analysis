@@ -225,7 +225,7 @@ namespace JiraCon
             }
         }
 
-        public static void SaveConfigList()
+        public static void SaveConfigList(JTISConfig jtisCfg)
         {
             if (cfgList.Count > 0)
             {
@@ -234,7 +234,7 @@ namespace JiraCon
                     File.Delete(ConfigFilePath);
                 }
                 JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;                
                 string data = JsonConvert.SerializeObject(cfgList,Formatting.None,settings);
                 using (StreamWriter writer = new StreamWriter(ConfigFilePath, false))
                 {
@@ -244,6 +244,13 @@ namespace JiraCon
                 {
                     tcfg.IsDirty = false;
                 }
+            }
+        }
+        public static void SaveConfigList()
+        {
+            if (config != null)
+            {
+                SaveConfigList(config);
             }
         }
 
@@ -688,7 +695,9 @@ namespace JiraCon
         internal static void ChangeTimeZone()
         {
             string? searchTerm = string.Empty;
-            string curTZ = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
+            string curTZ = JTISTimeZone.DisplayTimeZone.DisplayName;
+
+            // string curTZ = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
             searchTerm = ConsoleUtil.GetInput<string>($"Date/Time data from Jira is currently displaying as TimeZone: {curTZ}{Environment.NewLine}To change displayed times to another time zone, enter search text (e.g. 'Pacific') and you will be able to select from the filtered results, or press 'ENTER' to cancel",allowEmpty:true);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -710,7 +719,7 @@ namespace JiraCon
                     var selTZ = AnsiConsole.Prompt(sp);
                     if (ConsoleUtil.Confirm($"Change Time-Zone displayed for Jira data to: {selTZ.DisplayName}?",false))
                     {
-                        JTISConfigHelper.config.TimeZoneDisplay = selTZ;
+                        JTISConfigHelper.config.TimeZoneId =  selTZ.Id;
                         JTISConfigHelper.SaveConfigList();
                         ConsoleUtil.PressAnyKeyToContinue($"Jira Configuration '{JTISConfigHelper.config.configName}' has been updated to display time zone ** {selTZ.DisplayName} ** ");
                     }

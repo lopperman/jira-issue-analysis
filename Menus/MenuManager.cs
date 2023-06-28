@@ -63,11 +63,6 @@ namespace JiraCon
                     ConsoleUtil.PressAnyKeyToContinue();
                     break;
 /////////////////////////////////////
-                case MenuItemEnum.miShowJSONCards:
-                    JHelper.ShowIssueJSON();
-                    if (finalMenu == null){finalMenu = MenuEnum.meIssue_States;}
-                    break;
-
                 case MenuItemEnum.miIssCfgEdit:
                     IssueStatesUtil.EditIssueStatus();
                     if (finalMenu == null){finalMenu = MenuEnum.meStatus_Config;}
@@ -119,6 +114,10 @@ namespace JiraCon
                 case MenuItemEnum.miStartRecordingSession:
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
                     ConsoleUtil.StartRecording();
+                    break;
+                case MenuItemEnum.miJiraServerInfo:
+                    JEnvironmentConfig.JiraEnvironmentInfo();
+                    if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
                     break;
                 case MenuItemEnum.miSaveSessionToFile:
                     if (finalMenu == null){finalMenu = MenuEnum.meConfig;}
@@ -349,7 +348,6 @@ namespace JiraCon
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISJQL,"Get Issue(s) Data by JQL Query"));
                     ret.Add(menuSeparator);
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowJSONCards,"Show Issue(s) JSON"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));

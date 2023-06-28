@@ -2,11 +2,11 @@ using JiraCon;
 using Spectre.Console;
 using Spectre.Console.Json;
 
-namespace JTIS.Console
-{
-    public static class app
-    {
 
+namespace JTIS
+{
+    public static class JConsole
+    {
         private static IAnsiConsole? _cons = null;
 
         public static IAnsiConsole Console
@@ -29,25 +29,8 @@ namespace JTIS.Console
             }
         }
 
-        // public static void RenderJson()
-        // {
-        //     var waitMsg = "rendering json";
-        //     var kvp = new KeyValuePair<string,Action<string,string>>($"{waitMsg}",ShowJson);
-        //     var kvpList = new List<KeyValuePair<string,Action>>();
-        //     kvpList.Add(kvp);
-        //     ConsoleUtil.StatusWait2(kvpList);
-        //     ConsoleUtil.PressAnyKeyToContinue();
-        // }
-
         public static void ShowJson(string title, string jsonData)
         {
-            // string? data;
-            
-            // using (StreamReader reader = new StreamReader("/Users/paulbrower/JiraJTIS/json1.json"))
-            // {
-            //     data = reader.ReadToEnd();
-            // }
-
             var json = new JsonText(jsonData);
                     
             AnsiConsole.Write(

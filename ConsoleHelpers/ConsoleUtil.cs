@@ -146,11 +146,10 @@ namespace JiraCon
             get
             {
                 if (JTISConfigHelper.config != null)
-                {
-                    if (JTISConfigHelper.config.DefaultTimeZoneDisplay == false)
-                    {
-                        var tzi = JTISConfigHelper.config.TimeZoneDisplay.DisplayName;
-                        tzi = JTISConfigHelper.config.TimeZoneDisplay.StandardName;
+                {                    
+                    if (JTISConfigHelper.config.DefaultTimeZoneDisplay() == false)
+                    {   
+                        var tzi = JTISTimeZone.DisplayTimeZone.StandardName;
                         return $" [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ";
                     }
                 }
