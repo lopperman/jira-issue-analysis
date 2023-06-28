@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace JiraConsole_Brower
+namespace JTISsole_Brower
 {
 
     public class BuildPropNames<T> : IBuildPropNames<T>

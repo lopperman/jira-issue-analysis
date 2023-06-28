@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Atlassian.Jira;
 using Newtonsoft.Json;
 
-namespace JiraCon
+namespace JTIS
 {
     public class JIssueChangeLog
     {

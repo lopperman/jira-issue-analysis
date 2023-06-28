@@ -1,8 +1,10 @@
 ﻿using System;
 using Atlassian.Jira;
+using JTIS.Config;
+using JTIS.Console;
 using Newtonsoft.Json;
 
-namespace JiraCon
+namespace JTIS
 {
     public enum ChangeLogTypeEnum
     {

@@ -1,7 +1,7 @@
 using System;
 
 
-namespace JiraCon
+namespace JTIS
 {
     public enum DateTypeEnum
     {

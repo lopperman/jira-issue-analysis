@@ -4,7 +4,7 @@ using System.Linq;
 using Atlassian.Jira;
 using Newtonsoft.Json;
 
-namespace JiraCon
+namespace JTIS
 {
     public class JCustomField
     {

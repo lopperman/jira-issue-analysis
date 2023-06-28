@@ -4,7 +4,7 @@ using System.IO;
 using System;
 using System.Text.Json.Serialization;
 
-namespace JiraCon
+namespace JTIS
 {
     public class JQLConfig
     {

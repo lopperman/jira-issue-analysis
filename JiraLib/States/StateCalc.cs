@@ -1,6 +1,8 @@
 
 
-namespace  JiraCon
+using JTIS.Config;
+
+namespace JTIS
 {
     public class StateCalc
     {

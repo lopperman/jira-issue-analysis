@@ -1,16 +1,11 @@
-using System.Data.Common;
-using System.Net.NetworkInformation;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Atlassian.Jira;
 using Spectre.Console;
+using JTIS.Config;
+using JTIS.Console;
 
-namespace JiraCon
+namespace JTIS
 {
-
     public enum AnalysisType
     {
         _atUnknown = -1, 
@@ -145,7 +140,7 @@ namespace JiraCon
         }
 
         public void WriteToConsole()
-        {
+        {        
             WriteIssueSummary();
         }
 
@@ -407,14 +402,12 @@ namespace JiraCon
             ret = JTISConfigHelper.GetSavedJQL(title);
             if (ret != null && ret.Length > 0)
             {
-                ConsoleUtil.WriteStdLine("PRESS 'Y' TO USE THE FOLLOWING SAVED JQL/QUERY - ANY OTHER KEY TO CANCEL",StdLine.slResponse,false);
-                ConsoleUtil.WriteStdLine(ret,StdLine.slCode,false);
-                if (Console.ReadKey(true).Key == ConsoleKey.Y)
+                if (ConsoleUtil.Confirm("USE THE FOLLOWING SAVED JQL/QUERY?",true))
                 {
                     return ret;
                 }
             }
-            return String.Empty;
+            return string.Empty;
         }
 
         public int GetData()
@@ -784,7 +777,6 @@ namespace JiraCon
 
             }
         }
-
 
     }
 }

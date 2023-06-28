@@ -1,9 +1,9 @@
 ﻿using System.Reflection.Metadata;
 using System;
-using static JiraCon.ConsoleUtil;
 using Spectre.Console;
+using JTIS.Console;
 
-namespace JiraCon
+namespace JTIS
 {
     public class ConsoleLine
     {

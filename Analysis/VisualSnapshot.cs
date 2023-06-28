@@ -1,4 +1,6 @@
-namespace JiraCon
+using JTIS.Menu;
+
+namespace JTIS
 {
     internal class VisualSnapshot
     {

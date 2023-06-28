@@ -7,7 +7,7 @@ using System;
 using System.Globalization;
 using Spectre.Console;
 
-namespace JiraCon
+namespace JTIS.Menu
 {
 
     public enum VisualSnapshotType
@@ -23,7 +23,8 @@ namespace JiraCon
         meDev, 
         meIssue_States, 
         meStatus_Config, 
-        meJQL
+        meJQL, 
+        meAdvanced_Search
     }
     public enum MenuItemEnum
     {
@@ -55,7 +56,9 @@ namespace JiraCon
         miIssCfgEdit,
         miIssCfgReset, 
         miSaveSessionToFile, 
-        miStartRecordingSession
+        miStartRecordingSession,
+        miAdvSearchViewFields
+        
     }
 
 

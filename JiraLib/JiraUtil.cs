@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using Atlassian.Jira;
+using JTIS.Config;
+using JTIS.Console;
 using Spectre.Console;
 
-namespace JiraCon
+namespace JTIS
 {
     public static class JiraUtil
     {
@@ -57,9 +59,9 @@ namespace JiraCon
             }
             catch (Exception ex)
             {
-                Console.Beep();
-                Console.Beep();
-                Console.Error.WriteLine("Sorry, there seems to be a problem connecting to Jira with the arguments you provided. Error: {0}, {1}\r\n\r\n{2}", ex.Message, ex.Source, ex.StackTrace);
+                System.Console.Beep();
+                System.Console.Beep();
+                System.Console.Error.WriteLine("Sorry, there seems to be a problem connecting to Jira with the arguments you provided. Error: {0}, {1}\r\n\r\n{2}", ex.Message, ex.Source, ex.StackTrace);
                 return false;
             }
 

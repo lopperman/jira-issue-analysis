@@ -1,9 +1,9 @@
-using JiraCon;
+
 using Spectre.Console;
 using Spectre.Console.Json;
 
 
-namespace JTIS
+namespace JTIS.Console
 {
     public static class JConsole
     {

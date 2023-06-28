@@ -3,8 +3,10 @@ using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
+using JTIS.Console;
+using JTIS.Config;
 
-namespace JiraCon
+namespace JTIS
 {
 
     
@@ -31,7 +33,7 @@ namespace JiraCon
 
             _jira.Issues.MaxIssuesPerRequest = 500;
 
-            _fieldList = GetFields();
+            _fieldList = GetJFields();
 
             JField jField = _fieldList.Where(x => x.Name == "Epic Link").FirstOrDefault();
 
@@ -119,9 +121,9 @@ namespace JiraCon
             return GetIssueTypeStatusesAsync(projKey, issueType).GetAwaiter().GetResult().ToList();
         }
 
+        
 
-
-        public List<JField> GetFields()
+        public List<JField> GetJFields()
         {
             var ret = new List<JField>();
 
@@ -140,8 +142,7 @@ namespace JiraCon
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex.Message);
-                    Console.Error.WriteLine(ex.StackTrace);
+                    ConsoleUtil.WriteError(ex.Message,ex:ex,pause:false);
                 }
             }
 

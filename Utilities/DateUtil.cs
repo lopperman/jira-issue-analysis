@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
-namespace JiraCon
+using JTIS.Console;
+
+namespace JTIS
 {
 
         public static class ColorUtil
@@ -72,7 +74,7 @@ namespace JiraCon
         public static void testDT()
         {
             DateTime dt = DateTime.Now;
-            Console.WriteLine(dt.fwGetWorkingDays(DateTime.Now.AddHours(-37.25)));
+            System.Console.WriteLine(dt.fwGetWorkingDays(DateTime.Now.AddHours(-37.25)));
                 
         }
 

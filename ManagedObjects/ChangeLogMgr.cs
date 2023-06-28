@@ -1,8 +1,10 @@
 using Atlassian.Jira;
+using JTIS.Config;
+using JTIS.Console;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace JiraCon
+namespace JTIS
 {
    public class ChangeLogsMgr
     {

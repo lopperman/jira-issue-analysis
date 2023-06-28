@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using JTIS.Console;
 
-namespace JiraCon
+namespace JTIS.Config
 {
     public enum StatusType
     {

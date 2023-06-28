@@ -1,13 +1,11 @@
 using System.Data;
+using JTIS.Console;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static JiraCon.ConsoleUtil;
 using Spectre.Console;
 
-namespace JiraCon
+namespace JTIS.Config
 {
-    
-
     public static class JTISConfigHelper
     {
         public static bool IsInitialized {get;set;}
@@ -18,7 +16,6 @@ namespace JiraCon
         {
             get
             {
-
 
                 return _config;
             }
@@ -220,7 +217,7 @@ namespace JiraCon
                 {
                     File.Delete(filePath);
                     ConsoleUtil.WriteStdLine("Config file has been deleted. Run program again to create new config file. Press any key to exit.", StdLine.slResponse, true);
-                    Console.ReadKey(true);
+                    ConsoleUtil.PressAnyKeyToContinue();
                 }
             }
         }
@@ -443,22 +440,22 @@ namespace JiraCon
             {
                 IsInitialized = true;
                 //AnsiConsole.Clear();
-                WriteAppTitle ();
+                ConsoleUtil.WriteAppTitle();
                 if (ConsoleUtil.Confirm("Record console session?",false))
                 {
-                    IsConsoleRecording = true ;
+                    ConsoleUtil.IsConsoleRecording = true ;
                     AnsiConsole.Record();
                     ConsoleUtil.PressAnyKeyToContinue("Recording started. You'll have the option to save the recording when you quit using the EXIT Menu Option. You can also save the recording using the Configuration menu.");
                 }
             }
 
             JTISConfig? chCfg = null; 
-            Console.Clear();
+            AnsiConsole.Clear();
             if (msg==null || msg.Length == 0)
             {
                 msg = "[bold black on lightyellow3]SELECT CONFIGURATION BY [underline]USING ARROW KEYS[/], THEN PRESS 'ENTER'[/]";
             }
-            WriteAppTitle();
+            ConsoleUtil.WriteAppTitle();
             var panel = new Panel(msg);
             panel.Border = BoxBorder.Rounded;
             panel.Width = 20;
@@ -633,8 +630,7 @@ namespace JiraCon
             }
             else 
             {
-                ConsoleUtil.WriteStdLine("PRESS ANY KEY TO CONTINUE",StdLine.slResponse,false);
-                Console.ReadKey(true);
+                ConsoleUtil.PressAnyKeyToContinue();
             }
             return retJql;
         }

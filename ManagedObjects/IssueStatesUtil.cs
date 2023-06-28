@@ -1,6 +1,8 @@
+using JTIS.Config;
+using JTIS.Console;
 using Spectre.Console;
 
-namespace JiraCon
+namespace JTIS
 {
     public static class IssueStatesUtil
     {

@@ -3,7 +3,7 @@
 // using Atlassian.Jira;
 // using JConsole.ConsoleHelpers.ConsoleTables;
 
-// namespace JiraCon 
+// namespace JTIS 
 // {
 //     public class EpicAnalysis
 //     {

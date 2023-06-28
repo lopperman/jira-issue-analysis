@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Spectre.Console;
-using static JiraCon.ConsoleUtil;
 
-namespace JiraCon
+namespace JTIS.Console
 {
     public class ConsoleLines
     {
@@ -81,7 +80,7 @@ namespace JiraCon
 
         public void WriteQueuedLines(bool clearScreen, bool addTitle)
         {
-            Console.ResetColor();
+            AnsiConsole.ResetColors();
             if (clearScreen)
             {
                 AnsiConsole.Clear();
@@ -89,7 +88,7 @@ namespace JiraCon
             if (addTitle)
             {
                 AnsiConsole.Clear();
-                WriteAppTitle();
+                ConsoleUtil.WriteAppTitle();
             }
             for (int i = 0; i < _lines.Count; i++)
             {

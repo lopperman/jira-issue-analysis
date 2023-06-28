@@ -1,21 +1,25 @@
 ﻿using Atlassian.Jira;
+using JTIS.Config;
+using JTIS.Console;
+using JTIS.Extensions;
+using JTIS.Menu;
 using Newtonsoft.Json;
 using Spectre.Console;
 
-namespace JiraCon
+namespace JTIS
 {
     class MainClass
     {
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {        
-            ConsoleUtil.PressAnyKeyToContinue();
+            StringExt.StringsMatchTest();
         }
 
         //Valid Args are either empty, or a single arg which is the filepath to your desired config file
         public static void Main(string[] args) 
         {
-            if (args.Length == 1 && args[0].ToUpper()=="DEV")
+            if (args.Length == 1 && args[0].Equals("dev",StringComparison.OrdinalIgnoreCase))
             {
                 DevQuick();
                 return;                

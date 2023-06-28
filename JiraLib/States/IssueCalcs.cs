@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 
 
-namespace  JiraCon
+namespace JTIS
 {
     public class IssueCalcs
     {

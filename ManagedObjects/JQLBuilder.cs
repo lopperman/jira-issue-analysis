@@ -2,7 +2,7 @@
 
 using System.Text;
 
-namespace JiraCon
+namespace JTIS
 {
     public static class JQLBuilder
     {

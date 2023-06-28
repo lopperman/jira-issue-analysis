@@ -1,8 +1,10 @@
-﻿using System.Security.Cryptography;
+﻿using System.Net.Mime;
+using System.Security.Cryptography;
+using JTIS.Config;
 using Spectre.Console;
 
 
-namespace JiraCon
+namespace JTIS.Console
 {
     public enum StdLine
     {
@@ -52,8 +54,8 @@ namespace JiraCon
         }
 
         static ConsoleLines consoleLines = new ConsoleLines();
-        public static ConsoleColor defBackground = Console.BackgroundColor;
-        public static ConsoleColor defForeground = Console.ForegroundColor;
+        public static ConsoleColor defBackground = System.Console.BackgroundColor;
+        public static ConsoleColor defForeground = System.Console.ForegroundColor;
 
         public static ConsoleLines Lines
         {
@@ -88,21 +90,21 @@ namespace JiraCon
             p.Expand();
             AnsiConsole.Write(p);
 
-            Console.ReadKey(true);
+            System.Console.ReadKey(true);
         }
 
         public static void WriteStdLine(string text, ConsoleColor fontColor, ConsoleColor backColor,bool clearScreen = false)
         {
-            Console.ResetColor();
+            System.Console.ResetColor();
             if (clearScreen)
             {
-                Console.Clear();
+                System.Console.Clear();
             }            
-            Console.ForegroundColor = fontColor;
-            Console.BackgroundColor = backColor;
-            Console.Write(text);
-            Console.ResetColor();
-            Console.WriteLine();
+            System.Console.ForegroundColor = fontColor;
+            System.Console.BackgroundColor = backColor;
+            System.Console.Write(text);
+            System.Console.ResetColor();
+            System.Console.WriteLine();
 
         }
 
@@ -110,10 +112,10 @@ namespace JiraCon
         {
             try 
             {
-                if (clearScreen){Console.Clear();}
+                if (clearScreen){System.Console.Clear();}
                 if (string.IsNullOrEmpty(text))
                 {
-                    Console.Write("");
+                    System.Console.Write("");
                 }
                 else 
                 {
@@ -186,7 +188,7 @@ namespace JiraCon
             {
                 text = string.Format("  {0}",text);
             }
-            if (clearScreen){Console.Clear();}
+            if (clearScreen){System.Console.Clear();}
 
             try 
             {
@@ -204,7 +206,7 @@ namespace JiraCon
 
         public static void WriteError(string text, bool clearScreen = false, Exception? ex =  null, bool pause = false)
         {
-            if (clearScreen){Console.Clear();}
+            if (clearScreen){System.Console.Clear();}
             AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
             if (ex != null)
             {
@@ -273,7 +275,7 @@ namespace JiraCon
         {
             if (clearScreen)
             {
-                Console.Clear();
+                System.Console.Clear();
             }
             message = string.Format("[bold white on darkblue]{0}[/]",message);
             // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
@@ -370,19 +372,11 @@ namespace JiraCon
 
         public static bool ByeBye()
         {
-            var lines = new ConsoleLines();
-            lines.AddConsoleLine("Press 'Y' to exit, otherwise press any key to continue",ConsoleUtil.StdStyle(StdLine.slResponse));
-            lines.WriteQueuedLines(false);
-            if (Console.ReadKey(true).Key !=ConsoleKey.Y)
+            if (ConsoleUtil.Confirm("QUIT APPLICATION?",true))
             {
-                return false;
+                ByeByeForced();
             }
-            else 
-            {
-                lines.AddConsoleLine("   HAVE A GREAT DAY!!   ", ConsoleUtil.StdStyle(StdLine.slResponse));
-                lines.WriteQueuedLines(true);
-                return true;
-            }
+            return false;
         }
 
         public static void ByeByeForced()

@@ -9,5 +9,7 @@
     "editor.guides.indentation": true,
     "editor.smoothScrolling": true,
     "accessibility.verbosity.chat": false,
-    "csharp.inlayHints.parameters.forIndexerParameters": true
+    "csharp.inlayHints.parameters.forIndexerParameters": true,
+    "editor.tokenColorCustomizations": {"[Monokai Pro]": {"comments": "#0da9c8"}}    ,
+    "workbench.colorCustomizations": {"editor.selectionBackground": "#5f5c25b4"},     
 }

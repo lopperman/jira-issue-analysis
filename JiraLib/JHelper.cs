@@ -2,7 +2,7 @@
 using Atlassian.Jira;
 using Newtonsoft.Json;
 
-namespace JiraCon
+namespace JTIS
 {
     public static class JHelper
     {
