@@ -1,4 +1,5 @@
-﻿using Atlassian.Jira;
+﻿using System.Diagnostics;
+using Atlassian.Jira;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
@@ -13,7 +14,19 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {        
-            StringExt.StringsMatchTest();
+
+            var j = new JQLConfig();
+            j.jql = "a b c d e";
+            Debug.Assert(j.JQLSyntax == false);
+            j.jql = "project=wwt and status=priority";
+            Debug.Assert(j.JQLSyntax == true);
+            j.jql = "status in (priority, blocked)";
+            Debug.Assert(j.JQLSyntax == true);
+            j.jql = "status <>> (priority, blocked)";
+            Debug.Assert(j.JQLSyntax == true);
+
+
+            //StringExt.StringsMatchTest();
         }
 
         //Valid Args are either empty, or a single arg which is the filepath to your desired config file

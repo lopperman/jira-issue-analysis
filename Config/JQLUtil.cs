@@ -6,7 +6,16 @@ namespace JTIS
 {
     public static class JQLUtil
     {
-        //test
+        public static string[] JQLOperators
+        {
+            get 
+            {
+                return new string[]{
+                    "Equals","=","Not equals ","!=","Greater than",">","Greater than equals", "(>=)","Less than","<",
+                    "Less than equals","<=","IN","NOT IN","CONTAINS","~","DOES NOT CONTAIN","!~","IS","IS NOT","WAS", "WAS IN","WAS NOT IN",
+                    "WAS NOT","CHANGED"};
+            }
+        }
 
         public static void RemoveJQL(JTISConfig cfg)
         {

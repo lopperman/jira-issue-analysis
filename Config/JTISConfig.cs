@@ -237,6 +237,18 @@ namespace JTIS.Config
                 return SavedJQL.Count;
             }
         }
+        public bool HasSavedJQLQuery
+        {
+            get{
+                return SavedJQL.Any(x=>x.JQLSyntax);
+            }
+        }
+        public bool HasSavedJQLList
+        {
+            get{
+                return SavedJQL.Any(x=>x.JQLSyntax==false);
+            }
+        }
 
         [JsonIgnore]
         public bool ValidConfig 

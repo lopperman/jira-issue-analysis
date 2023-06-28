@@ -1,8 +1,10 @@
+using System;
 using System.Text;
 using Atlassian.Jira;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.Extensions;
 
 namespace JTIS
 {
@@ -580,12 +582,21 @@ namespace JTIS
             return sb.ToString();
         }
 
-        private void WriteIssueSummary()
+        private void WriteIssueSummary(bool writeAllAtOnce = false)
         {
+            int writeCount = 0;
+            int totalCount = JCalcs.Count;
+            bool writeAll = writeAllAtOnce;
+            AnsiConsole.Clear();
+
             foreach (var ic in JCalcs)
             {
-                AnsiConsole.Clear();
-                AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
+                if (writeAll == false)
+                {
+                    AnsiConsole.Clear();
+                }
+                writeCount +=1;
+                AnsiConsole.Write(new Rule($"[dim]({writeCount:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 AnsiConsole.Write(new Rule($"[bold]SUMMARY FOR: {ic.IssueObj.Key}  ({ic.IssueObj.StatusName})  [/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Left});
                 AnsiConsole.MarkupLineInterpolated($"\t[dim blue on white]{ic.IssueObj.Summary}[/]");
 
@@ -734,9 +745,12 @@ namespace JTIS
 
                 AnsiConsole.Write(tbl);
                 AnsiConsole.WriteLine();
-                AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), Justification=Justify.Left});
                 if (ic.Blockers.Count > 0)
                 {
+                    AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White), Justification=Justify.Center});
+                    AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
+                    Justification=Justify.Left});
+                    AnsiConsole.MarkupLine($"[italic darkred on white]NOTE: Current timestamp is used on actively blocked issues as 'Blocked End Dt' in order to calculate total blocked time[/]");
                     tbl = new Table();
                     tbl.AddColumns("Issue Key", "BlockStart", "BlockEnd");
                     foreach (var block in ic.Blockers)
@@ -759,21 +773,28 @@ namespace JTIS
                     AnsiConsole.Write(tbl);
                 }
 
-                // hdrLine.Style.Decoration(Decoration.Bold);
-                // if (ic.Blockers.Count > 0)
-                // {
-                //     tbl = new Table()
-                //     tbl.AddColumns("Issue Key","BlockStart","BlockEnd")
-                //     foreach (var block in ic.Blockers)
-                //     {
-                //         block.
-                //     }
-                // }
-                
-                AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
-
-
-                ConsoleUtil.PressAnyKeyToContinue();
+                if (writeCount == totalCount)
+                {
+                    AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
+                    ConsoleUtil.PressAnyKeyToContinue($"Showing {writeCount} / {totalCount} results");
+                }
+                else 
+                {
+                    if (writeAll == false)
+                    {
+                        AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
+                        string? resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                        if (resp.StringsMatch("A"))
+                        {
+                            WriteIssueSummary(true);
+                            return;
+                        }
+                        else if (resp.StringsMatch("X"))
+                        {
+                            return;
+                        }
+                    }
+                }
 
             }
         }

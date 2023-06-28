@@ -189,7 +189,7 @@ namespace JTIS.Menu
                     exitMenu = MenuEnum.meMain;
                     break;
             }
-            if (exitMenu != null)
+            if (exitMenu == null)
             {
                 exitMenu = MenuEnum.meMain;
             }

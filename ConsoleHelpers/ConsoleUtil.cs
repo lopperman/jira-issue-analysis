@@ -412,6 +412,10 @@ namespace JTIS.Console
             r.Style=Style.Parse("dim red");
             AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
+            if (!msg.EndsWith(Environment.NewLine))
+            {
+                msg = $"{msg}{Environment.NewLine}";
+            }
             if (allowEmpty)
             {
                 msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} [dim][[Optional]][/] {msg} [/]{Environment.NewLine}";
@@ -425,18 +429,6 @@ namespace JTIS.Console
                 retVal = AnsiConsole.Prompt<T>(
                     new TextPrompt<T>(msg));
             }
-
-                    
-
-            // if (defVal !=null)
-            // {
-            //     retVal = AnsiConsole.Ask<T?>(msg,defVal);
-            //     AnsiConsole.Ask<string>()
-            // }
-            // else 
-            // {
-            //     retVal = AnsiConsole.Ask<T>(msg);
-            // }
             if (allowEmpty == false && retVal == null )
             {
                 PressAnyKeyToContinue("[[Empty] is not allowed, please try again");
