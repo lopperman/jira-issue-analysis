@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using JTIS.Console;
+using JTIS.Extensions;
 
 namespace JTIS.Config
 {
@@ -87,9 +88,15 @@ namespace JTIS.Config
     public class JTISConfig: IDisposable
     {
         private bool _validConn = false;
-        private bool disposedValue;
-        
+        private bool disposedValue;        
         private string? _timeZoneId = null;
+        private List<JQLConfig> _savedJQL = new List<JQLConfig>();
+        private List<JiraStatus> _statusConfigs = new List<JiraStatus>();
+        private List<JiraStatus> _defaultStatusConfigs = new List<JiraStatus>();
+        private SortedList<string,string> _CustomFields = new SortedList<string, string>();
+
+        [JsonIgnore]
+        public bool IsDirty {get;set;}
         public string? TimeZoneId 
         {
             get
@@ -102,11 +109,8 @@ namespace JTIS.Config
                 _timeZoneId = value;
                 JTISTimeZone.SetJTISTimeZone(this);
             }
-        }
-            
+        }            
 
-        [JsonIgnore]
-        public bool IsDirty {get;set;}
 
         public JTISConfig()
         {
@@ -129,77 +133,13 @@ namespace JTIS.Config
 
         [JsonPropertyName("projectKey")]
         public string? defaultProject {get;set;}
+        public DateTime? ServerInfoUpdated {get;set;}
 
         public bool DefaultTimeZoneDisplay()
         {
             return JTISTimeZone.DefaultTimeZone;
         }
 
-        // public bool DefaultTimeZoneDisplay
-        // {
-        //     get
-        //     {
-        //         if (string.IsNullOrWhiteSpace(TimeZoneId))
-        //         {
-        //             return true;
-        //         }
-        //         else 
-        //         {
-        //             var tz = JTISTimeZone.SetJTISTimeZone
-        //         }
-        //         if (TimeZoneDisplay == null) {TimeZoneDisplay = TimeZoneInfo.Local;}
-        //         return TimeZoneDisplay.Equals(TimeZoneInfo.Local);
-        //     }
-        // }
-        // public string TimeZoneDisplayInfo()
-        // {
-        //     if (_timeZoneInfo == null)
-        //     {
-        //         if (!string.IsNullOrEmpty(TimeZoneId ))
-        //         {
-        //             var tzAttach = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(x=>x.Id == TimeZoneId);
-        //             if (tzAttach != null)
-        //             {
-        //                 _timeZoneInfo = tzAttach;
-        //             }
-        //         }
-        //         if (_timeZoneInfo == null) 
-        //         {
-        //             UpdateDisplayTimeZone(TimeZoneInfo.Local);
-        //         }
-        //     }
-        //     if (DefaultTimeZoneDisplay)
-        //     {
-        //         return $"Showing Times as your local zone: ({TimeZoneDisplay.DisplayName})";
-        //     }
-        //     else 
-        //     {
-        //         return $"Showing Times as ** CUSTOMIZED **: ({TimeZoneDisplay.DisplayName})";
-        //     }
-        // }
-        // public void UpdateDisplayTimeZone(TimeZoneInfo tzInfo)
-        // {
-        //     this.TimeZoneDisplay
-
-        //     bool tzDirty = false;
-        //     if (_timeZoneInfo == null)
-        //     {
-        //         tzDirty = true;
-        //     }
-        //     else 
-        //     {
-        //         if (_timeZoneInfo.Equals(tzInfo)==false)               
-        //         {
-        //             tzDirty = true;
-        //         }
-        //     }
-        //     _timeZoneInfo = tzInfo;
-        //     TimeZoneId = tzInfo.Id;
-        //     if (tzDirty)
-        //     {
-        //         JTISConfigHelper.SaveConfigList();
-        //     }
-        // }
 
         [JsonPropertyName("savedJQL")]
         public IReadOnlyList<JQLConfig> SavedJQL 
@@ -224,10 +164,6 @@ namespace JTIS.Config
             }
         }
         
-        private List<JQLConfig> _savedJQL = new List<JQLConfig>();
-        private List<JiraStatus> _statusConfigs = new List<JiraStatus>();
-        private List<JiraStatus> _defaultStatusConfigs = new List<JiraStatus>();
-
 
         [JsonIgnore]
         public int SavedJQLCount
@@ -302,27 +238,57 @@ namespace JTIS.Config
             }
         }
 
+
         public void AddJQL(JQLConfig jc)
         {
             jc.jqlId = SavedJQLCount + 1;
             _savedJQL.Add(jc);
+
+            _savedJQL = _savedJQL.OrderBy(x=>x.jqlName).ToList();
+            for (int i = 0; i < _savedJQL.Count; i ++)
+            {
+                _savedJQL[i].jqlId = i + 1;
+            }
+
             IsDirty = true;
+            
         }
         public void AddJQL(string shortName, string saveJql )
         {
+            if (_savedJQL.Exists(x=>x.jqlName.StringsMatch(shortName)))
+            {
+                int iCounter = 1;
+                string newName = string.Empty;
+                while(true)
+                {
+                    iCounter +=1;
+                    newName = $"{shortName} - {iCounter}";
+                    if (!_savedJQL.Exists(x=>x.jqlName.StringsMatch(newName)))
+                    {
+                        shortName = newName;
+                        break;
+                    }
+
+                }
+            }
             JQLConfig cfg = new JQLConfig(shortName,saveJql);
             AddJQL(cfg);
         }
         public void DeleteJQL(JQLConfig cfg)
         {
             IsDirty = true;
-            _savedJQL.Remove(cfg);
-            if (SavedJQLCount > 0)
+            var delCfg = _savedJQL.FirstOrDefault(x=>x.jqlName.StringsMatch(cfg.jqlName));
+            if (delCfg != null)
             {
-                for (int i = 0; i < SavedJQLCount; i ++)
+                _savedJQL.Remove(delCfg);
+                if (SavedJQLCount > 0)
                 {
-                    SavedJQL[i].jqlId = i + 1;
+                    for (int i = 0; i < SavedJQLCount; i ++)
+                    {
+                        SavedJQL[i].jqlId = i + 1;
+                    }
                 }
+                JTISConfigHelper.SaveConfigList(this);
             }
         }
         public void UpdateStatusCfgLocal(JiraStatus jStatus)

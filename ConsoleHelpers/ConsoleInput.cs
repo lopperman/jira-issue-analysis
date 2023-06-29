@@ -55,7 +55,9 @@ namespace JTIS
                 {
                     AnsiConsole.Clear();
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config,false);
-                    var jqlId = ConsoleUtil.GetInput<int>("Enter Saved JqlId or zero ('0') manually create a filter",allowEmpty:true);
+                    var sjqlId = ConsoleUtil.GetInput<string?>("Enter Saved JqlId, or press 'ENTER' to manually create a filter",allowEmpty:true);
+                    int jqlId = 0;
+                    int.TryParse(sjqlId, out jqlId);
                     if (jqlId < 1 || jqlId > JTISConfigHelper.config.SavedJQLCount)
                     {
                         return GetJQLOrIssueKeys(false);

@@ -8,8 +8,52 @@ namespace JTIS
         public JIssue? IssueObj {get;set;}
         public List<StateCalc> StateCalcs {get;set;}
         public List<Blocker> Blockers {get;set;}
-
+        public double CalendarDays {get; private set;}
+        public double BusinessDays {get; private set;}
+        public double UnblockedActiveDays {get; private set;}
+        public double BlockedActiveDays {get; private set;}
         public StateCalc? FirstActiveStateCalc {get;set;}
+
+        public void SetCalendarDays(double days)
+        {
+            if (CalendarDays != 0 && days != CalendarDays) 
+            {
+                throw new InvalidDataException("CalendarDays can only be set once");
+            }
+            CalendarDays = days;
+        }
+        public void SetBusinessDays(double days)
+        {
+            if (BusinessDays != 0 && days != BusinessDays) 
+            {
+                throw new InvalidDataException("BusinessDays can only be set once");
+            }
+            BusinessDays= days;
+        }
+        public void SetUnblockedActiveDays(double days)
+        {
+            
+            if (UnblockedActiveDays != 0 && days != UnblockedActiveDays) 
+            {
+                throw new InvalidDataException("UnblockedActiveDays can only be set once");
+            }
+            UnblockedActiveDays = days;
+        }
+        public void SetBlockedActiveDays(double days)
+        {
+            if (BlockedActiveDays != 0 && days != BlockedActiveDays) 
+            {
+                throw new InvalidDataException("BlockedActiveDays can only be set once");
+            }
+            BlockedActiveDays = days;
+        }
+        public void ResetTotalDaysFields()
+        {
+            CalendarDays = 0;
+            BlockedActiveDays = 0;
+            UnblockedActiveDays = 0;
+            BusinessDays = 0;
+        }
 
         public IssueCalcs()
         {

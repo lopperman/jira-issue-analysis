@@ -1,5 +1,7 @@
+using System.Xml.Linq;
 using System.Data;
 using JTIS.Console;
+using JTIS.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Spectre.Console;
@@ -594,6 +596,37 @@ namespace JTIS.Config
                     }
                     SaveConfigList();
                 }
+            }
+        }
+
+        public static void CheckDefaultJQL()
+        {            
+            var blockedName = "(def) Blocked Work";
+            var editedName = "(def) Recent Updates";
+            var blockedJql = $"project={config.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
+            var editedJql = $"project={config.defaultProject} and updated >= -7d";
+
+            var list = new SortedList<string,string>();
+            list.Add(blockedName,blockedJql);
+            list.Add(editedName,editedJql);
+
+            foreach (var kvp in list)
+            {
+                var existJql = config.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
+                if (existJql == null || existJql.jql.StringsMatch(kvp.Value)==false)
+                {
+                    if (existJql != null)
+                    {
+                        config.DeleteJQL(existJql);
+                    }
+                    config.AddJQL(kvp.Key,kvp.Value);
+                }
+            }
+
+
+            if (config.IsDirty)
+            {
+                SaveConfigList(config);
             }
         }
 

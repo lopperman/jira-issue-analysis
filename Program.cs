@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Atlassian.Jira;
 using JTIS.Config;
 using JTIS.Console;
@@ -15,21 +16,44 @@ namespace JTIS
         private static void DevQuick()
         {        
 
-            var j = new JQLConfig();
-            j.jql = "a b c d e";
-            Debug.Assert(j.JQLSyntax == false);
-            j.jql = "project=wwt and status=priority";
-            Debug.Assert(j.JQLSyntax == true);
-            j.jql = "status in (priority, blocked)";
-            Debug.Assert(j.JQLSyntax == true);
-            j.jql = "status <>> (priority, blocked)";
-            Debug.Assert(j.JQLSyntax == true);
+            string? s1 = null;
+            string s2 = "1";
+            string s3 = "A";
+            string s4 = "001";
+            int tst = 0;
+            try 
+            {
+                tst = -1;
+                AnsiConsole.WriteLine("s1 (null)");
+                tst = -1;
+                int.TryParse(s1, out tst);
+                AnsiConsole.WriteLine($"tst value: {tst}");
 
+                tst = -1;
+                AnsiConsole.WriteLine("s2 (1)");
+                int.TryParse(s2, out tst);
+                AnsiConsole.WriteLine($"tst value: {tst}");
 
-            //StringExt.StringsMatchTest();
+                tst = -1;
+                AnsiConsole.WriteLine("s3 (A)");
+                int.TryParse(s3, out tst);
+                AnsiConsole.WriteLine($"tst value: {tst}");
+
+                tst = -1;
+                AnsiConsole.WriteLine("s4 (001)");
+                int.TryParse(s4, out tst);
+                AnsiConsole.WriteLine($"tst value: {tst}");
+
+            }
+            catch (Exception e)
+            {
+                ConsoleUtil.WriteError(e.Message,false,e,false);
+            }
+
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
-        //Valid Args are either empty, or a single arg which is the filepath to your desired config file
+
         public static void Main(string[] args) 
         {
             if (args.Length == 1 && args[0].Equals("dev",StringComparison.OrdinalIgnoreCase))
@@ -89,6 +113,7 @@ namespace JTIS
                 if (manualConfig != null)
                 {
                     JTISConfigHelper.config = manualConfig;
+                    JTISConfigHelper.CheckDefaultJQL();
                 }
             }
             if (JTISConfigHelper.config != null)

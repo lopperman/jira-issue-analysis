@@ -43,7 +43,6 @@ namespace JTIS.Menu
         miChangeConnection, 
         miTISIssues, 
         miTISEpic, 
-        miTISJQL, 
         miJiraConfigAdd, 
         miJiraConfigView, 
         miJiraConfigRemove, 
@@ -52,12 +51,14 @@ namespace JTIS.Menu
         miSavedJQLAdd,         
         miSavedJQLFind, 
         miSavedJQLRemove,
+        miSavedJQLDefault, 
         miIssCfgView,
         miIssCfgEdit,
         miIssCfgReset, 
         miSaveSessionToFile, 
         miStartRecordingSession,
-        miAdvSearchViewFields
+        miAdvSearchViewCustomFields, 
+        miAdvSearchViewIssueFields
         
     }
 

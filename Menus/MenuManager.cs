@@ -72,8 +72,12 @@ namespace JTIS.Menu
                     exitMenu = lastMenu;
                     break;
 //  ADVANCED SEARCH
-                case MenuItemEnum.miAdvSearchViewFields:
-                    AdvancedSearch.Create().ViewJiraFields();
+                case MenuItemEnum.miAdvSearchViewCustomFields:
+                    AdvancedSearch.Create().ViewJiraCustomFields();
+                    exitMenu = MenuEnum.meAdvanced_Search;
+                    break; 
+                case MenuItemEnum.miAdvSearchViewIssueFields:
+                    AdvancedSearch.Create().ViewJiraIssueFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break; 
 
@@ -118,11 +122,6 @@ namespace JTIS.Menu
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
-                case MenuItemEnum.miTISJQL:
-                    NewAnalysis(AnalysisType.atJQL);                                        
-                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
-                    break;
-
                 case MenuItemEnum.miJiraConfigView:
                     JTISConfigHelper.ViewAll();
                     if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
@@ -166,6 +165,11 @@ namespace JTIS.Menu
                     break;
                 case MenuItemEnum.miSavedJQLRemove:
                     JQLUtil.RemoveJQL(JTISConfigHelper.config);
+                    if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
+                    break;
+                case MenuItemEnum.miSavedJQLDefault:
+                    JTISConfigHelper.CheckDefaultJQL();
+                    ConsoleUtil.PressAnyKeyToContinue("Default JQL Verified/Added");
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
 
@@ -377,7 +381,6 @@ namespace JTIS.Menu
                 case(MenuEnum.meIssue_States):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miTISJQL,"Get Issue(s) Data by JQL Query"));
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
@@ -391,6 +394,8 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLAdd,"Save New JQL / Issue Numbers"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLFind,"Find Saved JQL / Issue Numbers"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLRemove,"Remove Saved JQL / Issue Numbers"));
+                    ret.Add(menuSeparator);
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLDefault,"Verify/Add Default JQL Snippets"));
 
                 break;
 
@@ -405,7 +410,8 @@ namespace JTIS.Menu
 //  ADVANCED SEARCH MENU //
 
                 case(MenuEnum.meAdvanced_Search):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miAdvSearchViewFields,"View Jira Issue Field Info"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miAdvSearchViewCustomFields,"View Jira Custom Field Info"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miAdvSearchViewIssueFields,"View Jira Issues Field Info"));
                 break;
 
             }            

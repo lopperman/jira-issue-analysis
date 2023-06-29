@@ -3,7 +3,22 @@ using Spectre.Console;
 
 namespace JTIS.ManagedObjects
 {
+    public delegate T ParamsFunc<out T>(params object[] args);
+    public delegate void ParamsAction(params object[] args);
 
+    public class MapDelegates
+    {
+        
+    }
+    public class Pipeline2
+    {
+
+        TResult Foo<TResult>(ParamsFunc<TResult> f)
+        {
+            TResult result = f();
+            return result;
+        }        
+    }
 
 
     public class ManagedPipeline

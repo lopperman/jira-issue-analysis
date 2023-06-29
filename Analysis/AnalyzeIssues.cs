@@ -580,6 +580,8 @@ namespace JTIS
 
             foreach (var ic in JCalcs)
             {
+                ic.ResetTotalDaysFields();
+
                 if (writeAll == false)
                 {
                     AnsiConsole.Clear();
@@ -618,7 +620,8 @@ namespace JTIS
                     new TableColumn(new Text("Category",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()).Width(15),
                     new TableColumn(new Text($"Total{Environment.NewLine}Days",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
                     new TableColumn(new Text($"Total{Environment.NewLine}BusDays",ConsoleUtil.StdStyle(StdLine.slOutputTitle).Decoration(Decoration.Bold)).Centered()),
-                    new TableColumn(new Text($"Blocked{Environment.NewLine}Days",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
+                    new TableColumn(new Text($"Blocked{Environment.NewLine}ActiveDays",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
+                    new TableColumn(new Text($"Unblocked{Environment.NewLine}ActiveDays",ConsoleUtil.StdStyle(StdLine.slError)).Centered()),
                     new TableColumn(new Text($"Started{Environment.NewLine}Count",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
                     new TableColumn(new Text("FirstStart",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()),
                     new TableColumn(new Text("LastExit",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered())
@@ -669,9 +672,17 @@ namespace JTIS
                 double passiveBusDays = 0;
                 double passiveBlockDays = 0;
 
+                double stActiveBlockedDays = 0;
+                double stActiveUnblockedDays = 0;
+                double totActiveBlockedDays = 0;
+                double totActiveUnblockedDays = 0;
+
 
                 foreach (var statSumm in ssList)
                 {
+                    stActiveBlockedDays = 0;
+                    stActiveUnblockedDays = 0;
+
                     var trackStyle = todoStyle;
                     if (statSumm.TrackType==StatusType.stActiveState || statSumm.TrackType==StatusType.stStart){trackStyle=inProgressStyle;}
                     if (statSumm.TrackType==StatusType.stEnd){trackStyle=doneStyle;}
@@ -680,6 +691,10 @@ namespace JTIS
                         activeCalDays += statSumm.CalTime.TotalDays;
                         activeBusDays += statSumm.BusTime.TotalDays;
                         activeBlockDays += statSumm.BlockTime.TotalDays;
+                        stActiveBlockedDays = statSumm.BlockTime.TotalDays;
+                        stActiveUnblockedDays = statSumm.BusTime.TotalDays - stActiveBlockedDays;
+                        totActiveBlockedDays += stActiveBlockedDays;
+                        totActiveUnblockedDays += stActiveUnblockedDays;
                     }
                     else 
                     {
@@ -687,18 +702,41 @@ namespace JTIS
                         passiveBusDays += statSumm.BusTime.TotalDays;
                         passiveBlockDays += statSumm.BlockTime.TotalDays;
                     }
+
+
                     tbl.AddRow(new Text[]{
                         new Text($" {statSumm.Status} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                         new Text($" {statSumm.TrackType} ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
                         new Text($" {statSumm.CalTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
                         new Text($" {statSumm.BusTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
-                        new Text($" {statSumm.BlockTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                        new Text($" {stActiveBlockedDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                        new Text($" {stActiveUnblockedDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
                         new Text($" {statSumm.EntryCount} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
                         new Text($" {statSumm.FirstEntry} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
                         new Text($" {statSumm.LastExit} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()
                     });
-                }
 
+                    // tbl.AddRow(new Text[]{
+                    //     new Text($" {statSumm.Status} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    //     new Text($" {statSumm.TrackType} ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
+                    //     new Text($" {statSumm.CalTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                    //     new Text($" {statSumm.BusTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                    //     new Text($" {statSumm.BlockTime.TotalDays:##0.00} ",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                    //     new Text($" {(statSumm.BusTime.TotalDays-statSumm.BlockTime.TotalDays):##0.00} ",ConsoleUtil.StdStyle(StdLine.slError)).Centered(),
+                    //     new Text($" {statSumm.EntryCount} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                    //     new Text($" {statSumm.FirstEntry} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered(),
+                    //     new Text($" {statSumm.LastExit} ",ConsoleUtil.StdStyle(StdLine.slOutputTitle)).Centered()
+                    // });
+                    
+                }
+                    ic.SetCalendarDays(Math.Round(passiveCalDays + activeCalDays,2));
+                    ic.SetBusinessDays(Math.Round(passiveBusDays + activeBusDays,2));
+                    ic.SetBlockedActiveDays(Math.Round(totActiveBlockedDays,2));
+                    ic.SetUnblockedActiveDays(Math.Round(totActiveUnblockedDays,2));
+
+                        // activeCalDays += statSumm.CalTime.TotalDays;
+                        // activeBusDays += statSumm.BusTime.TotalDays;
+                        // activeBlockDays += statSumm.BlockTime.TotalDays;
                 tbl.AddEmptyRow();
                 tbl.AddRow(new Text[]{
                     new Text(" TOTALS ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
@@ -706,6 +744,7 @@ namespace JTIS
                     new Text($" {activeCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {(activeBusDays-activeBlockDays):0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text(" --- "),
                     new Text(" --- "),
                     new Text(" --- ")
@@ -716,6 +755,7 @@ namespace JTIS
                     new Text($" {passiveCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {passiveBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {passiveBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" N/A ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text(" --- "),
                     new Text(" --- "),
                     new Text(" --- ")
@@ -727,6 +767,19 @@ namespace JTIS
                     new Text($" {activeCalDays+passiveCalDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBusDays+passiveBusDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text($" {activeBlockDays+passiveBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {activeBusDays-activeBlockDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text(" --- "),
+                    new Text(" --- "),
+                    new Text(" --- ")
+                });
+                tbl.AddEmptyRow();
+                tbl.AddRow(new Text[]{
+                    new Text(" GRAND TOTAL (NEW) ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
+                    new Text($" ** ALL ** ",ConsoleUtil.StdStyle(StdLine.slInfo).Decoration(Decoration.Bold)).Centered(),
+                    new Text($" {ic.CalendarDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {ic.BusinessDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {ic.BlockedActiveDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
+                    new Text($" {ic.UnblockedActiveDays:0.00} ",ConsoleUtil.StdStyle(StdLine.slInfo)).Centered(),
                     new Text(" --- "),
                     new Text(" --- "),
                     new Text(" --- ")
