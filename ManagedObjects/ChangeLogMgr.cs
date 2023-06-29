@@ -1,6 +1,7 @@
 using Atlassian.Jira;
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.ManagedObjects;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -19,19 +20,27 @@ namespace JTIS
             this._analysisType = analysisType;
             bool doExport = false;
             if (!BuildSearch()) return;
-            if (!PopulateIssues()) return;
-            if (!PopulateChangeLogs()) return;
-            if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
+
+            var p = new ManagedPipeline();
+            p.Add("Populating issues",PopulateIssuesAction);
+            p.Add("Populating change logs",PopulateChangeLogs);
+            p.ExecutePipeline();
+            if (_jIssues.Count > 0)
+            // if (!PopulateIssues()) return;
+            // if (!PopulateChangeLogs()) return;
             {
-                Render();                
-            }
-            else 
-            {
-                doExport = true;
-            }
-            if (ConsoleUtil.Confirm("Export to csv file?",doExport))
-            {
-                Export();
+                if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
+                {
+                    Render();                
+                }
+                else 
+                {
+                    doExport = true;
+                }
+                if (ConsoleUtil.Confirm("Export to csv file?",doExport))
+                {
+                    Export();
+                }
             }
         }
         public string ExportPath
@@ -156,15 +165,19 @@ namespace JTIS
                 ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{ExportPath}[/]");
         }
 
-        private bool PopulateChangeLogs()
+        private void PopulateChangeLogs()
         {
+            if (_issues.Count == 0)
+            {
+                return;
+            }
             foreach (var tIss in _issues )            
             {
                 var jIss = new JIssue(tIss);
                 jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
                 _jIssues.Add(jIss);
             }
-            return _jIssues.Count > 0;
+            //return _jIssues.Count > 0;
         }
 
         private bool BuildSearch()
@@ -173,7 +186,7 @@ namespace JTIS
             {
                 case AnalysisType.atIssues:
                 case AnalysisType.atJQL:                    
-                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
+                    searchJQL = ConsoleInput.GetJQLOrIssueKeys((true));
                     break;
                 // case AnalysisType.atEpics:
 
@@ -183,10 +196,10 @@ namespace JTIS
             }
             return (searchJQL != null && searchJQL.Length > 0);
         }
-        private bool PopulateIssues()
-        {
+
+        private void PopulateIssuesAction()
+        {            
             _issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
-            return _issues.Count > 0;
         }
        
     }

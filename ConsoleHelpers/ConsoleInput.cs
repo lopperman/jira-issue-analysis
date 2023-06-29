@@ -20,7 +20,7 @@ namespace JTIS
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  100, 101, 102[/]");
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  100 101 102[/]");
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  WWT-100 QA-101 102[/]");
-                var data = ConsoleUtil.GetInput<string>("JQL or Issue List:",allowEmpty:true);
+                var data = ConsoleUtil.GetInput<string>("JQL or Issue List:",allowEmpty:true);                
                 if (data.Length > 0)
                 {
                     bool isJQL = JQLUtil.JQLSyntax(data);
@@ -35,9 +35,18 @@ namespace JTIS
                         saveName = ConsoleUtil.GetInput<string>("Enter short desc:",saveName,true);
                         if (saveName.Length > 0){
                             JTISConfigHelper.config.AddJQL(saveName,data);
+                            return data;
+                        }
+                        else 
+                        {
+                            return string.Empty;
                         }
                     }
                     return data;
+                }
+                else 
+                {
+                    return string.Empty;
                 }
             }
             else 
@@ -46,10 +55,10 @@ namespace JTIS
                 {
                     AnsiConsole.Clear();
                     JQLUtil.ViewSavedJQL(JTISConfigHelper.config,false);
-                    var jqlId = ConsoleUtil.GetInput<int>("Enter Saved JqlId or zero ('0') manually create a filter");
+                    var jqlId = ConsoleUtil.GetInput<int>("Enter Saved JqlId or zero ('0') manually create a filter",allowEmpty:true);
                     if (jqlId < 1 || jqlId > JTISConfigHelper.config.SavedJQLCount)
                     {
-                        return GetJQLOrIssueKeys(true);
+                        return GetJQLOrIssueKeys(false);
                     }
                     else 
                     {

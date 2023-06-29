@@ -396,9 +396,23 @@ namespace JTIS.Console
             }
 
             ConsoleUtil.WriteAppTitle();
-            AnsiConsole.MarkupLine("   :llama:  :llama:  :llama:  ");
-            var title = $"{Environment.NewLine}[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] :smiling_face_with_sunglasses: HAVE A GREAT DAY! :smiling_face_with_sunglasses:[/]{Environment.NewLine}";
-            var panel = new Panel(title).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
+            var tbl = new Table();
+            tbl.Border(TableBorder.None);
+            var llamas = $"{Emoji.Known.CoolButton}   {Emoji.Known.Llama}{Emoji.Known.Llama}   {Emoji.Known.CoolButton}";
+            var tblcol = new TableColumn("").Alignment(Justify.Left);
+            var title = $"[white on deepskyblue4_2] :smiling_face_with_sunglasses: HAVE A GREAT DAY! :smiling_face_with_sunglasses: [/]";
+            tbl.AddColumn(tblcol).Centered();
+            tbl.AddRow(llamas);
+            tbl.AddEmptyRow();            
+            tbl.AddRow(title);
+            tbl.AddEmptyRow();            
+            tbl.Columns[0].Centered();
+//            var mk2 = new Markup(title).Centered();
+//            AnsiConsole.MarkupLine("   :llama:  :llama:  :llama:  ");
+            
+            var panel = new Panel(tbl).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
+//            panel.Padding(2,0,2,0);
+
             AnsiConsole.Write(panel);
             Environment.Exit(0);
         }    

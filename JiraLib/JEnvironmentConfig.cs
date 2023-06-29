@@ -85,21 +85,7 @@ namespace JTIS
 
         // }
 
-        private static void GetSystemAndCustomIssueFields()
-        {
-            var repo = JiraUtil.JiraRepo;
-            IEnumerable<CustomField> fields = repo.GetJira().Fields.GetCustomFieldsAsync().GetAwaiter().GetResult();
 
-            ConsoleUtil.WriteStdLine("***** SYSTEM AND CUSTOM ISSUE FIELDS *********", StdLine.slOutputTitle);
-            var table = new ConsoleTable("Id", "Name", "CustomType","CustomIdentfier");
-            foreach (var field in repo.GetJira().Fields.GetCustomFieldsAsync().GetAwaiter().GetResult())
-            {
-                table.AddRow(field.Id, field.Name, field.CustomType, field.CustomIdentifier);
-            }
-            table.Write();
-
-            ConsoleUtil.PressAnyKeyToContinue();
-        }
 
 
         private static void GetServerInfo()

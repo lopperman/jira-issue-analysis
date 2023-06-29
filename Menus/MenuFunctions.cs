@@ -31,6 +31,7 @@ namespace JTIS.Menu
         miSeparator = 0, 
         miMenu_Main = 1, 
         miMenu_Config, 
+        miMenu_Advanced_Search, 
         // miMenu_Dev, 
         miMenu_IssueStates, 
         miMenu_StatusConfig, 

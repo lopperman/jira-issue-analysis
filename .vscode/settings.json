@@ -10,6 +10,6 @@
     "editor.smoothScrolling": true,
     "accessibility.verbosity.chat": false,
     "csharp.inlayHints.parameters.forIndexerParameters": true,
-    "editor.tokenColorCustomizations": {"[Monokai Pro]": {"comments": "#0da9c8"}}    ,
+    "editor.tokenColorCustomizations": {"[Monokai Pro]": {"comments": "#e0eb92"}}    ,
     "workbench.colorCustomizations": {"editor.selectionBackground": "#5f5c25b4"},     
 }

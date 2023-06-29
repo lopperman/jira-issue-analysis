@@ -8,6 +8,7 @@ using System.IO.Pipes;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.ManagedObjects;
 
 namespace JTIS.Menu
 {
@@ -63,13 +64,16 @@ namespace JTIS.Menu
                 case MenuItemEnum.miMenu_StatusConfig:
                     exitMenu = MenuEnum.meStatus_Config;
                     break;
+                case MenuItemEnum.miMenu_Advanced_Search:
+                    exitMenu = MenuEnum.meAdvanced_Search;
+                    break;
+
                 case MenuItemEnum.miSeparator:
                     exitMenu = lastMenu;
                     break;
 //  ADVANCED SEARCH
                 case MenuItemEnum.miAdvSearchViewFields:
-                    //JiraData
-                    ConsoleUtil.PressAnyKeyToContinue("NOT IMPLEMENTED");
+                    AdvancedSearch.Create().ViewJiraFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break; 
 
@@ -341,15 +345,22 @@ namespace JTIS.Menu
 
             switch (menu)
             {
+
+//  MAIN MENU //
+
                 case (MenuEnum.meMain):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
                 break;
+
+//  CONFIG MENU //
+
                 case(MenuEnum.meConfig):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
@@ -360,6 +371,9 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
                 break;
+
+//  ISSUE STATES MENU //
+
                 case(MenuEnum.meIssue_States):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
@@ -369,6 +383,9 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
                 break;
+
+//  MANAGE JQL MENU //
+
                 case(MenuEnum.meJQL):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLView,"View Saved JQL / Issue Numbers"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLAdd,"Save New JQL / Issue Numbers"));
@@ -376,11 +393,17 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLRemove,"Remove Saved JQL / Issue Numbers"));
 
                 break;
+
+//  ISSUE STATUS CONFIG MENU //
+
                 case(MenuEnum.meStatus_Config):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgView,"View Issue Status Config"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgEdit,"Edit Local Issue Status Config"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgReset,"Reset Local Issue Status Config to Match Jira"));
                 break;
+
+//  ADVANCED SEARCH MENU //
+
                 case(MenuEnum.meAdvanced_Search):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miAdvSearchViewFields,"View Jira Issue Field Info"));
                 break;
