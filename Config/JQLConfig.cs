@@ -36,29 +36,7 @@ namespace JTIS
         {
             
             get{
-                bool isjql = false;                
-                if (jql.Contains('='))
-                {
-                    isjql = true;
-                }
-                else 
-                {
-                    string[] tmp = jql.Split(' ',StringSplitOptions.RemoveEmptyEntries );
-                    if (tmp.Length > 0)
-                    {
-                        string[] jOper = JQLUtil.JQLOperators;
-                        for (int i = 0 ;i < jOper.Length; i ++)
-                        {
-                            var tmpO = jOper[i].ToLower();
-                            if (jql.ToLower().Contains(tmpO,StringComparison.OrdinalIgnoreCase))
-                            {
-                                isjql = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                return isjql;
+                return JQLUtil.JQLSyntax(jql);
             }
         }
 

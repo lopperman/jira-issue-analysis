@@ -44,24 +44,13 @@ namespace JTIS
         {
             _type = analysisType;
             string? data = string.Empty;
-            if (_type == AnalysisType.atIssues)
+            if (_type == AnalysisType.atIssues || _type == AnalysisType.atJQL)
             {
-                searchJQL = ConsoleInput.IssueKeysToJQL();
-            }
-            else if (_type==AnalysisType.atJQL)
-            {
-                string? tJQL = ConsoleUtil.GetInput<string>("ENTER JQL STATEMENT TO SELECT ITEMS",allowEmpty:true);
-                if (!string.IsNullOrWhiteSpace(tJQL))
-                {
-                    if (ConsoleUtil.Confirm($"Use the following JQL?{Environment.NewLine}{tJQL}",true))
-                    {
-                        searchJQL = tJQL;
-                    }
-                }
+                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
             }
             else if (_type == AnalysisType.atIssueSummary)
             {
-                searchJQL = ConsoleInput.IssueKeysToJQL();
+                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
             }
             else if (_type == AnalysisType.atEpics)
             {

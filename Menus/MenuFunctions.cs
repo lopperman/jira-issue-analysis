@@ -39,7 +39,6 @@ namespace JTIS.Menu
         miVisualSnapshotAll, 
         miExit, 
         miShowChangeHistoryCards, 
-        miShowChangeHistoryJQL,         
         miChangeConnection, 
         miTISIssues, 
         miTISEpic, 

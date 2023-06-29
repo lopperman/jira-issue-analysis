@@ -169,16 +169,11 @@ namespace JTIS
 
         private bool BuildSearch()
         {
-            bool hasSaved = JTISConfigHelper.config.SavedJQLCount > 0;
-
             switch(_analysisType)
             {
                 case AnalysisType.atIssues:
-                    
-                    searchJQL = ConsoleInput.IssueKeysToJQL();
-                    break;
-                case AnalysisType.atJQL:
-                    searchJQL = ConsoleInput.JQL();
+                case AnalysisType.atJQL:                    
+                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
                     break;
                 // case AnalysisType.atEpics:
 

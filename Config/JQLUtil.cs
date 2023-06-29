@@ -16,7 +16,32 @@ namespace JTIS
                     "WAS NOT","CHANGED"};
             }
         }
-
+        public static bool JQLSyntax(string jqlText)
+        {
+            bool isjql = false;                
+            if (jqlText.Contains('='))
+            {
+                isjql = true;
+            }
+            else 
+            {
+                string[] tmp = jqlText.Split(' ',StringSplitOptions.RemoveEmptyEntries );
+                if (tmp.Length > 0)
+                {
+                    string[] jOper = JQLUtil.JQLOperators;
+                    for (int i = 0 ;i < jOper.Length; i ++)
+                    {
+                        var tmpO = jOper[i].ToLower();
+                        if (jqlText.ToLower().Contains(tmpO,StringComparison.OrdinalIgnoreCase))
+                        {
+                            isjql = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return isjql;
+        }
         public static void RemoveJQL(JTISConfig cfg)
         {
             if (cfg.SavedJQLCount == 0)

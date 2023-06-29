@@ -436,13 +436,16 @@ namespace JTIS.Console
             }
             return retVal;
         }
-        public static bool Confirm(string msg, bool defResp )
+        public static bool Confirm(string msg, bool defResp, bool keepMarkup = false )
         {
             AnsiConsole.WriteLine();
             var r = new Rule();
             r.Style=Style.Parse("dim red");
             AnsiConsole.Write(r);
-            msg = Markup.Remove(msg);
+            if (keepMarkup == false)
+            {
+                msg = Markup.Remove(msg);
+            }
             msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
             var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
             return AnsiConsole.Confirm(msg,defResp);

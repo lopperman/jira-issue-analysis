@@ -106,10 +106,6 @@ namespace JTIS.Menu
                     var chl1 = new ChangeLogsMgr(AnalysisType.atIssues);
                     if (exitMenu == null){exitMenu = MenuEnum.meMain;}
                     break;
-                case MenuItemEnum.miShowChangeHistoryJQL:
-                    var chl2 = new ChangeLogsMgr(AnalysisType.atJQL);
-                    if (exitMenu == null){exitMenu = MenuEnum.meMain;}
-                    break;
                 case MenuItemEnum.miIssCfgView:
                     ViewIssueConfig();
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
@@ -348,8 +344,7 @@ namespace JTIS.Menu
                 case (MenuEnum.meMain):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"ChangeLog for Issues (Enter Issue #'s)"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryJQL,"ChangeLog for Issues (JQL)"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
