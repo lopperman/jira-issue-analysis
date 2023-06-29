@@ -53,12 +53,35 @@ namespace JTIS
             ConsoleUtil.PressAnyKeyToContinue();
         }
 
+        private static void NewFile()
+        {
+            var login = ConsoleUtil.GetInput<string>("Enter login name");
+            var apiToken = ConsoleUtil.GetInput<string>("Enter API Token");
+            var baseUrl = ConsoleUtil.GetInput<string>("Enter base url");
+            var defaultProject = ConsoleUtil.GetInput<string>("Enter default project key");
+            var c = new JTISConfig();
+            c.userName = login;
+            c.apiToken = apiToken;
+            c.baseUrl = baseUrl;
+            c.defaultProject = defaultProject;
+
+            
+            JTISConfigHelper.config = c;
+            JTISConfigHelper.SaveConfigList(c);
+            AnsiConsole.WriteLine("restart");
+
+        }
 
         public static void Main(string[] args) 
         {
             if (args.Length == 1 && args[0].Equals("dev",StringComparison.OrdinalIgnoreCase))
             {
                 DevQuick();
+                return;                
+            }
+            if (args.Length == 1 && args[0].Equals("new",StringComparison.OrdinalIgnoreCase))
+            {
+                NewFile();
                 return;                
             }
             bool requireManualConfig = false ;

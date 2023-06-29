@@ -9,6 +9,7 @@ using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.ManagedObjects;
+using JTIS.Analysis;
 
 namespace JTIS.Menu
 {

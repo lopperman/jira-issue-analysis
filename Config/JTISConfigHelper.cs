@@ -691,6 +691,8 @@ namespace JTIS.Config
                 {
                     if (File.Exists(argVal) == false)
                     {
+                        //var newCFG = CreateDefaultConfig();
+
                         cfgList.Add(CreateDefaultConfig());
                         if (string.Compare(argVal,ConfigFilePath,false)!=0)
                         {

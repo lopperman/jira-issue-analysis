@@ -6,8 +6,9 @@ using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
 
-namespace JTIS
+namespace JTIS.Analysis
 {
+
     public enum AnalysisType
     {
         _atUnknown = -1, 
@@ -18,7 +19,7 @@ namespace JTIS
     }
 
     public class AnalyzeIssues
-    {
+    {        
         private AnalysisType _type = AnalysisType._atUnknown;
         private string searchJQL = string.Empty;
         
