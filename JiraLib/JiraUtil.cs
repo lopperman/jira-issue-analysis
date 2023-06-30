@@ -11,30 +11,37 @@ namespace JTIS
     {
         private static JiraRestClientSettings? _settings ;
         private static JiraRepo? _jiraRepo;
-        private static JTISConfig? _cfg;
+        private static string _userName = string.Empty;
+        private static string _apiToken = string.Empty;
+        private static string _baseUrl = string.Empty;
+
 
         public static JiraRepo JiraRepo
         {
             get
             {
-                CreateRestClient();
                 if (_jiraRepo != null)
                 {                     
                     return _jiraRepo;
                 }
                 else 
                 {
+                    ConsoleUtil.WriteError("JiraUtil.JiraRepo is not set",pause:true);
                     throw new NullReferenceException("JiraUtil._jiraRepo is null");
                 }
             }
         }
 
-        public static bool CreateRestClient(JTISConfig cfg)
+        // public static bool CreateRestClient(JTISConfig cfg)
+        // {
+        //     return CreateRestClient(cfg.userName,cfg.apiToken,cfg.baseUrl);
+        // }
+        public static bool CreateRestClient(string login, string apiToken, string baseUrl)
         {
             bool ret = false;
             try
             {
-                if (_jiraRepo != null && _cfg != null && _cfg.userName == cfg.userName & _cfg.baseUrl == cfg.baseUrl && _cfg.apiToken == cfg.apiToken)
+                if (_jiraRepo != null && login == _userName & apiToken == _apiToken && baseUrl == _baseUrl)
                 {
                     ret = true;
                 }
@@ -42,17 +49,15 @@ namespace JTIS
                 {
                     _settings = new JiraRestClientSettings();
                     _settings.EnableUserPrivacyMode = true;
-                    _cfg = cfg;
+                    _userName = login;
+                    _apiToken = apiToken;
+                    _baseUrl = baseUrl;
 
-                    _jiraRepo = new JiraRepo(cfg.baseUrl , cfg.userName , cfg.apiToken );
+                    _jiraRepo = new JiraRepo(_baseUrl , _userName , _apiToken );
 
                     if (_jiraRepo != null)
                     {
-                        var test = _jiraRepo.GetJira().IssueTypes.GetIssueTypesAsync().Result.ToList();
-                        if (test != null && test.Count > 0)
-                        {
-                            ret = true;
-                        }
+                        return true;
                     }
                 }
 
@@ -69,17 +74,6 @@ namespace JTIS
             return ret;            
         }
 
-        public static bool CreateRestClient()
-        {
-            if (JTISConfigHelper.config != null)
-            {
-                return CreateRestClient(JTISConfigHelper.config);
-            }
-            else
-            {
-                return false;
-            }
-        }
 
         public static List<JIssue> GetJIssues(string jql, bool? expandChangeLog = true)
         {

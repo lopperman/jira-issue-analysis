@@ -67,7 +67,7 @@ namespace JTIS
                 if (ConsoleUtil.Confirm($"[bold]Delete[/] saved JQL: {delItem.jqlId:00} - {delItem.jqlName}?",true))
                 {
                     cfg.DeleteJQL(delItem);
-                    ConsoleUtil.WaitWhileSimple("Saving config file",JTISConfigHelper.SaveConfigList);
+                    ConsoleUtil.WaitWhileSimple("Saving config file",CfgManager.SaveConfigList);
                 }
             }
         }
@@ -136,8 +136,8 @@ namespace JTIS
                 string sName = ConsoleUtil.GetInput<string>("Enter short name to describe the entry (leave blank to cancel)",allowEmpty:true);
                 if (!string.IsNullOrWhiteSpace(sName))
                 {
-                    JTISConfigHelper.config.AddJQL(sName,jql);
-                    JTISConfigHelper.SaveConfigList();
+                    CfgManager.config.AddJQL(sName,jql);
+                    CfgManager.SaveConfigList();
                 }
             }
 

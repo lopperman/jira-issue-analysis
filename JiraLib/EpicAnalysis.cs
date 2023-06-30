@@ -22,11 +22,11 @@
 //         private static string BuildJQL_EpicChildren(string epicKey)
 //         {
 //             string retJQL = string.Empty;
-//             if (JTISConfigHelper.config != null)
+//             if (CfgManager.config != null)
 //             {
-//                 if (JTISConfigHelper.config.ValidConfig == true)
+//                 if (CfgManager.config.ValidConfig == true)
 //                 {
-//                     retJQL = string.Format("project={0} and parentEpic={1}",JTISConfigHelper.config.defaultProject,epicKey);
+//                     retJQL = string.Format("project={0} and parentEpic={1}",CfgManager.config.defaultProject,epicKey);
 //                 }
 //                 else 
 //                 {

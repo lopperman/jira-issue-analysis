@@ -16,7 +16,7 @@ namespace JTIS
                 var rLine = new Rule("[bold blue on white]ENTER JQL OR LIST OF ISSUE KEYS[/]").Centered();
                 AnsiConsole.Write(rLine);
                 AnsiConsole.MarkupLine("Enter a valid [bold]JQL statement[/], or a list of [bold]delimited issue Keys[/]");
-                AnsiConsole.MarkupLine($"\t[dim italic](If entering list of issue keys for current project, '{JTISConfigHelper.config.defaultProject}-' will be prepended automatically if missing -- '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]");
+                AnsiConsole.MarkupLine($"\t[dim italic](If entering list of issue keys for current project, '{CfgManager.config.defaultProject}-' will be prepended automatically if missing -- '100' becomes '{CfgManager.config.defaultProject}-100')[/]");
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  100, 101, 102[/]");
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  100 101 102[/]");
                 AnsiConsole.MarkupLine($"\t[dim]Example of valid issue keys:  WWT-100 QA-101 102[/]");
@@ -34,7 +34,7 @@ namespace JTIS
                         var saveName = isJQL ? $"JQL for:" : "Issue List for:";
                         saveName = ConsoleUtil.GetInput<string>("Enter short desc:",saveName,true);
                         if (saveName.Length > 0){
-                            JTISConfigHelper.config.AddJQL(saveName,data);
+                            CfgManager.config.AddJQL(saveName,data);
                             return data;
                         }
                         else 
@@ -51,20 +51,20 @@ namespace JTIS
             }
             else 
             {
-                if (JTISConfigHelper.config.SavedJQLCount > 0)
+                if (CfgManager.config.SavedJQLCount > 0)
                 {
                     AnsiConsole.Clear();
-                    JQLUtil.ViewSavedJQL(JTISConfigHelper.config,false);
+                    JQLUtil.ViewSavedJQL(CfgManager.config,false);
                     var sjqlId = ConsoleUtil.GetInput<string?>("Enter Saved JqlId, or press 'ENTER' to manually create a filter",allowEmpty:true);
                     int jqlId = 0;
                     int.TryParse(sjqlId, out jqlId);
-                    if (jqlId < 1 || jqlId > JTISConfigHelper.config.SavedJQLCount)
+                    if (jqlId < 1 || jqlId > CfgManager.config.SavedJQLCount)
                     {
                         return GetJQLOrIssueKeys(false);
                     }
                     else 
                     {
-                        var savedJQL = JTISConfigHelper.config.SavedJQL.FirstOrDefault(x=>x.jqlId == jqlId);
+                        var savedJQL = CfgManager.config.SavedJQL.FirstOrDefault(x=>x.jqlId == jqlId);
                         if (savedJQL != null)
                         {
                             return savedJQL.jql;
@@ -78,7 +78,7 @@ namespace JTIS
         {
             string? retJQL = null;
             string colName = "key";
-            string prefix = string.Format($"{JTISConfigHelper.config.defaultProject}-");
+            string prefix = string.Format($"{CfgManager.config.defaultProject}-");
             string input = string.Empty;
             if (previousInput != null)
             {
@@ -105,7 +105,7 @@ namespace JTIS
 
         public static string? IssueKeys()
         {
-            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]space or comma[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will have '{JTISConfigHelper.config.defaultProject}-' added (e.g. '100' becomes '{JTISConfigHelper.config.defaultProject}-100')[/]{Environment.NewLine}:");
+            var p = new TextPrompt<string>($"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]Enter 1 or more issue numbers, separated by a [underline]space or comma[/][/]{Environment.NewLine}[dim](Any values lacking a project prefix will have '{CfgManager.config.defaultProject}-' added (e.g. '100' becomes '{CfgManager.config.defaultProject}-100')[/]{Environment.NewLine}:");
             var keys = AnsiConsole.Prompt<string>(p);
             if (keys != null && keys.Length>0)
             {

@@ -66,7 +66,12 @@ namespace JTIS
             }
         }
 
-
+        public Jira jira 
+        {
+            get{
+                return _jira;
+            }
+        }
         public Jira GetJira()
         {
             return _jira;
@@ -192,9 +197,9 @@ namespace JTIS
 
             return response.ToString();
         }
-        public async Task<string> GetProjectItemStatusesAsync(CancellationToken token = default(CancellationToken))
+        public async Task<string> GetProjectItemStatusesAsync(string defProject, CancellationToken token = default(CancellationToken))
         {
-            var resourceUrl = String.Format("rest/api/3/project/{0}/statuses",JTISConfigHelper.config.defaultProject);
+            var resourceUrl = String.Format("rest/api/3/project/{0}/statuses",defProject);
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
                 .ConfigureAwait(false);
 

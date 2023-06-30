@@ -19,7 +19,7 @@ namespace JTIS.Data
 
         // public async void Load()
         // {
-        //     var jCustomFields =  _jira.Fields.GetCustomFieldsForProjectAsync(JTISConfigHelper).GetAwaiter().GetResult();
+        //     var jCustomFields =  _jira.Fields.GetCustomFieldsForProjectAsync(CfgManager).GetAwaiter().GetResult();
 
         //     //return GetSubTasksAsync(issue).GetAwaiter().GetResult().ToList();
         //     //

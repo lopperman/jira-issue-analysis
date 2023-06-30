@@ -1,13 +1,9 @@
 
 
-using JTIS.Config;
-
-namespace JTIS
+namespace JTIS.Analysis
 {
     public class StateCalc
     {
-
-
         private string _fromValue = string.Empty;
         private string _fromId = string.Empty;
         private string _toValue = string.Empty;

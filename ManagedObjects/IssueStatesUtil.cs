@@ -1,3 +1,4 @@
+using JTIS.Analysis;
 using JTIS.Config;
 using JTIS.Console;
 using Spectre.Console;
@@ -15,7 +16,7 @@ namespace JTIS
             var editJiraId = ConsoleUtil.GetInput<int>("ENTER JiraId TO CHANGE HOW THAT STATUS IS CATEGORIZED");
             if (editJiraId > 0)
             {
-                var changeCfg = JTISConfigHelper.config.StatusConfigs.SingleOrDefault(x=>x.StatusId == editJiraId);
+                var changeCfg = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusId == editJiraId);
                 if (changeCfg == null)
                 {
                     ConsoleUtil.WriteError($"'{editJiraId}' IS NOT A VALID JIRA STATUS ID",pause:true);
@@ -43,7 +44,7 @@ namespace JTIS
                     if (reSave)
                     {
                         ConsoleUtil.WriteStdLine(string.Format("Saving changes to '{0}' ...",changeCfg.StatusName ),StdLine.slOutput  ,false);
-                        JTISConfigHelper.SaveConfigList();
+                        CfgManager.SaveConfigList();
                         ConsoleUtil.PressAnyKeyToContinue();
                     }
                 }
@@ -52,7 +53,7 @@ namespace JTIS
 
         public static void WriteJiraStatuses(string? searchTerm = null)
         {
-            var usedInCol = string.Format("UsedIn: {0}",JTISConfigHelper.config.defaultProject);
+            var usedInCol = string.Format("UsedIn: {0}",CfgManager.config.defaultProject);
             Table table = new Table();
             table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
             table.Columns[2].Alignment(Justify.Center);
@@ -60,7 +61,7 @@ namespace JTIS
             table.Columns[4].Alignment(Justify.Center);
             table.Columns[5].Alignment(Justify.Center);
 
-            foreach (var jStatus in JTISConfigHelper.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
+            foreach (var jStatus in CfgManager.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
             {
                 bool includeStatus = false;
                 if (searchTerm == null || searchTerm.Length == 0)
@@ -76,7 +77,7 @@ namespace JTIS
                 }
                 if (includeStatus)
                 {
-                    JiraStatus  defStat = JTISConfigHelper.config.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
+                    JiraStatus  defStat = CfgManager.config.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
                     string usedIn = string.Empty;   
                     string overridden = string.Empty;      
                     string locState = Enum.GetName(typeof(StatusType),jStatus.Type);     

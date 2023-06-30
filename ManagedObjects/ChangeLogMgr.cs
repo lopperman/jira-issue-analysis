@@ -50,7 +50,7 @@ namespace JTIS
             {
                 if (_exportPath == null)
                 {
-                    _exportPath = Path.Combine(JTISConfigHelper.JTISRootPath,"Exports");                    
+                    _exportPath = Path.Combine(CfgManager.JTISRootPath,"Exports");                    
                     if (Directory.Exists(_exportPath)==false)
                     {
                         Directory.CreateDirectory(_exportPath);
@@ -65,7 +65,7 @@ namespace JTIS
             get
             {
                 var dtInfo = DateTime.Now.ToString("yyyyMMMdd_HHmmss");
-                var tmpFileName = string.Format($"{JTISConfigHelper.config.defaultProject}_ChangeLogExport_{dtInfo}.csv");
+                var tmpFileName = string.Format($"{CfgManager.config.defaultProject}_ChangeLogExport_{dtInfo}.csv");
                 return tmpFileName;
             }
         }

@@ -9,14 +9,6 @@ using JTIS.Extensions;
 namespace JTIS.Analysis
 {
 
-    public enum AnalysisType
-    {
-        _atUnknown = -1, 
-        atJQL = 1, 
-        atIssues = 2, 
-        atEpics = 3, 
-        atIssueSummary = 4
-    }
 
     public class AnalyzeIssues
     {        
@@ -85,7 +77,7 @@ namespace JTIS.Analysis
                         {
                             if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
                             {
-                                var stCfg = JTISConfigHelper.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
+                                var stCfg = CfgManager.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
                                 if (stCfg != null)
                                 {
                                     if (stCfg.Type == StatusType.stPassiveState )
@@ -142,7 +134,7 @@ namespace JTIS.Analysis
 //            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
             DateTime now = DateTime.Now;
             string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
-            string csvPath = Path.Combine(JTISConfigHelper.JTISRootPath,fileName);
+            string csvPath = Path.Combine(CfgManager.JTISRootPath,fileName);
 
             using (StreamWriter writer = new StreamWriter(csvPath))
             {                
@@ -391,7 +383,7 @@ namespace JTIS.Analysis
             {
                 return string.Empty;;
             }
-            ret = JTISConfigHelper.GetSavedJQL(title);
+            ret = CfgManager.GetSavedJQL(title);
             if (ret != null && ret.Length > 0)
             {
                 if (ConsoleUtil.Confirm("USE THE FOLLOWING SAVED JQL/QUERY?",true))
@@ -506,7 +498,7 @@ namespace JTIS.Analysis
             return sb.ToString();
 
 
-            //     retJQL = string.Format("project={0} and parentEpic={1}",JTISConfigHelper.config.defaultProject,epicKey);
+            //     retJQL = string.Format("project={0} and parentEpic={1}",CfgManager.config.defaultProject,epicKey);
             // {
             //     retJQL = string.Format("parentEpic={0}",epicKey);
             // }
@@ -517,7 +509,7 @@ namespace JTIS.Analysis
             if (srchData == null || srchData.Length == 0){return string.Empty;}
             string[] cards = srchData;
             StringBuilder sb = new StringBuilder();
-            string defProj = JTISConfigHelper.config.defaultProject;
+            string defProj = CfgManager.config.defaultProject;
             sb.Append("key in (");
             int added = 0;
             for (int i = 0; i < cards.Length; i ++)
@@ -546,7 +538,7 @@ namespace JTIS.Analysis
         {
             string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
             StringBuilder sb = new StringBuilder();
-            string defProj = JTISConfigHelper.config.defaultProject;
+            string defProj = CfgManager.config.defaultProject;
             sb.Append("key in (");
             int added = 0;
             if (cards.Length > 0)

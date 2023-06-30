@@ -10,6 +10,7 @@ namespace JTIS.Extensions
             string s1= sourceData.ToString() ?? string.Empty;
             string s2=compareTo.ToString() ?? string.Empty;
             return s1.Equals(s2,StringComparison.OrdinalIgnoreCase);
+            
         }
 
         public static void StringsMatchTest()
@@ -18,6 +19,8 @@ namespace JTIS.Extensions
             double d1 = 15;
             int i1 = 15;
             short sh1 = 15;
+
+            
 
             Debug.Assert(s1.StringsMatch(i1));
             Debug.Assert(s1.StringsMatch(d1));

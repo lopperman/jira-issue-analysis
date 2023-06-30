@@ -83,12 +83,12 @@ namespace JTIS.Menu
                     break; 
 
                 // case MenuItemEnum.miDev1:
-                //     var menuDev1 = new MenuDev(JTISConfigHelper.config);
+                //     var menuDev1 = new MenuDev(CfgManager.config);
                 //     menuDev1.DevTest1();
                 //     ConsoleUtil.PressAnyKeyToContinue();
                 //     break;
                 // case MenuItemEnum.miDev2:
-                //     var menuDev2 = new MenuDev(JTISConfigHelper.config);
+                //     var menuDev2 = new MenuDev(CfgManager.config);
                 //     menuDev2.DevTest2();
                 //     ConsoleUtil.PressAnyKeyToContinue();
                 //     break;
@@ -99,7 +99,7 @@ namespace JTIS.Menu
                     break;
 
                 case MenuItemEnum.miChangeTimeZoneDisplay:
-                    JTISConfigHelper.ChangeTimeZone();
+                    CfgManager.ChangeTimeZone();
                     if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
                     break;
                 case MenuItemEnum.miVisualSnapshotAll:
@@ -116,7 +116,7 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miIssCfgView:
-                    ViewIssueConfig();
+                    ViewIssueConfig(CfgManager.config.defaultProject);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miTISIssues:
@@ -124,11 +124,11 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miJiraConfigView:
-                    JTISConfigHelper.ViewAll();
+                    CfgManager.ViewAll();
                     if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
                     if (ConsoleUtil.Confirm("SHOW API KEYS?",false))
                     {
-                        JTISConfigHelper.ViewAll(true);
+                        CfgManager.ViewAll(true);
                         ConsoleUtil.PressAnyKeyToContinue();
                     }
                     break;
@@ -157,7 +157,7 @@ namespace JTIS.Menu
                     break;
 /// SAVED JQL ///                    
                 case MenuItemEnum.miSavedJQLView:
-                    JQLUtil.ViewSavedJQL(JTISConfigHelper.config);
+                    JQLUtil.ViewSavedJQL(CfgManager.config);
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miSavedJQLAdd:
@@ -165,11 +165,11 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miSavedJQLRemove:
-                    JQLUtil.RemoveJQL(JTISConfigHelper.config);
+                    JQLUtil.RemoveJQL(CfgManager.config);
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miSavedJQLDefault:
-                    JTISConfigHelper.CheckDefaultJQL();
+                    CfgManager.CheckDefaultJQL();
                     ConsoleUtil.PressAnyKeyToContinue("Default JQL Verified/Added");
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
@@ -177,13 +177,16 @@ namespace JTIS.Menu
 /// (END) SAVED JQL ///
                 case MenuItemEnum.miChangeConnection:
                     if (exitMenu == null) {exitMenu = MenuEnum.meMain;}
-                    var newCfg = JTISConfigHelper.ChangeCurrentConfig("Choose a Jira Configuration, or 'ADD NEW'");
+                    var newCfg = CfgManager.ChangeCurrentConfig();
                     if (newCfg != null)
                     {
-                        JTISConfigHelper.config = newCfg;
-                        ConsoleUtil.PressAnyKeyToContinue($"CONNECTED TO: {JTISConfigHelper.config.ToString()}");
+                        CfgManager.config = newCfg;
+                        ConsoleUtil.PressAnyKeyToContinue($"CONNECTED TO: {CfgManager.config.ToString()}");
                     }
-
+                    break;
+                case MenuItemEnum.miJiraConfigRemove:
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
+                    CfgManager.DeleteConfig();
                 break;
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
@@ -228,10 +231,10 @@ namespace JTIS.Menu
             }
         }
 
-        private static void ViewIssueConfig()
+        private static void ViewIssueConfig(string defProject) 
         {
 
-            JTISConfigHelper.UpdateDefaultStatusConfigs();
+            CfgManager.config.UpdateDefaultStatusConfigs(defProject);
 
             AnsiConsole.Status()
                 .Start($"Getting Latest Issue Status data from Jira ...", ctx=>
@@ -320,7 +323,7 @@ namespace JTIS.Menu
             AnsiConsole.Clear();
             var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
 
-            var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {JTISConfigHelper.config.ToString()}[/]";  
+            var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {CfgManager.config.ToString()}[/]";  
 
 
             var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}{menuLabel}";
@@ -436,9 +439,9 @@ namespace JTIS.Menu
         }
         public static bool DoMenu(IMenuConsole menu)
         {
-            // if (menu.ActiveConfig != JTISConfigHelper.config )
+            // if (menu.ActiveConfig != CfgManager.config )
             // {
-            //     menu.ActiveConfig = JTISConfigHelper.config;
+            //     menu.ActiveConfig = CfgManager.config;
             // }
             // while (menu.DoMenu())
             // {

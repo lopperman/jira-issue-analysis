@@ -1,6 +1,6 @@
 
 
-using JTIS.Config;
+using JTIS.Analysis;
 
 namespace JTIS
 {

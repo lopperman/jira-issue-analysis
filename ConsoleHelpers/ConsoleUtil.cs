@@ -147,9 +147,9 @@ namespace JTIS.Console
         {
             get
             {
-                if (JTISConfigHelper.config != null)
+                if (CfgManager.config != null)
                 {                    
-                    if (JTISConfigHelper.config.DefaultTimeZoneDisplay() == false)
+                    if (CfgManager.config.DefaultTimeZoneDisplay() == false)
                     {   
                         var tzi = JTISTimeZone.DisplayTimeZone.StandardName;
                         return $" [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ";
@@ -206,7 +206,9 @@ namespace JTIS.Console
 
         public static void WriteError(string text, bool clearScreen = false, Exception? ex =  null, bool pause = false)
         {
+            text = Markup.Escape(text);
             if (clearScreen){System.Console.Clear();}
+
             AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
             if (ex != null)
             {
@@ -381,9 +383,9 @@ namespace JTIS.Console
 
         public static void ByeByeForced()
         {
-            if (JTISConfigHelper.config != null && JTISConfigHelper.config.IsDirty)
+            if (CfgManager.config != null && CfgManager.config.IsDirty)
             {
-                JTISConfigHelper.SaveConfigList();
+                CfgManager.SaveConfigList();
             }
 
             if (IsConsoleRecording)
@@ -467,7 +469,7 @@ namespace JTIS.Console
 
         public static string SaveSessionFile()
         {
-            string sessFile = Path.Combine(JTISConfigHelper.JTISRootPath,"SessionFiles");
+            string sessFile = Path.Combine(CfgManager.JTISRootPath,"SessionFiles");
             if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
             string fName = string.Format("SessionFile_{0}.html",DateTime.Now.ToString("yyyyMMMddHHmmss"));
             sessFile = Path.Combine(sessFile,fName);

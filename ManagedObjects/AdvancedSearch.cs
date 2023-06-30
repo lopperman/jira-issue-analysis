@@ -15,7 +15,7 @@ namespace JTIS.ManagedObjects
         }
         public static AdvancedSearch Create()
         {
-            return new AdvancedSearch(JTISConfigHelper.config);
+            return new AdvancedSearch(CfgManager.config);
         }
 
         internal bool ValidateQuery()

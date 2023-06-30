@@ -14,35 +14,15 @@ namespace JTIS
     {
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
-        {        
+        {
+            try{        
 
-            string? s1 = null;
-            string s2 = "1";
-            string s3 = "A";
-            string s4 = "001";
-            int tst = 0;
-            try 
-            {
-                tst = -1;
-                AnsiConsole.WriteLine("s1 (null)");
-                tst = -1;
-                int.TryParse(s1, out tst);
-                AnsiConsole.WriteLine($"tst value: {tst}");
-
-                tst = -1;
-                AnsiConsole.WriteLine("s2 (1)");
-                int.TryParse(s2, out tst);
-                AnsiConsole.WriteLine($"tst value: {tst}");
-
-                tst = -1;
-                AnsiConsole.WriteLine("s3 (A)");
-                int.TryParse(s3, out tst);
-                AnsiConsole.WriteLine($"tst value: {tst}");
-
-                tst = -1;
-                AnsiConsole.WriteLine("s4 (001)");
-                int.TryParse(s4, out tst);
-                AnsiConsole.WriteLine($"tst value: {tst}");
+                var tLogin = ConsoleUtil.GetInput<string>("Enter Jira Login email address");
+                var tAPIToken = ConsoleUtil.GetInput<string>("Enter Jira API Token");
+                AnsiConsole.MarkupLine($"[dim](Example of Url: https://yourcompany.Atlassian.net/)[/]");
+                var tURL = ConsoleUtil.GetInput<string>("Enter Jira base URL {}");
+                AnsiConsole.MarkupLine($"[dim](A Jira Project is usually the character that appear [italic]before[/] the number in a Jira Issue, such as 'WWT' in Jira Issues 'WWT-100')[/]");
+                var tProj = ConsoleUtil.GetInput<string>("Enter Default Project Key");
 
             }
             catch (Exception e)
@@ -53,97 +33,68 @@ namespace JTIS
             ConsoleUtil.PressAnyKeyToContinue();
         }
 
-        private static void NewFile()
-        {
-            var login = ConsoleUtil.GetInput<string>("Enter login name");
-            var apiToken = ConsoleUtil.GetInput<string>("Enter API Token");
-            var baseUrl = ConsoleUtil.GetInput<string>("Enter base url");
-            var defaultProject = ConsoleUtil.GetInput<string>("Enter default project key");
-            var c = new JTISConfig();
-            c.userName = login;
-            c.apiToken = apiToken;
-            c.baseUrl = baseUrl;
-            c.defaultProject = defaultProject;
-
-            
-            JTISConfigHelper.config = c;
-            JTISConfigHelper.SaveConfigList(c);
-            AnsiConsole.WriteLine("restart");
-
-        }
 
         public static void Main(string[] args) 
         {
-            if (args.Length == 1 && args[0].Equals("dev",StringComparison.OrdinalIgnoreCase))
+            List<JTISConfig> tmpCfgList  = new List<JTISConfig>();
+            var tmpConfigFilePath = string.Empty;
+            if (args.Length == 1)            
             {
-                DevQuick();
-                return;                
-            }
-            if (args.Length == 1 && args[0].Equals("new",StringComparison.OrdinalIgnoreCase))
-            {
-                NewFile();
-                return;                
-            }
-            bool requireManualConfig = false ;
-            if (args!=null && args.Length == 1)
-            {
-                if (JTISConfigHelper.ValidateConfigFileArg(args[0])==false)
+                if(args[0].StringsMatch("dev"))
                 {
-                    return;
+                    DevQuick(); 
+                    ConsoleUtil.ByeByeForced();                   
+                }
+                else
+                {
+                    var manualFilePath = CfgManager.CheckManualFilePath(args[0]);
+                    if (!string.IsNullOrWhiteSpace(manualFilePath))
+                    {
+                        tmpConfigFilePath = manualFilePath;
+                    }
+                    else 
+                    {
+                        tmpConfigFilePath = CfgManager.ConfigFilePath;
+                    }
+                }
+            }
+            else 
+            {
+                tmpConfigFilePath = CfgManager.ConfigFilePath;
+            }
+
+            var tmpConfigs = CfgManager.ReadConfigFile(tmpConfigFilePath);
+            if (tmpConfigs == null)
+            {
+                var link = new Text("https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/");
+                AnsiConsole.MarkupLine($"[bold](You will need to have your Jira API Token to create a new connection profile.  see this link if you need help creating one:[/] {Environment.NewLine}[dim italic]\t{link}[/])");
+                if (ConsoleUtil.Confirm("Add a new Jira Connection Profile?",true))
+                {
+                    
+                    var newConfig = JTISConfig.ManualCreate();
+                    if (newConfig !=  null) 
+                    {
+                        CfgManager.config = newConfig;
+
+                    }
                 }
                 else 
                 {
-                    JTISConfigHelper.JTISConfigFilePath = args[0];
-                }
-            }
-            if (args == null || args.Length == 0)
-            {
-                if (JTISConfigHelper.ValidateConfigFileArg(JTISConfigHelper.ConfigFilePath)==false) 
-                {
-                    return;
-                }
-            }
-            if (File.Exists(JTISConfigHelper.ConfigFilePath))
-            {
-                JTISConfigHelper.ReadConfigList();
-            }
-            else 
-            {
-                return;
-            }
-
-            if (JTISConfigHelper.Configs.Count > 0)
-            {
-                JTISConfig? changeCfg = JTISConfigHelper.ChangeCurrentConfig(null);
-                if (changeCfg != null && changeCfg.configId > 0)
-                {
-                    JTISConfigHelper.config = changeCfg;
+                    ConsoleUtil.ByeByeForced();
                 }
             }
             else 
             {
-                return;
+                CfgManager.SetConfigList(tmpConfigs); 
             }
 
-            if (JTISConfigHelper.config==null)
+            if (CfgManager.config != null)
             {
-                requireManualConfig = true;
-            }
-
-            if (requireManualConfig==true)
-            {
-                JTISConfig? manualConfig = JTISConfigHelper.CreateConfig(); 
-                if (manualConfig != null)
-                {
-                    JTISConfigHelper.config = manualConfig;
-                    JTISConfigHelper.CheckDefaultJQL();
-                }
-            }
-            if (JTISConfigHelper.config != null)
-            {
-                MenuManager.Start(JTISConfigHelper.config);
+                MenuManager.Start(CfgManager.config);
             }
             ConsoleUtil.ByeByeForced();
         }
+
+
     }
 }
