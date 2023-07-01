@@ -67,6 +67,10 @@ namespace JTIS
                         var savedJQL = CfgManager.config.SavedJQL.FirstOrDefault(x=>x.jqlId == jqlId);
                         if (savedJQL != null)
                         {
+                            if (JQLUtil.JQLSyntax(savedJQL.jql)==false)
+                            {
+                                savedJQL.jql = IssueKeysToJQL(savedJQL.jql);
+                            }
                             return savedJQL.jql;
                         }
                     }

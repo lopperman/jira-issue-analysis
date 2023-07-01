@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using Atlassian.Jira;
+﻿using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
 using JTIS.Console;
-using JTIS.Config;
+using JTIS.Data;
 
 namespace JTIS
 {
 
-    
+
     public class JiraRepo: IJiraRepo
     {
         private Jira _jira;
@@ -197,6 +196,47 @@ namespace JTIS
 
             return response.ToString();
         }
+
+        
+        public async Task<AutoCompData> GetJQLAutoCompleteDataAsync(CancellationToken token = default(CancellationToken))
+        {
+            var resourceUrl = "rest/api/3/jql/autocompletedata";
+            JToken data = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
+                .ConfigureAwait(false);
+
+            var retClass = new AutoCompData();
+            var jsonResWords = data["jqlReservedWords"];
+            if (jsonResWords != null)
+            {
+                List<string> tmpResWords = JsonConvert.DeserializeObject<List<string>>(jsonResWords.ToString());
+                if (tmpResWords != null)
+                {
+                    retClass.ReservedWords = tmpResWords;
+                }
+            }
+            var jsonFuncNames = data[key:"visibleFunctionNames"];
+            if (jsonFuncNames != null)
+            {
+                var t1 = JsonConvert.DeserializeObject<List<FunctionName>>(jsonFuncNames.ToString());
+                if (t1 != null)
+                {
+                    retClass.FunctionNames = t1;
+                }
+
+            }
+            var jsonFieldNames = data[key:"visibleFieldNames"];
+            if (jsonFieldNames != null)
+            {
+                var t2 = JsonConvert.DeserializeObject<List<VisibleField>>(jsonFuncNames.ToString());
+                if (t2 != null)
+                {
+                    retClass.VisibleFields = t2;
+                }
+
+            }
+            return retClass;
+        }
+
         public async Task<string> GetProjectItemStatusesAsync(string defProject, CancellationToken token = default(CancellationToken))
         {
             var resourceUrl = String.Format("rest/api/3/project/{0}/statuses",defProject);

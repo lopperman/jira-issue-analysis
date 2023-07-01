@@ -2,6 +2,15 @@ using System.Diagnostics;
 namespace JTIS.Extensions
 {
 
+    public class IsMatch : Property<IsMatch>
+    {
+        public IsMatch(string name, Type type) : base(name, type)
+        {
+            
+        }
+
+    }
+
     public static class StringExt
     {
         // converts any two inputs to strings and compares

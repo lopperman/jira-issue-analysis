@@ -90,12 +90,6 @@ namespace JTIS
                 tbl.Border(TableBorder.Rounded);
                 tbl.BorderColor(AnsiConsole.Foreground);
                 tbl.Expand();
-                // tbl.Columns[0].Padding(1,1,1,1);
-                // tbl.Columns[1].Padding(1,1,1,1);
-                // tbl.Columns[2].Padding(1,1,1,1);
-
-                
-
                 foreach (var jql in cfg.SavedJQL)
                 {   
                     var tRow = new TableRow(
@@ -106,19 +100,6 @@ namespace JTIS
                             );
                     tbl.AddRow(tRow);
                     tbl.AddEmptyRow();
-                    
-
-                    // ).BorderColor(AnsiConsole.Foreground);
-
-                    // var _jql = new Panel(Markup.FromInterpolated($"[dim]JQL/Issue List: [/][italic]{jql.jql}[/]"));
-                    // _jql.Header($"|  {jql.jqlId:00} - Saved as: {jql.jqlName}  |",Justify.Left);
-                    // _jql.Border(BoxBorder.None);
-                    // // _jql.Border = BoxBorder.Rounded;
-                    // // _jql.BorderColor(Style.Parse("dim blue").Foreground);
-                    // _jql.Padding(2,2,2,0);
-                    // _jql.Expand();
-                    // _jql.SafeBorder();
-                    // AnsiConsole.Write(_jql);
                 }
                 AnsiConsole.Write(tbl);
                 if (pause)

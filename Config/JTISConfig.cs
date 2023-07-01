@@ -225,6 +225,23 @@ namespace JTIS.Config
         }
         public void AddJQL(string shortName, string saveJql , bool saveFile = false)
         {
+            if (JQLUtil.JQLSyntax(saveJql)==false)
+            {
+                while(saveJql.Contains("  "))
+                {
+                    saveJql = saveJql.Replace("  "," ");
+                }
+                while(saveJql.Contains(", "))
+                {
+                    saveJql = saveJql.Replace(", ",",");
+                }
+                int commaCount = saveJql.Split(',',StringSplitOptions.RemoveEmptyEntries).Length;
+                int spaceCount = saveJql.Split(' ',StringSplitOptions.RemoveEmptyEntries).Length;
+                Char delimChar = ' ';
+                if (commaCount > spaceCount) {delimChar=',';}
+                saveJql = JQLBuilder.BuildInList("Key",saveJql, delimChar,string.Format($"{CfgManager.config.defaultProject.Trim()}-"));
+            }
+
             if (_savedJQL.Exists(x=>x.jqlName.StringsMatch(shortName)))
             {
                 int iCounter = 1;

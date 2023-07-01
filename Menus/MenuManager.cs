@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using System.Resources;
 using System.Net.Http.Headers;
 using System.IO.Pipes;
@@ -10,6 +11,8 @@ using JTIS.Config;
 using JTIS.Console;
 using JTIS.ManagedObjects;
 using JTIS.Analysis;
+using Newtonsoft.Json.Linq;
+using JTIS.Data;
 
 namespace JTIS.Menu
 {
@@ -82,16 +85,15 @@ namespace JTIS.Menu
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break; 
 
-                // case MenuItemEnum.miDev1:
-                //     var menuDev1 = new MenuDev(CfgManager.config);
-                //     menuDev1.DevTest1();
-                //     ConsoleUtil.PressAnyKeyToContinue();
-                //     break;
-                // case MenuItemEnum.miDev2:
-                //     var menuDev2 = new MenuDev(CfgManager.config);
-                //     menuDev2.DevTest2();
-                //     ConsoleUtil.PressAnyKeyToContinue();
-                //     break;
+//  DEV
+                case MenuItemEnum.miDev1:
+                    MenuManager.Dev1();
+                    exitMenu = MenuEnum.meConfig;
+                    break;
+                case MenuItemEnum.miDev2:
+                    MenuManager.Dev2();
+                    exitMenu = MenuEnum.meConfig;
+                    break;
 /////////////////////////////////////
                 case MenuItemEnum.miIssCfgEdit:
                     IssueStatesUtil.EditIssueStatus();
@@ -204,6 +206,44 @@ namespace JTIS.Menu
             ShowMenu(exitMenu.Value);
         }
 
+        private static void Dev2()
+        {
+            var asdf = AutoCompData.Create();
+        }
+
+        private static void Dev1()
+        {
+            var tt = JiraUtil.JiraRepo.GetJQLAutoCompleteDataAsync().GetAwaiter().GetResult();
+            if (tt != null)
+            {
+                if (tt.ReservedWords.Count > 0)
+                {
+                    foreach (var wd in tt.ReservedWords)
+                    {
+                        AnsiConsole.WriteLine(wd);
+                    }
+                }
+            }
+
+            // using (StreamWriter w = new StreamWriter(Path.Combine(CfgManager.JTISRootPath,"dev1.json"),false))
+            // {
+            //     w.Write(t);
+            // }
+
+            // JObject jo = JObject.Parse(t);
+            // foreach (var t1 in jo.Children())
+            // {
+            //     AnsiConsole.WriteLine(t1.ToString());
+            //     ConsoleUtil.PressAnyKeyToContinue("t1");
+
+            // }
+
+            
+
+
+
+            ConsoleUtil.PressAnyKeyToContinue("DEV1 COMPLETED");
+        }
 
         private static void NewAnalysis(AnalysisType anType)
         {
@@ -378,6 +418,8 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev1, "DEV 1"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev2, "DEV 2"));
                 break;
 
 //  ISSUE STATES MENU //

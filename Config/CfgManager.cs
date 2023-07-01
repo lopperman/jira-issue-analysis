@@ -289,6 +289,11 @@ namespace JTIS.Config
             }
             else 
             {
+                if (config == null)
+                {
+                    ConsoleUtil.WriteAppTitle();
+                }
+
                 resp =  AnsiConsole.Prompt( 
                     new SelectionPrompt<JTISConfig>()
                     .Title("Select Config")

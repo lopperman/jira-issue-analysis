@@ -36,6 +36,8 @@ namespace JTIS.Menu
         miMenu_IssueStates, 
         miMenu_StatusConfig, 
         miMenu_JQL, 
+        miDev1, 
+        miDev2, 
         miChangeTimeZoneDisplay, 
         miVisualSnapshotAll, 
         miExit, 
