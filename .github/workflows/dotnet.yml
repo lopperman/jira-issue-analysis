@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore JiraStates.csproj
     - name: Build JiraStates.dll
-      run: dotnet build JiraStates.csproj  --no-restore
-    - name: publish JiraStates.dll
+      run: dotnet build JiraStates.csproj  --no-restore -o obj/Release/net7.0/
+    - name: publish JiraStates
       run: dotnet publish JiraStates.csproj --no-build -c Release --version-suffix alpha
     
