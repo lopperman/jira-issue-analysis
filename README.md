@@ -10,6 +10,16 @@
 ---
 [Latest Release](https://github.com/lopperman/jiraTimeInStatus/releases)
 ---
+#### 0.4.0 HAS IMPROVED FIRST RUN EXPERIENCE
+#### (FIRST RUN 1/4 - DETECT MISSING CONFIG FILE)
+![](https://github.com/lopperman/jira-issue-analysis/blob/master/images/firstRun_1.png?raw=true)
+#### (FIRST RUN 2/4 - ENTER LOGIN, APITOKEN, JIRA URL, DEFAULT PROJECT)
+![](https://github.com/lopperman/jira-issue-analysis/blob/master/images/firstRun_2.png?raw=true)
+#### (FIRST RUN 3/4 - VERIFY AUTHENTICATION)
+![](https://github.com/lopperman/jira-issue-analysis/blob/master/images/firstRun_3.png?raw=true)
+#### (FIRST RUN 4/4 - NEW FILE CREATED)
+![](https://github.com/lopperman/jira-issue-analysis/blob/master/images/firstRun_4.png?raw=true)
+---
 Utility to determine amount of time a jira issue has spend in any status
 ![](https://github.com/lopperman/jiraTimeInStatus/blob/master/images/mainMenu_v0-2-4-alpha.png?raw=true)
 ![](https://github.com/lopperman/jira-issue-analysis/blob/master/images/configMenu.png?raw=true)
