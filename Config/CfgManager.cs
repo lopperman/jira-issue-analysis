@@ -404,16 +404,31 @@ namespace JTIS.Config
         {
             JTISConfig? delCfg = null; 
 
-            ConsoleUtil.WriteStdLine("** DELETE JIRA CONFIG ** ", StdLine.slError, true);
-            var cfgNames = CfgManager.ConfigNameList;
-            for (int i = 0; i < cfgNames.Count; i ++)
-            {
-                ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slCode);
-            }
-            delCfg = AnsiConsole.Prompt<JTISConfig>(
-                new SelectionPrompt<JTISConfig>()
-                    .AddChoices(cfgList)
-                    .Title("Select configuration to delete"));
+            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Spectre.Console.Rule());
+            AnsiConsole.MarkupLine($"\t[bold] CHOOSE  JIRA CONFIG PROFILE TO DELETE[/]");
+
+            var sp  = new SelectionPrompt<JTISConfig>();
+            sp.AddChoices<JTISConfig>(CfgManager.cfgList);
+            sp.Title("SELECT ITEM TO DELETE");
+            delCfg = AnsiConsole.Prompt<JTISConfig>(sp);
+
+                // .AddChoices(CfgManager.cfgList.AsEnumerable()));
+
+                // .Title("SELECT CONFIGURATION TO DELETE");
+            
+
+
+            // var cfgNames = CfgManager.ConfigNameList;
+            // for (int i = 0; i < cfgNames.Count; i ++)
+            // {
+            //     ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slCode);
+            // }
+            // delCfg = AnsiConsole.Prompt<JTISConfig>(
+            //     new SelectionPrompt<JTISConfig>()
+            //         .AddChoices(cfgList)
+            //         .Title("Select configuration to delete"));
 
             if (delCfg.Key==config.Key)
             {
