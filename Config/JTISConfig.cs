@@ -11,11 +11,15 @@ namespace JTIS.Config
 {
     public class JTISConfig
     {
+        [JsonProperty("Key")]
         public Guid? Key {get;set;}
+        
+        [JsonIgnore]
         public bool IsDirty {get; set;}
 
         [JsonIgnore]
         private JiraRepo? _jiraRepo = null;
+
         [JsonIgnore]
         public JiraRepo? jiraRepo 
         {
@@ -30,7 +34,9 @@ namespace JTIS.Config
                 return _jiraRepo  != null ? _jiraRepo.jira : null;
             }
         }
+
         private int _configId;
+
         [JsonProperty("cfgId")]
         public int configId 
         {
@@ -118,6 +124,7 @@ namespace JTIS.Config
             UpdateDefaultStatusConfigs(defProject, isNewFile);
         }
 
+        [JsonProperty("TimeZoneId")]
         public string? TimeZoneId 
         {
             get
@@ -134,22 +141,24 @@ namespace JTIS.Config
 
 
 
-        [JsonProperty("configName")]
+        [JsonProperty("configName"),JsonRequired]
         public string? configName {get; private set;}
 
-        [JsonProperty("userName")]
+        [JsonProperty("userName"),JsonRequired]
         public string? userName {get; set;}
 
-        [JsonProperty("apiToken")]
+        [JsonProperty("apiToken"),JsonRequired]
         public string? apiToken {get; set;}
 
-        [JsonProperty("baseUrl")]
+        [JsonProperty("baseUrl"),JsonRequired]
         public string? baseUrl {get; set;}
 
-        [JsonProperty("defaultProject")]
+        [JsonProperty("defaultProject"),JsonRequired]
         public string? defaultProject {get;set;}
-        public DateTime? ServerInfoUpdated {get;set;}
 
+        [JsonIgnore]
+        public DateTime? ServerInfoUpdated {get;set;}
+        
         public bool DefaultTimeZoneDisplay()
         {
             return JTISTimeZone.DefaultTimeZone;
@@ -164,6 +173,8 @@ namespace JTIS.Config
                 return _savedJQL;
             }
         }
+
+        [JsonProperty("StatusConfigs")]
         public IReadOnlyList<JiraStatus> StatusConfigs 
         {
             get
@@ -171,6 +182,7 @@ namespace JTIS.Config
                 return _statusConfigs;
             }
         }
+        [JsonProperty("DefaultStatusConfigs")]
         public IReadOnlyList<JiraStatus> DefaultStatusConfigs 
         {
             get
@@ -184,7 +196,7 @@ namespace JTIS.Config
         public int SavedJQLCount
         {
             get
-            {
+            {                
                 return SavedJQL.Count;
             }
         }
@@ -203,7 +215,7 @@ namespace JTIS.Config
             }
         }
 
-        public void AddJQL(JQLConfig jc, bool saveFile = false)
+        public void AddJQL(JQLConfig jc)
         {
             jc.jqlId = SavedJQLCount + 1;
             _savedJQL.Add(jc);
@@ -213,17 +225,9 @@ namespace JTIS.Config
             {
                 _savedJQL[i].jqlId = i + 1;
             }
-
-            if (saveFile)
-            {
-                CfgManager.SaveConfigList();
-            }
-            else 
-            {
-                IsDirty = true;
-            }            
+            IsDirty = true;
         }
-        public void AddJQL(string shortName, string saveJql , bool saveFile = false)
+        public void AddJQL(string shortName, string saveJql)
         {
             if (JQLUtil.JQLSyntax(saveJql)==false)
             {
@@ -239,7 +243,7 @@ namespace JTIS.Config
                 int spaceCount = saveJql.Split(' ',StringSplitOptions.RemoveEmptyEntries).Length;
                 Char delimChar = ' ';
                 if (commaCount > spaceCount) {delimChar=',';}
-                saveJql = JQLBuilder.BuildInList("Key",saveJql, delimChar,string.Format($"{CfgManager.config.defaultProject.Trim()}-"));
+                saveJql = JQLBuilder.BuildInList("Key",saveJql, delimChar,string.Format($"{defaultProject.Trim()}-"));
             }
 
             if (_savedJQL.Exists(x=>x.jqlName.StringsMatch(shortName)))
@@ -259,7 +263,7 @@ namespace JTIS.Config
                 }
             }
             JQLConfig cfg = new JQLConfig(shortName,saveJql);
-            AddJQL(cfg, saveFile);
+            AddJQL(cfg);
 
         }
         public void DeleteJQL(JQLConfig cfg)
@@ -276,7 +280,6 @@ namespace JTIS.Config
                         SavedJQL[i].jqlId = i + 1;
                     }
                 }
-                CfgManager.SaveConfigList();
             }
         }
         private void UpdateStatusCfgLocal(JiraStatus jStatus)
@@ -412,7 +415,6 @@ ResetLocalIssueStatusCfg();
 
         private List<JiraStatus> GetJiraStatuses(string defProject,  bool defaultProjectOnly = true)
         {
-
             List<JiraStatus> ret = new List<JiraStatus>();
             string data = string.Empty;
             if (defaultProjectOnly)
@@ -451,8 +453,6 @@ ResetLocalIssueStatusCfg();
             return ret;
         }
 
- 
-
         public override string ToString()
         {
             return string.Format($"{configId:00} | {configName}");
@@ -468,7 +468,88 @@ ResetLocalIssueStatusCfg();
             }
         }
 
+
+#region MANUAL JTISCONFIG
+        private static void RenderManualConfigStatus(string login, string apiToken, string baseUrl, string proj)
+        {
+            ConsoleUtil.WriteAppTitle();
+            var p = new Panel($" :llama: [bold underline]CREATE NEW JIRA CONFIGURATION[/]  ");
+            p.Expand();
+            p.Border(BoxBorder.None);
+            p.HeaderAlignment(Justify.Left);
+            var tbl = new Table().Border(TableBorder.Horizontal);
+            tbl.AddColumn(new TableColumn($"[dim]LOGIN[/]").Alignment(Justify.Center)).HorizontalBorder();
+            tbl.AddColumn(new TableColumn($"[dim]API TOKEN[/]").Alignment(Justify.Center)).HorizontalBorder();
+            tbl.AddColumn(new TableColumn($"[dim]JIRA ROOT URL[/]").Alignment(Justify.Center)).HorizontalBorder();
+            tbl.AddColumn(new TableColumn($"[dim]DEFAULT PROJECT KEY[/]").Alignment(Justify.Center)).HorizontalBorder();
+            tbl.AddRow(new Markup[]
+            {
+                new Markup($"[bold]{login}[/]"){Justification=Justify.Center}, 
+                new Markup($"[bold]{apiToken}[/]"){Justification=Justify.Left}, 
+                new Markup($"[bold]{baseUrl}[/]"){Justification=Justify.Center}, 
+                new Markup($"[bold]{proj}[/]"){Justification=Justify.Center}
+            });
+
+
+            AnsiConsole.Write(p);
+            AnsiConsole.Write(tbl);
+        }
+
         internal static JTISConfig? ManualCreate()
+        {
+            JTISConfig? result = null;
+
+            try{        
+                string tLogin = string.Empty;
+                string tAPIToken = string.Empty;
+                string tURL = string.Empty;
+                string tProj = string.Empty;
+
+                RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
+                tLogin = ConsoleUtil.GetInput<string>("Enter Jira Login").Trim();
+
+                RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
+                AnsiConsole.Write(new Rule());
+                AnsiConsole.MarkupLine($"[dim](Atlassian requires the use of tokens when authenticating to their API. Active Jira users can create a new token if needed by following these instructions)[/]{Environment.NewLine}[bold]https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/[/]");
+                
+                tAPIToken = ConsoleUtil.GetInput<string>("Enter Jira API Token").Trim();
+
+                RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
+                AnsiConsole.Write(new Rule());                
+                AnsiConsole.MarkupLine($"[dim](Example of Url: https://yourcompany.Atlassian.net/)[/]");
+                tURL = ConsoleUtil.GetInput<string>("Enter Jira base URL").Trim();
+
+                RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
+                AnsiConsole.Write(new Rule());
+                AnsiConsole.MarkupLine($"[dim](A Jira Project is usually the characters that appear [italic]before[/] the number in a Jira Issue, such as 'WWT' in Jira Issues 'WWT-100')[/]");
+                tProj = ConsoleUtil.GetInput<string>("Enter Default Project Key").Trim().ToUpper();
+                
+                RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
+
+                if (ConsoleUtil.Confirm($"A successful connection is needed to verify the information you provided.{Environment.NewLine}[bold]Attempt to authenticate to Jira now?[/]",true,true))
+                {
+                    int configNumber = 1;
+                    if (CfgManager.config != null && CfgManager.Configs.Count > 0)
+                    {
+                        configNumber = CfgManager.Configs.Count + 1;
+                    }
+                    var testCfg = JTISConfig.Create(tLogin,tAPIToken,tURL,tProj, configNumber);
+                    if (testCfg != null)
+                    {
+                        result = testCfg;
+                    }
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleUtil.WriteError(e.Message,false,e,false);
+            }
+            ConsoleUtil.PressAnyKeyToContinue();
+            return result;
+        }
+
+        internal static JTISConfig? ManualCreateccc()
         {
             var tLogin = ConsoleUtil.GetInput<string>("Enter Jira Login email address");
             var tAPIToken = ConsoleUtil.GetInput<string>("Enter Jira API Token");
@@ -508,7 +589,8 @@ ResetLocalIssueStatusCfg();
                 }
             }
             return null;
-
         }
+#endregion 
+
     }
 }

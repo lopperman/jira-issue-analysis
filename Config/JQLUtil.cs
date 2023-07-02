@@ -74,7 +74,7 @@ namespace JTIS
         public static void ViewSavedJQL(JTISConfig cfg, bool pause = true)
         {
             if (cfg.SavedJQLCount == 0)
-            {
+            {                
                 ConsoleUtil.WriteMarkupLine("You don't have any saved JQL",StdLine.slError.CStyle());
             }
             else 

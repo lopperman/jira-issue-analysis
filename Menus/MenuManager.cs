@@ -171,7 +171,7 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miSavedJQLDefault:
-                    CfgManager.CheckDefaultJQL();
+                    CfgManager.CheckDefaultJQL(CfgManager.config);
                     ConsoleUtil.PressAnyKeyToContinue("Default JQL Verified/Added");
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;

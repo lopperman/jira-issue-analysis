@@ -20,6 +20,13 @@ namespace JTIS.Config
                 }
                 if (_config.Connected)
                 {
+                    if (_config.SavedJQLCount == 0)
+                    {
+                        CheckDefaultJQL(_config);
+                        SaveConfigList();
+                    }
+
+
                     return _config;
                 }
                 return null;
@@ -164,28 +171,42 @@ namespace JTIS.Config
         }
 
 
-        public static JTISConfig? CreateConfig()
+        public static JTISConfig?  CreateConfig(bool addToConfigList = true, bool connectTo = true )
         {
             
-            JTISConfig? retCfg = null;
-
-            string? tmpUserName = ConsoleUtil.GetInput<string>("Missing config -- please enter username (email address) for Jira login:",allowEmpty:true);
-            string? tmpApiToken = ConsoleUtil.GetInput<string>("Missing config -- please enter API token for Jira login:",allowEmpty:true);
-            string? tmpUrl = ConsoleUtil.GetInput<string>("Missing config -- please enter base url for Jira instance:",allowEmpty:true);
-            string? tmpProject = ConsoleUtil.GetInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:",allowEmpty:true);
-
-            // if (string.IsNullOrEmpty(tmpUserName) == false && tmpApiToken != null && tmpUrl != null & tmpProject != null)
-            if (string.IsNullOrEmpty(tmpUserName) == false && string.IsNullOrEmpty(tmpApiToken) == false && string.IsNullOrEmpty(tmpUrl) == false && string.IsNullOrEmpty(tmpProject) == false)
+            JTISConfig? retCfg = JTISConfig.ManualCreate();            
+            if (retCfg!= null)
             {
-                retCfg = JTISConfig.Create(tmpUserName,tmpApiToken,tmpUrl,tmpProject, cfgList.Count + 1);
-                if (retCfg != null)
+                if (addToConfigList)
                 {
                     cfgList.Add(retCfg);
+                    if (connectTo)
+                    {
+                        config = retCfg;    
+                    }
                     SaveConfigList();
-                    return retCfg;
                 }
             }
-            return null;
+            return retCfg;
+            
+
+            // string? tmpUserName = ConsoleUtil.GetInput<string>("Missing config -- please enter username (email address) for Jira login:",allowEmpty:true);
+            // string? tmpApiToken = ConsoleUtil.GetInput<string>("Missing config -- please enter API token for Jira login:",allowEmpty:true);
+            // string? tmpUrl = ConsoleUtil.GetInput<string>("Missing config -- please enter base url for Jira instance:",allowEmpty:true);
+            // string? tmpProject = ConsoleUtil.GetInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:",allowEmpty:true);
+
+            // // if (string.IsNullOrEmpty(tmpUserName) == false && tmpApiToken != null && tmpUrl != null & tmpProject != null)
+            // if (string.IsNullOrEmpty(tmpUserName) == false && string.IsNullOrEmpty(tmpApiToken) == false && string.IsNullOrEmpty(tmpUrl) == false && string.IsNullOrEmpty(tmpProject) == false)
+            // {
+            //     retCfg = JTISConfig.Create(tmpUserName,tmpApiToken,tmpUrl,tmpProject, cfgList.Count + 1);
+            //     if (retCfg != null)
+            //     {
+            //         cfgList.Add(retCfg);
+            //         SaveConfigList();
+            //         return retCfg;
+            //     }
+            // }
+            // return null;
 
         }
 
@@ -245,6 +266,10 @@ namespace JTIS.Config
 
         public static List<JTISConfig>? ReadConfigFile(string filePath)
         {
+            if (ConfigFilePath.StringsMatch(filePath)==false)
+            {
+                JTISConfigFilePath = filePath;
+            }
             List<JTISConfig>? retList = null;
 
             try 
@@ -266,7 +291,15 @@ namespace JTIS.Config
             }
             catch (Exception ex)
             {
-                ConsoleUtil.WriteError($"Error Reading '{filePath}'",false,ex);
+                AnsiConsole.Write(new Spectre.Console.Rule());
+                AnsiConsole.MarkupLine($"[bold]The file[/] [italic] '{filePath}'[/] [bold] is invalid or needs to be created[/]");
+                if (Path.Exists(filePath)==false)
+                {
+                    AnsiConsole.MarkupLine($"[bold red on white]*** Missing file *** '{filePath}'[/]");
+                }
+                AnsiConsole.Write(new Spectre.Console.Rule());
+
+                // ConsoleUtil.WriteError($"Error Reading '{filePath}'",false,ex);
             }
 
             return retList;
@@ -394,12 +427,18 @@ namespace JTIS.Config
             }
         }
 
-        public static void CheckDefaultJQL()
-        {            
+        public static void CheckDefaultJQL(JTISConfig? applyToConfig = null)
+        {             
+            if (applyToConfig == null && config != null)
+            {
+                applyToConfig = config;
+            }
+            if (applyToConfig == null){return;}
+
             var blockedName = "(def) Blocked Work";
             var editedName = "(def) Recent Updates";
-            var blockedJql = $"project={config.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
-            var editedJql = $"project={config.defaultProject} and updated >= -7d";
+            var blockedJql = $"project={applyToConfig.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
+            var editedJql = $"project={applyToConfig.defaultProject} and updated >= -7d";
 
             var list = new SortedList<string,string>();
             list.Add(blockedName,blockedJql);
@@ -407,21 +446,15 @@ namespace JTIS.Config
 
             foreach (var kvp in list)
             {
-                var existJql = config.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
+                var existJql = applyToConfig.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
                 if (existJql == null || existJql.jql.StringsMatch(kvp.Value)==false)
                 {
                     if (existJql != null)
                     {
-                        config.DeleteJQL(existJql);
+                        applyToConfig.DeleteJQL(existJql);
                     }
-                    config.AddJQL(kvp.Key,kvp.Value);
+                    applyToConfig.AddJQL(kvp.Key,kvp.Value);
                 }
-            }
-
-
-            if (config.IsDirty)
-            {
-                SaveConfigList();
             }
         }
 

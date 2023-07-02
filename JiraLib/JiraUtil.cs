@@ -36,7 +36,7 @@ namespace JTIS
         // {
         //     return CreateRestClient(cfg.userName,cfg.apiToken,cfg.baseUrl);
         // }
-        public static bool CreateRestClient(string login, string apiToken, string baseUrl)
+        public static bool  CreateRestClient(string login, string apiToken, string baseUrl)
         {
             bool ret = false;
             try

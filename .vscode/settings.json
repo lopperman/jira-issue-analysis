@@ -11,5 +11,13 @@
     "accessibility.verbosity.chat": false,
     "csharp.inlayHints.parameters.forIndexerParameters": true,
     "editor.tokenColorCustomizations": {"[Monokai Pro]": {"comments": "#e0eb92"}}    ,
-    "workbench.colorCustomizations": {"editor.selectionBackground": "#5f5c25b4"},     
+    "workbench.colorCustomizations": {
+        "editor.selectionBackground": "#5f5c25b4"
+    },
+    "editor.fontSize": 12,
+    "editor.cursorStyle": "block",
+    "editor.autoClosingOvertype": "always",
+    "editor.codeLensFontSize": 9,
+    "editor.definitionLinkOpensInPeek": true,
+    
 }
