@@ -20,7 +20,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
-    - name: Restore dependencies
+    - name: Install dependencies
       run: dotnet restore JiraStates.csproj
-    - name: Build
+    - name: Build JiraStates.dll
       run: dotnet build JiraStates.csproj  --no-restore
+    - name: publish JiraStates.dll
+      run: dotnet publish JiraStates.csproj  -o /bin/publish/ - Release
+    
