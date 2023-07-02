@@ -25,5 +25,5 @@ jobs:
     - name: Build JiraStates.dll
       run: dotnet build JiraStates.csproj  --no-restore
     - name: publish JiraStates.dll
-      run: dotnet publish JiraStates.csproj  -o /bin/publish/ - Release
+      run: dotnet publish JiraStates.csproj
     
