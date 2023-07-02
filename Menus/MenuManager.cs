@@ -208,7 +208,21 @@ namespace JTIS.Menu
 
         private static void Dev2()
         {
-            var asdf = AutoCompData.Create();
+            var s = new AnsiConsoleSettings();
+            s.ColorSystem= ColorSystemSupport.Detect;
+            s.Enrichment.UseDefaultEnrichers = true;
+            var c = AnsiConsole.Create(s);
+            System.Console.BackgroundColor = Color.LightYellow3;
+            System.Console.ForegroundColor = Color.DarkBlue;
+
+            c.WriteLine("did the colors change?");
+            ConsoleUtil.PressAnyKeyToContinue();
+            
+
+         
+////    KEEP THIS       ////         
+            // var asdf = AutoCompData.Create();
+////    KEEP THIS       ////         
         }
 
         private static void Dev1()
@@ -358,6 +372,16 @@ namespace JTIS.Menu
 
         }
 
+
+
+
+            // AnsiConsole.Clear();
+            // var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";            
+            // AnsiConsole.Write(new Rule());
+            // AnsiConsole.MarkupLine(title);
+            // var tr = new Rule().DoubleBorder();
+            // AnsiConsole.Write(tr);
+
         private static void BuildMenuPanel(MenuEnum menu)
         {
             AnsiConsole.Clear();
@@ -366,12 +390,16 @@ namespace JTIS.Menu
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {CfgManager.config.ToString()}[/]";  
 
 
-            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}{menuLabel}";
-            var panel = new Panel(title);
-            panel.Border = BoxBorder.Rounded;
-            panel.BorderColor(Color.Grey15);
-            panel.Expand = true;
-            AnsiConsole.Write(panel);
+            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  {menuLabel}";
+            // var panel = new Panel(title);
+            // panel.Border = BoxBorder.Rounded;
+            // panel.BorderColor(Color.Grey15);
+            // panel.Expand = true;
+            // AnsiConsole.Write(panel);
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.MarkupLine(title);
+            AnsiConsole.Write(new Rule().HeavyBorder());
+
         }
 
         private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null)

@@ -95,7 +95,7 @@ namespace JTIS.Console
 
         public static void WriteStdLine(string text, ConsoleColor fontColor, ConsoleColor backColor,bool clearScreen = false)
         {
-            System.Console.ResetColor();
+            ////System.Console.ResetColor();
             if (clearScreen)
             {
                 System.Console.Clear();
@@ -103,7 +103,7 @@ namespace JTIS.Console
             System.Console.ForegroundColor = fontColor;
             System.Console.BackgroundColor = backColor;
             System.Console.Write(text);
-            System.Console.ResetColor();
+            ////System.Console.ResetColor();
             System.Console.WriteLine();
 
         }
@@ -160,14 +160,18 @@ namespace JTIS.Console
         }
         public static void WriteAppTitle()
         {
-            AnsiConsole.Clear();
-            var title = $"JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}[dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";            
-            var panel = new Panel(title);
-            panel.Border = BoxBorder.Rounded;
-            panel.BorderColor(Color.Grey15);
-            panel.Expand = true;
-            AnsiConsole.Write(panel);
+            // var panel = new Panel(title);
+            // panel.Border = BoxBorder.
+            // panel.BorderColor(Color.Grey15);
+            // panel.Expand = true;
+            // AnsiConsole.Write(panel);
 //            panel.HeaderAlignment(Justify.Center );
+            AnsiConsole.Clear();
+            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";            
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.MarkupLine(title);
+            var tr = new Rule().DoubleBorder();
+            AnsiConsole.Write(tr);
         }
         public static void WriteMarkupLine(string text,Style style, bool clearScreen = false)
         {
@@ -197,7 +201,7 @@ namespace JTIS.Console
             catch (Exception ex)
             {
                 WriteError("Write Std Line Error - retrying ",ex:ex);
-                AnsiConsole.ResetColors();
+                ////AnsiConsole.ResetColors();
                 AnsiConsole.WriteLine(ogText);
             }
 
@@ -434,20 +438,32 @@ namespace JTIS.Console
             r.Style=Style.Parse("dim red");
             AnsiConsole.Write(r);
             msg = Markup.Remove(msg);
-            if (!msg.EndsWith(Environment.NewLine))
+            if (msg.EndsWith(Environment.NewLine))
             {
-                msg = $"{msg}{Environment.NewLine}";
+                int place = msg.LastIndexOf(Environment.NewLine);
+                if (place >-1)
+                {
+                    msg = msg.Remove(place,Environment.NewLine.Length);
+                }
             }
             if (allowEmpty)
             {
-                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} [dim][[Optional]][/] {msg} [/]{Environment.NewLine}";
+                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] [dim](Optional)[/] {msg}[/]";
+            }
+            else 
+            {
+                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg}[/]";
+            }
+            msg = $"{msg}[{AnsiConsole.Foreground} on {AnsiConsole.Background}]{Environment.NewLine} : [/]";
+            
+            if (allowEmpty)
+            {
                 retVal = AnsiConsole.Prompt<T>(
                     new TextPrompt<T>(msg)
                         .AllowEmpty());
             }
             else 
             {
-                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg} [/]{Environment.NewLine}";
                 retVal = AnsiConsole.Prompt<T>(
                     new TextPrompt<T>(msg));
             }

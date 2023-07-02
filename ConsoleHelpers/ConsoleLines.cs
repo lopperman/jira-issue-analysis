@@ -80,7 +80,7 @@ namespace JTIS.Console
 
         public void WriteQueuedLines(bool clearScreen, bool addTitle)
         {
-            AnsiConsole.ResetColors();
+            ////AnsiConsole.ResetColors();
             if (clearScreen)
             {
                 AnsiConsole.Clear();
