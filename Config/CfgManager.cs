@@ -390,7 +390,7 @@ namespace JTIS.Config
             ConsoleUtil.WriteAppTitle();
             AnsiConsole.WriteLine();
             AnsiConsole.Write(new Spectre.Console.Rule());
-            AnsiConsole.MarkupLine($"\t[bold] CHOOSE  JIRA CONFIG PROFILE TO DELETE[/]");
+            AnsiConsole.MarkupLine($"\t[bold] CHOOSE JIRA CONFIG PROFILE TO DELETE[/]");
 
             // var sp  = new SelectionPrompt<JTISConfig>();
             // sp.AddChoices<JTISConfig>(CfgManager.cfgList);

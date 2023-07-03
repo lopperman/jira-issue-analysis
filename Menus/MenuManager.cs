@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Resources;
 using System.Net.Http.Headers;
@@ -268,18 +269,38 @@ namespace JTIS.Menu
 
         private static void Dev2()
         {
-            var s = new AnsiConsoleSettings();
-            s.ColorSystem= ColorSystemSupport.Detect;
-            s.Enrichment.UseDefaultEnrichers = true;
-            var c = AnsiConsole.Create(s);
-            System.Console.BackgroundColor = Color.LightYellow3;
-            System.Console.ForegroundColor = Color.DarkBlue;
+            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.WriteLine("should end up right after this line");
 
-            c.WriteLine("did the colors change?");
+
+            AnsiConsole.MarkupLine($"Supports No Colors: {AnsiConsole.Console.Profile.Supports(ColorSystem.NoColors)}");
+            AnsiConsole.MarkupLine($"Supports Legacy: {AnsiConsole.Console.Profile.Supports(ColorSystem.Legacy)}");
+            AnsiConsole.MarkupLine($"Supports EightBit: {AnsiConsole.Console.Profile.Supports(ColorSystem.EightBit)}");
+            AnsiConsole.MarkupLine($"Supports Standard: {AnsiConsole.Console.Profile.Supports(ColorSystem.Standard)}");
+            AnsiConsole.MarkupLine($"Supports TrueColor: {AnsiConsole.Console.Profile.Supports(ColorSystem.TrueColor)}");
             ConsoleUtil.PressAnyKeyToContinue();
-            
 
-         
+
+
+            ConsoleUtil.Confirm("Confirm",true);
+            ConsoleUtil.Confirm("Confirm 2",true);
+            ConsoleUtil.Confirm("Confirm 3",true);
+            AnsiConsole.WriteLine($"This line should be next!");
+            ConsoleUtil.PressAnyKeyToContinue();
+
+            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.WriteLine("should end up right after this line");
+            ConsoleUtil.PressAnyKeyToContinue("1");
+            ConsoleUtil.PressAnyKeyToContinue("2");
+            ConsoleUtil.PressAnyKeyToContinue("3");
+            AnsiConsole.WriteLine($"This line should be next!");
+
+            if (ConsoleUtil.Confirm("do again?",false))
+            {
+                Dev2();
+            }
+
+
 ////    KEEP THIS       ////         
             // var asdf = AutoCompData.Create();
 ////    KEEP THIS       ////         

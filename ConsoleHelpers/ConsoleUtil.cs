@@ -67,6 +67,9 @@ namespace JTIS.Console
 
         public static void PressAnyKeyToContinue(string? msg = null)
         {
+            var startLine = System.Console.CursorTop + 1;
+            // ClearLinesBackTo(startLine);
+
             AnsiConsole.WriteLine();
             var mk = new List<Markup>();
             var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]  PRESS ANY KEY TO CONTINUE  [/]");            
@@ -89,8 +92,8 @@ namespace JTIS.Console
             p.Border(BoxBorder.Heavy);            
             p.Expand();
             AnsiConsole.Write(p);
-
             System.Console.ReadKey(true);
+            ClearLinesBackTo(startLine);            
         }
 
         public static void WriteStdLine(string text, ConsoleColor fontColor, ConsoleColor backColor,bool clearScreen = false)
@@ -476,6 +479,9 @@ namespace JTIS.Console
         }
         public static bool Confirm(string msg, bool defResp, bool keepMarkup = false )
         {
+            var startLine = System.Console.CursorTop + 1;
+            // ClearLinesBackTo(startLine);
+
             AnsiConsole.WriteLine();
             var r = new Rule();
             r.Style=Style.Parse("dim red");
@@ -486,8 +492,30 @@ namespace JTIS.Console
             }
             msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
             var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
-            return AnsiConsole.Confirm(msg,defResp);
+            var result = AnsiConsole.Confirm(msg,defResp);
+            ClearLinesBackTo(startLine);
+            return result;
         }    
+
+        public static void ClearLinesBackTo(int toLine)
+        {
+            var totalLines = System.Console.GetCursorPosition().Top - toLine + 1;
+            if (totalLines > 0)
+            {
+                ClearLines(totalLines);
+            }
+        }
+        public static void ClearLines(int lineCount)
+        {
+            var currentPos = System.Console.GetCursorPosition();
+            for (int i = 0; i < lineCount; i ++)
+            {
+                System.Console.SetCursorPosition(0,currentPos.Top - i);
+                System.Console.Write(new string(' ',System.Console.WindowWidth));
+            }
+            System.Console.SetCursorPosition(0,currentPos.Top-lineCount);
+        }
+
 
         public static string SaveSessionFile()
         {
