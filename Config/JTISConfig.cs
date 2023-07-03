@@ -534,6 +534,17 @@ ResetLocalIssueStatusCfg();
                     {
                         configNumber = CfgManager.Configs.Count + 1;
                     }
+                    List<string> validProjects = JiraUtil.ValidProjectKeys(tLogin,tAPIToken,tURL);
+                    if (validProjects.Count==0)
+                    {
+                        ConsoleUtil.PressAnyKeyToContinue("Failed to connect.");
+                        return null;
+                    }
+                    if (!validProjects.Contains(tProj))
+                    {
+                        ConsoleUtil.WriteError($"The Default Project '{tProj}' is not valid. Please choose a valid project key",pause:false);
+                        tProj = AnsiConsole.Prompt<string>(new SelectionPrompt<string>().AddChoices(validProjects).Title("Select Valid Project"));
+                    }
                     var testCfg = JTISConfig.Create(tLogin,tAPIToken,tURL,tProj, configNumber);
                     if (testCfg != null)
                     {

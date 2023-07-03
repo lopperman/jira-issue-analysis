@@ -188,26 +188,6 @@ namespace JTIS.Config
                 }
             }
             return retCfg;
-            
-
-            // string? tmpUserName = ConsoleUtil.GetInput<string>("Missing config -- please enter username (email address) for Jira login:",allowEmpty:true);
-            // string? tmpApiToken = ConsoleUtil.GetInput<string>("Missing config -- please enter API token for Jira login:",allowEmpty:true);
-            // string? tmpUrl = ConsoleUtil.GetInput<string>("Missing config -- please enter base url for Jira instance:",allowEmpty:true);
-            // string? tmpProject = ConsoleUtil.GetInput<string>("Missing Project Key -- please enter ProjectKey for current Jira instance:",allowEmpty:true);
-
-            // // if (string.IsNullOrEmpty(tmpUserName) == false && tmpApiToken != null && tmpUrl != null & tmpProject != null)
-            // if (string.IsNullOrEmpty(tmpUserName) == false && string.IsNullOrEmpty(tmpApiToken) == false && string.IsNullOrEmpty(tmpUrl) == false && string.IsNullOrEmpty(tmpProject) == false)
-            // {
-            //     retCfg = JTISConfig.Create(tmpUserName,tmpApiToken,tmpUrl,tmpProject, cfgList.Count + 1);
-            //     if (retCfg != null)
-            //     {
-            //         cfgList.Add(retCfg);
-            //         SaveConfigList();
-            //         return retCfg;
-            //     }
-            // }
-            // return null;
-
         }
 
         public static void  DeleteConfigFile(string? filePath)

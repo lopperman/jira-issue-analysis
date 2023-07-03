@@ -272,21 +272,11 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
-
-            JTISConfig? tst = null;
-            // tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - should confirm [/]");
-            // ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
-
-            // tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - no confirm [/]",confirm:false);
-            // ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
-
-            tst = CfgManager.SelectJTISConfig($"[yellow on green]Can not select active [bold]any config[/] - should confirm [/]",canSelectCurrent:false);
-            if (tst != null)
+            var projList = JiraUtil.ValidProjectKeys(CfgManager.config.userName,CfgManager.config.apiToken, CfgManager.config.baseUrl);
+            foreach (var proj in projList.OrderBy(x=>x))
             {
-                ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
-
+                AnsiConsole.WriteLine(proj);
             }
-
 
 
             // var tt = JiraUtil.JiraRepo.GetJQLAutoCompleteDataAsync().GetAwaiter().GetResult();

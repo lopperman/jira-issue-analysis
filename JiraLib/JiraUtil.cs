@@ -15,6 +15,30 @@ namespace JTIS
         private static string _apiToken = string.Empty;
         private static string _baseUrl = string.Empty;
 
+        //return empty list if invalid connection, otherwise returns list of project keys
+        public static List<string> ValidProjectKeys(string loginName, string loginAPIToken, string loginURL)
+        {
+            List<string> keys = new List<string>();
+            try 
+            {
+                JiraRepo tempJiraRepo = new JiraRepo(loginURL, loginName, loginAPIToken);
+                if (tempJiraRepo.GetJira() == null) 
+                {
+                    return keys;
+                }
+                var projects = tempJiraRepo.GetJira().Projects.GetProjectsAsync().GetAwaiter().GetResult();
+                foreach (var proj in projects)
+                {
+                    keys.Add(proj.Key);
+                }
+            }
+            catch 
+            {
+                //INVALID CONNECTION
+            }
+
+            return keys;
+        }
 
         public static JiraRepo JiraRepo
         {
