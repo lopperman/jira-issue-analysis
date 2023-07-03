@@ -2,6 +2,7 @@ using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.Extensions;
 using JTIS.ManagedObjects;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -24,8 +25,23 @@ namespace JTIS
 
             var p = new ManagedPipeline();
             p.Add("Populating issues",PopulateIssuesAction);
+            if (_analysisType==AnalysisType.atEpics)
+            {
+                p.Add("Finding issues linked to Epics", PopulateEpicLinks);
+            }
             p.Add("Populating change logs",PopulateChangeLogs);
-            p.ExecutePipeline();
+            try 
+            {
+                p.ExecutePipeline();
+            }
+            catch(Exception errEx) 
+            {
+                p.CancelPipeline();
+                p = null;
+                ConsoleUtil.WriteError($"An error occurred processing JQL: {searchJQL} ({errEx.Message}) ");
+                ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
+                return;
+            }
             if (_jIssues.Count > 0)
             // if (!PopulateIssues()) return;
             // if (!PopulateChangeLogs()) return;
@@ -82,7 +98,7 @@ namespace JTIS
         }
         private void WriteIssueHeader(JIssue ji)
         {
-            var p = new Panel($"[bold]Change Logs For {ji.Key}, (Status: {ji.StatusName})[/]{Environment.NewLine}[dim]{ji.Summary}[/]");
+            var p = new Panel($"[bold]Change Logs For {ji.Key}[/], ([dim]Issue Type: [/][bold]{ji.IssueType}[/][dim] Status:[/][bold] {ji.StatusName})[/]{Environment.NewLine}[dim]{ji.Summary}[/]");
             p.Border = BoxBorder.Rounded;
             p.Expand();
             p.BorderColor(Color.Blue);
@@ -144,7 +160,7 @@ namespace JTIS
                 
                     using( var writer = new StreamWriter(ExportPath,false))
                     {
-                        writer.WriteLine("jiraKEY,changeLogTime,fieldName,fromStatus,toStatus");
+                        writer.WriteLine("jiraKEY,issueType,summary,changeLogTime,fieldName,fromStatus,toStatus");
 
                         for (int j = 0; j < _jIssues.Count; j++)
                         {
@@ -155,7 +171,7 @@ namespace JTIS
                                 {
                                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                                     {
-                                        writer.WriteLine(string.Format("{0},{1},{2},{3},{4}",jIss.Key,cli.ChangeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
+                                        writer.WriteLine(string.Format("{0},{1},{2},{3},{4},{5},{6}",jIss.Key, jIss.IssueType,jIss.Summary.Replace(',',';') ,cli.ChangeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
                                     }
                                 }
                             }
@@ -187,11 +203,11 @@ namespace JTIS
             {
                 case AnalysisType.atIssues:
                 case AnalysisType.atJQL:                    
-                    searchJQL = ConsoleInput.GetJQLOrIssueKeys((true));
+                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
                     break;
-                // case AnalysisType.atEpics:
-
-                //     break;
+                case AnalysisType.atEpics:
+                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,true);
+                    break;
                 default:
                     throw new NotImplementedException($"ChangeLogsMgs does not support AnalysisType: {Enum.GetName(typeof(AnalysisType),_analysisType)}");
             }
@@ -201,6 +217,20 @@ namespace JTIS
         private void PopulateIssuesAction()
         {            
             _issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
+        }
+        private void PopulateEpicLinks()
+        {
+            if (_issues.Any(x=>x.Type.StringsMatch("epic")))
+            {
+                IEnumerable<Issue> epics = _issues.Where(x=>x.Type.StringsMatch("epic")).ToList();
+                IEnumerable<Issue> epicIssues = JiraUtil.JiraRepo.GetEpicIssues(epics);
+                var newList = _issues.Concat(epicIssues)
+                    .GroupBy(x=>x.Key.Value)
+                    .Where(x=>x.Count() == 1)
+                    .Select(x=>x.First())
+                    .ToList();    
+                _issues = newList;
+            }
         }
        
     }

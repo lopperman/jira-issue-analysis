@@ -24,7 +24,8 @@ namespace JTIS.Menu
         meIssue_States, 
         meStatus_Config, 
         meJQL, 
-        meAdvanced_Search
+        meAdvanced_Search, 
+        meIssue_Summary_Visualization
     }
     public enum MenuItemEnum
     {
@@ -34,6 +35,9 @@ namespace JTIS.Menu
         miMenu_Advanced_Search, 
         // miMenu_Dev, 
         miMenu_IssueStates, 
+        miMenu_Issue_Summary_Visualization, 
+        miIssue_Summary_Visualization, 
+        miIssue_Summary_Visualization_Epic, 
         miMenu_StatusConfig, 
         miMenu_JQL, 
         miDev1, 
@@ -42,6 +46,7 @@ namespace JTIS.Menu
         miVisualSnapshotAll, 
         miExit, 
         miShowChangeHistoryCards, 
+        miShowChangeHistoryEpics, 
         miChangeConnection, 
         miTISIssues, 
         miTISEpic, 

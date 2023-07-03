@@ -56,6 +56,8 @@ namespace JTIS.ManagedObjects
     {
         private List<string> _taskMessages = new List<string>();
         private List<Action> _taskActions = new List<Action>();
+        List<ProgressTask> tasks = new List<ProgressTask>();
+
 
         public ManagedPipeline Add(string taskMsg,Action taskAction)
         {
@@ -63,13 +65,24 @@ namespace JTIS.ManagedObjects
             _taskActions.Add(taskAction);
             return this;
         }
+        public void CancelPipeline()
+        {
+            if (tasks.Count > 0)
+            {
+                foreach (var t in tasks)
+                {
+                    if (t.IsFinished == false || t.IsIndeterminate == true)
+                    {
+                        t.StopTask();
+                    }
+                }
+            }
+        }
         public void ExecutePipeline()
         {
             if (_taskActions.Count == 0) {return;}
-
-            List<ProgressTask> tasks = new List<ProgressTask>();
-
             var pr = new Progress(AnsiConsole.Console);
+
             pr.AutoClear(true);
             pr.AutoRefresh(true);
             pr.HideCompleted(false);
@@ -89,7 +102,7 @@ namespace JTIS.ManagedObjects
                     var tStg = new ProgressTaskSettings();
                     tStg.AutoStart = false;
                     tStg.MaxValue = 2;
-                    tasks.Add(ctx.AddTask($"[dim blue on white] {msgArr[i]} [/]",tStg));                            
+                    tasks.Add(ctx.AddTask($"[dim blue on white] {msgArr[i]} [/]",tStg));   
                 }
                 var taskArr = tasks.ToArray();
                 for (int i = 0; i < actionArr.Length; i ++)

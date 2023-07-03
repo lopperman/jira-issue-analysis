@@ -1,9 +1,11 @@
-﻿using Atlassian.Jira;
+﻿using System.Text;
+using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
 using JTIS.Console;
 using JTIS.Data;
+using JTIS.Extensions;
 
 namespace JTIS
 {
@@ -548,6 +550,27 @@ namespace JTIS
 
         }
 
+        internal IEnumerable<Issue> GetEpicIssues(IEnumerable<Issue> epics)
+        {
+            List<Issue> response = new List<Issue>();            
+            StringBuilder sb = new StringBuilder();
+            foreach (var epic in epics)
+            {
+                if (epic.Type.StringsMatch("epic"))
+                {
+                    var appendVal = sb.Length==0 ? $"{epic.Key.Value}" : $", {epic.Key.Value}";
+                    sb.Append(appendVal);
+                }
+            }
+            if (sb.Length > 0)
+            {
+                var jql = $"'Epic Link' in({sb.ToString()})";
+                response = GetIssues(jql);
+            }
+
+
+            return response;
+        }
     }
 
 

@@ -70,8 +70,21 @@ namespace JTIS.Menu
                 case MenuItemEnum.miMenu_Advanced_Search:
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break;
+                case MenuItemEnum.miMenu_Issue_Summary_Visualization:
+                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
+                    break;
 #endregion
+//miMenu_Issue_Summary_Visualization
+#region ISSUE VISUALIZATION
+                case MenuItemEnum.miIssue_Summary_Visualization:
+                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
+                    break; 
+                case MenuItemEnum.miIssue_Summary_Visualization_Epic:
+                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
+                    break; 
 
+
+#endregion
 #region ADVANCED SEARCH MENUS
 
                 case MenuItemEnum.miAdvSearchViewCustomFields:
@@ -110,6 +123,10 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miShowChangeHistoryCards:
                     var chl1 = new ChangeLogsMgr(AnalysisType.atIssues);
+                    if (exitMenu == null){exitMenu = MenuEnum.meMain;}
+                    break;
+                case MenuItemEnum.miShowChangeHistoryEpics:
+                    var chl2 = new ChangeLogsMgr(AnalysisType.atEpics);
                     if (exitMenu == null){exitMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miIssCfgView:
@@ -414,7 +431,16 @@ namespace JTIS.Menu
 
                 }                    
                 var mnu = AnsiConsole.Prompt(sp);
-                MenuManager.Execute(mnu);            
+                try
+                {
+                    MenuManager.Execute(mnu);            
+                }
+                catch(Exception errEx)
+                {
+                    ConsoleUtil.WriteError($"An error occurred processing request. Please double-check syntax of any JQL statements you are working with.",false,ex:errEx,true);
+
+                    ShowMenu(menu);
+                }
             }
             else 
             {
@@ -482,14 +508,27 @@ namespace JTIS.Menu
 
                 case (MenuEnum.meMain):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miVisualSnapshotAll,"Project Summary Visualization"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Issue_Summary_Visualization,"Menu: Issue Summary Visualization"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
+
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
                     // ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
                 break;
+
+//  ISSUE VISUALIZAITON //
+
+                case (MenuEnum.meIssue_Summary_Visualization):
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization,"Issue Summary Visualization"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization_Epic,"Issue Summary Visualization (by Epic)"));
+
+                    ret.Add(menuSeparator);
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
+                break;
+
 
 //  CONFIG MENU //
 
