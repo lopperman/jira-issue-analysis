@@ -269,7 +269,7 @@ namespace JTIS.Config
                 }
 
             }
-            catch (Exception ex)
+            catch 
             {
                 AnsiConsole.Write(new Spectre.Console.Rule());
                 AnsiConsole.MarkupLine($"[bold]The file[/] [italic] '{filePath}'[/] [bold] is invalid or needs to be created[/]");
