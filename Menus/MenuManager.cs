@@ -76,13 +76,16 @@ namespace JTIS.Menu
 #endregion
 //miMenu_Issue_Summary_Visualization
 #region ISSUE VISUALIZATION
-                case MenuItemEnum.miIssue_Summary_Visualization:
-                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
-                    break; 
-                case MenuItemEnum.miIssue_Summary_Visualization_Epic:
-                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
-                    break; 
 
+                case MenuItemEnum.miIssue_Summary_Visualization:
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
+                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atIssues).BuildSearch();
+                    break;
+
+                case MenuItemEnum.miIssue_Summary_Visualization_Epic :
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
+                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atEpics).BuildSearch();
+                    break;
 
 #endregion
 #region ADVANCED SEARCH MENUS
@@ -109,15 +112,6 @@ namespace JTIS.Menu
                     break;
 #endregion
 
-#region VISUAL SNAPSHOT
-
-                case MenuItemEnum.miVisualSnapshotAll:
-                    if (exitMenu == null){exitMenu = MenuEnum.meMain;}
-                    ConsoleUtil.PressAnyKeyToContinue("IN DEVELOPMENT");
-                    var visAll = new VisualSnapshot(VisualSnapshotType.vsProject);
-                    break;
-
-#endregion
 
 #region ISSUE STATES & CHANGE LOGS
 

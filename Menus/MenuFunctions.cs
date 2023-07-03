@@ -12,9 +12,9 @@ namespace JTIS.Menu
 
     public enum VisualSnapshotType
     {
-        vsProject = 1, 
-        vsEpic = 2, 
-        vsCustom = 3
+        vsIssueStatus = 1, 
+        vsOpenedClosed = 2, 
+        vsBlockers = 3
     }
     public enum MenuEnum
     {
@@ -43,7 +43,6 @@ namespace JTIS.Menu
         miDev1, 
         miDev2, 
         miChangeTimeZoneDisplay, 
-        miVisualSnapshotAll, 
         miExit, 
         miShowChangeHistoryCards, 
         miShowChangeHistoryEpics, 

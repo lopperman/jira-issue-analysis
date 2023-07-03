@@ -411,8 +411,24 @@ namespace JTIS
 
             IssueSearchOptions searchOptions = new IssueSearchOptions(jql);
             searchOptions.FetchBasicFields = basicFields;
+            
 
             searchOptions.MaxIssuesPerRequest = _jira.Issues.MaxIssuesPerRequest;
+
+            if (additionalFields == null)
+            {
+                additionalFields = new string[] { "Flagged" };
+            }
+            else 
+            {
+                if (!additionalFields.ToList().Contains("Flagged"))
+                {
+                    var tmpAddlFields = additionalFields.ToList<string>();
+                    tmpAddlFields.Add("Flagged");
+
+                    additionalFields = tmpAddlFields.ToArray();
+                }
+            }
 
             if (additionalFields == null)
             {
