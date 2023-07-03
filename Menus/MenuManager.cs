@@ -50,15 +50,14 @@ namespace JTIS.Menu
             
             switch (item.MenuItem)
             {
+
+#region MENUS - MENU ITEMS                
                 case MenuItemEnum.miMenu_Main:
                     exitMenu = MenuEnum.meMain;
                     break;
                 case MenuItemEnum.miMenu_Config:
                     exitMenu = MenuEnum.meConfig;
                     break;
-                // case MenuItemEnum.miMenu_Dev:
-                //     finalMenu = MenuEnum.meDev;
-                //     break;
                 case MenuItemEnum.miMenu_IssueStates:
                     exitMenu = MenuEnum.meIssue_States;
                     break;
@@ -71,11 +70,10 @@ namespace JTIS.Menu
                 case MenuItemEnum.miMenu_Advanced_Search:
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break;
+#endregion
 
-                case MenuItemEnum.miSeparator:
-                    exitMenu = lastMenu;
-                    break;
-//  ADVANCED SEARCH
+#region ADVANCED SEARCH MENUS
+
                 case MenuItemEnum.miAdvSearchViewCustomFields:
                     AdvancedSearch.Create().ViewJiraCustomFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
@@ -84,8 +82,10 @@ namespace JTIS.Menu
                     AdvancedSearch.Create().ViewJiraIssueFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break; 
+#endregion
 
-//  DEV
+#region DEV MENU ITEMS
+
                 case MenuItemEnum.miDev1:
                     MenuManager.Dev1();
                     exitMenu = MenuEnum.meConfig;
@@ -94,25 +94,20 @@ namespace JTIS.Menu
                     MenuManager.Dev2();
                     exitMenu = MenuEnum.meConfig;
                     break;
-/////////////////////////////////////
-                case MenuItemEnum.miIssCfgEdit:
-                    IssueStatesUtil.EditIssueStatus();
-                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
-                    break;
+#endregion
 
-                case MenuItemEnum.miChangeTimeZoneDisplay:
-                    CfgManager.ChangeTimeZone();
-                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
-                    break;
+#region VISUAL SNAPSHOT
+
                 case MenuItemEnum.miVisualSnapshotAll:
                     if (exitMenu == null){exitMenu = MenuEnum.meMain;}
                     ConsoleUtil.PressAnyKeyToContinue("IN DEVELOPMENT");
                     var visAll = new VisualSnapshot(VisualSnapshotType.vsProject);
                     break;
-                case MenuItemEnum.miExit:
-                    exitMenu = null;                    
-                    ConsoleUtil.ByeByeForced();
-                    break;
+
+#endregion
+
+#region ISSUE STATES & CHANGE LOGS
+
                 case MenuItemEnum.miShowChangeHistoryCards:
                     var chl1 = new ChangeLogsMgr(AnalysisType.atIssues);
                     if (exitMenu == null){exitMenu = MenuEnum.meMain;}
@@ -125,39 +120,12 @@ namespace JTIS.Menu
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
-                case MenuItemEnum.miJiraConfigView:
-                    CfgManager.ViewAll();
-                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
-                    if (ConsoleUtil.Confirm("SHOW API KEYS?",false))
-                    {
-                        CfgManager.ViewAll(true);
-                        ConsoleUtil.PressAnyKeyToContinue();
-                    }
-                    break;
-                case MenuItemEnum.miStartRecordingSession:
-                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
-                    ConsoleUtil.StartRecording();
-                    break;
-                case MenuItemEnum.miJiraServerInfo:
-                    JEnvironmentConfig.JiraEnvironmentInfo();
-                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
-                    break;
-                case MenuItemEnum.miSaveSessionToFile:
-                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
-                    if (ConsoleUtil.IsConsoleRecording)
-                    {
-                        var fName = ConsoleUtil.SaveSessionFile();
-                        ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
-                    }
-                    else 
-                    {
-                        if (ConsoleUtil.Confirm($"Recording is not turned on. Turn on now?",defResp:false))
-                        {
-                            ConsoleUtil.StartRecording();
-                        }
-                    }
-                    break;
-/// SAVED JQL ///                    
+
+#endregion                    
+                    
+
+#region JQL MANAGEMENT
+
                 case MenuItemEnum.miSavedJQLView:
                     JQLUtil.ViewSavedJQL(CfgManager.config);
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
@@ -176,7 +144,45 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
 
-/// (END) SAVED JQL ///
+#endregion
+
+#region JIRA CONFIG MENU ITEMS
+
+                case MenuItemEnum.miJiraConfigView:
+                    CfgManager.ViewAll();
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    if (ConsoleUtil.Confirm("SHOW API KEYS?",false))
+                    {
+                        CfgManager.ViewAll(true);
+                        ConsoleUtil.PressAnyKeyToContinue();
+                    }
+                    break;
+
+                case MenuItemEnum.miJiraConfigAdd:
+                    CfgManager.AddNewConfig();
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
+                break;
+
+                case MenuItemEnum.miJiraConfigRemove:
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
+                    CfgManager.DeleteConfig();
+                break;
+
+
+#endregion
+
+#region CONFIG MENU MANAGEMENT
+
+                case MenuItemEnum.miIssCfgEdit:
+                    IssueStatesUtil.EditIssueStatus();
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
+                    break;
+
+                case MenuItemEnum.miChangeTimeZoneDisplay:
+                    CfgManager.ChangeTimeZone();
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    break;
+
                 case MenuItemEnum.miChangeConnection:
                     if (exitMenu == null) {exitMenu = MenuEnum.meMain;}
                     var newCfg = CfgManager.ChangeCurrentConfig();
@@ -186,10 +192,47 @@ namespace JTIS.Menu
                         ConsoleUtil.PressAnyKeyToContinue($"CONNECTED TO: {CfgManager.config.ToString()}");
                     }
                     break;
-                case MenuItemEnum.miJiraConfigRemove:
-                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
-                    CfgManager.DeleteConfig();
-                break;
+
+                case MenuItemEnum.miStartRecordingSession:
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    ConsoleUtil.StartRecording();
+                    break;
+
+                case MenuItemEnum.miJiraServerInfo:
+                    JEnvironmentConfig.JiraEnvironmentInfo();
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    break;
+
+                case MenuItemEnum.miSaveSessionToFile:
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    if (ConsoleUtil.IsConsoleRecording)
+                    {
+                        var fName = ConsoleUtil.SaveSessionFile();
+                        ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
+                    }
+                    else 
+                    {
+                        if (ConsoleUtil.Confirm($"Recording is not turned on. Turn on now?",defResp:false))
+                        {
+                            ConsoleUtil.StartRecording();
+                        }
+                    }
+                    break;
+
+#endregion                 
+
+#region MISC MENU ITEMS
+
+                case MenuItemEnum.miExit:
+                    exitMenu = null;                    
+                    ConsoleUtil.ByeByeForced();
+                    break;
+                    
+
+                case MenuItemEnum.miSeparator:
+                    exitMenu = lastMenu;
+                    break;
+
                 default:
                     string miName = Enum.GetName(typeof(MenuItemEnum),item.MenuItem);
                     AnsiConsole.Write(new Rule());
@@ -198,6 +241,8 @@ namespace JTIS.Menu
                     ConsoleUtil.PressAnyKeyToContinue();
                     exitMenu = MenuEnum.meMain;
                     break;
+#endregion                    
+
             }
             if (exitMenu == null)
             {
@@ -227,17 +272,34 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
-            var tt = JiraUtil.JiraRepo.GetJQLAutoCompleteDataAsync().GetAwaiter().GetResult();
-            if (tt != null)
+
+            JTISConfig? tst = null;
+            // tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - should confirm [/]");
+            // ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
+
+            // tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - no confirm [/]",confirm:false);
+            // ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
+
+            tst = CfgManager.SelectJTISConfig($"[yellow on green]Can not select active [bold]any config[/] - should confirm [/]",canSelectCurrent:false);
+            if (tst != null)
             {
-                if (tt.ReservedWords.Count > 0)
-                {
-                    foreach (var wd in tt.ReservedWords)
-                    {
-                        AnsiConsole.WriteLine(wd);
-                    }
-                }
+                ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
+
             }
+
+
+
+            // var tt = JiraUtil.JiraRepo.GetJQLAutoCompleteDataAsync().GetAwaiter().GetResult();
+            // if (tt != null)
+            // {
+            //     if (tt.ReservedWords.Count > 0)
+            //     {
+            //         foreach (var wd in tt.ReservedWords)
+            //         {
+            //             AnsiConsole.WriteLine(wd);
+            //         }
+            //     }
+            // }
 
             // using (StreamWriter w = new StreamWriter(Path.Combine(CfgManager.JTISRootPath,"dev1.json"),false))
             // {
@@ -438,14 +500,20 @@ namespace JTIS.Menu
 //  CONFIG MENU //
 
                 case(MenuEnum.meConfig):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection"));
+
                     ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"));
+
                     ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
+
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
+
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
+
                     ret.Add(MakeMenuDetail(MenuItemEnum.miDev1, "DEV 1"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miDev2, "DEV 2"));
                 break;

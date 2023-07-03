@@ -327,10 +327,7 @@ namespace JTIS.Config
                     ConsoleUtil.WriteAppTitle();
                 }
 
-                resp =  AnsiConsole.Prompt( 
-                    new SelectionPrompt<JTISConfig>()
-                    .Title("Select Config")
-                    .AddChoices(choices));                    
+                resp = SelectJTISConfig("Select Jira Config",false,list:choices);
             }
             if (resp != null)
             {
@@ -404,41 +401,39 @@ namespace JTIS.Config
         {
             JTISConfig? delCfg = null; 
 
+            if (cfgList.Count == 1)
+            {
+                ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED - YOU CANNOT DELETE ACTIVE CONNECTION AND YOU ONLY HAVE 1 JIRA CONFIGURATION!");
+                return;
+            }
+
             ConsoleUtil.WriteAppTitle();
             AnsiConsole.WriteLine();
             AnsiConsole.Write(new Spectre.Console.Rule());
             AnsiConsole.MarkupLine($"\t[bold] CHOOSE  JIRA CONFIG PROFILE TO DELETE[/]");
 
-            var sp  = new SelectionPrompt<JTISConfig>();
-            sp.AddChoices<JTISConfig>(CfgManager.cfgList);
-            sp.Title("SELECT ITEM TO DELETE");
-            delCfg = AnsiConsole.Prompt<JTISConfig>(sp);
+            // var sp  = new SelectionPrompt<JTISConfig>();
+            // sp.AddChoices<JTISConfig>(CfgManager.cfgList);
+            // sp.Title("SELECT ITEM TO DELETE");
+            // delCfg = AnsiConsole.Prompt<JTISConfig>(sp);
 
-                // .AddChoices(CfgManager.cfgList.AsEnumerable()));
-
-                // .Title("SELECT CONFIGURATION TO DELETE");
-            
-
-
-            // var cfgNames = CfgManager.ConfigNameList;
-            // for (int i = 0; i < cfgNames.Count; i ++)
-            // {
-            //     ConsoleUtil.WriteStdLine(cfgNames[i],StdLine.slCode);
-            // }
-            // delCfg = AnsiConsole.Prompt<JTISConfig>(
-            //     new SelectionPrompt<JTISConfig>()
-            //         .AddChoices(cfgList)
-            //         .Title("Select configuration to delete"));
+            delCfg = SelectJTISConfig("Select Jira Config to [bold]DELETE[/]. [dim](You'll be asked to confirm before deleting[/])",canSelectCurrent:false);
+            if (delCfg == null)
+            {
+                return;
+            }
 
             if (delCfg.Key==config.Key)
             {
                 ConsoleUtil.WriteError("you cannot delete a configuration that is currently connected");
+                ConsoleUtil.PressAnyKeyToContinue();
                 return;
             }
             if (ConsoleUtil.Confirm($"Delete Jira Config: {delCfg.ToString()}?",false))
             {
                 cfgList.Remove(delCfg);
                 SaveConfigList();
+                ConsoleUtil.PressAnyKeyToContinue("SUCCESSFULLY DELETED JIRA CONFIGURATION");
             }
         }
 
@@ -673,6 +668,98 @@ namespace JTIS.Config
             {
                 config = setCfg;
             }
+        }
+
+        public static  JTISConfig? SelectJTISConfig(string markupTitle, bool confirm = true, bool canSelectCurrent = true,  List<JTISConfig>? list = null)
+        {            
+
+            JTISConfig? selectedCfg = null;
+            if (list == null)
+            {
+                list = cfgList;;
+            }
+
+            if (canSelectCurrent == false && list.Count == 1)
+            {
+                ConsoleUtil.PressAnyKeyToContinue("THIS FUNCTION DOES NOT ALLOW YOU TO SELECT YOUR CURRENT CONFIG");
+                return null;
+            }
+
+            AnsiConsole.Write(new Spectre.Console.Rule());
+            AnsiConsole.MarkupLine($"\t{markupTitle}");
+
+            var sp  = new SelectionPrompt<JTISConfig>();
+            sp.AddChoices<JTISConfig>(list);
+            sp.Title("SELECT CONFIG ITEM");
+            selectedCfg = AnsiConsole.Prompt<JTISConfig>(sp);
+
+            if (canSelectCurrent == false && config.Key == selectedCfg.Key)
+            {
+                ConsoleUtil.PressAnyKeyToContinue("THIS FUNCTION DOES NOT ALLOW YOU TO SELECT YOUR CURRENT CONFIG");
+                return null;
+            }
+
+
+            if (confirm)
+            {
+                if (!ConsoleUtil.Confirm($"Proceed with '{selectedCfg.ToString()}'",true))
+                {
+                    return null;
+                }
+            }
+            return selectedCfg;
+
+        }
+
+        internal static void AddNewConfig()
+        {
+            ConsoleUtil.WriteAppTitle();
+            JTISConfig? newConfig = null;
+            AnsiConsole.Write(new Spectre.Console.Rule());
+            var onlyProject = ConsoleUtil.Confirm("Would you like to copy an existing Jira Configuration and just change the Default Project?",false);
+            if (onlyProject)
+            {
+                var anyConfig = SelectJTISConfig("Select any config to duplicate");                
+                var newDefProject = ConsoleUtil.GetInput<string>("Enter Jira Project Key to set as Default Project for the new Config",allowEmpty:true);
+                if (newDefProject!=null && newDefProject.Length > 0)
+                {
+                    newDefProject = newDefProject.Trim().ToUpper();
+                    foreach (var existCfg in cfgList)                    
+                    {
+                        if (existCfg.userName.StringsMatch(anyConfig.userName) && 
+                            existCfg.baseUrl.StringsMatch(anyConfig.baseUrl) && 
+                            existCfg.defaultProject.StringsMatch(newDefProject)) 
+                        {
+                            ConsoleUtil.PressAnyKeyToContinue($"OPERATION CANCELLED - A MATCHING CONFIG ALREADY EXISTS WITH DEFAULT PROJECT '{newDefProject}'");
+                            return;
+                        }
+                        else 
+                        {
+                            newConfig = JTISConfig.Create(anyConfig.userName,anyConfig.apiToken,anyConfig.baseUrl,newDefProject,cfgList.Count +  1);                            
+                        }
+                    }
+                }
+                else 
+                {
+                    ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
+                    return;
+                }
+            }
+            else
+            {
+                newConfig = JTISConfig.ManualCreate();
+            }
+            if (newConfig != null)
+            {
+                cfgList.Add(newConfig);
+                SaveConfigList();
+                if (ConsoleUtil.Confirm($"New Jira config ('{newConfig.ToString()}') has been created and saved. Would you like to connect to it now?",true,false))
+                {
+                    config = newConfig;
+                }
+            }
+
+
         }
     }
 }

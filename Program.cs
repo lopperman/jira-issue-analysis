@@ -15,11 +15,12 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
-            // var cfg = JTISConfig.ManualCreate();
-            // AnsiConsole.MarkupLine($"New Config Valid: {cfg!=null}");
+            JTISConfig? tst = null;
+            tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - should confirm [/]");
+            ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
 
-            AnsiConsole.MarkupLine($"[dim](Atlassian requires the use of tokens when authenticating to their API. Active Jira users can create a new token if needed by following these instructions)[/]{Environment.NewLine}[bold]https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/[/]");
-
+            tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - no confirm [/]",confirm:false);
+            ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
 
             ConsoleUtil.PressAnyKeyToContinue();
             Console.ConsoleUtil.ByeByeForced();
