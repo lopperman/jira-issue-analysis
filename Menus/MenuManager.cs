@@ -120,6 +120,10 @@ namespace JTIS.Menu
                     NewAnalysis(AnalysisType.atIssueSummary);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
+                case MenuItemEnum.miTISEpic:
+                    NewAnalysis(AnalysisType.atEpics);
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    break;
 
 #endregion                    
                     

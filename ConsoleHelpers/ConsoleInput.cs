@@ -9,8 +9,12 @@ namespace JTIS
     public static class ConsoleInput
     {
 
-        public static string GetJQLOrIssueKeys(bool allowFromSaved)
+        public static string GetJQLOrIssueKeys(bool allowFromSaved, bool findEpicLinks = false)
         {
+            if (findEpicLinks)
+            {
+                AnsiConsole.MarkupLine("[bold underline]\tNOTE: [/][bold]Any Epic type issues returned will automatically find and return all related issues[/]");
+            }
             if (allowFromSaved == false)
             {
                 var rLine = new Rule("[bold blue on white]ENTER JQL OR LIST OF ISSUE KEYS[/]").Centered();

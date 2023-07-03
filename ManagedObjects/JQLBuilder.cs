@@ -14,7 +14,6 @@ namespace JTIS
             valArr = vals.Split(delimitChar,StringSplitOptions.RemoveEmptyEntries);
             return BuildInList(colName,valArr,prependIfMissing);
         }
-        //test
         
         public static string BuildInList(string colName, string[] vals,  string? prependIfMissing=null)
         {

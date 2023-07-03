@@ -47,8 +47,7 @@ namespace JTIS.Analysis
             }
             else if (_type == AnalysisType.atEpics)
             {
-                ConsoleUtil.PressAnyKeyToContinue("NOT IMPLEMENTED");
-                
+                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,findEpicLinks:true);
             }
         }
 
@@ -405,30 +404,6 @@ namespace JTIS.Analysis
                 }
                 ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
 
-                // string toJQL = string.Empty;
-                // switch(_type)
-                // {
-                //     case AnalysisType.atIssues:
-                //         toJQL = BuildJQLKeyInList(searchData);
-                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-                //         break;
-                //     case AnalysisType.atIssueSummary:
-                //         toJQL = BuildJQLKeyInListArr(searchDataArr);
-                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-                //         break;
-                //     case AnalysisType.atEpics:
-                //         toJQL = BuildJQLForEpicChildren(searchData);
-                //         issues = JiraUtil.JiraRepo.GetIssues(toJQL);
-
-                //         break;
-                //     case AnalysisType.atJQL:
-                //         issues = JiraUtil.JiraRepo.GetIssues(searchData);
-                //         break;
-                //     default:
-                //         break;
-                // }
-
-
                 AnsiConsole.Status()
                     .Start($"Querying Jira", ctx=>
                     {
@@ -438,6 +413,53 @@ namespace JTIS.Analysis
                         Thread.Sleep(1000);
                         issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
                     });
+
+                if (_type==AnalysisType.atEpics && issues.Count > 0)
+                {
+
+                    var epicCount = issues.Count(x=>x.Type.StringsMatch("epic"));
+                    if (epicCount > 0)
+                    {
+                        List<string> searchEpics = new List<string>();
+                        foreach (var epic in issues.Where(x=>x.Type.StringsMatch("epic")).ToList())
+                        {
+                            searchEpics.Add(epic.Key.Value);
+                        }
+
+                        ConsoleUtil.WriteStdLine($"Finding related issues for {epicCount} Epics",StdLine.slCode ,false);
+                        AnsiConsole.Progress()                        
+                            .Columns(new ProgressColumn[]
+                            {
+                                new TaskDescriptionColumn(), 
+                                new PercentageColumn(),
+                                new ElapsedTimeColumn(), 
+                                new SpinnerColumn(), 
+
+                            })
+                            .Start(ctx => 
+                            {
+                                var task1 = ctx.AddTask($"[blue] loading related issues for {epicCount} Epic(s)[/]");
+                                task1.MaxValue = epicCount;
+                                task1.StartTask();
+                                foreach (var epicKey in searchEpics)
+                                {
+                                    // 'Epic Link'=WWT-262
+                                    var epicLinked = JiraUtil.JiraRepo.GetIssues($"'Epic Link'={epicKey}");
+                                    if (epicLinked.Count > 0)
+                                    {
+                                        foreach (var linked in epicLinked)
+                                        {
+                                            if (!issues.Exists(x=>x.Key.StringsMatch(linked.Key)))
+                                            {
+                                                issues.Add(linked);
+                                            }
+                                        }
+                                    }
+                                    task1.Increment(1);
+                                }
+                            });     
+                    }
+                }
 
                 if (issues.Count > 0)
                 {
@@ -453,14 +475,14 @@ namespace JTIS.Analysis
                         })
                         .Start(ctx => 
                         {
-                            var task1 = ctx.AddTask($"[blue] loading change logs for {issues.Count} issues [/]");
-                            task1.MaxValue = issues.Count;
+                            var task2 = ctx.AddTask($"[blue] loading change logs for {issues.Count} issues [/]");
+                            task2.MaxValue = issues.Count;
                             foreach (var issue in issues)
                             {
                                 JIssue newIssue = new JIssue(issue);
                                 newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
                                 JIssues.Add(newIssue);
-                                task1.Increment(1);
+                                task2.Increment(1);
                             }
                         });
                 }
@@ -598,7 +620,7 @@ namespace JTIS.Analysis
                 AnsiConsole.Write(new Rule($"[bold]SUMMARY FOR: {ic.IssueObj.Key}  ({ic.IssueObj.StatusName})  [/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
                 AnsiConsole.Write(new Rule($"[dim]DESC: {Markup.Escape(ic.IssueObj.Summary)}[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
-                AnsiConsole.Write(new Rule($"[dim]CURRENT STATUS:[/][bold] {Markup.Escape(ic.IssueObj.StatusName)}[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                AnsiConsole.Write(new Rule($"[dim]ISSUE TYPE:[/][bold] {ic.IssueObj.IssueType},[/] [dim]CURRENT STATUS:[/][bold] {Markup.Escape(ic.IssueObj.StatusName)}[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
                 AnsiConsole.Write(new Rule($"{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
                 // LAST SUMMARY 'RULE' LINE
