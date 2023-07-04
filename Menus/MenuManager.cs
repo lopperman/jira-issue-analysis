@@ -29,7 +29,7 @@ namespace JTIS.Menu
     {
         private static MenuEnum? exitMenu;        
         private static MenuEnum lastMenu = MenuEnum.meMain;
-        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}{0}{0}{0}{0}",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
+        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}","---"),"  ");
 //        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
