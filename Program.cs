@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Net.Mime;
+using System.Diagnostics;
 using System.Text;
 using Atlassian.Jira;
 using JTIS.Config;
@@ -12,9 +13,25 @@ namespace JTIS
 {
     class MainClass
     {
+        private static async void DevTestAsync(string cfgPath)
+        {
+            string jql = "project=wwt and updated >= -30d and issueType=story";
+
+            var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
+            var jIssues = await getCL.GetIssuesAsync(jql);
+
+            
+            ConsoleUtil.PressAnyKeyToContinue();
+
+        }
+
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
+            
+
+            
+
             JTISConfig? tst = null;
             tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - should confirm [/]");
             ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
@@ -37,14 +54,26 @@ namespace JTIS
             var tmpConfigFilePath = string.Empty;
             if (args.Length > 0)
             {
-                foreach(var arg in args)
+                for (int i = 0; i < args.Length; i++)
                 {
+                    var arg = args[i];
                     AnsiConsole.WriteLine($"processing argument: {arg}");
                     Thread.Sleep(300);
                     if (arg.StringsMatch("dev"))
                     {
                         DevQuick();
-                    }                    
+                    }        
+                    if (arg.StringsMatch("async"))
+                    {
+                        if (args.Length-1 > i)
+                        {
+                            if (args[i+1].EndsWith(".json"))
+                            {
+                                DevTestAsync(args[i+1]);
+                                ConsoleUtil.ByeByeForced();
+                            }
+                        }
+                    }
                     else if (CfgManager.CheckManualFilePath(arg)!=null)
                     {
                         tmpConfigFilePath=arg;

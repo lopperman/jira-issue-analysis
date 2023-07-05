@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
+using Spectre.Console;
 
 namespace JTIS
 {
@@ -127,6 +128,13 @@ namespace JTIS
             return GetIssueTypeStatusesAsync(projKey, issueType).GetAwaiter().GetResult().ToList();
         }
 
+        
+        public JArray GetFieldsAsJson()
+        {
+            string data = GetFieldsAsync().GetAwaiter().GetResult();
+            JArray json = JArray.Parse(data);
+            return json;
+        }
         
 
         public List<JField> GetJFields()
@@ -330,6 +338,62 @@ namespace JTIS
             return result;
 
         }
+
+        public async Task AddChangeLogsAsync(JIssue jIssue, ProgressTask progress, CancellationToken token = default(CancellationToken))
+        {
+            List<IssueChangeLog> changeLogs = new List<IssueChangeLog>();
+            // progress.StartTask();
+            changeLogs = await GetChangeLogsAsync(jIssue.Key, progress, token).ConfigureAwait(true);
+
+            if (changeLogs.Count > 0)
+            {
+                jIssue.ChangeLogs.AddRange((IEnumerable<JIssueChangeLog>)changeLogs);                
+            }
+        }
+
+        public async Task<List<IssueChangeLog>> GetChangeLogsAsync(string issueKey,ProgressTask progress,  CancellationToken token = default(CancellationToken))
+        {
+            List<IssueChangeLog> result = new List<IssueChangeLog>();
+
+            int incr = 0;
+            int total = 0;
+
+
+
+            do
+            {
+                var resourceUrl = String.Format("rest/api/3/issue/{0}/changelog?maxResults=100&startAt={1}", issueKey, incr);
+                var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+                var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
+                    .ConfigureAwait(true);
+
+                JToken changeLogs = response["values"];
+                JToken totalChangeLogs = response["total"];
+
+                if (totalChangeLogs != null)
+                {
+                    total = JsonConvert.DeserializeObject<Int32>(totalChangeLogs.ToString(), serializerSettings);
+                    // if (progress.MaxValue != total)
+                    // {
+                    //     progress.MaxValue = total;
+                    // }
+                }
+
+                if (changeLogs != null)
+                {
+                    var items = changeLogs.Select(cl => JsonConvert.DeserializeObject<IssueChangeLog>(cl.ToString(), serializerSettings));
+
+                    incr += items.Count();
+
+                    // progress.Increment(items.Count());
+
+                    result.AddRange(items);
+                }
+            }
+            while (incr < total);
+
+            return result;
+        }        
 
         public async Task<List<IssueChangeLog>> GetChangeLogsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {

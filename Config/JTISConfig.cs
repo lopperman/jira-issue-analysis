@@ -36,6 +36,7 @@ namespace JTIS.Config
             }
         }
 
+        public JArray? Fields {get;set;}
         private int _configId;
 
         [JsonProperty("cfgId")]
@@ -44,6 +45,10 @@ namespace JTIS.Config
             get
             {
                 return _configId;
+            }
+            set 
+            {
+                _configId = value;
             }
         }
         private string? _timeZoneId = null;
@@ -104,6 +109,10 @@ namespace JTIS.Config
                         }
                         if (jira != null)
                         {
+                            if (Fields == null)
+                            {
+                                Fields = _jiraRepo.GetFieldsAsJson();
+                            }
                             Initialize(defaultProject);
                             tConnected = true;
                         }

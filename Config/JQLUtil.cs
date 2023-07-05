@@ -84,7 +84,7 @@ namespace JTIS
 
                 var tbl = new Table();
                 tbl.AddColumns(
-                    new TableColumn($"[bold blue on white]jqlId[/]").Centered(), 
+                    new TableColumn($"[bold]jqlId[/]").Centered(), 
                     new TableColumn($"[bold]jqlName[/]").Width(25).Centered(), 
                     new TableColumn($"jql")).LeftAligned();
                 tbl.Border(TableBorder.Rounded);
@@ -94,7 +94,7 @@ namespace JTIS
                 {   
                     var tRow = new TableRow(
                         new Markup[]{
-                            new Markup($"[blue on white]{jql.jqlId}[/]"),
+                            new Markup($"[bold]{jql.jqlId:00}[/]"),
                             new Markup($"{jql.jqlName}"), 
                             new Markup($"[dim]{jql.jql}[/]")}
                             );

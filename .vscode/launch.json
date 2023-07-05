@@ -27,6 +27,19 @@
             "stopAtEntry": false
         },
         {
+            "name": "async",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net7.0/JiraStates.dll",
+            "args": ["async","/Users/paulbrower/JiraJTIS/Config/JiraTISCfg.json"],
+            "cwd": "${workspaceFolder}",
+            "console":"integratedTerminal",
+            "stopAtEntry": false
+        },
+
+        
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"

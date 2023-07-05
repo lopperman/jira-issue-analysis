@@ -6,51 +6,8 @@ namespace JTIS.ManagedObjects
     public delegate T ParamsFunc<out T>(params object[] args);
     public delegate void ParamsAction(params object[] args);
 
-    public class MapDelegates
-    {
-        
-    }
-    public class Pipeline2
-    {
 
-        TResult Foo<TResult>(ParamsFunc<TResult> f)
-        {
-            TResult result = f();
-            return result;
-        }        
-    }
-    public static class TestOutputThing
-    {
-        static TestOutputThing()
-        {
-            _used = new HashSet<long>();
-            _random = new Random(DateTime.Now.Millisecond);
-        }
-        private static readonly Random _random;
-        private static readonly HashSet<long> _used ;
-        public static bool TryGenerate(out long counter)
-        {
-            var iterations = 0;
-            while (iterations < 10)
-            {
-                Thread.Sleep(50 * iterations);
-                counter = _random.Next(1,20);
-                if (!_used.Contains(counter))
-                {
-                    _used.Add(counter);
-                    return true;
-                }
-                iterations ++;
-                return true;
-            }
-            counter = DateTime.Now.Ticks;
-            return false;
-        }
-        public static string Generate()
-        {
-            return $"Added {_used.Count} items; lowest: {_used.Min()}, largest: {_used.Max()}";
-        }
-    }
+
 
     public class ManagedPipeline
     {
@@ -64,6 +21,20 @@ namespace JTIS.ManagedObjects
             _taskMessages.Add(taskMsg);
             _taskActions.Add(taskAction);
             return this;
+        }
+
+        public void Complete()
+        {
+            if (tasks.Count > 0)
+            {
+                foreach (var tsk in tasks)
+                {
+                    if (tsk.IsFinished == false)
+                    {
+                        tsk.StopTask();
+                    }
+                }
+            }
         }
         public void CancelPipeline()
         {

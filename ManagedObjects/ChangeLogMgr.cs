@@ -29,7 +29,8 @@ namespace JTIS
             {
                 p.Add("Finding issues linked to Epics", PopulateEpicLinks);
             }
-            p.Add("Populating change logs",PopulateChangeLogs);
+
+//            p.Add("Populating change logs",PopulateChangeLogs);
             try 
             {
                 p.ExecutePipeline();
@@ -41,6 +42,12 @@ namespace JTIS
                 ConsoleUtil.WriteError($"An error occurred processing JQL: {searchJQL} ({errEx.Message}) ");
                 ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
                 return;
+            }
+            if (_issues.Count > 0)
+            {
+                p.Complete();
+                PopulateChangeLogs();
+
             }
             if (_jIssues.Count > 0)
             // if (!PopulateIssues()) return;
@@ -191,9 +198,39 @@ namespace JTIS
             foreach (var tIss in _issues )            
             {
                 var jIss = new JIssue(tIss);
-                jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
+//                jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
                 _jIssues.Add(jIss);
             }
+
+            
+
+             AnsiConsole.Progress()
+                .Columns(new ProgressColumn[]
+                {
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new PercentageColumn(),
+                    new RemainingTimeColumn(),
+                    new SpinnerColumn(),
+                })
+                .StartAsync(async ctx => 
+                {                       
+                    await Task.WhenAll(_jIssues.Select(async item => 
+                    {                        
+                        var task = ctx.AddTask($"downloading change logs: {item.Key}",true);                        
+                        // while(item.ChangeLogs.Count == 0)
+                        // {
+                            await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task).ConfigureAwait(true);                                                        
+                        // }                                          
+                    })).ConfigureAwait(true);
+                });
+
+            // foreach (var tIss in _issues )            
+            // {
+            //     var jIss = new JIssue(tIss);
+            //     jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
+            //     _jIssues.Add(jIss);
+            // }
             //return _jIssues.Count > 0;
         }
 
