@@ -13,9 +13,11 @@ namespace JTIS
                 return _id;
             }
         }
+
         public bool Removed {get;set;}
         public DateTime StartDt {get;set ;}
         public DateTime? EndDt {get; set;}
+        public bool CurrentlyBlocked {get;set;}
         public string IssueKey {get;private set;}
         public bool Adjusted {get;set;}
         public List<string> AdjustmentNotes = new List<string>();
@@ -30,9 +32,10 @@ namespace JTIS
             EndDt = DateTime.MinValue;
             IssueKey = string.Empty;
         }
-        public Blocker(string issKey, DateTime start, ChangeLogTypeEnum blockType, string? blockerField = null, DateTime? end = null): this()
+        public Blocker(string issKey, bool currentlyBlocked,  DateTime start, ChangeLogTypeEnum blockType, string? blockerField = null, DateTime? end = null): this()
         {
             IssueKey = issKey;
+            CurrentlyBlocked = currentlyBlocked;
             StartDt = start;
             BlockedType = blockType;
             BlockerFieldName = blockerField;

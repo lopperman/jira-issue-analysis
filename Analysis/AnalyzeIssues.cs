@@ -220,12 +220,12 @@ namespace JTIS.Analysis
                     {
                         if (cli.ToValue.ToLower()=="impediment")
                         {
-                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, cli.ChangeLogType, cli.FieldName );
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked, cli.StartDt, cli.ChangeLogType, cli.FieldName );
                             tmpStartingBlockers.Add(newBlocker);
                         }      
                         else if (cli.FromValue.ToLower()=="impediment")
                         {
-                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt,cli.ChangeLogType,cli.FieldName,cli.StartDt);
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt,cli.ChangeLogType,cli.FieldName,cli.StartDt);
                             tmpEndingBlockers.Add(newBlocker);
                         }                                          
                     }
@@ -233,15 +233,27 @@ namespace JTIS.Analysis
                     {
                         if (cli.ToValue.ToLower() == "blocked")                        
                         {
-                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
                             tmpStartingBlockers.Add(newBlocker);
                         }                        
                         if (cli.FromValue.ToLower() == "blocked")                        
                         {
-                            var newBlocker = new Blocker(cl.JIss.Key,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
                             tmpEndingBlockers.Add(newBlocker);
-                        }                        
-
+                        }                                            
+                    }
+                    else if (cli.FieldName.StringsMatch("status"))
+                    {
+                        if (cli.ToValue.StringsMatch("blocked"))
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            tmpStartingBlockers.Add(newBlocker);
+                        }
+                        if (cli.FromValue.StringsMatch("blocked"))
+                        {
+                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
+                            tmpEndingBlockers.Add(newBlocker);
+                        }
                     }
                 }
             }
@@ -596,17 +608,19 @@ namespace JTIS.Analysis
             foreach (var ic in JCalcs)
             {
                 ic.ResetTotalDaysFields();
+                var currentlyBlocked = ic.IssueObj.IsBlocked;
 
                 StateCalc? scStart = ic.StateCalcs.FirstOrDefault(x=>x.ActivityType == StatusType.stStart);
                 string formattedStartDt = string.Empty;
                 if (scStart == null)
                 {
-                    formattedStartDt = "[dim]ACTIVE WORK HAS NOT STARTED[/]";
+                    formattedStartDt = "[dim] ACTIVE WORK HAS NOT STARTED[/]";
                 }
                 else 
                 {
                     ic.FirstActiveStateCalc = scStart;
-                    formattedStartDt = string.Format("[dim]ACTIVE WORK STARTED:[/][bold] {0} [/]",scStart.StartDt.ToString("yyyy-MMM-dd HH:mm"));
+                    formattedStartDt = string.Format("[dim] ACTIVE WORK STARTED:[/][bold] {0} [/]",scStart.StartDt);
+                    //.ToString("yyyy-MMM-dd HH:mm tt")
                 }
 
                 if (writeAll == false)
@@ -617,11 +631,17 @@ namespace JTIS.Analysis
 
                 // FIRST SUMMARY 'RULE' LINE
                 AnsiConsole.Write(new Rule($"[dim]({writeCount:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
-                AnsiConsole.Write(new Rule($"[bold]SUMMARY FOR: {ic.IssueObj.Key}  ({ic.IssueObj.StatusName})  [/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                if (currentlyBlocked)
+                {
+                    AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED)[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
+                }
+                AnsiConsole.Write(new Rule($"[dim]({ic.IssueObj.IssueType.ToUpper()}) [/][bold]{ic.IssueObj.Key}[/][dim], DESC:[/] {Markup.Escape(ic.IssueObj.Summary)}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
-                AnsiConsole.Write(new Rule($"[dim]DESC: {Markup.Escape(ic.IssueObj.Summary)}[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
-                AnsiConsole.Write(new Rule($"[dim]ISSUE TYPE:[/][bold] {ic.IssueObj.IssueType},[/] [dim]CURRENT STATUS:[/][bold] {Markup.Escape(ic.IssueObj.StatusName)}[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
-                AnsiConsole.Write(new Rule($"{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                AnsiConsole.Write(new Rule($"[dim]Current Status:[/][bold] ({ic.IssueObj.StatusName.ToUpper()})[/]{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+
+
+
+                // AnsiConsole.Write(new Rule($"{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
                 // LAST SUMMARY 'RULE' LINE
                 AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});                
@@ -795,22 +815,20 @@ namespace JTIS.Analysis
                 AnsiConsole.WriteLine();
                 if (ic.Blockers.Count > 0)
                 {
-                    AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White), Justification=Justify.Center});
                     AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
                     Justification=Justify.Left});
-                    AnsiConsole.MarkupLine($"[italic darkred on white]NOTE: Current timestamp is used on actively blocked issues as 'Blocked End Dt' in order to calculate total blocked time[/]");
                     tbl = new Table();
                     tbl.AddColumns("Issue Key", "BlockStart", "BlockEnd");
                     foreach (var block in ic.Blockers)
                     {   
-                        var tEndDt = string.Empty;                        
-                        if (block.EndDt.HasValue)
+                        var tEndDt = string.Empty;      
+                        if (block.CurrentlyBlocked)                  
+                        {
+                            tEndDt = "* Currently Blocked *";
+                        }
+                        else if (block.EndDt.HasValue)
                         {
                             tEndDt = block.EndDt.Value.ToString();
-                        }
-                        else 
-                        {
-                            tEndDt = "(blocked now)";
                         }
                         tbl.AddRow(new Text[]{
                             new Text($"{block.IssueKey}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.Bold)).Centered(),

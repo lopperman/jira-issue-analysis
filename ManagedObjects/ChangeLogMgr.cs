@@ -22,30 +22,30 @@ namespace JTIS
             this._analysisType = analysisType;
             bool doExport = false;
             if (!BuildSearch()) return;
+            PopulateIssuesAction();
 
-            var p = new ManagedPipeline();
-            p.Add("Populating issues",PopulateIssuesAction);
-            if (_analysisType==AnalysisType.atEpics)
-            {
-                p.Add("Finding issues linked to Epics", PopulateEpicLinks);
-            }
-
-//            p.Add("Populating change logs",PopulateChangeLogs);
-            try 
-            {
-                p.ExecutePipeline();
-            }
-            catch(Exception errEx) 
-            {
-                p.CancelPipeline();
-                p = null;
-                ConsoleUtil.WriteError($"An error occurred processing JQL: {searchJQL} ({errEx.Message}) ");
-                ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
-                return;
-            }
+            // var p = new ManagedPipeline();
+            // p.Add("Populating issues",PopulateIssuesAction);
+            // if (_analysisType==AnalysisType.atEpics)
+            // {
+            //     p.Add("Finding issues linked to Epics", PopulateEpicLinks);
+            // }
+            // try 
+            // {
+            //     p.ExecutePipeline();
+            // }
+            // catch(Exception errEx) 
+            // {
+            //     p.CancelPipeline();
+            //     p = null;
+            //     ConsoleUtil.WriteError($"An error occurred processing JQL: {searchJQL} ({errEx.Message}) ");
+            //     ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
+            //     return;
+            // }
             if (_issues.Count > 0)
             {
-                p.Complete();
+                // p.Complete();
+                
                 PopulateChangeLogs();
 
             }
@@ -189,7 +189,7 @@ namespace JTIS
                 ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{ExportPath}[/]");
         }
 
-        private void PopulateChangeLogs()
+        public async void PopulateChangeLogs()
         {
             if (_issues.Count == 0)
             {
@@ -202,28 +202,56 @@ namespace JTIS
                 _jIssues.Add(jIss);
             }
 
-            
+            await Task.WhenAll(_jIssues.OrderBy(x=>x.Key).ToList().Select( async item => 
+            {
+                    await  JiraUtil.JiraRepo.AddChangeLogsAsync(item);
 
-             AnsiConsole.Progress()
-                .Columns(new ProgressColumn[]
-                {
-                    new TaskDescriptionColumn(),
-                    new ProgressBarColumn(),
-                    new PercentageColumn(),
-                    new RemainingTimeColumn(),
-                    new SpinnerColumn(),
-                })
-                .StartAsync(async ctx => 
-                {                       
-                    await Task.WhenAll(_jIssues.Select(async item => 
-                    {                        
-                        var task = ctx.AddTask($"downloading change logs: {item.Key}",true);                        
-                        // while(item.ChangeLogs.Count == 0)
-                        // {
-                            await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task).ConfigureAwait(true);                                                        
-                        // }                                          
-                    })).ConfigureAwait(true);
-                });
+                 //await JiraUtil.JiraRepo.AddChangeLogsAsync()
+            }));
+
+            // await Task.WhenAll(AnsiConsole.Progress()
+            // .StartAsync(async ctx => 
+            // {
+            //     await Task.WhenAll(_jIssues.Select(async item => 
+            //     {
+            //         var task = ctx.AddTask("downloading changes logs for: " + item.Key, new ProgressTaskSettings
+            //             {
+            //                 AutoStart = false
+            //             });
+                    
+            //         task.MaxValue = 2;
+
+            //         await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task);
+
+            //         // while(!ctx.IsFinished)
+            //         // {
+            //         //     await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task);
+            //         // }
+            //     }));   
+            // }));
+
+
+            //  AnsiConsole.Progress()
+            //     .Columns(new ProgressColumn[]
+            //     {
+            //         new TaskDescriptionColumn(),
+            //         new ProgressBarColumn(),
+            //         new PercentageColumn(),
+            //         new RemainingTimeColumn(),
+            //         new SpinnerColumn(),
+            //     })
+            //     .StartAsync(async ctx => 
+            //     {                       
+            //         await Task.WhenAll(_jIssues.Select(async item => 
+            //         {                        
+            //             var task = ctx.AddTask($"downloading change logs: {item.Key}",false);                        
+            //             // while(item.ChangeLogs.Count == 0)
+            //             // {
+            //                 await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task);
+            //                 // await JiraUtil.JiraRepo.AddChangeLogsAsync(item, task).ConfigureAwait(true);                                                        
+            //             // }                                          
+            //         })).ConfigureAwait(true);
+            //     });
 
             // foreach (var tIss in _issues )            
             // {

@@ -16,9 +16,13 @@ namespace JTIS
         private static async void DevTestAsync(string cfgPath)
         {
             string jql = "project=wwt and updated >= -30d and issueType=story";
-
+            var configs = CfgManager.ReadConfigFile(cfgPath);
+            CfgManager.config = configs[0];
+            JiraUtil.CreateRestClient(CfgManager.config.userName,CfgManager.config.apiToken,CfgManager.config.baseUrl);
             var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
-            var jIssues = await getCL.GetIssuesAsync(jql);
+
+
+            var results = Task<IEnumerable<JIssue>>.WhenAll((IEnumerable<Task>)await getCL.GetIssuesAsync(jql));
 
             
             ConsoleUtil.PressAnyKeyToContinue();
@@ -28,16 +32,7 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
-            
 
-            
-
-            JTISConfig? tst = null;
-            tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - should confirm [/]");
-            ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
-
-            tst = CfgManager.SelectJTISConfig($"[yellow on blue]Cany select [bold]any config[/] - no confirm [/]",confirm:false);
-            ConsoleUtil.PressAnyKeyToContinue("SELECTED " + tst.ToString());
 
             ConsoleUtil.PressAnyKeyToContinue();
             Console.ConsoleUtil.ByeByeForced();

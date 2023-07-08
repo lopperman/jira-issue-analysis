@@ -400,7 +400,7 @@ namespace JTIS.Console
                 if (Confirm("Save recorded session to file?",true))
                 {
                     var fName = SaveSessionFile();
-                    ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");                    
+                    ConsoleUtil.PressAnyKeyToContinue($"Saved to: {fName}");
                 }
             }
 
@@ -409,10 +409,10 @@ namespace JTIS.Console
             AnsiConsole.Foreground = Color.Blue3_1;
             var tbl = new Table();
             tbl.Border(TableBorder.None);
-            var llamas = $"[white on deepskyblue4_2]     :cool_button:   :llama::llama:   :cool_button:     [/]";
-            var fill2  = $"[white on deepskyblue4_2]                        [/]";
+            var llamas = $"[white on deepskyblue4_2]        :llama::llama:        [/]";
+            var fill2  = $"[white on deepskyblue4_2]                    [/]";
             var tblcol = new TableColumn("").Alignment(Justify.Left);
-            var title = $"[white on deepskyblue4_2] :smiling_face_with_sunglasses: HAVE A GREAT DAY :smiling_face_with_sunglasses: [/]";
+            var title = $"[white on deepskyblue4_2]  HAVE A GREAT DAY  [/]";
             tbl.AddColumn(tblcol).Centered();
             tbl.AddRow(fill2);
             tbl.AddRow(llamas);

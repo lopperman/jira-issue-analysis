@@ -104,6 +104,8 @@ namespace JTIS
             return await _jira.Issues.GetIssueAsync(key) as Issue;
         }
 
+        
+
         public List<IssueChangeLog> GetIssueChangeLogs(Issue issue)
         {
             return GetIssueChangeLogs(issue.Key.Value);
@@ -342,13 +344,29 @@ namespace JTIS
         public async Task AddChangeLogsAsync(JIssue jIssue, ProgressTask progress, CancellationToken token = default(CancellationToken))
         {
             List<IssueChangeLog> changeLogs = new List<IssueChangeLog>();
-            // progress.StartTask();
+            progress.Increment(1);
+            
             changeLogs = await GetChangeLogsAsync(jIssue.Key, progress, token).ConfigureAwait(true);
 
-            if (changeLogs.Count > 0)
-            {
-                jIssue.ChangeLogs.AddRange((IEnumerable<JIssueChangeLog>)changeLogs);                
-            }
+            jIssue.AddChangeLogs(changeLogs);
+            progress.Increment(1);
+            // if (changeLogs.Count > 0)
+            // {
+            //     jIssue.ChangeLogs.AddRange((IEnumerable<JIssueChangeLog>)changeLogs);                
+            // }
+        }
+        public async Task AddChangeLogsAsync(JIssue jIssue, CancellationToken token = default(CancellationToken))
+        {
+//            List<IssueChangeLog> changeLogs = new List<IssueChangeLog>();
+            
+            jIssue.AddChangeLogs(await GetChangeLogsAsync(jIssue.Key, token).ConfigureAwait(true));
+
+            // jIssue.AddChangeLogs(changeLogs);
+            // progress.Increment(1);
+            // if (changeLogs.Count > 0)
+            // {
+            //     jIssue.ChangeLogs.AddRange((IEnumerable<JIssueChangeLog>)changeLogs);                
+            // }
         }
 
         public async Task<List<IssueChangeLog>> GetChangeLogsAsync(string issueKey,ProgressTask progress,  CancellationToken token = default(CancellationToken))
@@ -465,6 +483,7 @@ namespace JTIS
             return issues;
 
         }
+
 
         public List<Issue> GetIssues(string jql, bool basicFields, params string[] additionalFields)
         {

@@ -564,7 +564,8 @@ ResetLocalIssueStatusCfg();
             }
             catch (Exception e)
             {
-                ConsoleUtil.WriteError(e.Message,false,e,false);
+                ConsoleUtil.WriteError("Unable to connect with the information provided",false,e,false);
+                result = null;
             }
             ConsoleUtil.PressAnyKeyToContinue();
             return result;

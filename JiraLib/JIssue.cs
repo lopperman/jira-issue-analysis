@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Atlassian.Jira;
+using JTIS.Extensions;
 using Newtonsoft.Json;
+using Spectre.Console;
 
 namespace JTIS
 {
@@ -509,6 +511,38 @@ namespace JTIS
             {
                 _subTasks = value;
             }
+        }
+
+        public bool IsBlocked {
+            get{
+                var blocked = false;
+                if (_issue.Priority != null && _issue.Priority.Name.StringsMatch("block",StringCompareType.scContains))
+                {
+                    blocked = true;
+                }
+                else if (_issue.Status != null && _issue.Status.Name.StringsMatch("block",StringCompareType.scContains))
+                {
+                    blocked = true;
+                }
+                else 
+                {
+                    var flaggedField = _issue.CustomFields.Where(x=>x.Name.StringsMatch("flagged")).FirstOrDefault();
+                    if (flaggedField != null && flaggedField.Values != null)
+                    {
+                        var flagVals = flaggedField.Values.ToList();
+                        if (flagVals.Any(x=>x.StringsMatch("impediment")))
+                        {
+                            blocked = true ;
+                        }
+                        else if (flagVals.Any(x=>x.StringsMatch("block",StringCompareType.scContains)))
+                        {
+                            blocked = true;
+                        }
+                    }
+                }
+                return blocked;
+            }
+
         }
 
         public List<T>? GetCustomFieldValues<T>(string customFieldName)

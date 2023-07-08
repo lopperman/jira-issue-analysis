@@ -388,16 +388,13 @@ namespace JTIS.Config
             }
 
             ConsoleUtil.WriteAppTitle();
-            AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Spectre.Console.Rule());
-            AnsiConsole.MarkupLine($"\t[bold] CHOOSE JIRA CONFIG PROFILE TO DELETE[/]");
 
             // var sp  = new SelectionPrompt<JTISConfig>();
             // sp.AddChoices<JTISConfig>(CfgManager.cfgList);
             // sp.Title("SELECT ITEM TO DELETE");
             // delCfg = AnsiConsole.Prompt<JTISConfig>(sp);
 
-            delCfg = SelectJTISConfig("Select Jira Config to [bold]DELETE[/]. [dim](You'll be asked to confirm before deleting[/])",canSelectCurrent:false);
+            delCfg = SelectJTISConfig("[bold]Select Jira Config to [underline]DELETE[/][/]. [dim](You'll be asked to confirm before deleting[/])",canSelectCurrent:false);
             if (delCfg == null)
             {
                 return;
@@ -664,13 +661,17 @@ namespace JTIS.Config
                 ConsoleUtil.PressAnyKeyToContinue("THIS FUNCTION DOES NOT ALLOW YOU TO SELECT YOUR CURRENT CONFIG");
                 return null;
             }
-
+            if (markupTitle.StringsMatch(Markup.Remove(markupTitle)))
+            {
+                markupTitle = $"[bold]{markupTitle}[/]";
+            }
             AnsiConsole.Write(new Spectre.Console.Rule());
             AnsiConsole.MarkupLine($"\t{markupTitle}");
+            AnsiConsole.Write(new Spectre.Console.Rule());
 
             var sp  = new SelectionPrompt<JTISConfig>();
             sp.AddChoices<JTISConfig>(list);
-            sp.Title("SELECT CONFIG ITEM");
+            //sp.Title("SELECT CONFIG ITEM");
             selectedCfg = AnsiConsole.Prompt<JTISConfig>(sp);
 
             if (canSelectCurrent == false && config.Key == selectedCfg.Key)

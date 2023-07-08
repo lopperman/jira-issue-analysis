@@ -1,19 +1,24 @@
-using System.Diagnostics;
-using System.Reflection.Emit;
-using System.Resources;
-using System.Net.Http.Headers;
-using System.IO.Pipes;
-
-
-
-
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.ManagedObjects;
 using JTIS.Analysis;
-using Newtonsoft.Json.Linq;
+using Atlassian.Jira;
+using JTIS.Extensions;
 using JTIS.Data;
+
+namespace JTIS{
+    public static class Info
+    {
+        public static bool IsDev
+        {
+            get{
+                return Environment.UserName.StringsMatch("paulbrower");
+            }
+        }
+
+    }
+}
 
 namespace JTIS.Menu
 {
@@ -269,15 +274,158 @@ namespace JTIS.Menu
 
         private static void Dev2()
         {
+            //var rslt = await Task.WhenAll(jira.Issues.GetChangeLogsAsync(issueKey,token));
+            var xxx = JiraUtil.JiraRepo.GetJira().Issues.GetChangeLogsAsync("WWT-311").GetAwaiter().GetResult();
 
-            string jql = "project=wwt and updated >= -30d and issueType=story";
+            return;
 
-            var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
-            DateTime startDt = DateTime.Now;
-            var jIssues = getCL.GetIssuesAsync(jql).GetAwaiter().GetResult();
-            DateTime endDt = DateTime.Now;
+            var iss = jtisIssues.Create(JiraUtil.JiraRepo);
+            var queries = new List<string>();
+            queries.Add("key in (WWT-310, WWT-302, WWT-297, WWT-296, WWT-295, WWT-294, WWT-293, WWT-292, WWT-291, WWT-311)");
+            // queries.Add("project=WWT and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
+            var jIssues = iss.GetIssues(queries);
+            foreach (var j in jIssues)
+            {
+                AnsiConsole.WriteLine($"{j.Key}, Change Logs: {j.ChangeLogs.Count}");
+            }
+
+            ConsoleUtil.PressAnyKeyToContinue($"JIssues: {jIssues.Count()}");
+
+            // var issAsync =jtisIssues.Create(JiraUtil.JiraRepo);
             
-            ConsoleUtil.PressAnyKeyToContinue(Convert.ToString(endDt.Subtract(startDt).TotalMilliseconds/1000) + " seconds");
+            // //"project=WWT and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))"
+            // var results = Task<IEnumerable<JIssue>>.WhenAll( issAsync.GetIssues2("project=WWT and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))"));
+
+
+            // AnsiConsole.WriteLine($"returned {results.Result.Count()} issues");
+            // ConsoleUtil.PressAnyKeyToContinue();
+        }
+
+        private static void Dev24()
+        {
+            var _issues = new List<Issue>();
+            var _jIssues = new List<JIssue>();
+
+            var tst = AsyncTesting.Create();
+            var tsk = tst.FindIssuesAsync();
+            List<Task> tasks  = new List<Task>();
+            tasks.Add(tsk);
+            
+
+            AnsiConsole.Progress()
+                .Columns(new ProgressColumn[]
+                {
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new PercentageColumn(),
+                    new RemainingTimeColumn(),
+                    new SpinnerColumn(),
+                })
+                .StartAsync(async ctx =>
+                {
+                    await Task.WhenAll(tasks.Select(async item =>
+                    {
+                        var task = ctx.AddTask("a task name", new ProgressTaskSettings
+                        {
+                            AutoStart = true
+                        });
+                        await item;
+                        // await Download(client, task, item.url);
+                    }));
+                });
+
+            ConsoleUtil.PressAnyKeyToContinue($"results {tsk.Result.Count()}");
+
+        }
+
+        private static void Dev22()
+        {
+            // Task tsk = Dev22();
+            // Task.WhenAll(tsk);
+            
+
+            // ConsoleUtil.PressAnyKeyToContinue();
+
+        }
+        private static void Dev23()
+        {
+
+            var startVal = DateTime.Now;
+            
+            var tst = AsyncTesting.Create();
+            // var issuesTask = tst.test1();
+            // await Task.WhenAll(issuesTask);
+            // var issues = issuesTask.Result;
+
+            AnsiConsole.Write(new Rule("ASYNC GET ISSUES"));
+            var issues = tst.FindIssuesAsync().Result;
+            var endVal = DateTime.Now;
+            var ts = endVal.Subtract(startVal);
+            var PERFIssues = $"Issues ({issues.Count()}) Elapsed seconds: {ts.TotalMilliseconds/1000}";
+
+            AnsiConsole.Write(new Rule("ASYNC GET CHANGE LOGS"));
+            startVal = DateTime.Now;
+            var clogs = tst.getChangeLogs(issues).Result;            
+            endVal = DateTime.Now;
+            ts = endVal.Subtract(startVal);
+            var clPerf = $"Elapsed seconds: {ts.TotalMilliseconds/1000}";
+
+            var clCount = 0;
+
+            foreach (var cl in clogs)
+            {
+                clCount += cl.Items.Count();
+                AnsiConsole.WriteLine($"change log id: {cl.Id}, count: {cl.Items.Count()}");
+            }
+            AnsiConsole.WriteLine(PERFIssues);
+            AnsiConsole.WriteLine($"Change Log count: ({clCount}), Elapsed seconds: {ts.TotalMilliseconds/1000}");
+
+            // AnsiConsole.Clear();
+            // ConsoleUtil.WriteAppTitle();
+
+            ConsoleUtil.PressAnyKeyToContinue($"returned {issues.Count()} issues, with {clCount} change logs");
+            
+
+            // string jql = "project=wwt and updated >= -30d and issueType=story";
+
+            // var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
+            // DateTime startDt = DateTime.Now;
+            // var jIssues = getCL.GetIssuesAsync(jql).GetAwaiter().GetResult();
+            // DateTime endDt = DateTime.Now;
+            
+            // ConsoleUtil.PressAnyKeyToContinue(Convert.ToString(endDt.Subtract(startDt).TotalMilliseconds/1000) + " seconds");            
+            // string jql = "project=wwt and updated >= -30d and issueType=story";
+            // var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
+
+            // foreach (var ji in Dev3(getCL,jql).GetAwaiter().GetResult())
+            // {
+            //     AnsiConsole.MarkupLine($"[bold]Issue: {ji.Key}[/], ChangeLog count: {ji.ChangeLogs.Count}");
+            // }
+            
+
+            // string jql = "project=wwt and updated >= -30d and issueType=story";
+            // var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
+            // // var jIssues = getCL.GetIssuesAsync(jql).GetAwaiter().GetResult();
+            // List<JIssue> testList = new List<JIssue>();
+            // await Task.WhenAll(
+            //     async item => 
+            // {
+            //     var rslt = await getCL.GetIssuesAsync(jql)
+                
+            //     // await getCL.GetIssuesAsync(jql);
+            // });
+
+            // var someTing = await getCL.GetIssuesAsync(jql);
+            // foreach (var ji in someTing)
+            // {
+            //     AnsiConsole.MarkupLine($"[bold]Issue: {ji.Key}[/], ChangeLog count: {ji.ChangeLogs.Count}");
+            // }
+
+
+
+
+            
+            ConsoleUtil.PressAnyKeyToContinue();
 
             
 
@@ -320,11 +468,13 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
-            var projList = JiraUtil.ValidProjectKeys(CfgManager.config.userName,CfgManager.config.apiToken, CfgManager.config.baseUrl);
-            foreach (var proj in projList.OrderBy(x=>x))
-            {
-                AnsiConsole.WriteLine(proj);
-            }
+
+            var tst = jtisIssueData.Create(JiraUtil.JiraRepo);
+            tst.Test();
+
+            // var ti = jtisIssueData.Create(JiraUtil.JiraRepo);
+            // foreach (var iss in ti.Test.)
+
 
 
             // var tt = JiraUtil.JiraRepo.GetJQLAutoCompleteDataAsync().GetAwaiter().GetResult();
@@ -440,7 +590,17 @@ namespace JTIS.Menu
                 var sp = new SelectionPrompt<MenuFunction>();
                 
                 sp.PageSize = 16;
+
                 sp.AddChoices(menuItems);
+                if (JTIS.Info.IsDev)
+                {
+                    sp.AddChoiceGroup(
+                        menuSeparator, 
+                        MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"), 
+                        MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2")
+                     );
+                }
+
                 if (menu == MenuEnum.meMain)
                 {
                     sp.AddChoiceGroup(
@@ -542,8 +702,6 @@ namespace JTIS.Menu
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
-                    // ret.Add(MakeMenuDetail(MenuItemEnum.miDev1,"DEV TEST 1"));
-                    // ret.Add(MakeMenuDetail(MenuItemEnum.miDev2,"DEV TEST 2"));
                 break;
 
 //  ISSUE VISUALIZAITON //
@@ -574,8 +732,6 @@ namespace JTIS.Menu
 
                     ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
 
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev1, "DEV 1"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miDev2, "DEV 2"));
                 break;
 
 //  ISSUE STATES MENU //

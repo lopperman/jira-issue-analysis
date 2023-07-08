@@ -66,9 +66,9 @@ namespace JTIS
         {
             return await  repo.GetChangeLogsAsync(issue.Key.Value);
         }
-        internal async Task<IEnumerable<Issue>> GetInitialIssues(string jql)
+        internal async Task<IEnumerable<Issue>> GetInitialIssues(string jql,  CancellationToken token = default(CancellationToken))
         {
-            var issues = await this.repo.jira.Issues.GetIssuesFromJqlAsync(jql);
+            var issues = await this.repo.jira.Issues.GetIssuesFromJqlAsync(jql,token:token);
             return issues;            
         }        
 
