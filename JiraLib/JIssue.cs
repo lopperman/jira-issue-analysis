@@ -11,14 +11,11 @@ namespace JTIS
     public class JIssue:IComparable, IComparer<JIssue>
     {
         private Issue? _issue ;
-
         private List<string> _components = new List<string>();
         private List<JCustomField> _customFields = new List<JCustomField>();
         private List<string> _labels = new List<string>();
-        private List<JIssue> _subTasks = new List<JIssue>();
+        // private List<JIssue> _subTasks = new List<JIssue>();
         private List<JIssueChangeLog> _changeLogs = new List<JIssueChangeLog>();
-        private List<string> preDevStatuses = new List<string>();
-        private List<string> preQAStatuses = new List<string>();
 
         //TODO:  what to do about initializing subTasks and changeLogs
 
@@ -64,29 +61,29 @@ namespace JTIS
 
         private void Initialize()
         {
-            preDevStatuses.Add("backlog");
-            preDevStatuses.Add("ready for development");
-            preDevStatuses.Add("ready for story writing");
-            preDevStatuses.Add("resolving dependencies");
-            preDevStatuses.Add("in design");
-            preDevStatuses.Add("ready for design");
+            // preDevStatuses.Add("backlog");
+            // preDevStatuses.Add("ready for development");
+            // preDevStatuses.Add("ready for story writing");
+            // preDevStatuses.Add("resolving dependencies");
+            // preDevStatuses.Add("in design");
+            // preDevStatuses.Add("ready for design");
 
-            preQAStatuses.AddRange(preDevStatuses);
-            preQAStatuses.Add("ready for code review");
-            preQAStatuses.Add("verifying");
-            preQAStatuses.Add("code review");
-            preQAStatuses.Add("ready for qa");
+            // preQAStatuses.AddRange(preDevStatuses);
+            // preQAStatuses.Add("ready for code review");
+            // preQAStatuses.Add("verifying");
+            // preQAStatuses.Add("code review");
+            // preQAStatuses.Add("ready for qa");
 
             if (_issue == null) return;
 
-            var subTasks = JiraUtil.JiraRepo.GetSubTasksAsList(_issue);
-            if (subTasks != null && subTasks.Count > 0)
-            {
-                foreach (var st in subTasks)
-                {
-                    AddSubTask(st);
-                }
-            }
+            // var subTasks = JiraUtil.JiraRepo.GetSubTasksAsList(_issue);
+            // if (subTasks != null && subTasks.Count > 0)
+            // {
+            //     foreach (var st in subTasks)
+            //     {
+            //         AddSubTask(st);
+            //     }
+            // }
 
 
             Key = _issue.Key.Value;
@@ -127,28 +124,28 @@ namespace JTIS
 
         }
 
-        [JsonIgnore]
-        public string FeatureTeamChoices
-        {
-            get
-            {
-                string ret = string.Empty;
+        // [JsonIgnore]
+        // public string FeatureTeamChoices
+        // {
+        //     get
+        //     {
+        //         string ret = string.Empty;
 
-                if (!string.IsNullOrWhiteSpace(JiraUtil.JiraRepo.FeatureTeamChoicesFieldName))
-                {
-                    var ftcField = _customFields.Where(x => x.Id == JiraUtil.JiraRepo.FeatureTeamChoicesFieldName).SingleOrDefault();
-                    if (ftcField != null)
-                    {
-                        if (ftcField.Values.Length > 0)
-                        {
-                            return String.Join("; ", ftcField.Values);
-                            //return ftcField.Values[0];
-                        }
-                    }
-                }
-                return ret;
-            }
-        }
+        //         if (!string.IsNullOrWhiteSpace(JiraUtil.JiraRepo.FeatureTeamChoicesFieldName))
+        //         {
+        //             var ftcField = _customFields.Where(x => x.Id == JiraUtil.JiraRepo.FeatureTeamChoicesFieldName).SingleOrDefault();
+        //             if (ftcField != null)
+        //             {
+        //                 if (ftcField.Values.Length > 0)
+        //                 {
+        //                     return String.Join("; ", ftcField.Values);
+        //                     //return ftcField.Values[0];
+        //                 }
+        //             }
+        //         }
+        //         return ret;
+        //     }
+        // }
 
 
         public string EpicLinkKey
@@ -186,231 +183,14 @@ namespace JTIS
 
             }
         }
-        public List<string> GetStateChanges()
-        {
-            var ret = new List<string>();
-
-            foreach (JIssueChangeLog cl in _changeLogs)
-            {
-                foreach (JIssueChangeLogItem cli in cl.Items)
-                {
-                    if (cli.FieldName == "status")
-                    {
-                        ret.Add(string.Format("{0}\tStatus from: {1} to: {2}", cl.CreatedDate.ToShortDateString(), cli.FromValue, cli.ToValue));
-                    }
-                }
-            }
-                   
-
-
-            return ret;
-        }
-
-        public int InDevBackwardsCount
-        {
-            get
-            {
-                return ChangeLogs.Where(x => x.Items.Exists(y => y.FieldName == "status" && y.FromValue == "In Development"  && preDevStatuses.Contains(y.ToValue.ToLower()))).Count();
-            }
-        }
-
-        public int InQABackwardsCount
-        {
-            get
-            {
-                return ChangeLogs.Where(x => x.Items.Exists(y => y.FieldName == "status" && y.FromValue == "In QA" && preQAStatuses.Contains(y.ToValue.ToLower()))).Count();
-            }
-        }
-
-        public int AfterQAMovedBackwardsCount
-        {
-            get
-            {
-                return ChangeLogs.Where(x => x.Items.Exists(y => y.FieldName == "status" && y.FromValue != "In QA" && !preQAStatuses.Contains(y.FromValue) && (preQAStatuses.Contains(y.ToValue) || y.ToValue == "In QA"))).Count();
-            }
-        }
-
-        public List<string> FailedQASummary
-        {
-            get
-            {
-                var ret = new List<string>();
 
 
 
-                List<JIssueChangeLog> cLogs = ChangeLogs.Where(x => x.Items.Exists(y => y.FieldName == "labels" && y.ToValue.ToLower().Contains("fail"))).ToList();
-                var QAFailCLogs = ChangeLogs.Where(x => x.Items.Exists(y => y.ToValue == "QA Failed")).ToList();
-                if (QAFailCLogs.Count() > 0)
-                {
-                    cLogs.AddRange(QAFailCLogs);
-                }
 
 
-                if (cLogs.Count() > 0 || InQABackwardsCount > 0)
-                {
-                   //key,type,summary,failedQADate,determinedBy,comments
-                    foreach (var cl in cLogs)
-                    {
-                        foreach (var cli in cl.Items.Where(x=>x.ToValue == "QA Failed"))
-                        {
-                            ret.Add(string.Format("{0},{1},{2},{3},{4},StatusChange,Moved to QA Failed", Key, IssueType, Summary, EpicLinkKey, cl.CreatedDate.ToShortDateString()));
-                        }
-                        foreach (var cli in cl.Items.Where(x => x.FieldName == "labels" && x.ToValue.ToLower().Contains("fail")).ToList())
-                        {
-                            ret.Add(string.Format("{0},{1},{2},{3},{4},QAFailedLabel,'{5}' Label Added", Key, IssueType, Summary, EpicLinkKey, cl.CreatedDate.ToShortDateString(),cli.ToValue));
-                        }
-                    }
-
-                }
-
-                return ret;
-            }
-        }
-
-        /// <summary>
-        /// Calculate Business days between first In Dev to First Done or Ready for Demo
-        /// </summary>
-        public string CycleTimeSummary
-        {
-            get
-            {
-                string ret = string.Empty;
-
-                List<DateTime> toInDev = new List<DateTime>();
-                List<DateTime> toDemo = new List<DateTime>();
-                List<DateTime> toDone = new List<DateTime>();
-
-                foreach (var cl in ChangeLogs)
-                {
-                    foreach (var cli in cl.Items)
-                    {
-                        if (cli.FieldName == "status" && cli.ToValue == "In Development")
-                        {
-                            toInDev.Add(cl.CreatedDate);
-                            break;
-                        }
-                        else if (cli.FieldName == "status" && (cli.ToValue == "done" || cli.ToValue == "Done"))
-                        {
-                            toDone.Add(cl.CreatedDate);
-                            break;
-                        }
-                        else if (cli.FieldName == "status" && (cli.ToValue == "Ready for Demo"))
-                        {
-                            toDemo.Add(cl.CreatedDate);
-                            break;
-                        }
-
-                    }
-                }
-
-                toInDev.Sort();
-                toDone.Sort();
-                toDemo.Sort();
-
-                var devDoneDate = GetDevDoneDate(toDemo, toDone);
-
-                if (!devDoneDate.HasValue)
-                {
-                    return "N/A";
-                }
-
-                if (devDoneDate.Value < new DateTime(2020,06,1))
-                {
-                    return "n/a";
-                }
-                if (toInDev.Count() == 0)
-                {
-                    return "n/a";
-                }
-
-                if (toInDev[0].Date < new DateTime(2020,6,1))
-                {
-                    return "n/a";
-                }
-
-                if (toInDev.Count == 1)
-                {
-
-                    DateTime dev = toInDev[0].Date;
-
-                    double days = JHelper.BusinessDaysUntil(dev,devDoneDate.Value.Date);
-                    ret = string.Format("{0},{1},{2},{3},Checked,{4},days,{5},{6},{7}", Key, IssueType, Summary, EpicLinkKey, days, dev.ToShortDateString(), devDoneDate.Value.ToShortDateString(), toInDev.Count);
-
-                }
-                else if (toInDev.Count > 1)
-                {
-                    DateTime dev = toInDev[0];
-
-                    double days = JHelper.BusinessDaysUntil(dev, devDoneDate.Value.Date);
-                    ret = string.Format("{0},{1},{2},{3},NotSure,{4},days,{5},{6},{7}", Key, IssueType,Summary,EpicLinkKey, days, dev.ToShortDateString(), devDoneDate.Value.ToShortDateString(),toInDev.Count);
-                }
 
 
-                return ret;
-            }
-        }
 
-        public DateTime? GetDevDoneDate()
-        {
-            string ret = string.Empty;
-
-            List<DateTime> toDemo = new List<DateTime>();
-            List<DateTime> toDone = new List<DateTime>();
-
-            foreach (var cl in ChangeLogs)
-            {
-                foreach (var cli in cl.Items)
-                {
-                    if (cli.FieldName == "status" && (cli.ToValue == "done" || cli.ToValue == "Done"))
-                    {
-                        toDone.Add(cl.CreatedDate);
-                        break;
-                    }
-                    else if (cli.FieldName == "status" && (cli.ToValue == "Ready for Demo"))
-                    {
-                        toDemo.Add(cl.CreatedDate);
-                        break;
-                    }
-                }
-            }
-
-            toDone.Sort();
-            toDemo.Sort();
-
-            return GetDevDoneDate(toDemo, toDone);
-
-            
-        }
-
-        public DateTime? GetDevDoneDate(List<DateTime> readyDemoDates, List<DateTime> doneDates)
-        {
-            DateTime? ret = null;
-
-            DateTime? latestDemoDate = readyDemoDates.OrderBy(x => x.Date).LastOrDefault();
-            DateTime? latestDoneDate = doneDates.OrderBy(x => x.Date).LastOrDefault();
-
-            if (latestDemoDate.HasValue && latestDemoDate.Value != DateTime.MinValue)
-            {
-                ret = latestDemoDate.Value;
-            }
-            else if (latestDoneDate.HasValue && latestDoneDate.Value != DateTime.MinValue)
-            {
-                ret = latestDoneDate.Value;
-            }
-
-            return ret;
-        }
-
-
-        public void AddSubTask(JIssue issue)
-        {
-            SubTasks.Add(issue);
-        }
-
-        public void AddSubTask(Issue issue)
-        {
-            SubTasks.Add(new JIssue(issue));
-        }
 
         public void AddChangeLogs(IEnumerable<IssueChangeLog> logs)
         {
@@ -439,79 +219,79 @@ namespace JTIS
 
         }
 
-        public List<JCustomField> CustomFields
-        {
-            get
-            {
-                return _customFields;
-            }
-            set
-            {
-                _customFields = value;
-            }
-        }
+        // public List<JCustomField> CustomFields
+        // {
+        //     get
+        //     {
+        //         return _customFields;
+        //     }
+        //     set
+        //     {
+        //         _customFields = value;
+        //     }
+        // }
 
-        public List<string> Components
-        {
-            get
-            {
-                if (_components == null)
-                {
-                    _components = new List<string>();
-                }
-                return _components;
-            }
-            set
-            {
-                _components = value;
-            }
+        // public List<string> Components
+        // {
+        //     get
+        //     {
+        //         if (_components == null)
+        //         {
+        //             _components = new List<string>();
+        //         }
+        //         return _components;
+        //     }
+        //     set
+        //     {
+        //         _components = value;
+        //     }
 
-        }
+        // }
 
-        public string LabelsToString
-        {
-            get
-            {
-                string ret = "";
+        // public string LabelsToString
+        // {
+        //     get
+        //     {
+        //         string ret = "";
 
-                if (Labels != null && Labels.Count > 0)
-                {
-                    ret = string.Join("|", Labels);
-                }
+        //         if (Labels != null && Labels.Count > 0)
+        //         {
+        //             ret = string.Join("|", Labels);
+        //         }
 
-                return ret;
-            }
-        }
+        //         return ret;
+        //     }
+        // }
 
-        public List<string> Labels
-        {
-            get
-            {
-                if (_labels == null)
-                {
-                    _labels = new List<string>();
-                }
-                return _labels;
-            }
-            set
-            {
-                _labels = value;
-            }
+        // public List<string> Labels
+        // {
+        //     get
+        //     {
+        //         if (_labels == null)
+        //         {
+        //             _labels = new List<string>();
+        //         }
+        //         return _labels;
+        //     }
+        //     set
+        //     {
+        //         _labels = value;
+        //     }
 
-        }
+        // }
 
-        public List<JIssue> SubTasks
-        {
-            get
-            {
-                if (_subTasks == null) _subTasks = new List<JIssue>();
-                return _subTasks;
-            }
-            set
-            {
-                _subTasks = value;
-            }
-        }
+        // public List<JIssue> SubTasks
+        // {
+        //     get
+        //     {
+        //         if (_subTasks == null) _subTasks = new List<JIssue>();
+        //         return _subTasks;
+        //     }
+        //     set
+        //     {
+        //         _subTasks = value;
+        //     }
+        // }
 
         public bool IsBlocked {
             get{

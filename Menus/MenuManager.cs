@@ -279,17 +279,17 @@ namespace JTIS.Menu
 
             return;
 
-            var iss = jtisIssues.Create(JiraUtil.JiraRepo);
-            var queries = new List<string>();
-            queries.Add("key in (WWT-310, WWT-302, WWT-297, WWT-296, WWT-295, WWT-294, WWT-293, WWT-292, WWT-291, WWT-311)");
-            // queries.Add("project=WWT and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
-            var jIssues = iss.GetIssues(queries);
-            foreach (var j in jIssues)
-            {
-                AnsiConsole.WriteLine($"{j.Key}, Change Logs: {j.ChangeLogs.Count}");
-            }
+            // var iss = jtisIssues.Create(JiraUtil.JiraRepo);
+            // var queries = new List<string>();
+            // queries.Add("key in (WWT-310, WWT-302, WWT-297, WWT-296, WWT-295, WWT-294, WWT-293, WWT-292, WWT-291, WWT-311)");
+            // // queries.Add("project=WWT and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
+            // var jIssues = iss.GetIssues(queries);
+            // foreach (var j in jIssues)
+            // {
+            //     AnsiConsole.WriteLine($"{j.Key}, Change Logs: {j.ChangeLogs.Count}");
+            // }
 
-            ConsoleUtil.PressAnyKeyToContinue($"JIssues: {jIssues.Count()}");
+            // ConsoleUtil.PressAnyKeyToContinue($"JIssues: {jIssues.Count()}");
 
             // var issAsync =jtisIssues.Create(JiraUtil.JiraRepo);
             
