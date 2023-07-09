@@ -114,15 +114,23 @@ namespace JTIS
             var jql = ConsoleUtil.GetInput<string>($"Enter JQL Statement, or delimited (space or comma) list of issues{Environment.NewLine}",allowEmpty:true);
             if (!string.IsNullOrEmpty(jql))
             {
-                string sName = ConsoleUtil.GetInput<string>("Enter short name to describe the entry (leave blank to cancel)",allowEmpty:true);
-                if (!string.IsNullOrWhiteSpace(sName))
+                if (JQLUtil.ValidJQL(jql))
                 {
-                    CfgManager.config.AddJQL(sName,jql);
-                    CfgManager.SaveConfigList();
+                    string sName = ConsoleUtil.GetInput<string>("Enter short name to describe the entry (leave blank to cancel)",allowEmpty:true);
+                    if (!string.IsNullOrWhiteSpace(sName))
+                    {
+                        CfgManager.config.AddJQL(sName,jql);
+                        CfgManager.SaveConfigList();
+                    }
                 }
+
             }
 
         }
 
+        public static bool ValidJQL(string jql)
+        {
+            return JiraUtil.JiraRepo.GetJQLResultsCount(jql, ignoreError:true) >= 0;
+        }
     }
 }

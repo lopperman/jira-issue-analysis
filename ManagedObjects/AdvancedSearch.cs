@@ -47,7 +47,7 @@ namespace JTIS.ManagedObjects
                 tsk1.Increment(1);
 
                 var repo = JiraUtil.JiraRepo;
-                IEnumerable<CustomField> fields = repo.GetJira().Fields.GetCustomFieldsAsync().GetAwaiter().GetResult();
+                IEnumerable<CustomField> fields = repo.jira.Fields.GetCustomFieldsAsync().GetAwaiter().GetResult();
 
                 tsk1.Increment(1);
                 tsk1.StopTask();

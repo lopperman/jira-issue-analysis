@@ -32,6 +32,11 @@ namespace JTIS
                     {
                         data = IssueKeysToJQL(data);
                     }
+                    if (JQLUtil.ValidJQL(data)==false)
+                    {
+                        ConsoleUtil.WriteError($"The JQL you entered is not valid ({data})",pause:true);
+                        return string.Empty;
+                    }
                     ConsoleUtil.WriteStdLine($"[dim] * JQL QUERY * [/]{Environment.NewLine}\t{data}",StdLine.slInfo);
                     if (ConsoleUtil.Confirm($"Would you like to save this [bold]JQL Query[/] to use in the future?",false,true))
                     {

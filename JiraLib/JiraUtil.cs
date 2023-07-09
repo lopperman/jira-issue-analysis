@@ -22,11 +22,11 @@ namespace JTIS
             try 
             {
                 JiraRepo tempJiraRepo = new JiraRepo(loginURL, loginName, loginAPIToken);
-                if (tempJiraRepo.GetJira() == null) 
+                if (tempJiraRepo.jira == null) 
                 {
                     return keys;
                 }
-                var projects = tempJiraRepo.GetJira().Projects.GetProjectsAsync().GetAwaiter().GetResult();
+                var projects = tempJiraRepo.jira.Projects.GetProjectsAsync().GetAwaiter().GetResult();
                 foreach (var proj in projects)
                 {
                     keys.Add(proj.Key);

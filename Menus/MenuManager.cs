@@ -283,7 +283,9 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
+            AnsiConsole.WriteLine($"JQL Results Count for (project=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("project=wwt and type=story")}");
 
+            AnsiConsole.WriteLine($"(Should Error) JQL Results Count for (proj=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("proj='wwt and type=story")}");
 
             ConsoleUtil.PressAnyKeyToContinue("DEV1 COMPLETED");
         }

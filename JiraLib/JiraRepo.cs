@@ -12,44 +12,27 @@ namespace JTIS
 {
 
 
-    public class JiraRepo: IJiraRepo
+    public class JiraRepo
     {
         private Jira _jira;
 
         private List<JField> _fieldList = new List<JField>();
         private string _epicLinkFieldKey = string.Empty;
-        private string _featureTeamChoicesFieldKey = string.Empty;
         public JiraRepo(string server, string userName, string password)
         {
-
             JiraRestClientSettings settings = new JiraRestClientSettings();
             // settings.JsonSerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Unspecified;
             // settings.JsonSerializerSettings.DateParseHandling = DateParseHandling.DateTime ;
             // settings.JsonSerializerSettings
-            settings.EnableUserPrivacyMode = true;
-            
+            settings.EnableUserPrivacyMode = true;            
             _jira = Atlassian.Jira.Jira.CreateRestClient(server, userName, password,settings);
-
-            
-
-
             _jira.Issues.MaxIssuesPerRequest = 500;
-
             _fieldList = GetJFields();
-
             JField jField = _fieldList.Where(x => x.Name == "Epic Link").FirstOrDefault();
-
             if (jField != null)
             {
                 _epicLinkFieldKey = jField.Key;
             }
-
-            jField = _fieldList.Where(x => x.Name == "Feature Team Choices").FirstOrDefault();
-            if (jField != null)
-            {
-                _featureTeamChoicesFieldKey = jField.Key;
-            }
-
         }
 
         public string EpicLinkFieldName
@@ -59,26 +42,12 @@ namespace JTIS
                 return _epicLinkFieldKey;
             }
         }
-
-        public string FeatureTeamChoicesFieldName
-        {
-            get
-            {
-                return _featureTeamChoicesFieldKey;
-            }
-        }
-
         public Jira jira 
         {
             get{
                 return _jira;
             }
         }
-        public Jira GetJira()
-        {
-            return _jira;
-        }
-
         public ServerInfo ServerInfo
         {
             get
@@ -93,52 +62,20 @@ namespace JTIS
             return _jira.Projects.GetProjectAsync(key).GetAwaiter().GetResult();
         }
 
-        public async Task<Project> GetProjectAsync(string key)
-        {
-            return await _jira.Projects.GetProjectAsync(key);
-        }
-
-
         public async Task<Issue> GetIssueAsync(string key)
         {
             return await _jira.Issues.GetIssueAsync(key) as Issue;
         }
-
-        
-
-        public List<IssueChangeLog> GetIssueChangeLogs(Issue issue)
-        {
-            return GetIssueChangeLogs(issue.Key.Value);
-        }
-
-        public List<IssueChangeLog> GetIssueChangeLogs(string issueKey)
-        {
-            return GetChangeLogsAsync(issueKey).Result;
-        }
-
         public List<JiraFilter> GetJiraFiltersFavorites()
         {
             return _jira.Filters.GetFavouritesAsync().GetAwaiter().GetResult().ToList();
         }
-
-        //TODO:  implement /rest/api/2/issue/{issueIdOrKey}/transitions
-
-
-        public List<IssueStatus> GetIssueTypeStatuses(string projKey, string issueType)
-        {
-
-            return GetIssueTypeStatusesAsync(projKey, issueType).GetAwaiter().GetResult().ToList();
-        }
-
-        
         public JArray GetFieldsAsJson()
         {
             string data = GetFieldsAsync().GetAwaiter().GetResult();
             JArray json = JArray.Parse(data);
             return json;
         }
-        
-
         public List<JField> GetJFields()
         {
             var ret = new List<JField>();
@@ -165,24 +102,34 @@ namespace JTIS
             return ret;
         }
 
-        public int GetJQLResultsCount( string jql)
+        public int GetJQLResultsCount( string jql, bool ignoreError = false)
         {
             int ret = -1;
-
-            string data = GetJQLResultsCountAsync(jql).GetAwaiter().GetResult();
-            Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string,object>>(data);
-
-            if (values.ContainsKey("total"))
+            try 
             {
-                ret = Convert.ToInt32(values["total"].ToString());
+                string data = GetJQLResultsCountAsync(jql).GetAwaiter().GetResult();
+                Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string,object>>(data);
+                if (values.ContainsKey("total"))
+                {
+                    ret = Convert.ToInt32(values["total"].ToString());
+                }
             }
-
+            catch(Exception exc)
+            {                
+                ret = -1;
+                if (ignoreError == false)
+                {
+                    ConsoleUtil.WriteError($"Error parsing jql: {jql}");
+                    ConsoleUtil.WriteError($"Error: {exc.Message}",pause:true);
+                }
+            }
             return ret;
         }
 
         private async Task<string> GetJQLResultsCountAsync(string jql, CancellationToken token = default(CancellationToken))
         {
-            var resourceUrl = String.Format("rest/api/3/search?jql={0}",jql);
+            var resourceUrl = $"rest/api/3/search?jql={jql}&maxResults=0";
+
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resourceUrl, null, token)
                 .ConfigureAwait(false);
 
@@ -521,24 +468,12 @@ namespace JTIS
                 }
             }
 
-            if (additionalFields == null)
-            {
-                if (!string.IsNullOrWhiteSpace(_featureTeamChoicesFieldKey))
-                {
-                    additionalFields = new string[] { _featureTeamChoicesFieldKey  };
-                }
-            }
-
             if (additionalFields != null)
             {
                 var fldList = additionalFields.ToList();
                 if (!fldList.Contains(_epicLinkFieldKey) && !string.IsNullOrWhiteSpace(_epicLinkFieldKey))
                 {
                     fldList.Add(_epicLinkFieldKey);
-                }
-                if (!fldList.Contains(_featureTeamChoicesFieldKey) && !string.IsNullOrWhiteSpace(_featureTeamChoicesFieldKey ))
-                {
-                    fldList.Add(_featureTeamChoicesFieldKey);
                 }
                 searchOptions.AdditionalFields = fldList;
             }
@@ -649,27 +584,6 @@ namespace JTIS
 
         }
 
-        internal IEnumerable<Issue> GetEpicIssues(IEnumerable<Issue> epics)
-        {
-            List<Issue> response = new List<Issue>();            
-            StringBuilder sb = new StringBuilder();
-            foreach (var epic in epics)
-            {
-                if (epic.Type.StringsMatch("epic"))
-                {
-                    var appendVal = sb.Length==0 ? $"{epic.Key.Value}" : $", {epic.Key.Value}";
-                    sb.Append(appendVal);
-                }
-            }
-            if (sb.Length > 0)
-            {
-                var jql = $"'Epic Link' in({sb.ToString()})";
-                response = GetIssues(jql);
-            }
-
-
-            return response;
-        }
     }
 
 
@@ -696,14 +610,5 @@ namespace JTIS
         public string Name { get; set; }
         public bool Custom { get; set; }
         
-    }
-
-    public interface IJiraRepo
-    {
-        Project GetProject(string key);
-        Task<Project> GetProjectAsync(string key);
-        Task<Issue> GetIssueAsync(string key);
-        List<IssueChangeLog> GetIssueChangeLogs(Issue issue);
-        List<Issue> GetIssues(string jql);
     }
 }
