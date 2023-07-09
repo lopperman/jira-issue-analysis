@@ -5,6 +5,7 @@ using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
+using JTIS.Data;
 
 namespace JTIS.Analysis
 {
@@ -15,7 +16,7 @@ namespace JTIS.Analysis
         private AnalysisType _type = AnalysisType._atUnknown;
         private string searchJQL = string.Empty;
         
-        public List<JIssue> JIssues {get; private set;}
+        public List<jtisIssue> jtisIssues {get; private set;}
         public List<IssueCalcs> JCalcs {get; private set;}
 
         public bool GetDataFail {get;private set;}
@@ -30,7 +31,7 @@ namespace JTIS.Analysis
 
         public AnalyzeIssues()
         {
-            JIssues = new List<JIssue>();
+            jtisIssues = new List<jtisIssue>();
             JCalcs = new List<IssueCalcs>();
         }
         public AnalyzeIssues(AnalysisType analysisType): this()
@@ -53,13 +54,13 @@ namespace JTIS.Analysis
 
         public void ClassifyStates()
         {
-            if (JIssues.Count == 0)
+            if (jtisIssues.Count == 0)
             {
                 return;
             }
-            foreach (JIssue iss in JIssues)
+            foreach (var iss in jtisIssues)
             {
-                var issCalc = new IssueCalcs(iss);
+                var issCalc = new IssueCalcs(iss.jIssue);
                 JCalcs.Add(issCalc);
                 JIssueChangeLogItem? firstActiveCLI = null;
                 
@@ -405,106 +406,49 @@ namespace JTIS.Analysis
             return string.Empty;
         }
 
+        private void PopulateEpicLinks()
+        {
+            List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
+            if (epics.Count() > 0)
+            {
+                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
+                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
+                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
+                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
+                var children = jtisData.GetIssuesWithChangeLogs(jql);
+                if (children.Count > 0)
+                {
+                    foreach (var child in children)
+                    {
+                        if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
+                        {
+                            jtisIssues.Add(child);
+                        }
+                    }
+                    ConsoleUtil.WritePerfData(jtisData.Performance);
+                }
+            }
+        }
         public int GetData()
         {
             try 
             {
-                List<Issue> issues = new List<Issue>();
-                if (string.IsNullOrWhiteSpace(searchJQL))
+                var data = jtisIssueData.Create(JiraUtil.JiraRepo);
+                jtisIssues.Clear();
+                jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
+                ConsoleUtil.WritePerfData(data.Performance);
+                if (_type == AnalysisType.atEpics)
                 {
-                    return 0;
-                }
-                ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
-
-                AnsiConsole.Status()
-                    .Start($"Querying Jira", ctx=>
-                    {
-                        ctx.Status("[bold]Retrieving items ...[/]");
-                        ctx.Spinner(Spinner.Known.Dots);
-                        ctx.SpinnerStyle(new Style(AnsiConsole.Foreground,AnsiConsole.Background));
-                        Thread.Sleep(1000);
-                        issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
-                    });
-
-                if (_type==AnalysisType.atEpics && issues.Count > 0)
-                {
-
-                    var epicCount = issues.Count(x=>x.Type.StringsMatch("epic"));
-                    if (epicCount > 0)
-                    {
-                        List<string> searchEpics = new List<string>();
-                        foreach (var epic in issues.Where(x=>x.Type.StringsMatch("epic")).ToList())
-                        {
-                            searchEpics.Add(epic.Key.Value);
-                        }
-
-                        ConsoleUtil.WriteStdLine($"Finding related issues for {epicCount} Epics",StdLine.slCode ,false);
-                        AnsiConsole.Progress()                        
-                            .Columns(new ProgressColumn[]
-                            {
-                                new TaskDescriptionColumn(), 
-                                new PercentageColumn(),
-                                new ElapsedTimeColumn(), 
-                                new SpinnerColumn(), 
-
-                            })
-                            .Start(ctx => 
-                            {
-                                var task1 = ctx.AddTask($"[blue] loading related issues for {epicCount} Epic(s)[/]");
-                                task1.MaxValue = epicCount;
-                                task1.StartTask();
-                                foreach (var epicKey in searchEpics)
-                                {
-                                    // 'Epic Link'=WWT-262
-                                    var epicLinked = JiraUtil.JiraRepo.GetIssues($"'Epic Link'={epicKey}");
-                                    if (epicLinked.Count > 0)
-                                    {
-                                        foreach (var linked in epicLinked)
-                                        {
-                                            if (!issues.Exists(x=>x.Key.StringsMatch(linked.Key)))
-                                            {
-                                                issues.Add(linked);
-                                            }
-                                        }
-                                    }
-                                    task1.Increment(1);
-                                }
-                            });     
-                    }
-                }
-
-                if (issues.Count > 0)
-                {
-                    ConsoleUtil.WriteStdLine(String.Format("Retrieved {0} issues ",issues.Count),StdLine.slCode ,false);
-                    AnsiConsole.Progress()                        
-                        .Columns(new ProgressColumn[]
-                        {
-                            new TaskDescriptionColumn(), 
-                            new PercentageColumn(),
-                            new ElapsedTimeColumn(), 
-                            new SpinnerColumn(), 
-
-                        })
-                        .Start(ctx => 
-                        {
-                            var task2 = ctx.AddTask($"[blue] loading change logs for {issues.Count} issues [/]");
-                            task2.MaxValue = issues.Count;
-                            foreach (var issue in issues)
-                            {
-                                JIssue newIssue = new JIssue(issue);
-                                newIssue.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(issue));
-                                JIssues.Add(newIssue);
-                                task2.Increment(1);
-                            }
-                        });
+                    PopulateEpicLinks();
                 }
             }
-            catch(Exception ex)
+            catch (Exception excep)
             {
-                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",searchJQL),ex:ex);
-                GetDataFail = true;
+                ConsoleUtil.WriteError($"An error occurred getting data from Jira. Please double check the JQL syntax you are using ({searchJQL})");
+                ConsoleUtil.WriteError($"Error Detail: {excep.Message}",pause:true);
             }
-            return JIssues.Count;
+
+            return jtisIssues.Count();
 
         }
 

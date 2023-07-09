@@ -181,17 +181,26 @@ namespace JTIS
         }
 
         private void PopulateIssuesAction()        
-        {            
-            _jtisIssues = jtisIssueData.Create(JiraUtil.JiraRepo).GetIssuesWithChangeLogs(searchJQL);
+        {   
+            var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
+            _jtisIssues.Clear();
+            _jtisIssues.AddRange(jtisData.GetIssuesWithChangeLogs(searchJQL));
+            ConsoleUtil.WritePerfData(jtisData.Performance);
+            if (_analysisType == AnalysisType.atEpics)
+            {
+                PopulateEpicLinks();
+            }
         }
         private void PopulateEpicLinks()
         {
             List<jtisIssue> epics = _jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
             if (epics.Count() > 0)
             {
+                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
                 var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
                 var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-                var children = jtisIssueData.Create(JiraUtil.JiraRepo).GetIssuesWithChangeLogs(jql);
+                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
+                var children = jtisData.GetIssuesWithChangeLogs(jql);
                 if (children.Count > 0)
                 {
                     foreach (var child in children)
@@ -201,6 +210,7 @@ namespace JTIS
                             _jtisIssues.Add(child);
                         }
                     }
+                    ConsoleUtil.WritePerfData(jtisData.Performance);
                 }
             }
         }

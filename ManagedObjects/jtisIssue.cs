@@ -15,6 +15,11 @@ namespace JTIS.Data
                 if (_jIssue == null){
                     _jIssue = new JIssue(issue);
                 }
+                if (_jIssue.ChangeLogs.Count() != ChangeLogs.Count())
+                {
+                    _jIssue.ChangeLogs.Clear();
+                    _jIssue.AddChangeLogs(ChangeLogs);
+                }
                 return _jIssue;
             }
         }

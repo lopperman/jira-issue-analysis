@@ -13,16 +13,8 @@ namespace JTIS
 {
     class MainClass
     {
-        private static async void DevTestAsync(string cfgPath)
+        private static void DevTestAsync(string cfgPath)
         {
-            string jql = "project=wwt and updated >= -30d and issueType=story";
-            var configs = CfgManager.ReadConfigFile(cfgPath);
-            CfgManager.config = configs[0];
-            JiraUtil.CreateRestClient(CfgManager.config.userName,CfgManager.config.apiToken,CfgManager.config.baseUrl);
-            var getCL  = AsyncChangeLogs.Create(JiraUtil.JiraRepo);
-
-
-            var results = Task<IEnumerable<JIssue>>.WhenAll((IEnumerable<Task>)await getCL.GetIssuesAsync(jql));
 
             
             ConsoleUtil.PressAnyKeyToContinue();

@@ -388,6 +388,21 @@ namespace JTIS.Console
             return false;
         }
 
+        public static void WritePerfData(SortedList<string,TimeSpan> perf, int sleepMilliseconds=1000)
+        {
+            foreach (var prf in perf)
+            {
+                AnsiConsole.MarkupLine($"[bold]{prf.Value.TotalSeconds} seconds - [/] {prf.Key}");
+            }
+            if (sleepMilliseconds <=0){
+                PressAnyKeyToContinue();
+            }
+            else {
+                Thread.Sleep(1000);
+            }
+
+        }
+
         public static void ByeByeForced()
         {
             if (CfgManager.config != null && CfgManager.config.IsDirty)
