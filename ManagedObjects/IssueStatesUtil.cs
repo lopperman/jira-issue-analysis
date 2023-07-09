@@ -1,6 +1,7 @@
 using JTIS.Analysis;
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.Extensions;
 using Spectre.Console;
 
 namespace JTIS
@@ -53,13 +54,21 @@ namespace JTIS
 
         public static void WriteJiraStatuses(string? searchTerm = null)
         {
+            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.MarkupLine($"[bold italic]Note: [/][italic]stActiveState, stPassiveState, stEnd[/] map respectively to Jira Status Categories: [italic]IN PROGRESS, TO DO, and DONE[/]{Environment.NewLine}[dim]([italic]stStart[/] also maps to Jira [italic]IN PROGRESS[/] status category, and dynamically displays for the [underline]first[/] 'Active/IN PROGRESS' status for any given Jira issue.)[/]");
+            AnsiConsole.Write(new Rule());
+
             var usedInCol = string.Format("UsedIn: {0}",CfgManager.config.defaultProject);
             Table table = new Table();
-            table.AddColumns("JiraId","Name","LocalState","DefaultState",usedInCol,"Override");
+            table.AddColumns("JiraId","Name",$"Local{Environment.NewLine}State",$"Default{Environment.NewLine}State",$"Jira Status{Environment.NewLine}Category",usedInCol,"Override");
+            table.Alignment(Justify.Left);
+            table.Columns[1].Alignment(Justify.Center);
             table.Columns[2].Alignment(Justify.Center);
             table.Columns[3].Alignment(Justify.Center);
             table.Columns[4].Alignment(Justify.Center);
             table.Columns[5].Alignment(Justify.Center);
+            table.Columns[6].Alignment(Justify.Center);
 
             foreach (var jStatus in CfgManager.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
             {
@@ -91,7 +100,13 @@ namespace JTIS
                         overridden = string.Format("[bold red on yellow]{0}{0}{0}[/]",":triangular_Flag:");
                         locState = string.Format("[bold blue on lightyellow3]{0}[/]",locState);
                     }
-                    table.AddRow(new string[]{jStatus.StatusId.ToString(), jStatus.StatusName,locState,Enum.GetName(typeof(StatusType),defStat.Type),usedIn, overridden});
+                    var _jiraId = usedIn.StringsMatch("yes") ? jStatus.StatusId.ToString() : $"[dim]{jStatus.StatusId.ToString()}[/]";
+                    var _name = usedIn.StringsMatch("yes") ? jStatus.StatusName.ToString() : $"[dim]{jStatus.StatusName.ToString()}[/]";
+                    var _localState = usedIn.StringsMatch("yes") ? locState : $"[dim]{locState}[/]";
+                    var _defState = usedIn.StringsMatch("yes") ? Enum.GetName(typeof(StatusType),defStat.Type) : $"[dim]{Enum.GetName(typeof(StatusType),defStat.Type)}[/]";
+                    var _jiraStatusCat = usedIn.StringsMatch("yes") ? jStatus.CategoryName.ToString() : $"[dim]{jStatus.CategoryName.ToString()}[/]";
+
+                    table.AddRow(new string[]{_jiraId, _name,_localState,_defState,_jiraStatusCat, usedIn, overridden});
                 }
             }
             AnsiConsole.Write(table);
