@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Security.Cryptography;
 using Atlassian.Jira;
 using JTIS.Analysis;
@@ -6,6 +7,7 @@ using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
 using JTIS.ManagedObjects;
+using JTIS.Menu;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -17,6 +19,8 @@ namespace JTIS
         private List<jtisIssue> _jtisIssues = new List<jtisIssue>();
         private string? searchJQL = null;
         private string? _exportPath = null;
+        private List<string> issueTypeFilter = new List<string>();
+        
 
         public ChangeLogsMgr(AnalysisType analysisType)
         {
@@ -67,11 +71,30 @@ namespace JTIS
         }
         public void Render()
         {
+            List<string> issueTypes = _jtisIssues.Select(x=>x.issue.Type.Name).Distinct().ToList();
+            issueTypeFilter.AddRange(issueTypes);
+            if (issueTypes.Count() > 1)
+            {
+                if (ConsoleUtil.Confirm($"Filter which of the {issueTypes.Count()} issue types get displayed?",true))
+                {
+                    var response = MenuManager.MenuMultiSelect($"Choose items to include. [dim](To select all items, press ENTER[/])",issueTypes);
+                    if (response != null && response.Count() > 0)
+                    {
+                        issueTypeFilter.Clear();
+                        issueTypeFilter.AddRange(response);
+                    }
+                }
+            }
+
+
             foreach (var iss in _jtisIssues)
             {
-                WriteIssueHeader(iss.jIssue);
-                WriteIssueDetail(iss.jIssue);
-                AnsiConsole.WriteLine();
+                if (issueTypeFilter.Exists(x=>x.StringsMatch(iss.issue.Type.Name)))
+                {
+                    WriteIssueHeader(iss.jIssue);
+                    WriteIssueDetail(iss.jIssue);
+                    AnsiConsole.WriteLine();
+                }
             }
             ConsoleUtil.PressAnyKeyToContinue();
 

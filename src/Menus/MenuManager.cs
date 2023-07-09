@@ -37,6 +37,38 @@ namespace JTIS.Menu
         private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}","---"),"  ");
 //        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
+        
+        public static IEnumerable<string> MenuMultiSelect(string title, List<string> choices,  int pageSize = 10, bool required = false)
+        {
+                ConsoleUtil.WriteAppTitle();
+
+                var msp = new MultiSelectionPrompt<string>()
+                    .Title(title)
+                    .Required(required)
+                    .PageSize(pageSize)
+                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .InstructionsText(
+                        "[grey](Press [blue]<space>[/] to toggle a choice, " + 
+                        "[green]<enter>[/] to accept)[/]")
+                    .AddChoices(choices);
+
+                var response = AnsiConsole.Prompt(msp);
+
+                // var response = AnsiConsole.Prompt(
+                // new MultiSelectionPrompt<string>()
+                //     .Title(title)
+                //     .Required(required)
+                //     .PageSize(pageSize)
+                //     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                //     .InstructionsText(
+                //         "[grey](Press [blue]<space>[/] to toggle a choice, " + 
+                //         "[green]<enter>[/] to accept)[/]")
+                //     .AddChoices(choices)
+                //     );
+                return response;
+        }
+
+
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
         {
             //MenuEnum finalMenu = returnToMenu ?? MenuEnum.meMain;
@@ -287,10 +319,19 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
+            // var resp = MenuManager.MenuMultiSelect("choose things",new string[]{"[bold]paul[/]","brower","emily","ethan","chase"});
+            // if (resp != null && resp.Count() > 0)
+            // {
+            //     resp.ToList().ForEach (item =>
+            //     {
+            //         AnsiConsole.WriteLine(item);
+            //     });
+            // }
 
-            AnsiConsole.WriteLine($"JQL Results Count for (project=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("project=wwt and type=story")}");
 
-            AnsiConsole.WriteLine($"(Should Error) JQL Results Count for (proj=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("proj='wwt and type=story")}");
+            // AnsiConsole.WriteLine($"JQL Results Count for (project=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("project=wwt and type=story")}");
+
+            // AnsiConsole.WriteLine($"(Should Error) JQL Results Count for (proj=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("proj='wwt and type=story")}");
 
             ConsoleUtil.PressAnyKeyToContinue("DEV1 COMPLETED");
         }
