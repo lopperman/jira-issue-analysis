@@ -12,7 +12,7 @@ namespace JTIS
     internal class VisualSnapshot
     {
         private string searchJQL;
-        List<string> issueTypeFilter = new List<string>();
+        jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
     
         public VisualSnapshotType SnapshotType {get;private set;}
         public AnalysisType SearchType {get;private set;}
@@ -33,25 +33,30 @@ namespace JTIS
 
         private void CheckIssueTypeFilter()
         {
-            if (jtisIssues.Count()==0) return;
-            
-            List<string> issueTypes = jtisIssues.Select(x=>x.issue.Type.Name).Distinct().ToList();
-            issueTypeFilter.AddRange(issueTypes);
-            if (issueTypes.Count() > 1)
+            //        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
+            //var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+
+            _issueTypeFilter.Clear();
+            foreach (var issType in jtisIssues.Select(x=>x.issue.Type.Name).Distinct())
             {
-                if (ConsoleUtil.Confirm($"Filter which of the {issueTypes.Count()} issue types get displayed?",true))
+                int cnt = jtisIssues.Count(x=>x.issue.Type.Name.StringsMatch(issType));
+                _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
+            }
+            if (_issueTypeFilter.Count > 1)
+            {
+                if (ConsoleUtil.Confirm($"Filter which of the {_issueTypeFilter.Count} issue types get displayed?",true))
                 {
-                    var response = MenuManager.MenuMultiSelect($"Choose items to include. [dim](To select all items, press ENTER[/])",issueTypes);
+                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueTypeFilter.Items.ToList());
                     if (response != null && response.Count() > 0)
                     {
-                        issueTypeFilter.Clear();
-                        issueTypeFilter.AddRange(response);
+                        _issueTypeFilter.Clear();
+                        _issueTypeFilter.AddFilterItems(response); 
                     }
                 }
             }
-            //     if (issueTypeFilter.Exists(x=>x.StringsMatch(iss.issue.Type.Name)))
 
         }
+
 
         public void BuildSearch()
         {
@@ -92,7 +97,7 @@ namespace JTIS
 
             SortedDictionary<string,double> dict = new SortedDictionary<string, double>();
 
-            var filtered = jtisIssues.Where(x=>issueTypeFilter.Contains(x.issue.Type.Name)).ToList();
+            var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
             foreach (var issue in filtered)
             {
@@ -178,9 +183,10 @@ namespace JTIS
                 AnsiConsole.Write(new Rule());
             }
 
+            // int totalCount = filteredItems.Count;
             if (jtisIssues.Count == 0){return;}
+            var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
-            var filtered = jtisIssues.Where(x=>issueTypeFilter.Contains(x.issue.Type.Name)).ToList();
 
             var statuses = filtered.Select(x=>x.issue.Status.Name).ToList().Distinct();
             SortedDictionary<string,double> statusCounts = new SortedDictionary<string, double>();

@@ -16,6 +16,8 @@ namespace JTIS
    public class ChangeLogsMgr
     {
         private readonly AnalysisType _analysisType;
+
+        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         private List<jtisIssue> _jtisIssues = new List<jtisIssue>();
         private string? searchJQL = null;
         private string? _exportPath = null;
@@ -68,33 +70,45 @@ namespace JTIS
                 return tmpFileName;
             }
         }
-        public void Render()
+
+        private void CheckIssueTypeFilter()
         {
-            List<string> issueTypeFilter = new List<string>();
-            List<string> issueTypes = _jtisIssues.Select(x=>x.issue.Type.Name).Distinct().ToList();
-            issueTypeFilter.AddRange(issueTypes);
-            if (issueTypes.Count() > 1)
+            //        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
+            //var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+
+            _issueTypeFilter.Clear();
+            foreach (var issType in _jtisIssues.Select(x=>x.issue.Type.Name).Distinct())
             {
-                if (ConsoleUtil.Confirm($"Filter which of the {issueTypes.Count()} issue types get displayed?",true))
+                int cnt = _jtisIssues.Count(x=>x.issue.Type.Name.StringsMatch(issType));
+                _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
+            }
+            if (_issueTypeFilter.Count > 1)
+            {
+                if (ConsoleUtil.Confirm($"Filter which of the {_issueTypeFilter.Count} issue types get displayed?",true))
                 {
-                    var response = MenuManager.MenuMultiSelect($"Choose items to include. [dim](To select all items, press ENTER[/])",issueTypes);
+                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueTypeFilter.Items.ToList());
                     if (response != null && response.Count() > 0)
                     {
-                        issueTypeFilter.Clear();
-                        issueTypeFilter.AddRange(response);
+                        _issueTypeFilter.Clear();
+                        _issueTypeFilter.AddFilterItems(response); 
                     }
                 }
             }
 
+        }
 
-            foreach (var iss in _jtisIssues)
+
+        public void Render()
+        {
+            CheckIssueTypeFilter();
+
+            var filtered = _jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+
+            foreach (var iss in filtered)
             {
-                if (issueTypeFilter.Exists(x=>x.StringsMatch(iss.issue.Type.Name)))
-                {
-                    WriteIssueHeader(iss.jIssue);
-                    WriteIssueDetail(iss.jIssue);
-                    AnsiConsole.WriteLine();
-                }
+                WriteIssueHeader(iss.jIssue);
+                WriteIssueDetail(iss.jIssue);
+                AnsiConsole.WriteLine();
             }
             ConsoleUtil.PressAnyKeyToContinue();
 

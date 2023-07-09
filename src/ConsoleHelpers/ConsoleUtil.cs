@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.Security.AccessControl;
+using System.Net.Mime;
 using System.Security.Cryptography;
 using JTIS.Config;
 using Spectre.Console;
@@ -392,7 +393,7 @@ namespace JTIS.Console
         {
             foreach (var prf in perf)
             {
-                AnsiConsole.MarkupLine($"[bold]{prf.Value.TotalSeconds} seconds - [/] {prf.Key}");
+                AnsiConsole.MarkupLine($"[bold]{prf.Value.TotalSeconds:##0.000} seconds - [/] {prf.Key}");
             }
             if (sleepMilliseconds <=0){
                 PressAnyKeyToContinue();
@@ -520,6 +521,23 @@ namespace JTIS.Console
                 ClearLines(totalLines);
             }
         }
+
+        public static void FillLines(Color fillColor, int startRowOffset = 0, int fillRowCount = 1, int resumeOffset = 0)
+        {
+            var currentPos = System.Console.GetCursorPosition();
+            if (startRowOffset != 0)
+            {
+                System.Console.SetCursorPosition(0,currentPos.Top + startRowOffset);
+            }
+            var spaces = new string(c:' ', System.Console.WindowWidth);
+            for (int i = 0; i < fillRowCount; i++)
+            {
+                System.Console.SetCursorPosition(0,(currentPos.Top + i));
+                AnsiConsole.Markup($"[yellow on navy]{spaces}[/]");
+            }
+            System.Console.SetCursorPosition(0,(currentPos.Top + resumeOffset));
+        }
+
         public static void ClearLines(int lineCount)
         {
             var currentPos = System.Console.GetCursorPosition();

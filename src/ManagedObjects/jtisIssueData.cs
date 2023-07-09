@@ -63,20 +63,12 @@ namespace JTIS.Data
                     }
 
                 });
-
-            // if (_totReturnCount > _jtisIssues.Count)
-            // {
-            //     _nextStart += 100;
-            //     return GetIssuesWithChangeLogs(jql,_nextStart);
-            // }
-
             sw.Stop();
             var totIssues = _jtisIssues.Count();
             var totCL = _jtisIssues.Values.SelectMany(x=>x.ChangeLogs).Count();
             var totCLI = _jtisIssues.Values.SelectMany(s=>s.ChangeLogs.SelectMany(y=>y.Items)).Count();
             Performance.Add($"(Overall Total Time) Issues: {totIssues}, Change Logs: {totCL}, Change Log Items: {totCLI}",sw.Elapsed);
             return _jtisIssues.Values.ToList();            
-
         }
         private async Task IssuesWithChangeLogs(string jql)
         {            

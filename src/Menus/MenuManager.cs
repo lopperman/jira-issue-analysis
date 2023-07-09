@@ -38,8 +38,29 @@ namespace JTIS.Menu
 //        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
         
+        public static IEnumerable<T> MultiSelect<T>(string title, List<T> choices, int pageSize = 10, bool required = false) where T:notnull
+        {
+                ConsoleUtil.WriteAppTitle();
+
+                var msp = new MultiSelectionPrompt<T>()
+                    .Title(title)
+                    .Required(required)
+                    .PageSize(pageSize)
+                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .InstructionsText(
+                        "[grey](Press [blue]<space>[/] to toggle a choice, " + 
+                        "[green]<enter>[/] to accept)[/]")
+                    .AddChoices(choices);
+
+                var response = AnsiConsole.Prompt(msp);
+
+                return response;
+
+        }
+
         public static IEnumerable<string> MenuMultiSelect(string title, List<string> choices,  int pageSize = 10, bool required = false)
         {
+
                 ConsoleUtil.WriteAppTitle();
 
                 var msp = new MultiSelectionPrompt<string>()
@@ -54,17 +75,6 @@ namespace JTIS.Menu
 
                 var response = AnsiConsole.Prompt(msp);
 
-                // var response = AnsiConsole.Prompt(
-                // new MultiSelectionPrompt<string>()
-                //     .Title(title)
-                //     .Required(required)
-                //     .PageSize(pageSize)
-                //     .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
-                //     .InstructionsText(
-                //         "[grey](Press [blue]<space>[/] to toggle a choice, " + 
-                //         "[green]<enter>[/] to accept)[/]")
-                //     .AddChoices(choices)
-                //     );
                 return response;
         }
 
@@ -319,6 +329,15 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
+
+            var refData = jtisRefData.Create(JiraUtil.JiraRepo);
+            foreach (var p in refData.Projects)
+            {
+                AnsiConsole.WriteLine($"Id: {p.Id}, Name: {p.Name}, Key: {p.Key}");                
+            }
+
+            ConsoleUtil.PressAnyKeyToContinue();            
+
             // var resp = MenuManager.MenuMultiSelect("choose things",new string[]{"[bold]paul[/]","brower","emily","ethan","chase"});
             // if (resp != null && resp.Count() > 0)
             // {

@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.Runtime.CompilerServices;
+using System.Net.Mime;
 using System.Diagnostics;
 using System.Text;
 using Atlassian.Jira;
@@ -24,8 +25,31 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
+            var r1 = new Tree("Brower Family");
+            r1.Guide(TreeGuide.BoldLine);
+            var r1n1 = r1.AddNode("Paul");
+            
+            var r1n2 = r1.AddNode("Emily");
+            var r1n1n1 = r1n1.AddNode("Ethan");
+            var r1n1n2 = r1n1.AddNode("Chase");
+            
+            var r1n2n1 = new Panel($":llama::llama:{Environment.NewLine}Elena").HeaderAlignment(Justify.Center).Border(BoxBorder.Rounded).BorderColor(Color.DeepPink1_1);
+            r1n2n1.Padding(2,0,2,0);
+            r1n2.AddNode(r1n2n1);
+
+            var r1r1 = r1.AddNode(new Tree("Pets"));
+
+            
+            
+
+            AnsiConsole.Write(r1);
 
 
+
+
+
+// ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
+// ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
             ConsoleUtil.PressAnyKeyToContinue();
             Console.ConsoleUtil.ByeByeForced();
         }
@@ -34,9 +58,9 @@ namespace JTIS
         public static void Main(string[] args) 
         {
             
-            // System.Console.ForegroundColor = Color.Black;
-            // System.Console.BackgroundColor = Color.LightYellow3;
             ConsoleUtil.WriteAppTitle();
+            AnsiConsole.Write(new Rule());
+
             List<JTISConfig> tmpCfgList  = new List<JTISConfig>();
             var tmpConfigFilePath = string.Empty;
             if (args.Length > 0)
@@ -45,7 +69,6 @@ namespace JTIS
                 {
                     var arg = args[i];
                     AnsiConsole.WriteLine($"processing argument: {arg}");
-                    Thread.Sleep(300);
                     if (arg.StringsMatch("dev"))
                     {
                         DevQuick();
