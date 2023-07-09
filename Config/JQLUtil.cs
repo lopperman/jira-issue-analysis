@@ -111,7 +111,7 @@ namespace JTIS
 
         public static void AddJQL()
         {
-            var jql = ConsoleUtil.GetInput<string>($"Enter JQL Statement, or delimited (space or comma) list of issues{Environment.NewLine}",allowEmpty:true);
+            var jql = ConsoleInput.GetJQLOrIssueKeys(false);
             if (!string.IsNullOrEmpty(jql))
             {
                 if (JQLUtil.ValidJQL(jql))
@@ -131,6 +131,29 @@ namespace JTIS
         public static bool ValidJQL(string jql)
         {
             return JiraUtil.JiraRepo.GetJQLResultsCount(jql, ignoreError:true) >= 0;
+        }
+
+        internal static void CheckManualJQL()
+        {
+            var jql = ConsoleInput.GetJQLOrIssueKeys(false,manualCheck:true);
+            if (jql.Length == 0){
+                return;
+            }
+            AnsiConsole.Write(new Rule());
+            if (JQLUtil.ValidJQL(jql) == false)
+            {
+                AnsiConsole.MarkupLine($"[bold]JQL is invalid and could not be parsed![/]{Environment.NewLine}[dim]({jql})[/]");
+            }
+            else 
+            {
+                var totRows = JiraUtil.JiraRepo.GetJQLResultsCount(jql);
+                AnsiConsole.MarkupLine($"[bold]JQL is valid, and would return {totRows} Jira items[/]");
+
+            }
+
+            AnsiConsole.Write(new Rule());
+
+            ConsoleUtil.PressAnyKeyToContinue();
         }
     }
 }

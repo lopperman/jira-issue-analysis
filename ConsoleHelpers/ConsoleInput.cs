@@ -9,7 +9,7 @@ namespace JTIS
     public static class ConsoleInput
     {
 
-        public static string GetJQLOrIssueKeys(bool allowFromSaved, bool findEpicLinks = false)
+        public static string GetJQLOrIssueKeys(bool allowFromSaved, bool findEpicLinks = false, bool manualCheck = false)
         {
             if (findEpicLinks)
             {
@@ -31,6 +31,10 @@ namespace JTIS
                     if (isJQL == false)
                     {
                         data = IssueKeysToJQL(data);
+                    }
+                    if (manualCheck)
+                    {
+                        return data;
                     }
                     if (JQLUtil.ValidJQL(data)==false)
                     {

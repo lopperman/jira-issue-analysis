@@ -58,6 +58,7 @@ namespace JTIS.Menu
         miSavedJQLFind, 
         miSavedJQLRemove,
         miSavedJQLDefault, 
+        miCheckJQLStatement, 
         miIssCfgView,
         miIssCfgEdit,
         miIssCfgReset, 

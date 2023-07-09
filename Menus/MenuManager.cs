@@ -159,6 +159,10 @@ namespace JTIS.Menu
                     JQLUtil.RemoveJQL(CfgManager.config);
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
+                case MenuItemEnum.miCheckJQLStatement:
+                    JQLUtil.CheckManualJQL();
+                    if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
+                    break;
                 case MenuItemEnum.miSavedJQLDefault:
                     CfgManager.CheckDefaultJQL(CfgManager.config);
                     ConsoleUtil.PressAnyKeyToContinue("Default JQL Verified/Added");
@@ -283,6 +287,7 @@ namespace JTIS.Menu
 
         private static void Dev1()
         {
+
             AnsiConsole.WriteLine($"JQL Results Count for (project=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("project=wwt and type=story")}");
 
             AnsiConsole.WriteLine($"(Should Error) JQL Results Count for (proj=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("proj='wwt and type=story")}");
@@ -533,6 +538,7 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLAdd,"Save New JQL / Issue Numbers"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLFind,"Find Saved JQL / Issue Numbers"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLRemove,"Remove Saved JQL / Issue Numbers"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miCheckJQLStatement, "Check Manual JQL Statement"));
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miSavedJQLDefault,"Verify/Add Default JQL Snippets"));
 

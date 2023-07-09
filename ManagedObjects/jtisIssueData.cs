@@ -7,6 +7,9 @@ namespace JTIS.Data
 {
     public class jtisIssueData
     {
+        Stopwatch? sw = null;
+        private int _totReturnCount;
+        private int _nextStart;
         private JiraRepo? repo = null;
         public SortedList<string,TimeSpan> Performance = new SortedList<string, TimeSpan>();
 
@@ -31,8 +34,9 @@ namespace JTIS.Data
         }
 
         public List<jtisIssue> GetIssuesWithChangeLogs(string jql)
-        {
-            var sw = Stopwatch.StartNew();
+        {            
+            _totReturnCount = repo.GetJQLResultsCount(jql);
+            sw = Stopwatch.StartNew();                        
 
             AnsiConsole.Progress()
                 .AutoClear(true)
@@ -45,16 +49,34 @@ namespace JTIS.Data
                         new ElapsedTimeColumn()
                     })
                 .Start(ctx=> {
-                    var task = ctx.AddTask("async issues and change logs search");
-                    Task.WaitAll(IssuesWithChangeLogs(jql));
-                    sw.Stop();
+                    
+                    while (_jtisIssues.Count() < _totReturnCount)
+                    {
+                        if (_jtisIssues.Count()==0){
+                            _nextStart = 0;
+                        }
+                        else{ 
+                            _nextStart += 100;                        
+                        }
+                        var task = ctx.AddTask($"(startAt: {_nextStart}) async issues and change logs search");
+                        Task.WaitAll(IssuesWithChangeLogs(jql));
+                    }
+
                 });
 
+            // if (_totReturnCount > _jtisIssues.Count)
+            // {
+            //     _nextStart += 100;
+            //     return GetIssuesWithChangeLogs(jql,_nextStart);
+            // }
+
+            sw.Stop();
             var totIssues = _jtisIssues.Count();
             var totCL = _jtisIssues.Values.SelectMany(x=>x.ChangeLogs).Count();
             var totCLI = _jtisIssues.Values.SelectMany(s=>s.ChangeLogs.SelectMany(y=>y.Items)).Count();
             Performance.Add($"(Overall Total Time) Issues: {totIssues}, Change Logs: {totCL}, Change Log Items: {totCLI}",sw.Elapsed);
-            return _jtisIssues.Values.ToList();
+            return _jtisIssues.Values.ToList();            
+
         }
         private async Task IssuesWithChangeLogs(string jql)
         {            
@@ -77,7 +99,7 @@ namespace JTIS.Data
 
         private async Task<IPagedQueryResult<Issue>> IssuesAsync(string jql)
         {
-            return await repo.jira.Issues.GetIssuesFromJqlAsync(jql);
+            return await repo.jira.Issues.GetIssuesFromJqlAsync(jql,startAt:_nextStart);
         }
 
         private async Task GetChangeLogs(Issue issue)

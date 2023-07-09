@@ -9,6 +9,7 @@ namespace JTIS.Data
         public List<IssueChangeLog> ChangeLogs {get; private set;}
 
         private JIssue? _jIssue = null;
+        
         public JIssue jIssue 
         {
             get{
