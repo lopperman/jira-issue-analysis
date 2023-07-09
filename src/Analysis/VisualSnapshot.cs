@@ -12,7 +12,8 @@ namespace JTIS
     internal class VisualSnapshot
     {
         private string searchJQL;
-
+        List<string> issueTypeFilter = new List<string>();
+    
         public VisualSnapshotType SnapshotType {get;private set;}
         public AnalysisType SearchType {get;private set;}
         private List<jtisIssue> jtisIssues = new List<jtisIssue>();
@@ -30,6 +31,28 @@ namespace JTIS
             return vs;
         }
 
+        private void CheckIssueTypeFilter()
+        {
+            if (jtisIssues.Count()==0) return;
+            
+            List<string> issueTypes = jtisIssues.Select(x=>x.issue.Type.Name).Distinct().ToList();
+            issueTypeFilter.AddRange(issueTypes);
+            if (issueTypes.Count() > 1)
+            {
+                if (ConsoleUtil.Confirm($"Filter which of the {issueTypes.Count()} issue types get displayed?",true))
+                {
+                    var response = MenuManager.MenuMultiSelect($"Choose items to include. [dim](To select all items, press ENTER[/])",issueTypes);
+                    if (response != null && response.Count() > 0)
+                    {
+                        issueTypeFilter.Clear();
+                        issueTypeFilter.AddRange(response);
+                    }
+                }
+            }
+            //     if (issueTypeFilter.Exists(x=>x.StringsMatch(iss.issue.Type.Name)))
+
+        }
+
         public void BuildSearch()
         {
             if (SearchType == AnalysisType.atIssues)
@@ -45,6 +68,7 @@ namespace JTIS
                 return;
             }
             GetIssues();
+            CheckIssueTypeFilter();
             BuildStatusBreakdown();
             ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
             BuildBlockedNonBlocked(false,false);
@@ -67,7 +91,10 @@ namespace JTIS
             SortedDictionary<string,double> chtPerc = new SortedDictionary<string, double>();
 
             SortedDictionary<string,double> dict = new SortedDictionary<string, double>();
-            foreach (var issue in jtisIssues)
+
+            var filtered = jtisIssues.Where(x=>issueTypeFilter.Contains(x.issue.Type.Name)).ToList();
+
+            foreach (var issue in filtered)
             {
                 var blocked = issue.jIssue.IsBlocked;
                 string key1 = "";
@@ -152,13 +179,16 @@ namespace JTIS
             }
 
             if (jtisIssues.Count == 0){return;}
-            var statuses = jtisIssues.Select(x=>x.issue.Status.Name).ToList().Distinct();
+
+            var filtered = jtisIssues.Where(x=>issueTypeFilter.Contains(x.issue.Type.Name)).ToList();
+
+            var statuses = filtered.Select(x=>x.issue.Status.Name).ToList().Distinct();
             SortedDictionary<string,double> statusCounts = new SortedDictionary<string, double>();
             SortedDictionary<string,double> statusPercents = new SortedDictionary<string, double>();
             foreach (var tmpStatus in statuses)
             {   
-                var pct = Math.Round((double)jtisIssues.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)jtisIssues.Count,2);
-                statusCounts.Add(tmpStatus,jtisIssues.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
+                var pct = Math.Round((double)filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)filtered.Count,2);
+                statusCounts.Add(tmpStatus,filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
                 statusPercents.Add(tmpStatus,Math.Round((pct*100),2));
 
             }
@@ -188,7 +218,7 @@ namespace JTIS
                 var tbl = new Table();
                 tbl.AddColumns("KEY","TYPE", "STATUS", "SUMMARY");
                 tbl.Expand();                
-                foreach (var issue in jtisIssues)
+                foreach (var issue in filtered)
                 {                    
                     tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
                 }

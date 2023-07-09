@@ -19,7 +19,6 @@ namespace JTIS
         private List<jtisIssue> _jtisIssues = new List<jtisIssue>();
         private string? searchJQL = null;
         private string? _exportPath = null;
-        private List<string> issueTypeFilter = new List<string>();
         
 
         public ChangeLogsMgr(AnalysisType analysisType)
@@ -71,6 +70,7 @@ namespace JTIS
         }
         public void Render()
         {
+            List<string> issueTypeFilter = new List<string>();
             List<string> issueTypes = _jtisIssues.Select(x=>x.issue.Type.Name).Distinct().ToList();
             issueTypeFilter.AddRange(issueTypes);
             if (issueTypes.Count() > 1)
