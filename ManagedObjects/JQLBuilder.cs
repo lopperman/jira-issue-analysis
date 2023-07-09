@@ -6,6 +6,17 @@ namespace JTIS
 {
     public static class JQLBuilder
     {
+        public static string BuildJQLForFindEpicIssues(params string[] epicKeys)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var epicKey in epicKeys)
+            {
+                var appendVal = sb.Length==0 ? $"{epicKey}" : $", {epicKey}";
+                sb.Append(appendVal);
+            }
+            var jql = $"'Epic Link' in({sb.ToString()})";
+            return jql;
+        }
 
 
         public static string BuildInList(string colName, string vals,char delimitChar = ' ', string? prependIfMissing=null)

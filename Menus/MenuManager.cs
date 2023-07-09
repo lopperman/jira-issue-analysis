@@ -470,7 +470,13 @@ namespace JTIS.Menu
         {
 
             var tst = jtisIssueData.Create(JiraUtil.JiraRepo);
-            tst.Test();
+            var jql = "project=WWT and status='backlog'";
+            var jtisIssueList = tst.GetIssuesWithChangeLogs(jql);
+            foreach (var prf in tst.Performance)
+            {
+                AnsiConsole.MarkupLine($"[bold]{prf.Value.TotalSeconds} seconds - [/] {prf.Key}");
+            }
+            ConsoleUtil.PressAnyKeyToContinue();
 
             // var ti = jtisIssueData.Create(JiraUtil.JiraRepo);
             // foreach (var iss in ti.Test.)
