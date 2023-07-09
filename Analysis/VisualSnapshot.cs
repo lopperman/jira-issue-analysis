@@ -1,6 +1,7 @@
 using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Console;
+using JTIS.Data;
 using JTIS.Extensions;
 using JTIS.ManagedObjects;
 using JTIS.Menu;
@@ -14,8 +15,7 @@ namespace JTIS
 
         public VisualSnapshotType SnapshotType {get;private set;}
         public AnalysisType SearchType {get;private set;}
-        private List<Issue> issues = new List<Issue>();
-        private List<JIssue> jIssues = new List<JIssue>();
+        private List<jtisIssue> jtisIssues = new List<jtisIssue>();
 
         private VisualSnapshot(VisualSnapshotType snapshotType, AnalysisType analysisType)
         {
@@ -52,27 +52,6 @@ namespace JTIS
 
         }
 
-        private bool IsBlocked(Issue item)
-        {
-            var blocked = false;
-            if (item.Priority.Name.Contains("block",StringComparison.InvariantCultureIgnoreCase))
-            {
-                blocked = true;            
-            }
-            else 
-            {
-                var flagged = item.CustomFields.Where(x=>x.Name.ToLower()=="flagged").FirstOrDefault();
-                if (flagged != null)
-                {
-                    if (flagged.Values.Any(x=>x.StringsMatch("impediment")))
-                    {
-                        blocked = true;
-                    }
-                }
-            }
-            return blocked;
-        }
-
         private void AddMissingKey(string key, ref SortedDictionary<string,double> dic)
         {
             if (dic.ContainsKey(key)==false)
@@ -82,15 +61,15 @@ namespace JTIS
         }
         private void BuildBlockedNonBlocked(bool clearScreen = true, bool showDetail = false)
         {
-            if (issues.Count == 0){return;}
+            if (jtisIssues.Count == 0){return;}
 
             SortedDictionary<string,double> chtCount = new SortedDictionary<string, double>();
             SortedDictionary<string,double> chtPerc = new SortedDictionary<string, double>();
 
             SortedDictionary<string,double> dict = new SortedDictionary<string, double>();
-            foreach (var issue in issues)
+            foreach (var issue in jtisIssues)
             {
-                var blocked = IsBlocked(issue);
+                var blocked = issue.jIssue.IsBlocked;
                 string key1 = "";
                 string key2 = "";
 
@@ -101,15 +80,15 @@ namespace JTIS
                 string useKey = blocked ? key1 : key2;
                 dict[useKey]+=1;
 
-                key1 = $"01-Type {issue.Type.Name} IsBlocked";
-                key2 = $"01-Type {issue.Type.Name} NotBlocked";
+                key1 = $"01-Type {issue.issue.Type.Name} IsBlocked";
+                key2 = $"01-Type {issue.issue.Type.Name} NotBlocked";
                 AddMissingKey(key1, ref dict);
                 AddMissingKey(key2, ref dict);
                 useKey = blocked ? key1 : key2;
                 dict[useKey]+=1;
 
-                key1 = $"02-Status {issue.Status.Name} IsBlocked";
-                key2 = $"02-Status {issue.Status.Name} NotBlocked";
+                key1 = $"02-Status {issue.issue.Status.Name} IsBlocked";
+                key2 = $"02-Status {issue.issue.Status.Name} NotBlocked";
                 AddMissingKey(key1, ref dict);
                 AddMissingKey(key2, ref dict);
                 useKey = blocked ? key1 : key2;
@@ -172,14 +151,14 @@ namespace JTIS
                 AnsiConsole.Write(new Rule());
             }
 
-            if (issues.Count == 0){return;}
-            var statuses = issues.Select(x=>x.Status.Name).ToList().Distinct();
+            if (jtisIssues.Count == 0){return;}
+            var statuses = jtisIssues.Select(x=>x.issue.Status.Name).ToList().Distinct();
             SortedDictionary<string,double> statusCounts = new SortedDictionary<string, double>();
             SortedDictionary<string,double> statusPercents = new SortedDictionary<string, double>();
             foreach (var tmpStatus in statuses)
             {   
-                var pct = Math.Round((double)issues.Count(x=>x.Status.StringsMatch(tmpStatus)) / (double)issues.Count,2);
-                statusCounts.Add(tmpStatus,issues.Count(x=>x.Status.StringsMatch(tmpStatus)));
+                var pct = Math.Round((double)jtisIssues.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)jtisIssues.Count,2);
+                statusCounts.Add(tmpStatus,jtisIssues.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
                 statusPercents.Add(tmpStatus,Math.Round((pct*100),2));
 
             }
@@ -209,9 +188,9 @@ namespace JTIS
                 var tbl = new Table();
                 tbl.AddColumns("KEY","TYPE", "STATUS", "SUMMARY");
                 tbl.Expand();                
-                foreach (var issue in issues)
-                {
-                    tbl.AddRow(issue.Key.Value,issue.Type.Name,issue.Status.Name,Markup.Escape(issue.Summary));
+                foreach (var issue in jtisIssues)
+                {                    
+                    tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
                 }
                 AnsiConsole.Write(new Panel(tbl).Expand().Header("ISSUE STATUS BREAKDOWN - DETAIL DATA",Justify.Center));
             }
@@ -224,93 +203,42 @@ namespace JTIS
 
         }
 
-        private void GetIssues()
-        {
-            var p = new ManagedPipeline();
-            p.Add("Populating issues",GetData);
-            if (SearchType==AnalysisType.atEpics)
-            {
-                p.Add("Finding issues linked to Epics", PopulateEpicLinks);
-            }
-            p.Add("Populating change logs",PopulateChangeLogs);
-            try 
-            {
-                p.ExecutePipeline();
-            }
-            catch(Exception errEx) 
-            {
-                p.CancelPipeline();
-                p = null;
-                ConsoleUtil.WriteError($"An error occurred processing JQL: {searchJQL} ({errEx.Message}) ");
-                ConsoleUtil.PressAnyKeyToContinue("OPERATION CANCELLED");
-                return;
-            }
-            // if (_jIssues.Count > 0)
-            // // if (!PopulateIssues()) return;
-            // // if (!PopulateChangeLogs()) return;
-            // {
-            //     if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
-            //     {
-            //         Render();                
-            //     }
-            //     else 
-            //     {
-            //         doExport = true;
-            //     }
-            //     if (ConsoleUtil.Confirm("Export to csv file?",doExport))
-            //     {
-            //         Export();
-            //     }
-            // }            
-        }
-
-        private void GetData()
-        {
-            try 
-            {
-                issues.Clear();
-                if (string.IsNullOrWhiteSpace(searchJQL))
-                {
-                    return;
-                }
-                issues = JiraUtil.JiraRepo.GetIssues(searchJQL);
-            }
-            catch(Exception ex)
-            {
-                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",searchJQL),ex:ex);
-            }
-        }
-
         private void PopulateEpicLinks()
         {
-            if (issues.Any(x=>x.Type.StringsMatch("epic")))
+            List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
+            if (epics.Count() > 0)
             {
-                IEnumerable<Issue> epics = issues.Where(x=>x.Type.StringsMatch("epic")).ToList();
-                IEnumerable<Issue> epicIssues = JiraUtil.JiraRepo.GetEpicIssues(epics);
-                var newList = issues.Concat(epicIssues)
-                    .GroupBy(x=>x.Key.Value)
-                    .Where(x=>x.Count() == 1)
-                    .Select(x=>x.First())
-                    .ToList();    
-                issues = newList;
+                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
+                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
+                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
+                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
+                var children = jtisData.GetIssuesWithChangeLogs(jql);
+                if (children.Count > 0)
+                {
+                    foreach (var child in children)
+                    {
+                        if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
+                        {
+                            jtisIssues.Add(child);
+                        }
+                    }
+                    ConsoleUtil.WritePerfData(jtisData.Performance);
+                }
             }
-
         }
-
-        private void PopulateChangeLogs()
+        private void GetIssues()
         {
-            if (issues.Count == 0)
+            var data = jtisIssueData.Create(JiraUtil.JiraRepo);
+            jtisIssues.Clear();
+            jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
+            ConsoleUtil.WritePerfData(data.Performance);
+            if (SearchType==AnalysisType.atEpics)
             {
-                return;
-            }
-            foreach (var tIss in issues )            
-            {
-                var jIss = new JIssue(tIss);
-                jIss.AddChangeLogs(JiraUtil.JiraRepo.GetIssueChangeLogs(tIss));
-                jIssues.Add(jIss);
+                PopulateEpicLinks();
             }
 
         }
+
         private void Summarize()
         {
             //https://graphiant.atlassian.net/rest/api/3/search?jql=project=WWT&fields=issueType,status,key,priority,flagged&expand=names
