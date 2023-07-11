@@ -123,7 +123,7 @@ namespace JTIS.Menu
                 case MenuItemEnum.miAdvSearchViewCustomFields:
                     AdvancedSearch.Create().ViewJiraCustomFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
-                    break; 
+                    break;  
                 case MenuItemEnum.miAdvSearchViewIssueFields:
                     AdvancedSearch.Create().ViewJiraIssueFields();
                     exitMenu = MenuEnum.meAdvanced_Search;
@@ -137,9 +137,11 @@ namespace JTIS.Menu
                     exitMenu = MenuEnum.meIssue_Notes;                    
                     break;
                 case MenuItemEnum.miIssueNotesAdd:
+                    IssueNotesUtil.AddEdit();
                     exitMenu = MenuEnum.meIssue_Notes;
                     break;
                 case MenuItemEnum.miIssueNotesDelete:
+                    IssueNotesUtil.Delete();
                     exitMenu = MenuEnum.meIssue_Notes;
                     break;
 #endregion
@@ -466,8 +468,8 @@ namespace JTIS.Menu
             var sp = new SelectionPrompt<MenuFunction>();            
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "View Issue Notes"));
-            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "Add Issue Note"));
-            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "Delete Issue Note"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesAdd, "Add Issue Note"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesDelete, "Delete Issue Note"));
 
             AddCommonMenuItems(sp,lastMenu);
             MenuManager.Execute(AnsiConsole.Prompt(sp));            

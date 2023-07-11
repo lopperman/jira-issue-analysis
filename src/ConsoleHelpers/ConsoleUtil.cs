@@ -1,4 +1,6 @@
-﻿using JTIS.Config;
+﻿using System.Data.SqlTypes;
+using System;
+using JTIS.Config;
 using Spectre.Console;
 
 
@@ -445,7 +447,7 @@ namespace JTIS.Console
             Environment.Exit(0);
         }    
 
-        public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false) 
+        public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false) where T:IComparable<T>
         {
             T retVal = default(T);
 
@@ -471,18 +473,24 @@ namespace JTIS.Console
                 msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg}[/]";
             }
             msg = $"{msg}[{AnsiConsole.Foreground} on {AnsiConsole.Background}]{Environment.NewLine} : [/]";
+            var showDefVal = false;
+            if (default(T) != null &&  default(T).CompareTo(defVal)!=0)
+            {
+                showDefVal = true;
+            }
             
+            var tp = new TextPrompt<T>(msg);
             if (allowEmpty)
             {
-                retVal = AnsiConsole.Prompt<T>(
-                    new TextPrompt<T>(msg)
-                        .AllowEmpty());
+                tp.AllowEmpty();
             }
-            else 
+            if (showDefVal)
             {
-                retVal = AnsiConsole.Prompt<T>(
-                    new TextPrompt<T>(msg));
+                tp.DefaultValue<T>(defVal);
             }
+
+            retVal = AnsiConsole.Prompt<T>(tp);
+
             if (allowEmpty == false && retVal == null )
             {
                 PressAnyKeyToContinue("[[Empty] is not allowed, please try again");

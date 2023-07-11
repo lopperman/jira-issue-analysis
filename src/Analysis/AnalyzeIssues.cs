@@ -145,10 +145,6 @@ namespace JTIS.Analysis
                     }
                 }
             }
-            // var filteredItems = JCalcs.Where(x=>_issueTypeFilter.IsFiltered(x.IssueObj.IssueType)).ToList();
-            // int totalCount = filteredItems.Count;
-
-            // foreach (var ic in filteredItems)
 
         }
 
@@ -615,12 +611,13 @@ namespace JTIS.Analysis
 
                 AnsiConsole.Write(new Rule($"[dim]Current Status:[/][bold] ({ic.IssueObj.StatusName.ToUpper()})[/]{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
-
-
-                // AnsiConsole.Write(new Rule($"{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
-
                 // LAST SUMMARY 'RULE' LINE
                 AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});                
+
+                if (CfgManager.config.issueNotes.HasNote(ic.IssueObj.Key))
+                {
+                    AnsiConsole.MarkupLine($"[bold darkred_1 on cornsilk1]ISSUE NOTE: [/]{CfgManager.config.issueNotes.GetNote(ic.IssueObj.Key)}");
+                }
 
                 var tbl = new Table();
                 tbl.NoSafeBorder();
@@ -641,7 +638,7 @@ namespace JTIS.Analysis
                 //status, first entered, last entered, last exit, entered count, active/passive/etc, caltime, bustime
                 List<StatusSummary> ssList = new List<StatusSummary>();
                 foreach (StateCalc sc in ic.StateCalcs)
-                {
+                {                    
                     StatusSummary? ss = null;
                     if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
                     {
@@ -815,28 +812,80 @@ namespace JTIS.Analysis
                     AnsiConsole.Write(tbl);
                 }
 
-                if (writeCount == totalCount)
+                if (writeAll == false)
                 {
-                    AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
-                    ConsoleUtil.PressAnyKeyToContinue($"Showing {writeCount} / {totalCount} results");
-                }
-                else 
-                {
-                    if (writeAll == false)
+                    AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});                                                
+                    var waitLoop = true;
+                    string? resp = string.Empty;
+                    var currentTop = System.Console.GetCursorPosition().Top;
+                    while (waitLoop)
                     {
-                        AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
-                        string? resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
-                        if (resp.StringsMatch("A"))
+                        resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'N' to add an Issue note,  A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+
+                        if (resp.StringsMatch("N"))
                         {
-                            WriteIssueSummary(true);
-                            return;
+                            IssueNotesUtil.AddEdit(ic.IssueObj.Key, false);
+                            ConsoleUtil.ClearLinesBackTo(currentTop);
                         }
-                        else if (resp.StringsMatch("X"))
+                        else 
                         {
-                            return;
+                            waitLoop = false;
+                            break;
                         }
                     }
+
+                    if (resp.StringsMatch("A"))
+                    {
+                        WriteIssueSummary(true);
+                        return;
+                    }
+                    else if (resp.StringsMatch("X"))
+                    {
+                        return;
+                    }
                 }
+
+
+
+                // if (writeCount == totalCount)
+                // {
+                //     AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
+                //     ConsoleUtil.PressAnyKeyToContinue($"Showing {writeCount} / {totalCount} results");
+                // }
+                // else 
+                // {
+                //     if (writeAll == false)
+                //     {
+                //         AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});                                                
+                //         var waitLoop = true;
+                //         string? resp = string.Empty;
+                //         var currentTop = System.Console.GetCursorPosition().Top;
+                //         while (waitLoop)
+                //         {
+                //             resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'N' to add an Issue note,  A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                //             if (resp.StringsMatch("N"))
+                //             {
+                //                 IssueNotesUtil.AddEdit(ic.IssueObj.Key, false);
+                //                 ConsoleUtil.ClearLinesBackTo(currentTop);
+                //             }
+                //             else 
+                //             {
+                //                 waitLoop = false;
+                //                 break;
+                //             }
+                //         }
+
+                //         if (resp.StringsMatch("A"))
+                //         {
+                //             WriteIssueSummary(true);
+                //             return;
+                //         }
+                //         else if (resp.StringsMatch("X"))
+                //         {
+                //             return;
+                //         }
+                //     }
+                // }
                 
             }
         }

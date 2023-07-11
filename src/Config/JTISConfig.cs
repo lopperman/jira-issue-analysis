@@ -18,7 +18,7 @@ namespace JTIS.Config
             get{
                 if (_issNotes == null) {_issNotes = new IssueNotes();}
                 return _issNotes;
-            }
+            }       
             set{
                 _issNotes = value;
             }
