@@ -100,22 +100,22 @@ namespace JTIS
                 string key1 = "";
                 string key2 = "";
 
-                key1 = "00-All IsBlocked";
-                key2 = "00-All NotBlocked";
+                key1 = $"00-[bold]ALL[/] Is [bold]Blocked[/]";
+                key2 = $"00-[bold]ALL[/] NotBlocked";
                 AddMissingKey(key1, ref dict);
                 AddMissingKey(key2, ref dict);
                 string useKey = blocked ? key1 : key2;
                 dict[useKey]+=1;
 
-                key1 = $"01-Type {issue.issue.Type.Name} IsBlocked";
-                key2 = $"01-Type {issue.issue.Type.Name} NotBlocked";
+                key1 = $"01-[dim]Type[/] [bold]{issue.issue.Type.Name.ToUpper()}[/] Is [bold]Blocked[/]";
+                key2 = $"01-[dim]Type[/] [bold]{issue.issue.Type.Name.ToUpper()}[/] NotBlocked";
                 AddMissingKey(key1, ref dict);
                 AddMissingKey(key2, ref dict);
                 useKey = blocked ? key1 : key2;
                 dict[useKey]+=1;
 
-                key1 = $"02-Status {issue.issue.Status.Name} IsBlocked";
-                key2 = $"02-Status {issue.issue.Status.Name} NotBlocked";
+                key1 = $"02-[dim]Status[/] [bold]{issue.issue.Status.Name.ToUpper()}[/] Is [bold]Blocked[/]";
+                key2 = $"02-[dim]Status[/] [bold]{issue.issue.Status.Name.ToUpper()}[/] NotBlocked";
                 AddMissingKey(key1, ref dict);
                 AddMissingKey(key2, ref dict);
                 useKey = blocked ? key1 : key2;

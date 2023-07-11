@@ -14,8 +14,8 @@ namespace JTIS{
         public static bool IsDev
         {
             get{
-                return false;
-                // return Environment.UserName.StringsMatch("paulbrower");
+                // return false;
+                return Environment.UserName.StringsMatch("paulbrower");
             }
         }
 
@@ -36,15 +36,15 @@ namespace JTIS.Menu
     {
         private static MenuEnum? exitMenu;        
         private static MenuEnum lastMenu = MenuEnum.meMain;
-//        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}","---"),"  ");
         private static MenuFunction menuSeparator = MenuFunction.Separator;
-//        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
-     
-        
+
+        private static MenuFunction menuGroupheader(string menuTitle)
+        {
+            return MenuFunction.GroupHeader(menuTitle);
+        }
         public static IEnumerable<T> MultiSelect<T>(string title, List<T> choices, int pageSize = 10, bool required = false) where T:notnull
         {
                 ConsoleUtil.WriteAppTitle();
-
                 var msp = new MultiSelectionPrompt<T>()
                     .Title(title)
                     .Required(required)
@@ -54,54 +54,24 @@ namespace JTIS.Menu
                         "[grey](Press [blue]<space>[/] to toggle a choice, " + 
                         "[green]<enter>[/] to accept)[/]")
                     .AddChoices(choices);
-
                 var response = AnsiConsole.Prompt(msp);
-
-                return response;
-
-        }
-
-        public static IEnumerable<string> MenuMultiSelect(string title, List<string> choices,  int pageSize = 10, bool required = false)
-        {
-
-                ConsoleUtil.WriteAppTitle();
-
-                var msp = new MultiSelectionPrompt<string>()
-                    .Title(title)
-                    .Required(required)
-                    .PageSize(pageSize)
-                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
-                    .InstructionsText(
-                        "[grey](Press [blue]<space>[/] to toggle a choice, " + 
-                        "[green]<enter>[/] to accept)[/]")
-                    .AddChoices(choices);
-
-                var response = AnsiConsole.Prompt(msp);
-
                 return response;
         }
-
 
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
-        {
-            //MenuEnum finalMenu = returnToMenu ?? MenuEnum.meMain;
-            
+        {            
             exitMenu = null;
             if (returnToMenu != null)
             {
                 exitMenu = returnToMenu;
             }
-
             if (item.MenuItem == MenuItemEnum.miSeparator)
             {
                 ShowMenu(lastMenu);
                 return;
-            }
-
-            
+            }            
             switch (item.MenuItem)
             {
-
 #region MENUS - MENU ITEMS                
                 case MenuItemEnum.miMenu_Main:
                     exitMenu = MenuEnum.meMain;
@@ -123,6 +93,9 @@ namespace JTIS.Menu
                     break;
                 case MenuItemEnum.miMenu_Issue_Summary_Visualization:
                     exitMenu = MenuEnum.meIssue_Summary_Visualization;
+                    break;
+                case MenuItemEnum.miMenu_Dev:
+                    exitMenu = MenuEnum.meDev;
                     break;
 #endregion
 //miMenu_Issue_Summary_Visualization
@@ -320,16 +293,10 @@ namespace JTIS.Menu
             }
             ShowMenu(exitMenu.Value);
         }
-
         private static void Dev2()
         {
-
             ConsoleUtil.PressAnyKeyToContinue();
         }
-
-
-
-
         private static void Dev1()
         {
 
@@ -423,11 +390,6 @@ namespace JTIS.Menu
 
         }
 
-
-
-        
-
-
         private static void CheckMinConsoleSize(int cWidth, int cHeight)
         {
             AnsiConsole.WriteLine("checking minimum console ");
@@ -448,6 +410,20 @@ namespace JTIS.Menu
             }
 
         }
+        private static void ShowMenu_DEV()
+        {
+            lastMenu = MenuEnum.meConfig;
+            BuildMenuPanel(MenuEnum.meConfig);
+            var ret = new List<MenuFunction>();
+            var sp = new SelectionPrompt<MenuFunction>();            
+            sp.PageSize = 16;
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2"));
+
+            AddCommonMenuItems(sp,MenuEnum.meDev);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+  
+        }
 
         private static void ShowMenu_Config()
         {
@@ -457,16 +433,6 @@ namespace JTIS.Menu
 
             var sp = new SelectionPrompt<MenuFunction>();            
             sp.PageSize = 16;
-
-            // sp.AddChoices(menuItems);
-            // if (JTIS.Info.IsDev)
-            // {
-            //     sp.AddChoiceGroup(
-            //         menuSeparator, 
-            //         MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"), 
-            //         MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2")
-            //         );
-            // }
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));            
             sp.AddChoiceGroup(MenuFunction.GroupHeader("JIRA CONNECTION PROFILES"), 
@@ -483,12 +449,23 @@ namespace JTIS.Menu
                 MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"), 
                 MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone")
             );            
+            AddCommonMenuItems(sp,MenuEnum.meConfig);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+        }
+
+        private static void  AddCommonMenuItems(SelectionPrompt<MenuFunction> sp, MenuEnum fromMenu)
+        {
+            if (Info.IsDev && fromMenu != MenuEnum.meDev)
+            {
+                sp.AddChoice(new MenuFunction(MenuItemEnum.miMenu_Dev,"Developer","[bold blue on white]Developer[/]"));
+            }
             sp.AddChoice(MenuFunction.Separator);
-            sp.AddChoice(new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"));
+            if (fromMenu != MenuEnum.meMain)
+            {
+                sp.AddChoice(new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"));
+            }
             sp.AddChoice(new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
-              sp.DisabledStyle = new Style(AnsiConsole.Foreground,AnsiConsole.Background,Decoration.Italic);
-            var mnu = AnsiConsole.Prompt(sp);
-            MenuManager.Execute(mnu);            
+
         }
         public static void ShowMenu(MenuEnum menu)
         {
@@ -582,6 +559,12 @@ namespace JTIS.Menu
             AnsiConsole.MarkupLine(title);
             AnsiConsole.Write(new Rule().HeavyBorder());
 
+        }
+
+        public static bool IsMenu(MenuItemEnum mi)
+        {
+            var miString = Enum.GetName(typeof(MenuItemEnum),mi);
+            return miString.StringsMatch("miMenu",StringCompareType.scStartsWith);
         }
 
         private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null)

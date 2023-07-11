@@ -40,6 +40,7 @@ namespace JTIS.Menu
         miIssue_Summary_Visualization_Epic, 
         miMenu_StatusConfig, 
         miMenu_JQL, 
+        miMenu_Dev, 
         miDev1, 
         miDev2, 
         miChangeTimeZoneDisplay, 
@@ -134,14 +135,16 @@ namespace JTIS.Menu
             {
                 MenuNameMarkup = $"[dim]{menuTitleMarkup}[/]";
             }
+            if (MenuManager.IsMenu(menuItem))
+            {
+                emoji = Emoji.Known.Llama;
+                var title = MenuName.Replace("Menu:","").Trim();
+                var markupTitle = $"[bold]MENU: [/]{title.Trim().ToUpper()}";                
+                menuTitleMarkup = markupTitle;
+            }
             if (emoji == null){emoji = Emoji.Known.SmallBlueDiamond;}
             if (emoji != null){emoji = $"{emoji}  ";}
             MenuNameMarkup = $"{emoji ?? string.Empty}{menuTitleMarkup}";
-            if (MenuNameMarkup.ToLower().Contains("menu:"))
-            {
-                var nwMain = "Menu:";
-                MenuNameMarkup = MenuNameMarkup.Replace("Menu:",$"[bold]{nwMain}[/]",ignoreCase:true,CultureInfo.InvariantCulture);
-            }
             MenuItem = menuItem;
         }
 
