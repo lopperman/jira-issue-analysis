@@ -142,19 +142,21 @@ namespace JTIS
                     {
                         Markup? toVal;
                         Markup? frVal;
+                        Markup? changeDt;
                         if ((cli.FieldName.ToLower()=="status"))
                         {
                             toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue} [/]");
-                            frVal = Markup.FromInterpolated($"[blue on white] {cli.FromValue} [/]");
+                            frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue} [/]");
+                            changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.ToString()} [/]");
                         }
                         else 
                         {
                             toVal = Markup.FromInterpolated($"{cli.ToValue}");
                             frVal = Markup.FromInterpolated($"{cli.FromValue}");
+                            changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.ToString()}");
+                            //new Text(changeLog.CreatedDate.ToString())
                         }
-                        // string toVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[bold blue on white] {cli.ToValue} [/]") : cli.ToValue;
-                        // string frVal = (cli.FieldName.ToLower()=="status") ? string.Format($"[dim blue on white] {cli.FromValue} [/]") : cli.FromValue;
-                        tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), new Text(changeLog.CreatedDate.ToString()),frVal,toVal});
+                        tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
                         
                     }
                 }

@@ -33,8 +33,6 @@ namespace JTIS
 
         private void CheckIssueTypeFilter()
         {
-            //        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-            //var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
             _issueTypeFilter.Clear();
             foreach (var issType in jtisIssues.Select(x=>x.issue.Type.Name).Distinct())
@@ -54,9 +52,7 @@ namespace JTIS
                     }
                 }
             }
-
         }
-
 
         public void BuildSearch()
         {
@@ -78,7 +74,6 @@ namespace JTIS
             ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
             BuildBlockedNonBlocked(false,false);
             ConsoleUtil.PressAnyKeyToContinue($"NEXT: ???");
-
         }
 
         private void AddMissingKey(string key, ref SortedDictionary<string,double> dic)
@@ -193,9 +188,9 @@ namespace JTIS
             SortedDictionary<string,double> statusPercents = new SortedDictionary<string, double>();
             foreach (var tmpStatus in statuses)
             {   
-                var pct = Math.Round((double)filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)filtered.Count,2);
+                var pct = (double)filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)filtered.Count;
                 statusCounts.Add(tmpStatus,filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
-                statusPercents.Add(tmpStatus,Math.Round((pct*100),2));
+                statusPercents.Add(tmpStatus,pct);
 
             }
             var cht = new BreakdownChart();
@@ -203,6 +198,7 @@ namespace JTIS
             cht.FullSize().ShowTags();
             cht.ShowTagValues();
             chtPerc.FullSize().ShowPercentage().ShowTags();
+            chtPerc.UseValueFormatter(x=>$"{x:0.00%}");
             int clr = 1;
             foreach (var kvp in statusCounts)
             {
@@ -215,9 +211,14 @@ namespace JTIS
                 chtPerc.AddItem(kvp.Key,kvp.Value,clr);
                 clr +=1;
             }
-            
-            AnsiConsole.Write(new Panel(cht).Expand().Header("ISSUE STATUS BREAKDOWN (COUNT)",Justify.Center));
-            AnsiConsole.Write(new Panel(chtPerc).Expand().Header("ISSUE STATUS BREAKDOWN (PERCENT)",Justify.Center));
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Rule("ISSUE STATUS BREAKDOWN (COUNT/PERC)").Centered());
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Panel(cht).Expand().Header("ISSUE STATUS BREAKDOWN (COUNT)",Justify.Center).NoBorder());
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Panel(chtPerc).Expand().Header("ISSUE STATUS BREAKDOWN (PERCENT)",Justify.Center).NoBorder());
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Rule("~~~").Centered());
 
             if (showDetail)
             {

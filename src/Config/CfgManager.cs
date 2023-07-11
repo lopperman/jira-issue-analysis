@@ -1,5 +1,6 @@
 using System.Data;
 using JTIS.Console;
+using JTIS.Data;
 using JTIS.Extensions;
 using Newtonsoft.Json;
 using Spectre.Console;
@@ -8,7 +9,22 @@ namespace JTIS.Config
 {
     public static class CfgManager
     {
+        private static jtisRefData? _refData;
         private static JTISConfig? _config ;
+
+        public static jtisRefData RefData{
+            get{
+                if (config == null || JiraUtil.JiraRepo == null)
+                {
+                    throw new InvalidOperationException("JiraRepo not initialized");
+                }
+                else if (_refData == null)
+                { 
+                    _refData = jtisRefData.Create(config);
+                }
+                return _refData;
+            }
+        }
 
         public static JTISConfig? config
         {
@@ -40,6 +56,7 @@ namespace JTIS.Config
                         cfgList.Add(value);
                     }
                     _config = value;
+                    _refData = null;
                 }
                 else 
                 {

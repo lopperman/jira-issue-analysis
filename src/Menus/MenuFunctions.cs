@@ -29,11 +29,11 @@ namespace JTIS.Menu
     }
     public enum MenuItemEnum
     {
-        miSeparator = 0, 
-        miMenu_Main = 1, 
+        miMenuGroupHeader = -2, 
+        miSeparator = -1, 
+        miMenu_Main = 0, 
         miMenu_Config, 
         miMenu_Advanced_Search, 
-        // miMenu_Dev, 
         miMenu_IssueStates, 
         miMenu_Issue_Summary_Visualization, 
         miIssue_Summary_Visualization, 
@@ -77,6 +77,7 @@ namespace JTIS.Menu
         public string MenuName {get;private set;}
         public string? MenuNameMarkup {get; private set;}
         public MenuItemEnum MenuItem {get; private set;}
+        public bool Disabled {get;set;}
 
         public MenuFunction()
         {
@@ -85,8 +86,49 @@ namespace JTIS.Menu
             
         }
 
+        public static MenuFunction Separator
+        {
+            get
+            {
+                var mf = new MenuFunction();
+                mf.MenuName = $"\t\t--- --- ---";
+                mf.MenuItem = MenuItemEnum.miSeparator;
+                mf.MenuNameMarkup = $"[dim]{mf.MenuName}[/]";
+                mf.Disabled = true;
+                return mf;
+            }
+        }
+
+        public static MenuFunction GroupHeader(string menuTitle)
+        {
+            var mf = new MenuFunction();
+            mf.MenuName = Markup.Remove(menuTitle);
+            mf.MenuItem = MenuItemEnum.miMenuGroupHeader;
+            Color menuForecolor = AnsiConsole.Background;
+            Color menuBackcolor = AnsiConsole.Foreground;
+            mf.MenuNameMarkup = $"[dim]{mf.MenuName}[/]";
+            mf.Disabled = true;
+            return mf;
+        }
         public MenuFunction(MenuItemEnum menuItem, string menuTitle, string menuTitleMarkup, bool dimItem = false, string? emoji = null)
         {
+            if (menuItem == MenuItemEnum.miSeparator)
+            {
+                MenuName = $"\t\t--- --- ---";
+                MenuItem = MenuItemEnum.miSeparator;
+                MenuNameMarkup = $"[dim]{MenuName}[/]";
+                Disabled = true;                
+                return;
+            } 
+            else if (menuItem == MenuItemEnum.miMenuGroupHeader)
+            {
+                var gh = MenuFunction.GroupHeader(menuTitle);
+                MenuName=gh.MenuName;
+                menuItem=gh.MenuItem;
+                Disabled=gh.Disabled;
+                MenuNameMarkup = gh.MenuNameMarkup;
+                return;
+            }
             MenuName = menuTitle;
             if (dimItem == true)
             {

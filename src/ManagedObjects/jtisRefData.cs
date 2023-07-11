@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Atlassian.Jira;
+using JTIS.Config;
 using JTIS.Console;
+using JTIS.Extensions;
 using Spectre.Console;
 
 namespace JTIS.Data
@@ -11,34 +13,115 @@ namespace JTIS.Data
         // private int _totReturnCount;
         // private int _nextStart;
         private JiraRepo? repo = null;
-        private List<Project> _projectList = new List<Project>();
-        public IReadOnlyList<Project> Projects {get{return _projectList;}}
+        public Project? project {get;private set;}
+        private List<CustomField> _customFieldsList = new List<CustomField>();
+        private SortedDictionary<string,List<IssueType>> _projectIssueTypes = new SortedDictionary<string, List<IssueType>>();
 
-            
-        public static jtisRefData Create(JiraRepo jRepo)
+        private SortedDictionary<string,List<CustomField>> _projectCustomFields = new SortedDictionary<string, List<CustomField>>();
+        // public IReadOnlyList<Project> Projects {get{return _projectList;}}
+        public IReadOnlyList<CustomField> CustomFields {get{return _customFieldsList;}}
+        public IReadOnlyList<IssueType>? ProjectIssuesTypes(string prjKey)
         {
-            var instance = new jtisRefData();
-            instance.repo = jRepo;            
-            Task.WaitAll(instance.Initialize());
-            return instance;
-        }        
-
-        private async Task Initialize()
-        {
-            var prj = await Task.WhenAll(GetProjectsAsync());            
-            foreach (var p in prj)
+            if (_projectIssueTypes.ContainsKey(prjKey))
             {
-                _projectList.AddRange(p);
+                return _projectIssueTypes.Single(x=>x.Key==prjKey).Value;
+            }
+            else 
+            {
+                return null;
             }
         }
-        private async Task<IEnumerable<IssueType>> GetProjectIssueTypesAsync(Project prj)
+        public IReadOnlyList<CustomField>? ProjectCustomFields(string prjKey)
         {
-            return await prj.GetIssueTypesAsync();
-        }
-        private async Task<IEnumerable<Project>> GetProjectsAsync()
+            if (_projectCustomFields.ContainsKey(prjKey)){
+                return _projectCustomFields.Single(x=>x.Key==prjKey).Value;
+            } else {
+                return null;
+            }
+        }            
+
+        public static jtisRefData Create(JTISConfig cfg)
         {
-            return await repo.jira.Projects.GetProjectsAsync();
+            var instance = new jtisRefData();
+            instance.repo = cfg.jiraRepo;
+            instance.project = cfg.jira.Projects.GetProjectAsync(cfg.defaultProject).GetAwaiter().GetResult();            
+            Task.WaitAll(instance.Initialize());
+            Task.WaitAll(instance.InitializeProjects());
+            return instance;
+        }        
+        private async Task Initialize()
+        {
+            List<Task> tasks = new List<Task>();
+            // tasks.Add(GetProjectsAsync());
+            tasks.Add(GetCustomFieldsAsync());
+            await Task.WhenAll(tasks);
+
         }
+        private async Task InitializeProjects()
+        {
+            List<Task> tasks = new List<Task>();
+            tasks.Add(GetProjectIssueTypesAsync());
+            tasks.Add(GetProjectCustomFieldsAsync());
+            await Task.WhenAll(tasks[0]);
+            await Task.WhenAll(tasks[1]);
+
+        }
+        // private async Task  GetProjectsAsync()
+        // {
+        //     var prjTask = repo.jira.Projects.GetProjectsAsync();
+        //     await Task<IEnumerable<Project>>.WhenAny(prjTask);
+        //     _projectList.AddRange(prjTask.Result);
+        // }
+        private async Task  GetCustomFieldsAsync()
+        {
+            Task<IEnumerable<CustomField>> fldsTask = repo.jira.Fields.GetCustomFieldsAsync();
+            await Task<IEnumerable<CustomField>>.WhenAny(fldsTask);
+            _customFieldsList.AddRange(fldsTask.Result);
+        }
+        private async Task  GetProjectIssueTypesAsync()
+        {
+            Task<IEnumerable<IssueType>> issTypesTask = project.GetIssueTypesAsync();
+            var issType = await Task.WhenAny(issTypesTask);
+            await issType;
+            if (_projectIssueTypes.ContainsKey(project.Key)){
+                _projectIssueTypes[project.Key].AddRange(issType.Result);
+            } else {
+                _projectIssueTypes.Add(project.Key,issType.Result.ToList());
+            }
+        }
+        private async Task  GetProjectCustomFieldsAsync()
+        {
+                
+            CustomFieldFetchOptions options = new CustomFieldFetchOptions();
+            options.ProjectKeys.Add(project.Key);                
+            Task<IEnumerable<CustomField>> cstmFieldsTask = repo.jira.Fields.GetCustomFieldsAsync(options);
+            var cstmFields = Task.WhenAny(cstmFieldsTask);
+
+            await cstmFields;
+            if (_projectCustomFields.ContainsKey(project.Key))
+            {
+                _projectCustomFields[project.Key].AddRange(cstmFields.Result.Result);
+            }
+            else 
+            {
+                _projectCustomFields.Add(project.Key,cstmFields.Result.Result.ToList());
+            }
+        }
+
+        // private async Task  GetCustomProjectFieldsAsync()
+        // {
+        //     CustomFieldFetchOptions options = new CustomFieldFetchOptions();
+        //     options.
+        //     foreach (var prj in _projectList)
+        //     {
+        //         Task
+        //     }
+        //     repo.jira.Fields.GetCustomFieldsForProjectAsync()
+        //         // Task<IEnumerable<IssueType>> issTypesTask = prj.GetIssueTypesAsync();
+        //         // await Task.WhenAll(issTypesTask);
+        //         // _projectIssueTypes.Add(prj.Key,issTypesTask.Result.ToList());                
+        // }
+
 
         // private async Task<IPagedQueryResult<Issue>> IssuesAsync(string jql)
         // {

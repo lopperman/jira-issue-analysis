@@ -1,3 +1,4 @@
+using System.Linq;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
@@ -13,7 +14,8 @@ namespace JTIS{
         public static bool IsDev
         {
             get{
-                return Environment.UserName.StringsMatch("paulbrower");
+                return false;
+                // return Environment.UserName.StringsMatch("paulbrower");
             }
         }
 
@@ -34,7 +36,8 @@ namespace JTIS.Menu
     {
         private static MenuEnum? exitMenu;        
         private static MenuEnum lastMenu = MenuEnum.meMain;
-        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}","---"),"  ");
+//        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("{0}{0}{0}","---"),"  ");
+        private static MenuFunction menuSeparator = MenuFunction.Separator;
 //        private static MenuFunction menuSeparator = MakeMenuDetail(MenuItemEnum.miSeparator,string.Format("Connect to different Jira",Emoji.Known.WavyDash),Emoji.Known.WavyDash);
      
         
@@ -330,13 +333,33 @@ namespace JTIS.Menu
         private static void Dev1()
         {
 
-            var refData = jtisRefData.Create(JiraUtil.JiraRepo);
-            foreach (var p in refData.Projects)
+            var refData = jtisRefData.Create(CfgManager.config);
+
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.Write(new Rule("PROJECT ISSUE TYPES"));
+            AnsiConsole.Write(new Rule());
+            foreach (var issType in refData.ProjectIssuesTypes(refData.project.Key))
             {
-                AnsiConsole.WriteLine($"Id: {p.Id}, Name: {p.Name}, Key: {p.Key}");                
+                AnsiConsole.WriteLine($"Id: {issType.Id}, Name: {issType.Name}, Statuses Count: {issType.Statuses.Count()}");
+            }
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.Write(new Rule("PROJECT CUSTOM FIELDS"));
+            AnsiConsole.Write(new Rule());
+            foreach (var cstmFld in refData.ProjectCustomFields(refData.project.Key))
+            {
+                AnsiConsole.WriteLine($"Id: {cstmFld.Id}, Custom Field Name: {cstmFld.Name}, Custom Type: {cstmFld.CustomType.ToString()}");
             }
 
-            ConsoleUtil.PressAnyKeyToContinue();            
+            AnsiConsole.Write(new Rule());
+            AnsiConsole.Write(new Rule("ALL CUSTOM FIELDS"));
+            AnsiConsole.Write(new Rule());
+            foreach (var f in refData.CustomFields)
+            {
+                AnsiConsole.WriteLine($"*CUSTOM FIELD (all)* Id: {f.Id}, Custom Field Name: {f.Name}, Custom Type: {f.CustomType.ToString()}");
+            }
+            
+
+       
 
             // var resp = MenuManager.MenuMultiSelect("choose things",new string[]{"[bold]paul[/]","brower","emily","ethan","chase"});
             // if (resp != null && resp.Count() > 0)
@@ -425,8 +448,55 @@ namespace JTIS.Menu
             }
 
         }
+
+        private static void ShowMenu_Config()
+        {
+            lastMenu = MenuEnum.meConfig;
+            BuildMenuPanel(MenuEnum.meConfig);
+            var ret = new List<MenuFunction>();
+
+            var sp = new SelectionPrompt<MenuFunction>();            
+            sp.PageSize = 16;
+
+            // sp.AddChoices(menuItems);
+            // if (JTIS.Info.IsDev)
+            // {
+            //     sp.AddChoiceGroup(
+            //         menuSeparator, 
+            //         MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"), 
+            //         MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2")
+            //         );
+            // }
+
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));            
+            sp.AddChoiceGroup(MenuFunction.GroupHeader("JIRA CONNECTION PROFILES"), 
+                MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"), 
+                MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"), 
+                MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"), 
+                MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection")
+            );
+            sp.AddChoiceGroup(MenuFunction.GroupHeader("CONSOLE SESSION RECORDING"), 
+                MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"), 
+                MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file")
+            );
+            sp.AddChoiceGroup(MenuFunction.GroupHeader("MISCELLANEOUS"), 
+                MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"), 
+                MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone")
+            );            
+            sp.AddChoice(MenuFunction.Separator);
+            sp.AddChoice(new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"));
+            sp.AddChoice(new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
+              sp.DisabledStyle = new Style(AnsiConsole.Foreground,AnsiConsole.Background,Decoration.Italic);
+            var mnu = AnsiConsole.Prompt(sp);
+            MenuManager.Execute(mnu);            
+        }
         public static void ShowMenu(MenuEnum menu)
         {
+            if (menu == MenuEnum.meConfig)
+            {
+                ShowMenu_Config();
+                return;
+            }
 
             lastMenu = menu;
             BuildMenuPanel(menu);
@@ -501,10 +571,7 @@ namespace JTIS.Menu
         {
             AnsiConsole.Clear();
             var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
-
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {CfgManager.config.ToString()}[/]";  
-
-
             var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  {menuLabel}";
             // var panel = new Panel(title);
             // panel.Border = BoxBorder.Rounded;
