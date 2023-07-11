@@ -68,7 +68,8 @@ namespace JTIS.Menu
             {
                 ShowMenu(lastMenu);
                 return;
-            }            
+            }          
+
             switch (item.MenuItem)
             {
 #region MENUS - MENU ITEMS                
@@ -96,6 +97,12 @@ namespace JTIS.Menu
                 case MenuItemEnum.miMenu_Dev:
                     exitMenu = MenuEnum.meDev;
                     break;
+                case MenuItemEnum.miMenu_Change_Log:
+                    exitMenu = MenuEnum.meChangeLog;
+                    break;
+                case MenuItemEnum.miMenu_Issue_Notes:
+                    exitMenu = MenuEnum.meIssue_Notes;
+                    break;
 #endregion
 //miMenu_Issue_Summary_Visualization
 #region ISSUE VISUALIZATION
@@ -122,6 +129,21 @@ namespace JTIS.Menu
                     exitMenu = MenuEnum.meAdvanced_Search;
                     break; 
 #endregion
+
+#region ISSUE NOTE MENU ITEMS
+
+                case MenuItemEnum.miIssueNotesView:
+                    IssueNotesUtil.View();
+                    exitMenu = MenuEnum.meIssue_Notes;                    
+                    break;
+                case MenuItemEnum.miIssueNotesAdd:
+                    exitMenu = MenuEnum.meIssue_Notes;
+                    break;
+                case MenuItemEnum.miIssueNotesDelete:
+                    exitMenu = MenuEnum.meIssue_Notes;
+                    break;
+#endregion
+
 
 #region DEV MENU ITEMS
 
@@ -181,7 +203,7 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miSavedJQLDefault:
-                    CfgManager.CheckDefaultJQL(CfgManager.config);
+                    JQLUtil.CheckDefaultJQL(CfgManager.config);
                     ConsoleUtil.PressAnyKeyToContinue("Default JQL Verified/Added");
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
@@ -294,6 +316,18 @@ namespace JTIS.Menu
         }
         private static void Dev2()
         {
+            CfgManager.config.issueNotes.CreateNote("wwt-291","6 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-292","1/2 day");
+            CfgManager.config.issueNotes.CreateNote("wwt-293","5-66 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-294","6-8 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-295","3-5 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-296","3-5 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-297","3-5 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-302","2-4 days");
+            CfgManager.config.issueNotes.CreateNote("wwt-310","n/a");
+            CfgManager.config.issueNotes.CreateNote("wwt-311","n/a");
+            CfgManager.SaveConfigList();
+
             ConsoleUtil.PressAnyKeyToContinue();
         }
         private static void Dev1()
@@ -409,17 +443,46 @@ namespace JTIS.Menu
             }
 
         }
+
+        private static void ShowMenu_ChangeLog()
+        {
+            lastMenu = MenuEnum.meChangeLog;
+            BuildMenuPanel(lastMenu);
+            var sp = new SelectionPrompt<MenuFunction>();            
+            sp.PageSize = 16;
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
+
+            AddCommonMenuItems(sp,lastMenu);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+
+        }
+
+        private static void ShowMenu_IssueNotes()
+        {
+
+            lastMenu = MenuEnum.meIssue_Notes ;
+            BuildMenuPanel(lastMenu);
+            var sp = new SelectionPrompt<MenuFunction>();            
+            sp.PageSize = 16;
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "View Issue Notes"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "Add Issue Note"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "Delete Issue Note"));
+
+            AddCommonMenuItems(sp,lastMenu);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+
+        }
         private static void ShowMenu_DEV()
         {
-            lastMenu = MenuEnum.meConfig;
-            BuildMenuPanel(MenuEnum.meConfig);
-            var ret = new List<MenuFunction>();
+            lastMenu = MenuEnum.meDev;
+            BuildMenuPanel(lastMenu);
             var sp = new SelectionPrompt<MenuFunction>();            
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2"));
 
-            AddCommonMenuItems(sp,MenuEnum.meDev);
+            AddCommonMenuItems(sp,lastMenu);
             MenuManager.Execute(AnsiConsole.Prompt(sp));            
   
         }
@@ -427,9 +490,7 @@ namespace JTIS.Menu
         private static void ShowMenu_Config()
         {
             lastMenu = MenuEnum.meConfig;
-            BuildMenuPanel(MenuEnum.meConfig);
-            var ret = new List<MenuFunction>();
-
+            BuildMenuPanel(lastMenu);
             var sp = new SelectionPrompt<MenuFunction>();            
             sp.PageSize = 16;
 
@@ -448,7 +509,7 @@ namespace JTIS.Menu
                 MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"), 
                 MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone")
             );            
-            AddCommonMenuItems(sp,MenuEnum.meConfig);
+            AddCommonMenuItems(sp,lastMenu);
             MenuManager.Execute(AnsiConsole.Prompt(sp));            
         }
 
@@ -468,6 +529,23 @@ namespace JTIS.Menu
         }
         public static void ShowMenu(MenuEnum menu)
         {
+            switch (menu)
+            {
+                case MenuEnum.meConfig:
+                    ShowMenu_Config();
+                    return;
+                case MenuEnum.meDev:
+                    ShowMenu_DEV();
+                    return;
+                case MenuEnum.meChangeLog:
+                    ShowMenu_ChangeLog();
+                    return;
+                case MenuEnum.meIssue_Notes:
+                    ShowMenu_IssueNotes();
+                    return;
+
+            }
+            
             if (menu == MenuEnum.meConfig)
             {
                 ShowMenu_Config();
@@ -484,20 +562,11 @@ namespace JTIS.Menu
                 sp.PageSize = 16;
 
                 sp.AddChoices(menuItems);
-                if (JTIS.Info.IsDev)
-                {
-                    sp.AddChoiceGroup(
-                        menuSeparator, 
-                        MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"), 
-                        MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2")
-                     );
-                }
 
                 if (menu == MenuEnum.meMain)
                 {
                     sp.AddChoiceGroup(
                             menuSeparator, 
-                            new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to other Jira Site","[dim]Connect to other Jira Site[/]"),
                             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
                 }
                 else 
@@ -505,7 +574,6 @@ namespace JTIS.Menu
                     sp.AddChoiceGroup(
                             menuSeparator, 
                             new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"),
-                            new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to different Jira","[dim]Connect to other Jira Site[/]"),
                             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
 
                 }                    
@@ -591,8 +659,12 @@ namespace JTIS.Menu
                 case (MenuEnum.meMain):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Issue_Summary_Visualization,"Menu: Issue Summary Visualization"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Change_Log,"Change Logs"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Issue_Notes,"Issue Notes"));
+
+
+                    // ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
+                    // ret.Add(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
 
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
@@ -610,24 +682,6 @@ namespace JTIS.Menu
                 break;
 
 
-//  CONFIG MENU //
-
-                case(MenuEnum.meConfig):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection"));
-
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"));
-
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file"));
-
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
-
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"));
-
-                break;
 
 //  ISSUE STATES MENU //
 

@@ -46,7 +46,7 @@ namespace JTIS.Data
             return instance;
         }        
         private async Task Initialize()
-        {
+            {
             List<Task> tasks = new List<Task>();
             // tasks.Add(GetProjectsAsync());
             tasks.Add(GetCustomFieldsAsync());

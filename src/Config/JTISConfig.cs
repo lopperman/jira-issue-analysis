@@ -3,13 +3,27 @@ using JTIS.Console;
 using JTIS.Extensions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-// using Newtonsoft.Json.Linq;
 using Spectre.Console;
 
 namespace JTIS.Config
 {
     public class JTISConfig
     {
+        
+        private IssueNotes? _issNotes;
+
+        [JsonProperty]
+        public IssueNotes? issueNotes 
+        {
+            get{
+                if (_issNotes == null) {_issNotes = new IssueNotes();}
+                return _issNotes;
+            }
+            set{
+                _issNotes = value;
+            }
+        }
+
         [JsonProperty("Key")]
         public Guid? Key {get;set;}
         
@@ -59,7 +73,9 @@ namespace JTIS.Config
         {
             //need for serialization
         }
-        private JTISConfig(string login, string token, string jiraRootUrl, string defPrj, int cfgId)
+
+
+        private JTISConfig(string login, string token, string jiraRootUrl, string defPrj, int cfgId):this()
         {
             userName = login;
             apiToken = token;
@@ -67,6 +83,7 @@ namespace JTIS.Config
             defaultProject = defPrj;
             _configId = cfgId;
             configName = string.Format("CFG{0:00} - {1} - {2}",configId,baseUrl,defaultProject);
+            issueNotes = new IssueNotes();
         }
 
         public static JTISConfig? Create(string login, string apiToken, string baseUrl, string defPrj, int cfgId)

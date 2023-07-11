@@ -19,6 +19,8 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
+            DEV.TEST.test1();
+            
             var r1 = new Tree("Brower Family");
             r1.Guide(TreeGuide.BoldLine);
             var r1n1 = r1.AddNode("Paul");
@@ -111,7 +113,7 @@ namespace JTIS
                         newConfigList.Add(newConfig);
                         CfgManager.SetConfigList(newConfigList);
                         CfgManager.config = newConfig;
-                        CfgManager.CheckDefaultJQL(newConfig);
+                        JQLUtil.CheckDefaultJQL(newConfig);
                         CfgManager.SaveConfigList();
                         ConsoleUtil.PressAnyKeyToContinue($"New configuration file has been created at '{CfgManager.ConfigFilePath}'");
                     }

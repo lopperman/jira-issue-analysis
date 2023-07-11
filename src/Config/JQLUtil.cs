@@ -1,5 +1,6 @@
 using JTIS.Config;
 using JTIS.Console;
+using JTIS.Extensions;
 using Spectre.Console;
 
 namespace JTIS
@@ -155,5 +156,35 @@ namespace JTIS
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
+
+        public static void CheckDefaultJQL(JTISConfig cfg)
+        {             
+
+            var blockedName = "(def) Blocked Work";
+            var editedName = "(def) Recent Updates";
+            var allInProgressName = "(def) Status Category In Progress";
+            var blockedJql = $"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
+            var editedJql = $"project={cfg.defaultProject} and updated >= -7d";
+            var allInProgressJql = $"project={cfg.defaultProject} and statusCategory=\"in progress\"";
+
+            var list = new SortedList<string,string>();
+            list.Add(blockedName,blockedJql);
+            list.Add(editedName,editedJql);
+            list.Add(allInProgressName,allInProgressJql);
+
+            foreach (var kvp in list)
+            {
+                var existJql = cfg.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
+                if (existJql == null || existJql.jql.StringsMatch(kvp.Value)==false)
+                {
+                    if (existJql != null)
+                    {
+                        cfg.DeleteJQL(existJql);
+                    }
+                    cfg.AddJQL(kvp.Key,kvp.Value);
+                }
+            }
+            CfgManager.SaveConfigList();
+        }        
     }
 }

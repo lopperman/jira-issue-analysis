@@ -38,7 +38,7 @@ namespace JTIS.Config
                 {
                     if (_config.SavedJQLCount == 0)
                     {
-                        CheckDefaultJQL(_config);
+                        JQLUtil.CheckDefaultJQL(_config);
                         SaveConfigList();
                     }
 
@@ -431,36 +431,7 @@ namespace JTIS.Config
             }
         }
 
-        public static void CheckDefaultJQL(JTISConfig? applyToConfig = null)
-        {             
-            if (applyToConfig == null && config != null)
-            {
-                applyToConfig = config;
-            }
-            if (applyToConfig == null){return;}
 
-            var blockedName = "(def) Blocked Work";
-            var editedName = "(def) Recent Updates";
-            var blockedJql = $"project={applyToConfig.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
-            var editedJql = $"project={applyToConfig.defaultProject} and updated >= -7d";
-
-            var list = new SortedList<string,string>();
-            list.Add(blockedName,blockedJql);
-            list.Add(editedName,editedJql);
-
-            foreach (var kvp in list)
-            {
-                var existJql = applyToConfig.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
-                if (existJql == null || existJql.jql.StringsMatch(kvp.Value)==false)
-                {
-                    if (existJql != null)
-                    {
-                        applyToConfig.DeleteJQL(existJql);
-                    }
-                    applyToConfig.AddJQL(kvp.Key,kvp.Value);
-                }
-            }
-        }
 
         public static string? GetSavedJQL(string title = "SELECT SAVED JQL")
         {

@@ -14,11 +14,13 @@ namespace JTIS.Menu
         meMain = 1, 
         meConfig, 
         meDev, 
+        meChangeLog, 
         meIssue_States, 
         meStatus_Config, 
         meJQL, 
         meAdvanced_Search, 
-        meIssue_Summary_Visualization
+        meIssue_Summary_Visualization, 
+        meIssue_Notes
     }
     public enum MenuItemEnum
     {
@@ -29,11 +31,16 @@ namespace JTIS.Menu
         miMenu_Advanced_Search, 
         miMenu_IssueStates, 
         miMenu_Issue_Summary_Visualization, 
+        miMenu_Issue_Notes, 
         miIssue_Summary_Visualization, 
         miIssue_Summary_Visualization_Epic, 
         miMenu_StatusConfig, 
         miMenu_JQL, 
         miMenu_Dev, 
+        miMenu_Change_Log,
+        miIssueNotesView, 
+        miIssueNotesAdd, 
+        miIssueNotesDelete, 
         miDev1, 
         miDev2, 
         miChangeTimeZoneDisplay, 
