@@ -1,9 +1,5 @@
-﻿using System;
-using System.Linq;
-using Atlassian.Jira;
-using JTIS.Config;
+﻿using Atlassian.Jira;
 using JTIS.Console;
-using Spectre.Console;
 
 namespace JTIS
 {

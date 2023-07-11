@@ -1,9 +1,5 @@
-using System.Diagnostics;
 using Atlassian.Jira;
 using JTIS.Config;
-using JTIS.Console;
-using JTIS.Extensions;
-using Spectre.Console;
 
 namespace JTIS.Data
 {

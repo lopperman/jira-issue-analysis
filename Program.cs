@@ -1,13 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using System.Net.Mime;
-using System.Diagnostics;
-using System.Text;
-using Atlassian.Jira;
-using JTIS.Config;
+﻿using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
 using JTIS.Menu;
-using Newtonsoft.Json;
 using Spectre.Console;
 
 namespace JTIS

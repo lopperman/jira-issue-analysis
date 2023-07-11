@@ -1,7 +1,5 @@
-﻿using System;
-using Atlassian.Jira;
+﻿using Atlassian.Jira;
 using JTIS.Analysis;
-using JTIS.Config;
 using JTIS.Console;
 using Newtonsoft.Json;
 

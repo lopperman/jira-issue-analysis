@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Atlassian.Jira;
-using JTIS.Console;
+﻿using JTIS.Console;
 using JTIS.Waiter;
 using Spectre.Console;
 
-namespace JTIS 
+namespace JTIS
 {
     public static class JEnvironmentConfig
     {

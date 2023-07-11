@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata;
-using System;
-using Spectre.Console;
+﻿using Spectre.Console;
 using JTIS.Console;
 
 namespace JTIS

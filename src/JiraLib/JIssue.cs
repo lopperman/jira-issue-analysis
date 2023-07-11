@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Atlassian.Jira;
+﻿using Atlassian.Jira;
 using JTIS.Extensions;
 using Newtonsoft.Json;
-using Spectre.Console;
 
 namespace JTIS
 {

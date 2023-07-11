@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
 using System.Text;
-using Atlassian.Jira;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;

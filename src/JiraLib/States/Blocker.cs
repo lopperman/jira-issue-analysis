@@ -1,6 +1,3 @@
-using System;
-
-
 namespace JTIS
 {
     public class Blocker

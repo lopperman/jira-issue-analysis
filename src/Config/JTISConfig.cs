@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 using Atlassian.Jira;
 using JTIS.Console;
 using JTIS.Extensions;

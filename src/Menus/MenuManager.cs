@@ -1,14 +1,13 @@
-using System.Linq;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.ManagedObjects;
 using JTIS.Analysis;
-using Atlassian.Jira;
 using JTIS.Extensions;
 using JTIS.Data;
 
-namespace JTIS{
+namespace JTIS
+{
     public static class Info
     {
         public static bool IsDev

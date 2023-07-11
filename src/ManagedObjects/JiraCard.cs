@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace JTIS
+﻿namespace JTIS
 {
     public class JiraCard
     {

@@ -1,19 +1,15 @@
-using System.ComponentModel.Design;
-using System.Security.Cryptography;
-using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
-using JTIS.ManagedObjects;
 using JTIS.Menu;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace JTIS
 {
-   public class ChangeLogsMgr
+    public class ChangeLogsMgr
     {
         private readonly AnalysisType _analysisType;
 

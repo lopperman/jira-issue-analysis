@@ -1,9 +1,7 @@
-using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
-using JTIS.ManagedObjects;
 using JTIS.Menu;
 using Spectre.Console;
 

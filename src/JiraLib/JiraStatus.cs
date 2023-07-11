@@ -2,10 +2,9 @@
 
 using System.Text.Json.Serialization;
 using JTIS.Analysis;
-using JTIS.Config;
 using Newtonsoft.Json.Linq;
 
-namespace JTIS 
+namespace JTIS
 {
     public class JiraStatus 
     {

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Atlassian.Jira;
-using Newtonsoft.Json;
-
 namespace JTIS
 {
     public class JCustomField

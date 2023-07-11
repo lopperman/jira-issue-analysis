@@ -1,11 +1,9 @@
-﻿using System.Text;
-using Atlassian.Jira;
+﻿using Atlassian.Jira;
 using Newtonsoft.Json;
 using RestSharp;
 using Newtonsoft.Json.Linq;
 using JTIS.Console;
 using JTIS.Data;
-using JTIS.Extensions;
 using Spectre.Console;
 
 namespace JTIS

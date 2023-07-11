@@ -1,8 +1,4 @@
-﻿using Spectre.Console;
-using Atlassian.Jira;
-using Newtonsoft.Json;
-
-namespace JTIS
+﻿namespace JTIS
 {
     public static class JHelper
     {

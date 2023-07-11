@@ -1,10 +1,9 @@
-using System.Text.RegularExpressions;
 using JTIS.Console;
 
 namespace JTIS
 {
 
-        public static class ColorUtil
+    public static class ColorUtil
         {
             public static IEnumerable<T> ReverseEnumerable<T>(this IEnumerable<T> source)
             {
