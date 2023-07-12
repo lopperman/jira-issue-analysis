@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using Atlassian.Jira;
 using JTIS.Extensions;
@@ -24,6 +25,24 @@ namespace JTIS.Data
         private SortedList<string,jtisIssue> _jtisIssues = new SortedList<string, jtisIssue>();
         private int duplicateCount = 0;
 
+        public SortedDictionary<string,int> IssueTypesCount
+        {
+            get{
+                SortedDictionary<string,int> response = new SortedDictionary<string,int>();
+                foreach (var issType in jtisIssuesList.Select(x=>x.jIssue.IssueType).Distinct<string>())
+                {
+                    response.Add(issType, jtisIssuesList.Count(x=>x.jIssue.IssueType.StringsMatch(issType)));
+                }
+                return response;
+            }
+
+        }
+        public int jtisIssueCount
+        {
+            get{
+                return _jtisIssues.Count();
+            }
+        }
         public int EpicCount
         {
             get{
@@ -31,7 +50,7 @@ namespace JTIS.Data
             }
         }
 
-        
+
 
         public void  AddExternalJtisIssues(IEnumerable<jtisIssue> issues)
         {

@@ -11,21 +11,18 @@ namespace JTIS
 {
     public class ChangeLogsMgr
     {
-        private readonly AnalysisType _analysisType;
-
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-        private List<jtisIssue> _jtisIssues = new List<jtisIssue>();
-        private string? searchJQL = null;
+        private jtisIssueData? _jtisIssueData = null;
         private string? _exportPath = null;
-        
+        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
 
         public ChangeLogsMgr(AnalysisType analysisType)
         {
-            this._analysisType = analysisType;
+            if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
+            _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+
             bool doExport = false;
-            if (!BuildSearch()) return;
-            PopulateIssuesAction();
-            if (_jtisIssues.Count > 0)
+            if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {
                 if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
                 {
@@ -69,14 +66,11 @@ namespace JTIS
 
         private void CheckIssueTypeFilter()
         {
-            //        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-            //var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
-
             _issueTypeFilter.Clear();
-            foreach (var issType in _jtisIssues.Select(x=>x.issue.Type.Name).Distinct())
+            foreach (var kvp in _jtisIssueData.IssueTypesCount)
             {
-                int cnt = _jtisIssues.Count(x=>x.issue.Type.Name.StringsMatch(issType));
-                _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
+                _issueTypeFilter.AddFilterItem(kvp.Key,$"Count: {kvp.Value}");
+
             }
             if (_issueTypeFilter.Count > 1)
             {
@@ -98,7 +92,7 @@ namespace JTIS
         {
             CheckIssueTypeFilter();
 
-            var filtered = _jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
             foreach (var iss in filtered)
             {
@@ -179,9 +173,9 @@ namespace JTIS
                     {
                         writer.WriteLine("jiraKEY,issueType,summary,changeLogTime,fieldName,fromStatus,toStatus");
 
-                        for (int j = 0; j < _jtisIssues.Count; j++)
+                        for (int j = 0; j < _jtisIssueData.jtisIssueCount; j++)
                         {
-                            var jIss = _jtisIssues[j].jIssue;
+                            var jIss = _jtisIssueData.jtisIssuesList[j].jIssue;
                             for (int i = 0; i < jIss.ChangeLogs.Count; i++)
                             {
                                 foreach (JIssueChangeLogItem cli in jIss.ChangeLogs[i].Items)
@@ -199,57 +193,6 @@ namespace JTIS
                 ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{ExportPath}[/]");
         }
 
-        private bool BuildSearch()
-        {
-            switch(_analysisType)
-            {
-                case AnalysisType.atIssues:
-                case AnalysisType.atJQL:                    
-                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
-                    break;
-                case AnalysisType.atEpics:
-                    searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,true);
-                    break;
-                default:
-                    throw new NotImplementedException($"ChangeLogsMgs does not support AnalysisType: {Enum.GetName(typeof(AnalysisType),_analysisType)}");
-            }
-            return (searchJQL != null && searchJQL.Length > 0);
-        }
-
-        private void PopulateIssuesAction()        
-        {   
-            var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-            _jtisIssues.Clear();
-            _jtisIssues.AddRange(jtisData.GetIssuesWithChangeLogs(searchJQL));
-            ConsoleUtil.WritePerfData(jtisData.Performance);
-            if (_analysisType == AnalysisType.atEpics)
-            {
-                PopulateEpicLinks();
-            }
-        }
-        private void PopulateEpicLinks()
-        {
-            List<jtisIssue> epics = _jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
-            if (epics.Count() > 0)
-            {
-                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
-                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
-                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-                var children = jtisData.GetIssuesWithChangeLogs(jql);
-                if (children.Count > 0)
-                {
-                    foreach (var child in children)
-                    {
-                        if (!_jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
-                        {
-                            _jtisIssues.Add(child);
-                        }
-                    }
-                    ConsoleUtil.WritePerfData(jtisData.Performance);
-                }
-            }
-        }
        
     }
 }

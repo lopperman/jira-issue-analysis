@@ -109,12 +109,12 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miIssue_Summary_Visualization:
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
-                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atIssues).BuildSearch();
+                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atIssues).Build();
                     break;
 
                 case MenuItemEnum.miIssue_Summary_Visualization_Epic :
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
-                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atEpics).BuildSearch();
+                    VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atEpics).Build();
                     break;
 
 #endregion
@@ -179,11 +179,11 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miTISIssues:
-                    NewAnalysis(AnalysisType.atIssueSummary);
+                    AnalyzeIssues analyzeIssSum = new AnalyzeIssues(AnalysisType.atIssueSummary );
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miTISEpic:
-                    NewAnalysis(AnalysisType.atEpics);
+                    AnalyzeIssues analyzeEpics = new AnalyzeIssues(AnalysisType.atEpics);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
 
@@ -363,51 +363,8 @@ namespace JTIS.Menu
             {
                 AnsiConsole.WriteLine($"*CUSTOM FIELD (all)* Id: {f.Id}, Custom Field Name: {f.Name}, Custom Type: {f.CustomType.ToString()}");
             }
-            
-
-       
-
-            // var resp = MenuManager.MenuMultiSelect("choose things",new string[]{"[bold]paul[/]","brower","emily","ethan","chase"});
-            // if (resp != null && resp.Count() > 0)
-            // {
-            //     resp.ToList().ForEach (item =>
-            //     {
-            //         AnsiConsole.WriteLine(item);
-            //     });
-            // }
-
-
-            // AnsiConsole.WriteLine($"JQL Results Count for (project=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("project=wwt and type=story")}");
-
-            // AnsiConsole.WriteLine($"(Should Error) JQL Results Count for (proj=WWT and type=story) - {JiraUtil.JiraRepo.GetJQLResultsCount("proj='wwt and type=story")}");
 
             ConsoleUtil.PressAnyKeyToContinue("DEV1 COMPLETED");
-        }
-
-        private static void NewAnalysis(AnalysisType anType)
-        {
-            AnalyzeIssues analyze = new AnalyzeIssues(anType);
-            // int issueCount = 0;
-            // if (analyze.HasSearchData)
-            // {
-            //     try 
-            //     {
-            //         issueCount = analyze.GetData();
-            //     }
-            //     catch 
-            //     {
-            //         ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
-            //     }
-            //     if (analyze.GetDataFail)
-            //     {
-            //         ConsoleUtil.PressAnyKeyToContinue();
-            //     }
-            // } 
-            // if (issueCount > 0)
-            // {                
-            //     analyze.ClassifyStates();                
-            //     analyze.WriteToConsole();
-            // }
         }
 
         private static void ViewIssueConfig(string defProject) 
@@ -454,7 +411,8 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meChangeLog;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();            
+            var sp = new SelectionPrompt<MenuFunction>();      
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));      
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
@@ -469,7 +427,8 @@ namespace JTIS.Menu
 
             lastMenu = MenuEnum.meIssue_Notes ;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();            
+            var sp = new SelectionPrompt<MenuFunction>();          
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));  
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "View Issue Notes"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesAdd, "Add Issue Note"));
@@ -483,7 +442,8 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meDev;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();            
+            var sp = new SelectionPrompt<MenuFunction>();       
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));     
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2"));
@@ -497,7 +457,9 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meConfig;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();            
+            var sp = new SelectionPrompt<MenuFunction>();       
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+            
             sp.PageSize = 16;
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));            
@@ -564,6 +526,7 @@ namespace JTIS.Menu
             if (menuItems.Count > 0)
             {
                 var sp = new SelectionPrompt<MenuFunction>();
+                sp.HighlightStyle(new Style(decoration:Decoration.Bold));
                 
                 sp.PageSize = 16;
 

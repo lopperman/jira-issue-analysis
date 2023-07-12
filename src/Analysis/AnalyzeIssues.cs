@@ -16,6 +16,7 @@ namespace JTIS.Analysis
         private AnalysisType _type = AnalysisType._atUnknown;
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
+        FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
 
         public bool GetDataFail {get;private set;}
         public AnalyzeIssues()
@@ -25,10 +26,9 @@ namespace JTIS.Analysis
 
         public AnalyzeIssues(AnalysisType analysisType): this()
         {
-            _type = analysisType;
-            var options = FetchOptions.DefaultFetchOptions;
-            if (analysisType == AnalysisType.atEpics){options.FetchEpicChildren=true;}
-            _jtisIssueData = IssueFetcher.FetchIssues(options);
+            if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
+            _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+            
             if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
             {
                 ClassifyStates();

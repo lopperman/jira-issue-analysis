@@ -45,7 +45,6 @@ namespace JTIS.Data
     {
         private static  SortedList<string,jtisIssueData> _cachedData = new SortedList<string, jtisIssueData>();
 
-        private static IEnumerable<jtisIssue>? _results = null;
         public static jtisIssueData? FetchIssues(FetchOptions? options)
         {
             // bool handled = false;

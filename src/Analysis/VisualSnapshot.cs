@@ -9,18 +9,17 @@ namespace JTIS
 {
     internal class VisualSnapshot
     {
-        private string searchJQL;
         jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-    
         public VisualSnapshotType SnapshotType {get;private set;}
         public AnalysisType SearchType {get;private set;}
-        private List<jtisIssue> jtisIssues = new List<jtisIssue>();
+        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
+
+        private jtisIssueData? _jtisIssueData = null;
 
         private VisualSnapshot(VisualSnapshotType snapshotType, AnalysisType analysisType)
         {
             SnapshotType = snapshotType;
             SearchType = analysisType;
-            searchJQL = string.Empty;
         }
 
         public static VisualSnapshot Create(VisualSnapshotType snapshotType, AnalysisType  analysisType)
@@ -33,10 +32,9 @@ namespace JTIS
         {
 
             _issueTypeFilter.Clear();
-            foreach (var issType in jtisIssues.Select(x=>x.issue.Type.Name).Distinct())
+            foreach (var kvp in _jtisIssueData.IssueTypesCount)
             {
-                int cnt = jtisIssues.Count(x=>x.issue.Type.Name.StringsMatch(issType));
-                _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
+                _issueTypeFilter.AddFilterItem(kvp.Key,$"Count: {kvp.Value}");
             }
             if (_issueTypeFilter.Count > 1)
             {
@@ -52,26 +50,20 @@ namespace JTIS
             }
         }
 
-        public void BuildSearch()
+        public void Build()
         {
-            if (SearchType == AnalysisType.atIssues)
+            if (SearchType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
+            _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+
+            if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {
-                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
+                CheckIssueTypeFilter();
+                BuildStatusBreakdown();
+                ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
+                BuildBlockedNonBlocked(false,false);
             }
-            else if (SearchType == AnalysisType.atEpics)
-            {
-                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,findEpicLinks:true);
-            }
-            if (string.IsNullOrWhiteSpace(searchJQL))
-            {
-                return;
-            }
-            GetIssues();
-            CheckIssueTypeFilter();
-            BuildStatusBreakdown();
-            ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
-            BuildBlockedNonBlocked(false,false);
             ConsoleUtil.PressAnyKeyToContinue($"NEXT: ???");
+            
         }
 
         private void AddMissingKey(string key, ref SortedDictionary<string,double> dic)
@@ -83,14 +75,13 @@ namespace JTIS
         }
         private void BuildBlockedNonBlocked(bool clearScreen = true, bool showDetail = false)
         {
-            if (jtisIssues.Count == 0){return;}
+            if (_jtisIssueData.jtisIssueCount == 0){return;}
 
             SortedDictionary<string,double> chtCount = new SortedDictionary<string, double>();
             SortedDictionary<string,double> chtPerc = new SortedDictionary<string, double>();
-
             SortedDictionary<string,double> dict = new SortedDictionary<string, double>();
 
-            var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
             foreach (var issue in filtered)
             {
@@ -177,8 +168,8 @@ namespace JTIS
             }
 
             // int totalCount = filteredItems.Count;
-            if (jtisIssues.Count == 0){return;}
-            var filtered = jtisIssues.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            if (_jtisIssueData.jtisIssueCount == 0){return;}
+            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
 
             var statuses = filtered.Select(x=>x.issue.Status.Name).ToList().Distinct();
@@ -238,41 +229,6 @@ namespace JTIS
 
         }
 
-        private void PopulateEpicLinks()
-        {
-            List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
-            if (epics.Count() > 0)
-            {
-                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
-                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
-                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-                var children = jtisData.GetIssuesWithChangeLogs(jql);
-                if (children.Count > 0)
-                {
-                    foreach (var child in children)
-                    {
-                        if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
-                        {
-                            jtisIssues.Add(child);
-                        }
-                    }
-                    ConsoleUtil.WritePerfData(jtisData.Performance);
-                }
-            }
-        }
-        private void GetIssues()
-        {
-            var data = jtisIssueData.Create(JiraUtil.JiraRepo);
-            jtisIssues.Clear();
-            jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
-            ConsoleUtil.WritePerfData(data.Performance);
-            if (SearchType==AnalysisType.atEpics)
-            {
-                PopulateEpicLinks();
-            }
-
-        }
 
         private void Summarize()
         {

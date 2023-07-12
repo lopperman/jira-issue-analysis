@@ -599,7 +599,11 @@ ResetLocalIssueStatusCfg();
                     if (!validProjects.Contains(tProj))
                     {
                         ConsoleUtil.WriteError($"The Default Project '{tProj}' is not valid. Please choose a valid project key",pause:false);
-                        tProj = AnsiConsole.Prompt<string>(new SelectionPrompt<string>().AddChoices(validProjects).Title("Select Valid Project"));
+                        var sp = new SelectionPrompt<string>();
+                        sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+                        sp.AddChoices(validProjects);
+                        sp.Title("Select Valid Project");
+                        tProj = AnsiConsole.Prompt<string>(sp);
                     }
                     var testCfg = JTISConfig.Create(tLogin,tAPIToken,tURL,tProj, configNumber);
                     if (testCfg != null)
@@ -645,6 +649,7 @@ ResetLocalIssueStatusCfg();
                         {
                             IEnumerable<Project> prjList = testCFG.jira.Projects.GetProjectsAsync().GetAwaiter().GetResult();
                             var p = new SelectionPrompt<Project>();
+                            p.HighlightStyle(new Style(decoration:Decoration.Bold));
                             p.Title("Select Project");
                             p.AddChoices(prjList);
                             var selProj = p.Show(AnsiConsole.Console);

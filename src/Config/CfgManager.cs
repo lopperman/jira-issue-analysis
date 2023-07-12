@@ -496,6 +496,8 @@ namespace JTIS.Config
                         return;
                     }
                     var sp = new SelectionPrompt<TimeZoneInfo>();
+                    sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+
                     sp.Title("Select Time Zone - (Required - can cancel after selection)");
                     sp.PageSize = 20;
                     sp.AddChoices(results.ToArray());
@@ -659,6 +661,8 @@ namespace JTIS.Config
             AnsiConsole.Write(new Spectre.Console.Rule());
 
             var sp  = new SelectionPrompt<JTISConfig>();
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+
             sp.AddChoices<JTISConfig>(list);
             //sp.Title("SELECT CONFIG ITEM");
             selectedCfg = AnsiConsole.Prompt<JTISConfig>(sp);

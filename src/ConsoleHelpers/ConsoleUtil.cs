@@ -49,6 +49,9 @@ namespace JTIS.Console
         
         public static Style StdStyle(StdLine input)
         {
+            AnsiConsole.Reset();
+            
+
             switch(input)
             {
                 case StdLine.slTitle:
