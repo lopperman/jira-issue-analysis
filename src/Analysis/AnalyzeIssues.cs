@@ -14,51 +14,14 @@ namespace JTIS.Analysis
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         private AnalysisType _type = AnalysisType._atUnknown;
-//        private string searchJQL = string.Empty;
-        
-//        public List<jtisIssue> jtisIssues {get; private set;}
-
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
 
         public bool GetDataFail {get;private set;}
-
-        // public bool HasSearchData
-        // {
-        //     get
-        //     {
-        //         return (searchJQL != null && searchJQL.Length > 0);
-        //     }
-        // }
-
         public AnalyzeIssues()
         {
-            // jtisIssues = new List<jtisIssue>();
             JCalcs = new List<IssueCalcs>();
         }
-
-
-            // int issueCount = 0;
-            // if (analyze.HasSearchData)
-            // {
-            //     try 
-            //     {
-            //         issueCount = analyze.GetData();
-            //     }
-            //     catch 
-            //     {
-            //         ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
-            //     }
-            //     if (analyze.GetDataFail)
-            //     {
-            //         ConsoleUtil.PressAnyKeyToContinue();
-            //     }
-            // } 
-            // if (issueCount > 0)
-            // {                
-            //     analyze.ClassifyStates();                
-            //     analyze.WriteToConsole();
-            // }
 
         public AnalyzeIssues(AnalysisType analysisType): this()
         {
@@ -71,21 +34,6 @@ namespace JTIS.Analysis
                 ClassifyStates();
                 WriteToConsole();
             }
-
-
-            // string? data = string.Empty;
-            // if (_type == AnalysisType.atIssues || _type == AnalysisType.atJQL)
-            // {
-            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
-            // }
-            // else if (_type == AnalysisType.atIssueSummary)
-            // {
-            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
-            // }
-            // else if (_type == AnalysisType.atEpics)
-            // {
-            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,findEpicLinks:true);
-            // }
         }
 
         public void ClassifyStates()
@@ -162,8 +110,6 @@ namespace JTIS.Analysis
 
         private void CheckIssueTypeFilter()
         {
-            //        private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-
             _issueTypeFilter.Clear();
             foreach (var issType in JCalcs.Select(x=>x.IssueObj.IssueType).Distinct())
             {
@@ -234,8 +180,7 @@ namespace JTIS.Analysis
                 }
 
             }
-            return csvPath;
-            
+            return csvPath;   
         }
 
         private bool FromIdNull(JIssueChangeLogItem item)
@@ -390,7 +335,6 @@ namespace JTIS.Analysis
             var goodList = bList.Where(x=>x.Removed == false).ToList();
             ic.Blockers = goodList;
         }
-
         private void CalculateEndDates()
         {
             foreach (IssueCalcs issCalcs in JCalcs)
@@ -469,53 +413,6 @@ namespace JTIS.Analysis
             return string.Empty;
         }
 
-        // private void PopulateEpicLinks()
-        // {
-        //     var 
-        //     List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
-        //     if (epics.Count() > 0)
-        //     {
-        //         AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
-        //         var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
-        //         var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-        //         var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-        //         var children = jtisData.GetIssuesWithChangeLogs(jql);
-        //         if (children.Count > 0)
-        //         {
-        //             foreach (var child in children)
-        //             {
-        //                 if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
-        //                 {
-        //                     jtisIssues.Add(child);
-        //                 }
-        //             }
-        //             ConsoleUtil.WritePerfData(jtisData.Performance);
-        //         }
-        //     }
-        // }
-        // public int GetData()
-        // {
-        //     try 
-        //     {
-        //         var data = jtisIssueData.Create(JiraUtil.JiraRepo);
-        //         jtisIssues.Clear();
-        //         jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
-        //         ConsoleUtil.WritePerfData(data.Performance);
-        //         if (_type == AnalysisType.atEpics)
-        //         {
-        //             PopulateEpicLinks();
-        //         }
-        //     }
-        //     catch (Exception excep)
-        //     {
-        //         ConsoleUtil.WriteError($"An error occurred getting data from Jira. Please double check the JQL syntax you are using ({searchJQL})");
-        //         ConsoleUtil.WriteError($"Error Detail: {excep.Message}",pause:true);
-        //     }
-
-        //     return jtisIssues.Count();
-
-        // }
-
         private string BuildJQLForEpicChildren(string srchData)
         {
             string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
@@ -539,11 +436,6 @@ namespace JTIS.Analysis
             }
             return sb.ToString();
 
-
-            //     retJQL = string.Format("project={0} and parentEpic={1}",CfgManager.config.defaultProject,epicKey);
-            // {
-            //     retJQL = string.Format("parentEpic={0}",epicKey);
-            // }
         }
 
         private string BuildJQLKeyInListArr(string[]? srchData)
@@ -882,48 +774,6 @@ namespace JTIS.Analysis
                         return;
                     }
                 }
-
-
-
-                // if (writeCount == totalCount)
-                // {
-                //     AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});
-                //     ConsoleUtil.PressAnyKeyToContinue($"Showing {writeCount} / {totalCount} results");
-                // }
-                // else 
-                // {
-                //     if (writeAll == false)
-                //     {
-                //         AnsiConsole.Write(new Rule(){Style=new Style(Color.DarkRed,Color.White)});                                                
-                //         var waitLoop = true;
-                //         string? resp = string.Empty;
-                //         var currentTop = System.Console.GetCursorPosition().Top;
-                //         while (waitLoop)
-                //         {
-                //             resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'N' to add an Issue note,  A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
-                //             if (resp.StringsMatch("N"))
-                //             {
-                //                 IssueNotesUtil.AddEdit(ic.IssueObj.Key, false);
-                //                 ConsoleUtil.ClearLinesBackTo(currentTop);
-                //             }
-                //             else 
-                //             {
-                //                 waitLoop = false;
-                //                 break;
-                //             }
-                //         }
-
-                //         if (resp.StringsMatch("A"))
-                //         {
-                //             WriteIssueSummary(true);
-                //             return;
-                //         }
-                //         else if (resp.StringsMatch("X"))
-                //         {
-                //             return;
-                //         }
-                //     }
-                // }
                 
             }
         }

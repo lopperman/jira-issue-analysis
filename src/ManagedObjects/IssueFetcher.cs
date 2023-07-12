@@ -110,19 +110,6 @@ namespace JTIS.Data
             }
             return null;
         }
-
-
-        // //TODO: IMPLEMENT
-        // private static bool ProcessJQL(FetchOptions options)
-        // {
-        //     var jql = ConsoleInput.GetJQLOrIssueKeys(options.AllowJQLSnippets,options.FetchEpicChildren);
-        //     return ProcessJQL(jql,options);
-        // }        
-        // //TODO: IMPLEMENT
-        // private static bool SelectCachedResults()
-        // {
-        //     return false;            
-        // }
     }
 
 
