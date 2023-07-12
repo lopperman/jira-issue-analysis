@@ -607,7 +607,7 @@ namespace JTIS.Analysis
                 {
                     AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED)[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
                 }
-                AnsiConsole.Write(new Rule($"[dim]({ic.IssueObj.IssueType.ToUpper()}) [/][bold]{ic.IssueObj.Key}[/][dim], DESC:[/] {Markup.Escape(ic.IssueObj.Summary)}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                AnsiConsole.Write(new Rule($"[dim]({ic.IssueObj.IssueType.ToUpper()}) [/][bold]{ic.IssueObj.Key}[/][dim], DESC:[/] {Markup.Escape(ConsoleUtil.Scrub(ic.IssueObj.Summary))}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
                 AnsiConsole.Write(new Rule($"[dim]Current Status:[/][bold] ({ic.IssueObj.StatusName.ToUpper()})[/]{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 

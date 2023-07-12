@@ -12,6 +12,37 @@ namespace JTIS.Config
         
         private IssueNotes? _issNotes;
 
+        //A LIST OF STRINGS WHICH WILL GET SCRUBBED WHEN WRITING TO SCREEN
+        //MAKES IT EASIER TO TAKE SCREENSHOTS AND SHARE ON GITHUB!
+        public List<string>? ScrubData {get;set;}
+
+        public IReadOnlyList<string> ScrubList()
+        {
+            if (ScrubData == null) { ScrubData = new List<string>();}
+            return ScrubData;
+        }
+        public void DeleteScrubTerms(params string[] items)
+        {
+            foreach (var item in items)
+            {
+                if (ScrubData.Exists(x=>x.StringsMatch(item)))
+                {
+                    ScrubData.Remove(item);
+                }
+            }
+        }
+        public void AddScrubTerms(params string[] items)
+        {
+            if (ScrubData == null) {ScrubData = new List<string>();} 
+            foreach (var item in items)
+            {
+                if (!ScrubData.Exists(x=>x.StringsMatch(item)))
+                {
+                    ScrubData.Add(item);
+                }
+            }
+        }
+
         [JsonProperty]
         public IssueNotes? issueNotes 
         {
@@ -84,6 +115,7 @@ namespace JTIS.Config
             _configId = cfgId;
             configName = string.Format("CFG{0:00} - {1} - {2}",configId,baseUrl,defaultProject);
             issueNotes = new IssueNotes();
+            ScrubData = new List<string>();
         }
 
         public static JTISConfig? Create(string login, string apiToken, string baseUrl, string defPrj, int cfgId)

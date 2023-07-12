@@ -157,6 +157,10 @@ namespace JTIS.Menu
                     MenuManager.Dev2();
                     exitMenu = MenuEnum.meConfig;
                     break;
+                case MenuItemEnum.miDevScrubEdit:
+                    JiraUtil.DevScrub();
+                    exitMenu = MenuEnum.meConfig;
+                    break;
 #endregion
 
 
@@ -483,7 +487,7 @@ namespace JTIS.Menu
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2"));
-
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDevScrubEdit, "Managed Scrubbed Terms"));
             AddCommonMenuItems(sp,lastMenu);
             MenuManager.Execute(AnsiConsole.Prompt(sp));            
   
@@ -619,6 +623,7 @@ namespace JTIS.Menu
             var menuName = Enum.GetName(typeof(MenuEnum),menu).Replace("me","").Replace("_"," ");
             var menuLabel = $"[bold black on lightyellow3]{Emoji.Known.DiamondWithADot} {menuName} Menu [/]| [dim italic]Connected: {CfgManager.config.ToString()}[/]";  
             var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  {menuLabel}";
+            title=ConsoleUtil.Scrub(title);
             // var panel = new Panel(title);
             // panel.Border = BoxBorder.Rounded;
             // panel.BorderColor(Color.Grey15);

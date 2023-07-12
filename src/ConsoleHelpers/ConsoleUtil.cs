@@ -6,6 +6,7 @@ using Spectre.Console;
 
 namespace JTIS.Console
 {
+    
     public enum StdLine
     {
         slTitle = 1, 
@@ -21,7 +22,29 @@ namespace JTIS.Console
 
     public static class ConsoleUtil
     {
-            
+        public static bool? ScrubData = null;                    
+        public static string Scrub(string data)
+        {
+            if (ScrubData == null) 
+            {
+                if (!Info.IsDev)
+                {
+                    ScrubData = false;
+                }
+                else 
+                {
+                    ScrubData = Confirm("DEV: SCRUB DATA?",false);
+                }
+            }
+            if (ScrubData == true)
+            {
+                foreach (var scrubItem in CfgManager.config.ScrubList())
+                {
+                    data = data.Replace(scrubItem,new string('*',scrubItem.Length),StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            return data;
+        }
         public static bool IsConsoleRecording {get;set;}
         
         public static Style StdStyle(StdLine input)
@@ -170,7 +193,7 @@ namespace JTIS.Console
             // AnsiConsole.Write(panel);
 //            panel.HeaderAlignment(Justify.Center );
             AnsiConsole.Clear();
-            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";            
+            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";     
             AnsiConsole.Write(new Rule());
             AnsiConsole.MarkupLine(title);
             var tr = new Rule().DoubleBorder();

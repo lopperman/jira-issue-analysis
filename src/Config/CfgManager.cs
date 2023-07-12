@@ -39,7 +39,6 @@ namespace JTIS.Config
                     if (_config.SavedJQLCount == 0)
                     {
                         JQLUtil.CheckDefaultJQL(_config);
-                        SaveConfigList();
                     }
 
 
@@ -55,8 +54,10 @@ namespace JTIS.Config
                     {
                         cfgList.Add(value);
                     }
-                    _config = value;
+                    _config = null;
                     _refData = null;
+
+                    _config = value;
                 }
                 else 
                 {

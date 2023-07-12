@@ -43,6 +43,7 @@ namespace JTIS.Menu
         miIssueNotesDelete, 
         miDev1, 
         miDev2, 
+        miDevScrubEdit, 
         miChangeTimeZoneDisplay, 
         miExit, 
         miShowChangeHistoryCards, 

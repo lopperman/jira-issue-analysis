@@ -111,7 +111,7 @@ namespace JTIS
         }
         private void WriteIssueHeader(JIssue ji)
         {
-            var escSummary = Markup.Escape(ji.Summary);
+            var escSummary = Markup.Escape(ConsoleUtil.Scrub(ji.Summary));
             var p = new Panel($"[bold]Change Logs For {ji.Key}[/], ([dim]Issue Type: [/][bold]{ji.IssueType}[/][dim] Status:[/][bold] {ji.StatusName})[/]{Environment.NewLine}[dim]{escSummary}[/]");
             p.Border = BoxBorder.Rounded;
             p.Expand();
@@ -147,11 +147,12 @@ namespace JTIS
                         }
                         else 
                         {
-                            toVal = Markup.FromInterpolated($"{cli.ToValue}");
-                            frVal = Markup.FromInterpolated($"{cli.FromValue}");
+                            toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue)}");
+                            frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue)}");
                             changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.ToString()}");
                             //new Text(changeLog.CreatedDate.ToString())
                         }
+
                         tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
                         
                     }
