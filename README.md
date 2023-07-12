@@ -1,5 +1,9 @@
 [![.NET](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml/badge.svg)](https://github.com/lopperman/jiraTimeInStatus/actions/workflows/dotnet.yml)
 ---
+
+[Jira Time‐In‐Status WIKI](https://github.com/lopperman/jira-issue-analysis/wiki/Jira-Time%E2%80%90In%E2%80%90Status-WIKI)
+
+
 # jiraTimeInStatus
 ### Description
 
