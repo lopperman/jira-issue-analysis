@@ -184,6 +184,49 @@ namespace JTIS.Console
                 return string.Empty;
             }
         }
+
+        public static void WriteAppHello()
+        {
+            ConsoleUtil.WriteAppTitle();
+            AnsiConsole.Background = Color.LightSteelBlue;
+            AnsiConsole.Foreground = Color.Blue3_1;
+            var tbl = new Table();
+            tbl.Border(TableBorder.None);
+            var llamas = $"[white on deepskyblue4_2]       :llama::llama:        [/]";
+            var fill2  = $"[white on deepskyblue4_2]                   [/]";
+            var tblcol = new TableColumn("").Alignment(Justify.Left);
+            var title = $"[white on deepskyblue4_2]  WELCOME FRIEND!  [/]";
+            tbl.AddColumn(tblcol).Centered();
+            tbl.AddRow(fill2);
+            tbl.AddRow(llamas);
+            tbl.AddRow(fill2);
+            tbl.AddRow(title);
+            tbl.AddRow(fill2);
+            tbl.AddEmptyRow();            
+            tbl.Columns[0].Centered();
+            var panel = new Panel(tbl).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
+            AnsiConsole.Write(panel);
+            AnsiConsole.Progress()
+                .AutoClear(true)
+                .HideCompleted(false)
+                .Columns(
+                    new ProgressColumn[]{
+                        new ProgressBarColumn(){Width=20},
+//                        new TaskDescriptionColumn(), 
+//                        new SpinnerColumn() , 
+                        new PercentageColumn()
+                    })
+                .Start(ctx=> {
+                    var task = ctx.AddTask($"Thank you for trying this app...");
+                    task.MaxValue(100);
+                    task.StartTask();
+                    while (task.Value < task.MaxValue)
+                    {
+                        task.Increment(1);
+                        Thread.Sleep(30);
+                    }
+                });            
+        }
         public static void WriteAppTitle()
         {
             // var panel = new Panel(title);
@@ -455,17 +498,11 @@ namespace JTIS.Console
             tbl.AddRow(fill2);
             tbl.AddRow(llamas);
             tbl.AddRow(fill2);
-            // tbl.AddEmptyRow();            
             tbl.AddRow(title);
             tbl.AddRow(fill2);
             tbl.AddEmptyRow();            
             tbl.Columns[0].Centered();
-//            var mk2 = new Markup(title).Centered();
-//            AnsiConsole.MarkupLine("   :llama:  :llama:  :llama:  ");
-            
             var panel = new Panel(tbl).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
-//            panel.Padding(2,0,2,0);
-
             AnsiConsole.Write(panel);
             Environment.Exit(0);
         }    

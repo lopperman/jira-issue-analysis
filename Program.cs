@@ -54,7 +54,9 @@ namespace JTIS
         public static void Main(string[] args) 
         {
             
-            ConsoleUtil.WriteAppTitle();
+            //ConsoleUtil.WriteAppTitle();
+            ConsoleUtil.WriteAppHello();
+
             AnsiConsole.Write(new Rule());
 
             List<JTISConfig> tmpCfgList  = new List<JTISConfig>();

@@ -398,7 +398,7 @@ namespace JTIS.Config
                 .Columns(new ProgressColumn[]
                 {
                     new TaskDescriptionColumn(), 
-                    new PercentageColumn(),
+                    new ProgressBarColumn(),
                     new ElapsedTimeColumn(), 
                     new SpinnerColumn()
                 })
