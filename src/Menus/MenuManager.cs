@@ -387,27 +387,27 @@ namespace JTIS.Menu
         private static void NewAnalysis(AnalysisType anType)
         {
             AnalyzeIssues analyze = new AnalyzeIssues(anType);
-            int issueCount = 0;
-            if (analyze.HasSearchData)
-            {
-                try 
-                {
-                    issueCount = analyze.GetData();
-                }
-                catch 
-                {
-                    ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
-                }
-                if (analyze.GetDataFail)
-                {
-                    ConsoleUtil.PressAnyKeyToContinue();
-                }
-            } 
-            if (issueCount > 0)
-            {                
-                analyze.ClassifyStates();                
-                analyze.WriteToConsole();
-            }
+            // int issueCount = 0;
+            // if (analyze.HasSearchData)
+            // {
+            //     try 
+            //     {
+            //         issueCount = analyze.GetData();
+            //     }
+            //     catch 
+            //     {
+            //         ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
+            //     }
+            //     if (analyze.GetDataFail)
+            //     {
+            //         ConsoleUtil.PressAnyKeyToContinue();
+            //     }
+            // } 
+            // if (issueCount > 0)
+            // {                
+            //     analyze.ClassifyStates();                
+            //     analyze.WriteToConsole();
+            // }
         }
 
         private static void ViewIssueConfig(string defProject) 

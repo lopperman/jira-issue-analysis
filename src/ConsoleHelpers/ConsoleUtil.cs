@@ -205,16 +205,24 @@ namespace JTIS.Console
             tbl.AddEmptyRow();            
             tbl.Columns[0].Centered();
             var panel = new Panel(tbl).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
+
+            // AnsiConsole.Write(new Rule());
+            // AnsiConsole.MarkupLine(title);
+            // var tr = new Rule().DoubleBorder();
+
             AnsiConsole.Write(panel);
+//            ConsoleUtil.PressAnyKeyToContinue();
+            var pbar = new ProgressBarColumn();
+            pbar.CompletedStyle = new Style(Color.Green,Color.LightSlateGrey);
+            pbar.IndeterminateStyle = new Style(Color.Yellow,Color.LightSlateGrey);
+            pbar.Width = 25;
+
             AnsiConsole.Progress()
                 .AutoClear(true)
                 .HideCompleted(false)
                 .Columns(
                     new ProgressColumn[]{
-                        new ProgressBarColumn(){Width=20},
-//                        new TaskDescriptionColumn(), 
-//                        new SpinnerColumn() , 
-                        new PercentageColumn()
+                        pbar,
                     })
                 .Start(ctx=> {
                     var task = ctx.AddTask($"Thank you for trying this app...");
@@ -223,7 +231,7 @@ namespace JTIS.Console
                     while (task.Value < task.MaxValue)
                     {
                         task.Increment(1);
-                        Thread.Sleep(30);
+                        Thread.Sleep(25);
                     }
                 });            
         }

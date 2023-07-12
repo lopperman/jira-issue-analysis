@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Atlassian.Jira;
+using JTIS.Extensions;
 using Spectre.Console;
 
 namespace JTIS.Data
@@ -10,6 +11,8 @@ namespace JTIS.Data
         private int _totReturnCount;
         private int _nextStart;
         private JiraRepo? repo = null;
+        public string? JQL {get;private set;}
+
         public SortedList<string,TimeSpan> Performance = new SortedList<string, TimeSpan>();
 
         public static jtisIssueData Create(JiraRepo jRepo)
@@ -19,11 +22,43 @@ namespace JTIS.Data
             return instance;
         }        
         private SortedList<string,jtisIssue> _jtisIssues = new SortedList<string, jtisIssue>();
+        private int duplicateCount = 0;
+
+        public int EpicCount
+        {
+            get{
+                return _jtisIssues.Where(x=>x.Value.jIssue.IssueType.StringsMatch("epic")).Count();
+            }
+        }
+
+        
+
+        public void  AddExternalJtisIssues(IEnumerable<jtisIssue> issues)
+        {
+            foreach (var jtisIss in issues)
+            {
+                if (_jtisIssues.ContainsKey(jtisIss.jIssue.Key)==false)
+                {
+                    _jtisIssues.Add(jtisIss.jIssue.Key,jtisIss);
+                }
+            }
+        }
+
+        public IReadOnlyList<jtisIssue> jtisIssuesList 
+        {
+            get{
+                return _jtisIssues.Values.ToList();
+            }
+        }
         private jtisIssue AddjtisIssue(Issue issue)
         {
             if (_jtisIssues.ContainsKey(issue.Key.Value)==false)
             {
                 _jtisIssues.Add(issue.Key.Value,new jtisIssue(issue));
+            }
+            else 
+            {
+                duplicateCount +=1;
             }
             return _jtisIssues.Single(x=>x.Key==issue.Key.Value).Value;
         }
@@ -32,8 +67,12 @@ namespace JTIS.Data
             AddjtisIssue(issue).AddChangeLogs(logs);
         }
 
-        public List<jtisIssue> GetIssuesWithChangeLogs(string jql)
+
+
+
+        public List<jtisIssue> GetIssuesWithChangeLogs(string jql, bool includeChangeLogs=true)
         {            
+            JQL = jql;
             _totReturnCount = repo.GetJQLResultsCount(jql);
             sw = Stopwatch.StartNew();                        
 
@@ -58,7 +97,7 @@ namespace JTIS.Data
                             _nextStart += 100;                        
                         }
                         var task = ctx.AddTask($"(startAt: {_nextStart}) async issues and change logs search");
-                        Task.WaitAll(IssuesWithChangeLogs(jql));
+                        Task.WaitAll(IssuesChangeLogs(jql,includeChangeLogs));
                     }
 
                 });
@@ -69,22 +108,28 @@ namespace JTIS.Data
             Performance.Add($"(Overall Total Time) Issues: {totIssues}, Change Logs: {totCL}, Change Log Items: {totCLI}",sw.Elapsed);
             return _jtisIssues.Values.ToList();            
         }
-        private async Task IssuesWithChangeLogs(string jql)
+        private async Task IssuesChangeLogs(string jql, bool includeChangeLogs = true)
         {            
             var iss = await Task<IPagedQueryResult<Issue>>.WhenAny(IssuesAsync(jql));
             List<Task> clTasks = new List<Task>();
             foreach (var i in iss.Result)
             {  
                 AddjtisIssue(i);
-                Task clResult = GetChangeLogs(i);
-                clTasks.Add(clResult);
+                if (includeChangeLogs)
+                {
+                    Task clResult = GetChangeLogs(i);
+                    clTasks.Add(clResult);
+                }
             }
 
-            while (clTasks.Any())
+            if (includeChangeLogs)
             {
-                var clTask = await Task.WhenAny(clTasks);
-                await clTask;
-                clTasks.Remove(clTask);
+                while (clTasks.Any())
+                {
+                    var clTask = await Task.WhenAny(clTasks);
+                    await clTask;
+                    clTasks.Remove(clTask);
+                }
             }
         }
 

@@ -9,7 +9,7 @@ namespace JTIS
     public static class ConsoleInput
     {
 
-        public static string GetJQLOrIssueKeys(bool allowFromSaved, bool findEpicLinks = false, bool manualCheck = false)
+        public static string GetJQLOrIssueKeys(bool allowFromSaved, bool findEpicLinks = false, bool manualJQLValidation = false)
         {
             if (findEpicLinks)
             {
@@ -32,7 +32,7 @@ namespace JTIS
                     {
                         data = IssueKeysToJQL(data);
                     }
-                    if (manualCheck)
+                    if (!manualJQLValidation)
                     {
                         return data;
                     }
@@ -68,7 +68,7 @@ namespace JTIS
                 {
                     AnsiConsole.Clear();
                     JQLUtil.ViewSavedJQL(CfgManager.config,false);
-                    var sjqlId = ConsoleUtil.GetInput<string?>("Enter Saved JqlId, or press 'ENTER' to manually create a filter",allowEmpty:true);
+                    var sjqlId = ConsoleUtil.GetInput<string>("Enter Saved JqlId, or press 'ENTER' to manually create a filter",allowEmpty:true);
                     int jqlId = 0;
                     int.TryParse(sjqlId, out jqlId);
                     if (jqlId < 1 || jqlId > CfgManager.config.SavedJQLCount)

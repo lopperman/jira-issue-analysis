@@ -14,46 +14,83 @@ namespace JTIS.Analysis
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         private AnalysisType _type = AnalysisType._atUnknown;
-        private string searchJQL = string.Empty;
+//        private string searchJQL = string.Empty;
         
-        public List<jtisIssue> jtisIssues {get; private set;}
+//        public List<jtisIssue> jtisIssues {get; private set;}
+
+        private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
 
         public bool GetDataFail {get;private set;}
 
-        public bool HasSearchData
-        {
-            get
-            {
-                return (searchJQL != null && searchJQL.Length > 0);
-            }
-        }
+        // public bool HasSearchData
+        // {
+        //     get
+        //     {
+        //         return (searchJQL != null && searchJQL.Length > 0);
+        //     }
+        // }
 
         public AnalyzeIssues()
         {
-            jtisIssues = new List<jtisIssue>();
+            // jtisIssues = new List<jtisIssue>();
             JCalcs = new List<IssueCalcs>();
         }
+
+
+            // int issueCount = 0;
+            // if (analyze.HasSearchData)
+            // {
+            //     try 
+            //     {
+            //         issueCount = analyze.GetData();
+            //     }
+            //     catch 
+            //     {
+            //         ConsoleUtil.PressAnyKeyToContinue("NO ISSUES WERE RETURNED");
+            //     }
+            //     if (analyze.GetDataFail)
+            //     {
+            //         ConsoleUtil.PressAnyKeyToContinue();
+            //     }
+            // } 
+            // if (issueCount > 0)
+            // {                
+            //     analyze.ClassifyStates();                
+            //     analyze.WriteToConsole();
+            // }
+
         public AnalyzeIssues(AnalysisType analysisType): this()
         {
             _type = analysisType;
-            string? data = string.Empty;
-            if (_type == AnalysisType.atIssues || _type == AnalysisType.atJQL)
+            var options = FetchOptions.DefaultFetchOptions;
+            if (analysisType == AnalysisType.atEpics){options.FetchEpicChildren=true;}
+            _jtisIssueData = IssueFetcher.FetchIssues(options);
+            if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
             {
-                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
+                ClassifyStates();
+                WriteToConsole();
             }
-            else if (_type == AnalysisType.atIssueSummary)
-            {
-                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
-            }
-            else if (_type == AnalysisType.atEpics)
-            {
-                searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,findEpicLinks:true);
-            }
+
+
+            // string? data = string.Empty;
+            // if (_type == AnalysisType.atIssues || _type == AnalysisType.atJQL)
+            // {
+            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
+            // }
+            // else if (_type == AnalysisType.atIssueSummary)
+            // {
+            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true);
+            // }
+            // else if (_type == AnalysisType.atEpics)
+            // {
+            //     searchJQL = ConsoleInput.GetJQLOrIssueKeys(true,findEpicLinks:true);
+            // }
         }
 
         public void ClassifyStates()
         {
+            var jtisIssues = _jtisIssueData.jtisIssuesList;
             if (jtisIssues.Count == 0)
             {
                 return;
@@ -432,51 +469,52 @@ namespace JTIS.Analysis
             return string.Empty;
         }
 
-        private void PopulateEpicLinks()
-        {
-            List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
-            if (epics.Count() > 0)
-            {
-                AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
-                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
-                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-                var children = jtisData.GetIssuesWithChangeLogs(jql);
-                if (children.Count > 0)
-                {
-                    foreach (var child in children)
-                    {
-                        if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
-                        {
-                            jtisIssues.Add(child);
-                        }
-                    }
-                    ConsoleUtil.WritePerfData(jtisData.Performance);
-                }
-            }
-        }
-        public int GetData()
-        {
-            try 
-            {
-                var data = jtisIssueData.Create(JiraUtil.JiraRepo);
-                jtisIssues.Clear();
-                jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
-                ConsoleUtil.WritePerfData(data.Performance);
-                if (_type == AnalysisType.atEpics)
-                {
-                    PopulateEpicLinks();
-                }
-            }
-            catch (Exception excep)
-            {
-                ConsoleUtil.WriteError($"An error occurred getting data from Jira. Please double check the JQL syntax you are using ({searchJQL})");
-                ConsoleUtil.WriteError($"Error Detail: {excep.Message}",pause:true);
-            }
+        // private void PopulateEpicLinks()
+        // {
+        //     var 
+        //     List<jtisIssue> epics = jtisIssues.Where(x=>x.issue.Type.StringsMatch("epic")).ToList();
+        //     if (epics.Count() > 0)
+        //     {
+        //         AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
+        //         var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
+        //         var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
+        //         var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
+        //         var children = jtisData.GetIssuesWithChangeLogs(jql);
+        //         if (children.Count > 0)
+        //         {
+        //             foreach (var child in children)
+        //             {
+        //                 if (!jtisIssues.Exists(x=>x.issue.Key.Value == child.issue.Key.Value))
+        //                 {
+        //                     jtisIssues.Add(child);
+        //                 }
+        //             }
+        //             ConsoleUtil.WritePerfData(jtisData.Performance);
+        //         }
+        //     }
+        // }
+        // public int GetData()
+        // {
+        //     try 
+        //     {
+        //         var data = jtisIssueData.Create(JiraUtil.JiraRepo);
+        //         jtisIssues.Clear();
+        //         jtisIssues.AddRange(data.GetIssuesWithChangeLogs(searchJQL));
+        //         ConsoleUtil.WritePerfData(data.Performance);
+        //         if (_type == AnalysisType.atEpics)
+        //         {
+        //             PopulateEpicLinks();
+        //         }
+        //     }
+        //     catch (Exception excep)
+        //     {
+        //         ConsoleUtil.WriteError($"An error occurred getting data from Jira. Please double check the JQL syntax you are using ({searchJQL})");
+        //         ConsoleUtil.WriteError($"Error Detail: {excep.Message}",pause:true);
+        //     }
 
-            return jtisIssues.Count();
+        //     return jtisIssues.Count();
 
-        }
+        // }
 
         private string BuildJQLForEpicChildren(string srchData)
         {

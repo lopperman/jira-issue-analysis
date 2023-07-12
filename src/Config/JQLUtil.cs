@@ -136,7 +136,7 @@ namespace JTIS
 
         internal static void CheckManualJQL()
         {
-            var jql = ConsoleInput.GetJQLOrIssueKeys(false,manualCheck:true);
+            var jql = ConsoleInput.GetJQLOrIssueKeys(false,manualJQLValidation:true);
             if (jql.Length == 0){
                 return;
             }
