@@ -216,8 +216,10 @@ namespace JTIS.Console
             AnsiConsole.Write(panel);
 //            ConsoleUtil.PressAnyKeyToContinue();
             var pbar = new ProgressBarColumn();
-            pbar.CompletedStyle = new Style(Color.Green,Color.LightSlateGrey);
-            pbar.IndeterminateStyle = new Style(Color.Yellow,Color.LightSlateGrey);
+            // pbar.CompletedStyle = new Style(Color.Green,Color.LightSlateGrey);
+            // pbar.IndeterminateStyle = new Style(Color.Yellow,Color.LightSlateGrey);
+            pbar.RemainingStyle = new Style(foreground:Color.DarkSlateGray1).Decoration(Decoration.RapidBlink);
+            pbar.CompletedStyle = new Style(foreground:Color.SlateBlue3_1).Decoration(Decoration.Bold);
             pbar.Width = 25;
 
             AnsiConsole.Progress()
@@ -228,7 +230,7 @@ namespace JTIS.Console
                         pbar,
                     })
                 .Start(ctx=> {
-                    var task = ctx.AddTask($"Thank you for trying this app...");
+                    var task = ctx.AddTask($"[green]Thank you for trying this app...[/]");
                     task.MaxValue(100);
                     task.StartTask();
                     while (task.Value < task.MaxValue)

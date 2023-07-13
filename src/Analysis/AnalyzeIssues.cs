@@ -379,39 +379,6 @@ namespace JTIS.Analysis
                 }
             }
         }
-        private string? SelectSavedJQL()
-        {
-            string title = string.Empty;
-            string ret = string.Empty;
-            switch(_type)
-            {
-                case AnalysisType.atIssues:
-                    title = "SELECT SAVED LIST (SPACE-DELIMITED ISSUE KEYS) - ANALYSIS WILL RUN ON EACH ITEM IN THE LIST";
-                    break;
-                case AnalysisType.atEpics:
-                    title = "SELECT SAVED LIST (SPACE-DELIMITED EPIC KEYS) - ANALYSIS WILL RUN ON ALL CHILDREN LINKED TO EPIC(S)";
-                    break;
-                case AnalysisType.atJQL:
-                    title = "SELECT SAVED JQL QUERY (MUST BE VALID JQL) - ANALYSIS WILL RUN ON ALL EPIC 'CHILDREN'";
-                    break;
-                default:
-                    title = string.Empty;
-                    break;
-            }
-            if (title.Length == 0)
-            {
-                return string.Empty;;
-            }
-            ret = CfgManager.GetSavedJQL(title);
-            if (ret != null && ret.Length > 0)
-            {
-                if (ConsoleUtil.Confirm("USE THE FOLLOWING SAVED JQL/QUERY?",true))
-                {
-                    return ret;
-                }
-            }
-            return string.Empty;
-        }
 
         private string BuildJQLForEpicChildren(string srchData)
         {
@@ -438,65 +405,6 @@ namespace JTIS.Analysis
 
         }
 
-        private string BuildJQLKeyInListArr(string[]? srchData)
-        {
-            if (srchData == null || srchData.Length == 0){return string.Empty;}
-            string[] cards = srchData;
-            StringBuilder sb = new StringBuilder();
-            string defProj = CfgManager.config.defaultProject;
-            sb.Append("key in (");
-            int added = 0;
-            for (int i = 0; i < cards.Length; i ++)
-            {
-                string tKey = cards[i];
-                if (!tKey.Contains('-'))
-                {
-                    tKey = string.Format("{0}-{1}",defProj,tKey);
-                }
-                if (added == 0)
-                {                        
-                    sb.AppendFormat("'{0}'",tKey);
-                    added +=1;
-                }
-                else 
-                {
-                    sb.AppendFormat(",'{0}'",tKey);
-                    added +=1;
-                }
-            }
-            sb.Append(")");
-
-            return sb.ToString();            
-        }
-        private string BuildJQLKeyInList(string srchData)
-        {
-            string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
-            StringBuilder sb = new StringBuilder();
-            string defProj = CfgManager.config.defaultProject;
-            sb.Append("key in (");
-            int added = 0;
-            if (cards.Length > 0)
-            {
-                for (int i = 0; i < cards.Length; i ++)
-                {
-                    var tKey = cards[i];
-                    if (!tKey.Contains("-"))
-                    {
-                        tKey = string.Format("{0}-{1}",defProj,tKey);
-                    }
-                    if (added == 0)
-                    {                        
-                        sb.AppendFormat("{0}",tKey);
-                    }
-                    else 
-                    {
-                        sb.AppendFormat(",{0}",tKey);
-                    }
-                }
-                sb.Append(")");
-            }
-            return sb.ToString();
-        }
 
         private void WriteIssueSummary(bool writeAllAtOnce = false)
         {
@@ -674,9 +582,6 @@ namespace JTIS.Analysis
                     ic.SetBlockedActiveDays(Math.Round(totActiveBlockedDays,2));
                     ic.SetUnblockedActiveDays(Math.Round(totActiveUnblockedDays,2));
 
-                        // activeCalDays += statSumm.CalTime.TotalDays;
-                        // activeBusDays += statSumm.BusTime.TotalDays;
-                        // activeBlockDays += statSumm.BlockTime.TotalDays;
                 tbl.AddEmptyRow();
                 tbl.AddRow(new Markup[]{
                     new Markup($"ACTIVE TOTALS:").RightJustified(),
@@ -750,33 +655,34 @@ namespace JTIS.Analysis
                     var currentTop = System.Console.GetCursorPosition().Top;
                     while (waitLoop)
                     {
-                        resp = ConsoleUtil.GetInput<string>("PRESS 'ENTER'=View Next, 'N' to add an Issue note,  A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                        resp = ConsoleUtil.GetInput<string>("'ENTER' to View Next, 'N' to add an Issue note,  'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
 
-                        if (resp.StringsMatch("N"))
+                        if (resp.StringsMatch("N")) 
                         {
                             IssueNotesUtil.AddEdit(ic.IssueObj.Key, false);
                             ConsoleUtil.ClearLinesBackTo(currentTop);
+                        } 
+                        else if(resp.StringsMatch("X"))
+                            {return;} 
+                        else if (resp.StringsMatch("A"))
+                        {
+                            writeAll = true;
+                            WriteIssueSummary(writeAll);
+                            return;
                         }
                         else 
                         {
                             waitLoop = false;
                             break;
                         }
-                    }
-
-                    if (resp.StringsMatch("A"))
-                    {
-                        WriteIssueSummary(true);
-                        return;
-                    }
-                    else if (resp.StringsMatch("X"))
-                    {
-                        return;
-                    }
+                    }                
                 }
-                
-            }
-        }
 
+            }
+            ConsoleUtil.PressAnyKeyToContinue();
+                
+        }
+        
     }
+
 }
