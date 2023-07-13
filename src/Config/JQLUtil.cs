@@ -1,3 +1,4 @@
+using System.Text;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
@@ -159,24 +160,49 @@ namespace JTIS
 
         public static void CheckDefaultJQL(JTISConfig cfg)
         {             
+            var defaultjql = new SortedList<string,string>();
+            defaultjql.Add("(def) Blocked Work",$"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
+            defaultjql.Add("(def) Recent Updates",$"project={cfg.defaultProject} and updated >= -7d");
 
-            var blockedName = "(def) Blocked Work";
-            var editedName = "(def) Recent Updates";
-            var allInProgressName = "(def) Status Category In Progress";
-            var blockedJql = $"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))";
-            var editedJql = $"project={cfg.defaultProject} and updated >= -7d";
-            var allInProgressJql = $"project={cfg.defaultProject} and statusCategory=\"in progress\"";
+            defaultjql.Add("(def) Status Category In Progress",$"project={cfg.defaultProject} and statusCategory in ('In Progress')");
+            // defaultjql.Add("(def) Blocked Work",$"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
+            // defaultjql.Add("(def) Blocked Work",$"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
 
-            var list = new SortedList<string,string>();
-            list.Add(blockedName,blockedJql);
-            list.Add(editedName,editedJql);
-            list.Add(allInProgressName,allInProgressJql);
-
-            foreach (var kvp in list)
+            bool isDirty = false;
+            List<JQLConfig> deleteList = new List<JQLConfig>();
+            foreach (var jqlCfg in cfg.SavedJQL)
             {
+                if (jqlCfg.jqlName.StringsMatch("(def)",StringCompareType.scContains))
+                {
+                    if (defaultjql.Count(x=>x.Key.StringsMatch(jqlCfg.jqlName))==0)
+                    {
+                        deleteList.Add(jqlCfg);
+                    }
+                    else 
+                    {
+                        if (defaultjql.Single(x=>x.Key.StringsMatch(jqlCfg.jqlName)).Value.StringsMatch(jqlCfg.JQLSyntax)==false)
+                        {
+                            deleteList.Add(jqlCfg);
+                        }
+                    }                    
+                }
+            }
+            if (deleteList.Count() > 0)
+            {
+                isDirty = true;
+                foreach  (var delItem in deleteList)
+                {
+                    cfg.DeleteJQL(delItem);
+                }
+            }
+
+            foreach (var kvp in defaultjql)
+            {
+
                 var existJql = cfg.SavedJQL.FirstOrDefault(x=>x.jqlName == kvp.Key);
                 if (existJql == null || existJql.jql.StringsMatch(kvp.Value)==false)
                 {
+                    isDirty=true;
                     if (existJql != null)
                     {
                         cfg.DeleteJQL(existJql);
@@ -184,7 +210,10 @@ namespace JTIS
                     cfg.AddJQL(kvp.Key,kvp.Value);
                 }
             }
-            CfgManager.SaveConfigList();
+            if (isDirty)
+            {
+                CfgManager.SaveConfigList();
+            }
         }        
     }
 }

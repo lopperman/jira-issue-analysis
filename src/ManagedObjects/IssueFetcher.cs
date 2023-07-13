@@ -11,14 +11,14 @@ namespace JTIS.Data
 
     public class FetchOptions
     {
-        public bool AllowJQLSnippets {get;set;}
-        public bool AllowManualJQL {get;set;}
-        public bool AllowCachedSelection {get;set;}
-        public bool IncludeChangeLogs {get;set;}
-        public bool CacheResults {get;set;}
-        public bool FetchEpicChildren {get;set;}
-        public string? CacheResultsDesc {get;set;}
-        public string? JQL {get;set;}
+        public bool AllowJQLSnippets {get;set;} = true;
+        public bool AllowManualJQL {get;set;} = true;
+        public bool AllowCachedSelection {get;set;} = true;
+        public bool IncludeChangeLogs {get;set;} = true;
+        public bool CacheResults {get;set;} = false;
+        public bool FetchEpicChildren {get;set;} = false;
+        public string CacheResultsDesc {get;set;} = string.Empty;
+        public string JQL {get;set;} = string.Empty;
 
         public FetchOptions()
         {

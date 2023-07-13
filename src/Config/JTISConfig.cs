@@ -223,7 +223,7 @@ namespace JTIS.Config
 
 
         [JsonProperty("SavedJQL")]
-        public IReadOnlyList<JQLConfig> SavedJQL 
+        public List<JQLConfig> SavedJQL 
         {
             get 
             {

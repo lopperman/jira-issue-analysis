@@ -52,6 +52,7 @@ namespace JTIS
 
         public void Build()
         {
+            fetchOptions.IncludeChangeLogs(false);
             if (SearchType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
 
@@ -188,6 +189,7 @@ namespace JTIS
             cht.ShowTagValues();
             chtPerc.FullSize().ShowPercentage().ShowTags();
             chtPerc.UseValueFormatter(x=>$"{x:0.00%}");
+            chtPerc.HideTags();
             int clr = 1;
             foreach (var kvp in statusCounts)
             {

@@ -86,9 +86,6 @@ namespace JTIS.Data
             AddjtisIssue(issue).AddChangeLogs(logs);
         }
 
-
-
-
         public List<jtisIssue> GetIssuesWithChangeLogs(string jql, bool includeChangeLogs=true)
         {            
             JQL = jql;

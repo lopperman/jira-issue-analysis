@@ -13,7 +13,6 @@ namespace JTIS.Analysis
     public class AnalyzeIssues
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-        private AnalysisType _type = AnalysisType._atUnknown;
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
         FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
