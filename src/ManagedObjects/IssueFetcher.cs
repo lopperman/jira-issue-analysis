@@ -3,50 +3,25 @@ using System.Diagnostics;
 using JTIS.Console;
 using Spectre.Console;
 using JTIS.Extensions;
+using Atlassian.Jira;
 
 namespace JTIS.Data
 {
-
-
-
-    public class FetchOptions
-    {
-        public bool AllowJQLSnippets {get;set;} = true;
-        public bool AllowManualJQL {get;set;} = true;
-        public bool AllowCachedSelection {get;set;} = true;
-        public bool IncludeChangeLogs {get;set;} = true;
-        public bool CacheResults {get;set;} = false;
-        public bool FetchEpicChildren {get;set;} = false;
-        public string CacheResultsDesc {get;set;} = string.Empty;
-        public string JQL {get;set;} = string.Empty;
-
-        public FetchOptions()
-        {
-            //set defaults
-            AllowJQLSnippets = true;
-            AllowManualJQL = true;
-            AllowCachedSelection = false;
-            IncludeChangeLogs = true;
-            CacheResults = false;       
-            FetchEpicChildren = false;     
-
-        }
-        public static FetchOptions DefaultFetchOptions
-        {
-            get
-            {
-                var result = new FetchOptions();
-                return result;
-            }
-        }
-
-    }
     public static class IssueFetcher
     {
         private static  SortedList<string,jtisIssueData> _cachedData = new SortedList<string, jtisIssueData>();
 
         public static jtisIssueData? FetchIssues(FetchOptions? options)
         {
+            if (options.CacheResults)
+            {
+                if (string.IsNullOrWhiteSpace(options.CacheResultsDesc))
+                {
+                    options.CacheResultsDesc=$"(cached on: {DateTime.Now})";
+                }
+            }
+            var usedCache = false;
+
             // bool handled = false;
             jtisIssueData? response = null;
             // if (options==null){options = FetchOptions.DefaultFetchOptions;}
@@ -62,6 +37,10 @@ namespace JTIS.Data
             // {
             //     handled = ProcessJQL(options);
             // }
+            if (options.CacheResults && usedCache==false)
+            {
+                _cachedData.Add(options.CacheResultsDesc,response);
+            }
             return response;
         }
 
@@ -92,8 +71,19 @@ namespace JTIS.Data
             return jtisData;
         }
 
+
+        private static void pdb(Issue iss)
+        {
+            
+        }
         private static List<jtisIssue>? PopulateEpicLinks(List<jtisIssue> epics, FetchOptions options)
         {
+
+            //FOR COMPANY MANAGED JIRA CLOUD, GET CHILDREN OF EPIC USING:
+            //project=CSSK and "epic link" in (CSSK-85, ETC, ETC)
+
+
+
             if (epics.Count() > 0)
             {
                 AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");

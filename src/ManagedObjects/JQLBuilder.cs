@@ -14,7 +14,7 @@ namespace JTIS
                 var appendVal = sb.Length==0 ? $"{epicKey}" : $", {epicKey}";
                 sb.Append(appendVal);
             }
-            var jql = $"'Epic Link' in({sb.ToString()})";
+            var jql = $"'Epic Link' in({sb.ToString()}) or parent in({sb.ToString()})";
             return jql;
         }
 
