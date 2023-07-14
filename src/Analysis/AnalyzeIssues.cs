@@ -15,7 +15,13 @@ namespace JTIS.Analysis
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
-        FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
+        FetchOptions fetchOptions = 
+            FetchOptions.DefaultFetchOptions
+                .CacheResults()
+                .AllowCachedSelection()
+                .AllowJQLSnippets()
+                .IncludeChangeLogs()
+                .AllowManualJQL();
 
         public bool GetDataFail {get;private set;}
         public AnalyzeIssues()
