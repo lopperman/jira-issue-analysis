@@ -542,7 +542,7 @@ ResetLocalIssueStatusCfg();
             tbl.AddRow(new Markup[]
             {
                 new Markup($"[bold]{login}[/]"){Justification=Justify.Center}, 
-                new Markup($"[bold]{apiToken}[/]"){Justification=Justify.Left}, 
+                new Markup($"[dim]* concealed *[/]"){Justification=Justify.Left}, 
                 new Markup($"[bold]{baseUrl}[/]"){Justification=Justify.Center}, 
                 new Markup($"[bold]{proj}[/]"){Justification=Justify.Center}
             });
@@ -569,7 +569,7 @@ ResetLocalIssueStatusCfg();
                 AnsiConsole.Write(new Rule());
                 AnsiConsole.MarkupLine($"[dim](Atlassian requires the use of tokens when authenticating to their API. Active Jira users can create a new token if needed by following these instructions)[/]{Environment.NewLine}[bold]https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/[/]");
                 
-                tAPIToken = ConsoleUtil.GetInput<string>("Enter Jira API Token").Trim();
+                tAPIToken = ConsoleUtil.GetInput<string>("Enter Jira API Token",concealed:true).Trim();
 
                 RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
                 AnsiConsole.Write(new Rule());                

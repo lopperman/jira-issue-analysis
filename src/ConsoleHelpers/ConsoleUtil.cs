@@ -411,7 +411,9 @@ namespace JTIS.Console
             Environment.Exit(0);
         }    
 
-        public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false) where T:IComparable<T>
+
+
+        public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false, bool concealed = false) where T:IComparable<T>
         {
             T retVal = default(T);
 
@@ -441,10 +443,6 @@ namespace JTIS.Console
                 // double totLen = lines * System.Console.WindowWidth;
                 msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
 
-                // double tmplines = (double)msg.Length/(double)System.Console.WindowWidth;
-                // int lines = (int)Math.Truncate(100 * tmplines)/100;
-                // if (tmplines > lines){lines +=1;}
-                // msg = msg + new String(' ',(System.Console.WindowWidth * lines)-msg.Length);                                
                 msg = $"[bold blue on cornsilk1]{msg}[/]";
             }
             // msg = $"{msg}{Environment.NewLine}:: ";
@@ -454,16 +452,6 @@ namespace JTIS.Console
                 showDefVal = true;
             }
             
-        //    var tp = new TextPrompt<T>(msg);
-        //     if (allowEmpty)
-        //     {
-        //         tp.AllowEmpty();
-        //     }
-        //     if (showDefVal)
-        //     {
-        //         tp.DefaultValue<T>(defVal);
-        //     }            
-            
             var r = new Rule();
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);            
@@ -472,6 +460,10 @@ namespace JTIS.Console
             AnsiConsole.Write(r);
 
             var tp = new TextPrompt<T>("::");
+            if (concealed)
+            {
+                tp.Secret('*');
+            }
             if (allowEmpty)
             {
                 tp.AllowEmpty();
@@ -486,7 +478,7 @@ namespace JTIS.Console
             if (allowEmpty == false && retVal == null )
             {
                 PressAnyKeyToContinue("[[Empty] is not allowed, please try again");
-                return GetInput<T>(msg,defVal,allowEmpty);
+                return GetInput<T>(msg,defVal,allowEmpty,concealed);
             }
             return retVal;
         }
