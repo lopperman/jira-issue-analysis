@@ -97,8 +97,8 @@ namespace JTIS
                     if (jStatus.Type != defStat.Type)
                     {
                         
-                        overridden = string.Format("[bold red on yellow]{0}{0}{0}[/]",":triangular_Flag:");
-                        locState = string.Format("[bold blue on lightyellow3]{0}[/]",locState);
+                        overridden = string.Format("[bold red on cornsilk1]{0}{0}{0}[/]",":triangular_Flag:");
+                        locState = string.Format("[bold blue on cornsilk1]{0}[/]",locState);
                     }
                     var _jiraId = usedIn.StringsMatch("yes") ? jStatus.StatusId.ToString() : $"[dim]{jStatus.StatusId.ToString()}[/]";
                     var _name = usedIn.StringsMatch("yes") ? jStatus.StatusName.ToString() : $"[dim]{jStatus.StatusName.ToString()}[/]";

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using Spectre.Console;
 using JTIS.Config;
@@ -13,6 +14,9 @@ namespace JTIS.Analysis
     public class AnalyzeIssues
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
+
+        private DateTime? filterStatusChangeStart = null;
+        private DateTime? filterStatusChangeEnd = null;
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
         FetchOptions fetchOptions = 
@@ -138,8 +142,25 @@ namespace JTIS.Analysis
 
         public void WriteToConsole()
         {
-            CheckIssueTypeFilter();        
+            CheckIssueTypeFilter();       
+            CheckStatusDateFilter(); 
             WriteIssueSummary();
+        }
+
+        private void CheckStatusDateFilter()
+        {
+            string filterStart = ConsoleUtil.GetInput<string>("Enter Status Change Start Date to filter issues changing status after 'Start Date', otherwise leave blank",allowEmpty:true);
+            filterStatusChangeStart = null;
+            filterStatusChangeEnd = null;
+            if (filterStart != null)
+            {
+                DateTime tmpDt = DateTime.MinValue;
+                if (DateTime.TryParse(filterStart, out tmpDt))
+                {
+                    filterStatusChangeStart = tmpDt;
+                }
+            }
+
         }
 
         public string WriteToCSV()
@@ -417,6 +438,18 @@ namespace JTIS.Analysis
             AnsiConsole.Clear();
 
             var filteredItems = JCalcs.Where(x=>_issueTypeFilter.IsFiltered(x.IssueObj.IssueType)).ToList();
+            if (filterStatusChangeStart.HasValue)
+            {
+                var filteredDates = new List<IssueCalcs>();
+                foreach (var iCalc in filteredItems)
+                {
+                    if (iCalc.StateCalcs.Any(x=>x.StartDt >= filterStatusChangeStart.Value) || (iCalc.StateCalcs.Any(y=>y.EndDt.HasValue && y.EndDt.Value >= filterStatusChangeStart.Value)))
+                    {
+                        filteredDates.Add(iCalc);
+                    }
+                }
+                filteredItems = filteredDates;
+            }
             int totalCount = filteredItems.Count;
 
             if (startIndex <0 || startIndex >= totalCount){startIndex=0;}
@@ -477,6 +510,7 @@ namespace JTIS.Analysis
                     new TableColumn(new Markup($"[bold][underline]UN[/]BLOCKED{Environment.NewLine}[underline]ACTIVE[/] DAYS[/]").Centered()),
                     new TableColumn(new Markup($"[bold]# TIMES{Environment.NewLine}STARTED[/]").Centered()),
                     new TableColumn(new Markup($"[bold][underline]FIRST[/]{Environment.NewLine}ENTERED DATE[/]").Centered()),
+                    new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}ENTERED DATE[/]").Centered()),
                     new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}EXITED DATE[/]").Centered())
                 });
                 
@@ -556,6 +590,46 @@ namespace JTIS.Analysis
                         passiveBlockDays += statSumm.BlockTime.TotalDays;
                     }
 
+                    Markup? lastEntry = null;
+                    Markup? firstEntry = null;
+                    Markup? lastexit = null;
+                    if (filterStatusChangeStart.HasValue)
+                    {
+                        if (statSumm.FirstEntry.HasValue && statSumm.FirstEntry.Value >= filterStatusChangeStart.Value)
+                        {
+                            firstEntry = new Markup($"[bold blue on cornsilk1]{statSumm.FirstEntry}[/]").Centered();
+                        }
+                        else 
+                        {
+                            firstEntry = new Markup($"{statSumm.FirstEntry}").Centered();
+
+                        }
+                        if (statSumm.LastEntry.HasValue && statSumm.LastEntry.Value >= filterStatusChangeStart.Value)
+                        {
+                            lastEntry = new Markup($"[bold blue on cornsilk1]{statSumm.LastEntry}[/]").Centered();
+                        }
+                        else 
+                        {
+                            lastEntry = new Markup($"{statSumm.LastEntry}").Centered();
+
+                        }
+                        if (statSumm.LastExit.HasValue && statSumm.LastExit.Value >= filterStatusChangeStart.Value)
+                        {
+                            lastexit= new Markup($"[bold blue on cornsilk1]{statSumm.LastExit}[/]").Centered();
+                        }
+                        else 
+                        {
+                            lastexit = new Markup($"{statSumm.LastExit}").Centered();
+
+                        }
+                    }
+                    else 
+                    {
+                        firstEntry = new Markup($"{statSumm.FirstEntry}").Centered();
+                        lastEntry = new Markup($"{statSumm.LastEntry}").Centered();
+                        lastexit = new Markup($"{statSumm.LastExit}").Centered();
+                    }
+
                     tbl.AddRow(new Markup[]{
                         new Markup($" {statSumm.Status} ").Centered(),
 
@@ -578,8 +652,11 @@ namespace JTIS.Analysis
                             new Markup($"[bold]{statSumm.EntryCount}[/]").Centered() :
                             new Markup($"[dim]{statSumm.EntryCount}[/]").Centered(),
 
-                        new Markup($"{statSumm.FirstEntry}").Centered(), 
-                        new Markup($"{statSumm.LastExit}").Centered()
+                        firstEntry, 
+                        lastEntry, 
+                        lastexit
+                        // new Markup($"{statSumm.FirstEntry}").Centered(), 
+                        // new Markup($"{statSumm.LastExit}").Centered()
                     });
 
                     
@@ -599,6 +676,7 @@ namespace JTIS.Analysis
                     new Markup($"[bold green on lightcyan1] {activeBusDays-activeBlockDays:0.00} [/]").Centered(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
+                    new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered()
                 });
                 tbl.AddRow(new Markup[]{
@@ -608,6 +686,7 @@ namespace JTIS.Analysis
                     new Markup($"[bold]{passiveBusDays:0.00}[/]").Centered(),
                     new Markup($"{passiveBlockDays:0.00}").Centered(),
                     new Markup($"[dim]n/a[/]").Centered(),
+                    new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered()
@@ -622,6 +701,7 @@ namespace JTIS.Analysis
                     new Markup($"[bold]{ic.BusinessDays:0.00}[/]").Centered(),
                     new Markup($"[bold red1 on cornsilk1] {ic.BlockedActiveDays:0.00} [/]").Centered(),
                     new Markup($"[bold green on cornsilk1] {ic.UnblockedActiveDays:0.00} [/]").Centered(),
+                    new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered()

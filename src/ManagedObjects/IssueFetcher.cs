@@ -15,7 +15,7 @@ namespace JTIS.Data
 
         public static void ClearCachedData()
         {
-            if (ConsoleUtil.Confirm("Clear all caches issues search results?",true))
+            if (ConsoleUtil.Confirm("Clear all cached issues search results?",true))
             {
                 _cachedData.Clear();
             }

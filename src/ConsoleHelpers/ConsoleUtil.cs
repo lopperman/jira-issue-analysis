@@ -240,6 +240,19 @@ namespace JTIS.Console
                     }
                 });            
         }
+
+        public static string scrubMode 
+        {
+            get 
+            {
+                if (ScrubData != null && ScrubData==true)
+                {
+                    return $"[bold maroon on cornsilk1] * SCRUB DATA MODE * [/]";
+                }
+                return string.Empty;
+            }
+
+        }
         public static void WriteAppTitle()
         {
             // var panel = new Panel(title);
@@ -249,7 +262,7 @@ namespace JTIS.Console
             // AnsiConsole.Write(panel);
 //            panel.HeaderAlignment(Justify.Center );
             AnsiConsole.Clear();
-            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";     
+            var title = $"  JIRA Time In Status :llama: [dim]by[/] [dim link=https://github.com/lopperman/jira-issue-analysis]Paul Brower[/]{scrubMode}{ConsoleUtil.RecordingInfo}{ConsoleUtil.TimeZoneAlert}{Environment.NewLine}  [dim italic][link]https://github.com/lopperman/jira-issue-analysis[/][/]";     
             AnsiConsole.Write(new Rule());
             AnsiConsole.MarkupLine(title);
             var tr = new Rule().DoubleBorder();

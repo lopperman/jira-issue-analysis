@@ -20,8 +20,8 @@ internal class Overview1
     }
 
     public static Overview1 Create(FetchOptions options)
-    {
-        var vs = new Overview1(options);
+    {        
+        var vs = new Overview1(options.AllowCachedSelection().CacheResults().IncludeChangeLogs());
         vs.Build();
         return vs;
     }
@@ -70,7 +70,7 @@ internal class Overview1
 
     public Overview1 Build()
     {
-        fetchOptions.IncludeChangeLogs(true);
+        fetchOptions.IncludeChangeLogs().AllowCachedSelection().CacheResults();
         _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
 
         if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
