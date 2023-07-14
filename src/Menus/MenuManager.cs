@@ -117,6 +117,16 @@ namespace JTIS.Menu
                     VisualSnapshot.Create(VisualSnapshotType.vsIssueStatus, AnalysisType.atEpics).Build();
                     break;
 
+                case MenuItemEnum.miIssue_Summary_Overall1:
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
+                    var ov1 = Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs()).Build();
+                    break;
+
+                case MenuItemEnum.miIssue_Summary_Overall1_Epic :
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
+                    var ov1E = Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs().FetchEpicChildren()).Build();
+                    break;
+
 #endregion
 #region ADVANCED SEARCH MENUS
 
@@ -407,6 +417,24 @@ namespace JTIS.Menu
 
         }
 
+        private static void ShowMenu_SummaryVisualization()
+        {
+            lastMenu = MenuEnum.meIssue_Summary_Visualization;
+            BuildMenuPanel(lastMenu);
+
+            var sp = new SelectionPrompt<MenuFunction>();      
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));      
+            sp.PageSize = 16;
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization,"Issue Status and Blocker Summary"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization_Epic,"Issue Status and Blocker Summary (by Epic)"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Overall1,"Overall Status Summary 1"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Overall1_Epic ,"Overall Status Summary 1 (by Epic)"));
+
+            AddCommonMenuItems(sp,lastMenu);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+
+        }
+
         private static void ShowMenu_ChangeLog()
         {
             lastMenu = MenuEnum.meChangeLog;
@@ -510,6 +538,9 @@ namespace JTIS.Menu
                     return;
                 case MenuEnum.meIssue_Notes:
                     ShowMenu_IssueNotes();
+                    return;
+                case MenuEnum.meIssue_Summary_Visualization:
+                    ShowMenu_SummaryVisualization();
                     return;
 
             }
@@ -641,15 +672,6 @@ namespace JTIS.Menu
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
                 break;
 
-//  ISSUE VISUALIZAITON //
-
-                case (MenuEnum.meIssue_Summary_Visualization):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization,"Issue Summary Visualization"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization_Epic,"Issue Summary Visualization (by Epic)"));
-
-                    ret.Add(menuSeparator);
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
-                break;
 
 
 

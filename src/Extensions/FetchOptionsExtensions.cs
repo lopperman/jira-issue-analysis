@@ -9,6 +9,12 @@ public static class FetchOptionsExtensions
         options.IncludeChangeLogs=value;
         return options;
     }
+    public static FetchOptions FetchEpicChildren(this FetchOptions options, bool value=true)
+    {
+        if (options is null){throw new ArgumentNullException(nameof(options));}
+        options.FetchEpicChildren = value;
+        return options;
+    }
     public static FetchOptions AllowCachedSelection(this FetchOptions options, bool value=true)
     {
         if (options is null){throw new ArgumentNullException(nameof(options));}

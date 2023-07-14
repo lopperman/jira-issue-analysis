@@ -24,6 +24,8 @@ namespace JTIS
             bool doExport = false;
             if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {
+                CheckIssueTypeFilter();
+
                 if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
                 {
                     Render();                
@@ -88,19 +90,45 @@ namespace JTIS
         }
 
 
-        public void Render()
+        public void Render(bool writeAll = false, int startAt = 0)
         {
-            CheckIssueTypeFilter();
-
             var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
-            foreach (var iss in filtered)
+            if (startAt < 0 || startAt > filtered.Count) {startAt = 0;}
+            for (int i = startAt; i < filtered.Count; i ++)
+            // foreach (var iss in filtered)
             {
+                var iss = filtered[i];
+                if (writeAll==false)
+                {
+                    AnsiConsole.Clear();
+                }
                 WriteIssueHeader(iss.jIssue);
                 WriteIssueDetail(iss.jIssue);
                 AnsiConsole.WriteLine();
+                if (writeAll == false)
+                {
+                    var resp = ConsoleUtil.GetInput<string>("'ENTER' to View Next, 'P'=Show Previous, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                    if (resp.StringsMatch("X")) 
+                    {
+                        return;
+                    } 
+                    else if (resp.StringsMatch("A"))
+                    {
+                        Render(true);
+                        return;
+                    }
+                    else if (resp.StringsMatch("P"))
+                    {
+                        Render(writeAll,i-1);
+                        return;
+                    }
+                }
             }
-            ConsoleUtil.PressAnyKeyToContinue();
+            if (writeAll)
+            {
+                ConsoleUtil.PressAnyKeyToContinue();
+            }
 
         }
         private void WriteIssueHeader(JIssue ji)

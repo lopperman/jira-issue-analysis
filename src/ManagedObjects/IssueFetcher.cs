@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Diagnostics;
+using System;
 using JTIS.Console;
 using Spectre.Console;
 using JTIS.Extensions;
@@ -13,6 +14,7 @@ namespace JTIS.Data
 
         public static jtisIssueData? FetchIssues(FetchOptions? options)
         {
+            var usedCache = false;
             if (options.CacheResults)
             {
                 if (string.IsNullOrWhiteSpace(options.CacheResultsDesc))
@@ -20,7 +22,10 @@ namespace JTIS.Data
                     options.CacheResultsDesc=$"(cached on: {DateTime.Now})";
                 }
             }
-            var usedCache = false;
+            if (options.AllowCachedSelection && _cachedData.Count > 0)
+            {
+                
+            }
 
             // bool handled = false;
             jtisIssueData? response = null;
@@ -48,13 +53,20 @@ namespace JTIS.Data
         private static jtisIssueData? ProcessJQL(FetchOptions options)
         {
             var jql = string.Empty;
-            jql = ConsoleInput.GetJQLOrIssueKeys(true);
+            if (options.JQL.Length ==0)
+            {
+                jql = ConsoleInput.GetJQLOrIssueKeys(true);
+            }
+            else 
+            {
+                jql = options.JQL;
+            }
             if (jql.Length == 0)
             {
                 return null;
             }
             var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-            jtisData.GetIssuesWithChangeLogs(jql,options.IncludeChangeLogs);
+            jtisData.GetIssuesWithChangeLogs(options);
             ConsoleUtil.WritePerfData(jtisData.Performance);
             if (options.FetchEpicChildren)
             {
@@ -78,19 +90,20 @@ namespace JTIS.Data
         }
         private static List<jtisIssue>? PopulateEpicLinks(List<jtisIssue> epics, FetchOptions options)
         {
-
+            var optionsClone = FetchOptions.Clone(options);
             //FOR COMPANY MANAGED JIRA CLOUD, GET CHILDREN OF EPIC USING:
-            //project=CSSK and "epic link" in (CSSK-85, ETC, ETC)
-
-
+            //  project=CSSK and "epic link" in (CSSK-85, ETC, ETC)
+            //FOR TEAM MANAGER JIRA CLOUD, USE:
+            //  project=CSSK AND parent in (EPIC KEY, EPIC KEY, ETC)
 
             if (epics.Count() > 0)
             {
                 AnsiConsole.MarkupLine($"getting linked issues for [bold]{epics.Count} epics[/]");
-                var epicKeys = epics.Select(x=>x.issue.Key.Value).ToArray();
-                var jql = JQLBuilder.BuildJQLForFindEpicIssues(epicKeys);
-                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);         
-                var children = jtisData.GetIssuesWithChangeLogs(jql,options.IncludeChangeLogs);
+
+                optionsClone.JQL = JQLBuilder.BuildJQLForFindEpicIssues(epics.Select(x=>x.issue.Key.Value).ToArray());
+
+                var jtisData = jtisIssueData.Create(JiraUtil.JiraRepo);
+                var children = jtisData.GetIssuesWithChangeLogs(optionsClone);
                 if (children.Count > 0)
                 {
                     ConsoleUtil.WritePerfData(jtisData.Performance);

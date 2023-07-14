@@ -34,6 +34,9 @@ namespace JTIS.Menu
         miMenu_Issue_Notes, 
         miIssue_Summary_Visualization, 
         miIssue_Summary_Visualization_Epic, 
+        miIssue_Summary_Overall1, 
+        miIssue_Summary_Overall1_Epic, 
+
         miMenu_StatusConfig, 
         miMenu_JQL, 
         miMenu_Dev, 

@@ -12,9 +12,11 @@ namespace JTIS.Data
         private int _totReturnCount;
         private int _nextStart;
         private JiraRepo? repo = null;
-        public string? JQL {get;private set;}
 
+        public FetchOptions? fetchOptions = null;
         public SortedList<string,TimeSpan> Performance = new SortedList<string, TimeSpan>();
+        private SortedList<string,jtisIssue> _jtisIssues = new SortedList<string, jtisIssue>();
+        private int duplicateCount = 0;
 
         public static jtisIssueData Create(JiraRepo jRepo)
         {
@@ -22,8 +24,6 @@ namespace JTIS.Data
             instance.repo = jRepo;            
             return instance;
         }        
-        private SortedList<string,jtisIssue> _jtisIssues = new SortedList<string, jtisIssue>();
-        private int duplicateCount = 0;
 
         public SortedDictionary<string,int> IssueTypesCount
         {
@@ -63,7 +63,7 @@ namespace JTIS.Data
             }
         }
 
-        public IReadOnlyList<jtisIssue> jtisIssuesList 
+        public List<jtisIssue> jtisIssuesList 
         {
             get{
                 return _jtisIssues.Values.ToList();
@@ -86,9 +86,12 @@ namespace JTIS.Data
             AddjtisIssue(issue).AddChangeLogs(logs);
         }
 
-        public List<jtisIssue> GetIssuesWithChangeLogs(string jql, bool includeChangeLogs=true)
+        public List<jtisIssue> GetIssuesWithChangeLogs(FetchOptions options)
         {            
-            JQL = jql;
+            fetchOptions = options;
+            var jql = options.JQL;
+
+
             _totReturnCount = repo.GetJQLResultsCount(jql);
             sw = Stopwatch.StartNew();                        
 
@@ -113,7 +116,7 @@ namespace JTIS.Data
                             _nextStart += 100;                        
                         }
                         var task = ctx.AddTask($"(startAt: {_nextStart}) async issues and change logs search");
-                        Task.WaitAll(IssuesChangeLogs(jql,includeChangeLogs));
+                        Task.WaitAll(IssuesChangeLogs(jql,options.IncludeChangeLogs));
                     }
 
                 });

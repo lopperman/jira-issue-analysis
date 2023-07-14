@@ -22,6 +22,19 @@ namespace JTIS.Data
             FetchEpicChildren = false;     
 
         }
+        public static FetchOptions Clone(FetchOptions options)
+        {
+            var response = new FetchOptions();
+            response.AllowCachedSelection = options.AllowCachedSelection;
+            response.AllowJQLSnippets = options.AllowJQLSnippets;
+            response.AllowManualJQL = options.AllowManualJQL;
+            response.CacheResults = options.CacheResults;
+            response.CacheResultsDesc = options.CacheResultsDesc;
+            response.FetchEpicChildren = options.FetchEpicChildren;
+            response.IncludeChangeLogs = options.IncludeChangeLogs;
+            response.JQL = options.JQL;
+            return response;
+        }
         public static FetchOptions DefaultFetchOptions
         {
             get
