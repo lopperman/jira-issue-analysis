@@ -109,7 +109,7 @@ namespace JTIS
                 AnsiConsole.WriteLine();
                 if (writeAll == false)
                 {
-                    var resp = ConsoleUtil.GetInput<string>($"'ENTER' to View Next, 'P'=Show Previous, '1' - '{filteredCount}'=go to list item, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                    var resp = ConsoleUtil.GetInput<string>($"ENTER= View Next, P=Show Previous, 1-{filteredCount}=Go To Item, A=Show All, X=Return to Menu",allowEmpty:true);
                     if (resp.StringsMatch("X")) 
                     {
                         return;

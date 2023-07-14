@@ -32,6 +32,10 @@ namespace JTIS.Data
         public static jtisIssueData? FetchIssues(FetchOptions options)
         {
             options.JQL = GetJQL(options);
+            if (options.JQL.Length==0)
+            {
+                return null;
+            }
 
             if (options.AllowCachedSelection && _cachedData.Count > 0)
             {

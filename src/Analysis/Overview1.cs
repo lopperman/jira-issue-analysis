@@ -76,10 +76,10 @@ internal class Overview1
         if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
         {
             CheckIssueTypeFilter();
-        }
-        foreach (var item in _filteredIssues)
-        {
-            AnsiConsole.MarkupLine($"[bold]{item.jIssue.IssueType}[/], {item.jIssue.Key}, {item.jIssue.StatusName}");
+            foreach (var item in _filteredIssues)
+            {
+                AnsiConsole.MarkupLine($"[bold]{item.jIssue.IssueType}[/], {item.jIssue.Key}, {item.jIssue.StatusName}");
+            }
         }
 
         ConsoleUtil.PressAnyKeyToContinue();

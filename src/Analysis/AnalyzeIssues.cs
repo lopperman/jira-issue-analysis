@@ -16,7 +16,7 @@ namespace JTIS.Analysis
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
 
         private DateTime? filterStatusChangeStart = null;
-        private DateTime? filterStatusChangeEnd = null;
+        // private DateTime? filterStatusChangeEnd = null;
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
         FetchOptions fetchOptions = 
@@ -151,7 +151,7 @@ namespace JTIS.Analysis
         {
             string filterStart = ConsoleUtil.GetInput<string>("Enter Status Change Start Date to filter issues changing status after 'Start Date', otherwise leave blank",allowEmpty:true);
             filterStatusChangeStart = null;
-            filterStatusChangeEnd = null;
+            
             if (filterStart != null)
             {
                 DateTime tmpDt = DateTime.MinValue;
@@ -742,7 +742,7 @@ namespace JTIS.Analysis
                     var currentTop = System.Console.GetCursorPosition().Top;
                     while (waitLoop)
                     {
-                        resp = ConsoleUtil.GetInput<string>("'ENTER' to view next, 'P' to view previous, 'N' to add an Issue note, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                        resp = ConsoleUtil.GetInput<string>("ENTER=View Next, P=View Previous, N=Add Issue Note, A=Show All, X=Return to Menu",allowEmpty:true);
 
                         if (resp.StringsMatch("N")) 
                         {

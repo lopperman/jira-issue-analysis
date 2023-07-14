@@ -220,6 +220,10 @@ namespace JTIS.Menu
                     JQLUtil.ViewSavedJQL(CfgManager.config);
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
                     break;
+                case MenuItemEnum.miSavedJQLFind:
+                    JQLUtil.FindSavedJQLl();
+                    if (exitMenu == null){exitMenu = MenuEnum.meJQL;}
+                    break;
                 case MenuItemEnum.miSavedJQLAdd:
                     JQLUtil.AddJQL();
                     if (exitMenu == null){exitMenu = MenuEnum.meJQL;}

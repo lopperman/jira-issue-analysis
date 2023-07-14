@@ -472,7 +472,7 @@ namespace JTIS.Console
             AnsiConsole.MarkupLine(msg);
             AnsiConsole.Write(r);
 
-            var tp = new TextPrompt<T>("::");
+            var tp = new TextPrompt<T>(" : ");
             if (concealed)
             {
                 tp.Secret('*');
@@ -490,7 +490,7 @@ namespace JTIS.Console
 
             if (allowEmpty == false && retVal == null )
             {
-                PressAnyKeyToContinue("[[Empty] is not allowed, please try again");
+                PressAnyKeyToContinue("(Empty) is not allowed, please try again");
                 return GetInput<T>(msg,defVal,allowEmpty,concealed);
             }
             return retVal;

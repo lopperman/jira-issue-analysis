@@ -32,6 +32,10 @@ namespace JTIS
 
             AnsiConsole.Write(new Panel(jqlHelp).Header($"[dim]Help - Entering Issue Id's)[/]").Border(BoxBorder.None));
             var tmpResponse = ConsoleUtil.GetInput<string>($"{jqlIdHelp}",allowEmpty:true);
+            if (tmpResponse.Trim().Length == 0)
+            {
+                return string.Empty;
+            }
 
             var data = string.Empty;
             var reg1 = new Regex("^\\d+$",RegexOptions.Singleline);

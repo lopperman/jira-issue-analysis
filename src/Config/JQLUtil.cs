@@ -73,6 +73,40 @@ namespace JTIS
                 }
             }
         }
+
+        internal static void FindSavedJQLl()
+        {
+            var searchTerm = ConsoleUtil.GetInput<string>("Enter search term to find Saved JQL snippets by name or JQL",allowEmpty:true);
+            if (searchTerm.Trim().Length == 0){return;}
+
+            var codeStyle = ConsoleUtil.StdStyle(StdLine.slCode);
+            var colNameStyle = ConsoleUtil.StdStyle(StdLine.slOutputTitle);
+
+            var tbl = new Table();
+            tbl.AddColumns(
+                new TableColumn($"[bold]jqlId[/]").Centered(), 
+                new TableColumn($"[bold]jqlName[/]").Width(25).Centered(), 
+                new TableColumn($"jql")).LeftAligned();
+            tbl.Border(TableBorder.Rounded);
+            tbl.BorderColor(AnsiConsole.Foreground);
+            tbl.Expand();
+            foreach (var jql in CfgManager.config.SavedJQL)
+            {   
+                if (jql.jqlName.StringsMatch(searchTerm,StringCompareType.scContains) || jql.jql.StringsMatch(searchTerm,StringCompareType.scContains))
+                {
+                    var tRow = new TableRow(
+                        new Markup[]{
+                            new Markup($"[bold]{jql.jqlId:00}[/]"),
+                            new Markup($"{jql.jqlName}"), 
+                            new Markup($"[dim]{jql.jql}[/]")}
+                            );
+                    tbl.AddRow(tRow);
+                }
+            }
+            AnsiConsole.Write(tbl);
+            ConsoleUtil.PressAnyKeyToContinue();
+        }
+
         public static void ViewSavedJQL(JTISConfig cfg, bool pause = true)
         {
             if (cfg.SavedJQLCount == 0)
@@ -214,6 +248,7 @@ namespace JTIS
             {
                 CfgManager.SaveConfigList();
             }
-        }        
+        }
+
     }
 }
