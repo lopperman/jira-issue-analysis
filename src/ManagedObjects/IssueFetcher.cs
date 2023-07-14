@@ -56,6 +56,7 @@ namespace JTIS.Data
             if (options.JQL.Length ==0)
             {
                 jql = ConsoleInput.GetJQLOrIssueKeys(true);
+                options.JQL = jql;
             }
             else 
             {
