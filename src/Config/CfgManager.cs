@@ -454,7 +454,8 @@ namespace JTIS.Config
             ConsoleUtil.Lines.WriteQueuedLines(false);
             if (CfgManager.config.SavedJQLCount > 0)
             {
-                var jqlId = ConsoleUtil.GetConsoleInput<int>("Enter JQL item number (number after 'NAME') to select. Enter zero ('0') to cancel",false);
+                var jqlId = ConsoleUtil.GetInput<int>("Enter JQL item number (number after 'NAME') to select. Enter zero ('0') to cancel",allowEmpty:true);
+                // jqlId = ConsoleUtil.GetConsoleInput<int>("Enter JQL item number (number after 'NAME') to select. Enter zero ('0') to cancel",false);
                 if (jqlId > 0 && jqlId <= CfgManager.config.SavedJQLCount)
                 {
                     JQLConfig? tmpJQL = CfgManager.config.SavedJQL.Single(x=>x.jqlId == jqlId);
@@ -727,7 +728,7 @@ namespace JTIS.Config
             {
                 cfgList.Add(newConfig);
                 SaveConfigList();
-                if (ConsoleUtil.Confirm($"New Jira config ('{newConfig.ToString()}') has been created and saved. Would you like to connect to it now?",true,false))
+                if (ConsoleUtil.Confirm($"New Jira config ('{newConfig.ToString()}') has been created and saved. Would you like to connect to it now?",true))
                 {
                     config = newConfig;
                 }

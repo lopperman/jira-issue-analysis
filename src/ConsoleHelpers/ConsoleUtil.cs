@@ -2,7 +2,7 @@
 using System;
 using JTIS.Config;
 using Spectre.Console;
-
+using JTIS.Extensions;
 
 namespace JTIS.Console
 {
@@ -359,114 +359,6 @@ namespace JTIS.Console
             }
             return ret;
         }
-        public static T GetConsoleInput<T>(string? message = null, bool requireConfirmation = false, bool allowNull = false, bool clearScreen = false, T defaultValue = default(T)) where T:IConvertible
-        {
-            if (clearScreen)
-            {
-                System.Console.Clear();
-            }
-            message = string.Format("[bold white on darkblue]{0}[/]",message);
-            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
-            return AnsiConsole.Ask<T>(message);
-
-            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
-            // return AnsiConsole.Ask<T>(mk.ToString());
-
-
-            // if (message!=null && message.Length > 0)
-            // {
-            //     WriteStdLine(message,StdLine.slResponse);
-            // }
-            // Console.ResetColor();
-            // var rslt = Console.ReadLine();
-            // bool isError = false;
-            // var ret = ConvertString<T>(rslt, out isError);
-            // if (isError)
-            // {
-            //     WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", rslt),StdLine.slResponse);
-            //     return GetConsoleInput<T>(requireConfirmation:requireConfirmation,allowNull:allowNull);
-            // }
-            // if (allowNull == false && (ret == null || ret.ToString().Length == 0))
-            // {
-            //     return GetConsoleInput<T>(message,requireConfirmation,allowNull,clearScreen);
-            // }
-            
-            // // if (ret.Cast<T> == null)
-            // // {
-            // //     WriteStdLine(string.Format("'{0}' is not a valid choice, please try again", ret),StdLine.slResponse);
-            // //     return GetConsoleInput<T>(requireConfirmation:requireConfirmation,allowNull:allowNull);
-            // // }
-            // if (requireConfirmation)
-            // {
-            //     WriteStdLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdLine.slResponse);
-            //     var key = Console.ReadKey(true);
-            //     if (key.Key == ConsoleKey.X)
-            //     {
-            //         ConsoleUtil.ByeByeForced();
-            //     }
-            //     if (key.Key != ConsoleKey.Y)
-            //     {
-            //         return GetConsoleInput<T>(message);
-            //     }
-            // }
-            // return (T)Convert.ChangeType(ret,typeof(T));
-            // try 
-            // {
-            //     T retVal = (T)Convert.ChangeType(ret,typeof(T));
-            //     return retVal;
-            // }
-            // catch
-            // {
-            //     WriteError(ret + " is not valid, try again");
-            //     return GetConsoleInput<T>(message);
-            // }            
-        }
-
-        public static T GetConsoleInput<T>(string message) where T:IConvertible 
-        {
-            message = string.Format("[bold white on darkblue]{0}[/]",message);
-            // var mk = new Markup(message, new Style(Color.White,Color.DarkBlue,Decoration.Bold));
-            return AnsiConsole.Ask<T>(message);
-            
-            //return GetConsoleInput<T>(message,true);
-            // WriteLine(message,StdForecolor(StdLine.slResponse), StdBackcolor(StdLine.slResponse));
-            // var ret = Console.ReadLine();            
-            // if (string.IsNullOrWhiteSpace(ret))
-            // {
-            //     return GetConsoleInput<T>(message);
-            // }
-            // WriteLine(string.Format("ENTER 'Y' TO USE '{0}', OTHERWISE 'X' TO EXIT'", ret),StdForecolor(StdLine.slResponse),StdBackcolor(StdLine.slResponse),false);
-            // var key = Console.ReadKey(true);
-            // if (key.Key == ConsoleKey.X)
-            // {
-            //     ConsoleUtil.ByeByeForced();
-            // }
-            // if (key.Key != ConsoleKey.Y)
-            // {
-            //     return GetConsoleInput<T>(message);
-            // }
-            // try 
-            // {
-            //     T retVal = (T)Convert.ChangeType(ret,typeof(T));
-            //     return retVal;
-            // }
-            // catch
-            // {
-            //     WriteError(ret + " is not valid, try again");
-            //     return GetConsoleInput<T>(message);
-            // }
-
-        }
-
-        public static bool ByeBye()
-        {
-            if (ConsoleUtil.Confirm("QUIT APPLICATION?",true))
-            {
-                ByeByeForced();
-            }
-            return false;
-        }
-
         public static void WritePerfData(SortedList<string,TimeSpan> perf, int sleepMilliseconds=1000)
         {
             foreach (var prf in perf)
@@ -479,7 +371,6 @@ namespace JTIS.Console
             else {
                 Thread.Sleep(1000);
             }
-
         }
 
         public static void ByeByeForced()
@@ -525,34 +416,62 @@ namespace JTIS.Console
             T retVal = default(T);
 
             AnsiConsole.WriteLine();
-            var r = new Rule();
-            r.Style=Style.Parse("dim red");
-            AnsiConsole.Write(r);
-            msg = Markup.Remove(msg);
+            var noMarkup = Markup.Remove(msg);
             if (msg.EndsWith(Environment.NewLine))
             {
                 int place = msg.LastIndexOf(Environment.NewLine);
                 if (place >-1)
                 {
                     msg = msg.Remove(place,Environment.NewLine.Length);
-                }
+                }                
             }
-            if (allowEmpty)
+            msg = $"  {msg.Trim()}  ";
+            if (msg.Length <= System.Console.WindowWidth)
             {
-                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] [dim](Optional)[/] {msg}[/]";
+                if (msg.Length < System.Console.WindowWidth)
+                {
+                    msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
+                }
+                msg = $"[bold blue on cornsilk1]{msg}[/]";            
             }
             else 
             {
-                msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg}[/]";
+                int lines = (int)(msg.Length/System.Console.WindowWidth);
+                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
+                // double totLen = lines * System.Console.WindowWidth;
+                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
+
+                // double tmplines = (double)msg.Length/(double)System.Console.WindowWidth;
+                // int lines = (int)Math.Truncate(100 * tmplines)/100;
+                // if (tmplines > lines){lines +=1;}
+                // msg = msg + new String(' ',(System.Console.WindowWidth * lines)-msg.Length);                                
+                msg = $"[bold blue on cornsilk1]{msg}[/]";
             }
-            msg = $"{msg}[{AnsiConsole.Foreground} on {AnsiConsole.Background}]{Environment.NewLine} : [/]";
+            // msg = $"{msg}{Environment.NewLine}:: ";
             var showDefVal = false;
             if (default(T) != null &&  default(T).CompareTo(defVal)!=0)
             {
                 showDefVal = true;
             }
             
-            var tp = new TextPrompt<T>(msg);
+        //    var tp = new TextPrompt<T>(msg);
+        //     if (allowEmpty)
+        //     {
+        //         tp.AllowEmpty();
+        //     }
+        //     if (showDefVal)
+        //     {
+        //         tp.DefaultValue<T>(defVal);
+        //     }            
+            
+            var r = new Rule();
+            r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
+            r.Border(BoxBorder.Heavy);            
+            AnsiConsole.Write(r);
+            AnsiConsole.MarkupLine(msg);
+            AnsiConsole.Write(r);
+
+            var tp = new TextPrompt<T>("::");
             if (allowEmpty)
             {
                 tp.AllowEmpty();
@@ -560,7 +479,7 @@ namespace JTIS.Console
             if (showDefVal)
             {
                 tp.DefaultValue<T>(defVal);
-            }
+            }            
 
             retVal = AnsiConsole.Prompt<T>(tp);
 
@@ -571,22 +490,21 @@ namespace JTIS.Console
             }
             return retVal;
         }
-        public static bool Confirm(string msg, bool defResp, bool keepMarkup = false )
+        public static bool Confirm(string msg, bool defResp)
         {
             var startLine = System.Console.CursorTop + 1;
             // ClearLinesBackTo(startLine);
 
             AnsiConsole.WriteLine();
             var r = new Rule();
-            r.Style=Style.Parse("dim red");
+            r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
+            r.Border(BoxBorder.Heavy);
             AnsiConsole.Write(r);
-            if (keepMarkup == false)
-            {
-                msg = Markup.Remove(msg);
-            }
-            msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
-            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
-            var result = AnsiConsole.Confirm(msg,defResp);
+            msg = Markup.Remove(msg);
+            // msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
+            msg = $"[bold blue on cornsilk1]  {msg}  [/]";
+//            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
+            var result = AnsiConsole.Confirm($"{msg}{Environment.NewLine}:",defResp);
             ClearLinesBackTo(startLine);
             return result;
         }    

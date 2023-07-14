@@ -583,7 +583,7 @@ ResetLocalIssueStatusCfg();
                 
                 RenderManualConfigStatus(tLogin,tAPIToken,tURL,tProj);
 
-                if (ConsoleUtil.Confirm($"A successful connection is needed to verify the information you provided.{Environment.NewLine}[bold]Attempt to authenticate to Jira now?[/]",true,true))
+                if (ConsoleUtil.Confirm($"A successful connection is needed to verify the information you provided.{Environment.NewLine}[bold]Attempt to authenticate to Jira now?[/]",true))
                 {
                     int configNumber = 1;
                     if (CfgManager.config != null && CfgManager.Configs.Count > 0)

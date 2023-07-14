@@ -405,17 +405,20 @@ namespace JTIS.Analysis
         }
 
 
-        private void WriteIssueSummary(bool writeAllAtOnce = false)
+        private void WriteIssueSummary(bool writeAllAtOnce = false, int startIndex = 0)
         {
-            int writeCount = 0;
             bool writeAll = writeAllAtOnce;
             AnsiConsole.Clear();
 
             var filteredItems = JCalcs.Where(x=>_issueTypeFilter.IsFiltered(x.IssueObj.IssueType)).ToList();
             int totalCount = filteredItems.Count;
 
-            foreach (var ic in filteredItems)
+            if (startIndex <0 || startIndex >= totalCount){startIndex=0;}
+
+            for (int i = startIndex; i < totalCount; i ++)
+            // foreach (var ic in filteredItems)
             {
+                var ic = filteredItems[i];
 
                 ic.ResetTotalDaysFields();
                 var currentlyBlocked = ic.IssueObj.IsBlocked;
@@ -436,10 +439,9 @@ namespace JTIS.Analysis
                 {
                     AnsiConsole.Clear();
                 }
-                writeCount +=1;
 
                 // FIRST SUMMARY 'RULE' LINE
-                AnsiConsole.Write(new Rule($"[dim]({writeCount:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
+                AnsiConsole.Write(new Rule($"[dim]({i+1:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 if (currentlyBlocked)
                 {
                     AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED)[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
@@ -654,7 +656,7 @@ namespace JTIS.Analysis
                     var currentTop = System.Console.GetCursorPosition().Top;
                     while (waitLoop)
                     {
-                        resp = ConsoleUtil.GetInput<string>("'ENTER' to View Next, 'N' to add an Issue note,  'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                        resp = ConsoleUtil.GetInput<string>("'ENTER' to view next, 'P' to view previous, 'N' to add an Issue note, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
 
                         if (resp.StringsMatch("N")) 
                         {
@@ -663,6 +665,11 @@ namespace JTIS.Analysis
                         } 
                         else if(resp.StringsMatch("X"))
                             {return;} 
+                        else if (resp.StringsMatch("P"))
+                        {
+                            WriteIssueSummary(writeAllAtOnce, i-1);
+                            return;
+                        }
                         else if (resp.StringsMatch("A"))
                         {
                             writeAll = true;

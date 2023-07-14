@@ -152,7 +152,7 @@ namespace JTIS
             AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ISSUE STATUS",Justify.Center));
 
 
-            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false,true))
+            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
             {
                 BuildBlockedNonBlocked(clearScreen,true);
                 return;
@@ -223,7 +223,7 @@ namespace JTIS
                 AnsiConsole.Write(new Panel(tbl).Expand().Header("ISSUE STATUS BREAKDOWN - DETAIL DATA",Justify.Center));
             }
             
-            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false,true))
+            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
             {
                 BuildStatusBreakdown(clearScreen,true);
                 return;

@@ -93,8 +93,9 @@ namespace JTIS
         public void Render(bool writeAll = false, int startAt = 0)
         {
             var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            var filteredCount = filtered.Count;
 
-            if (startAt < 0 || startAt > filtered.Count) {startAt = 0;}
+            if (startAt < 0 || startAt >= filtered.Count) {startAt = 0;}
             for (int i = startAt; i < filtered.Count; i ++)
             // foreach (var iss in filtered)
             {
@@ -103,12 +104,12 @@ namespace JTIS
                 {
                     AnsiConsole.Clear();
                 }
-                WriteIssueHeader(iss.jIssue);
+                WriteIssueHeader(iss.jIssue, i+1, filteredCount);
                 WriteIssueDetail(iss.jIssue);
                 AnsiConsole.WriteLine();
                 if (writeAll == false)
                 {
-                    var resp = ConsoleUtil.GetInput<string>("'ENTER' to View Next, 'P'=Show Previous, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
+                    var resp = ConsoleUtil.GetInput<string>($"'ENTER' to View Next, 'P'=Show Previous, '1' - '{filteredCount}'=go to list item, 'A'=Show All At Once, 'X'=Stop Showing Results",allowEmpty:true);
                     if (resp.StringsMatch("X")) 
                     {
                         return;
@@ -123,6 +124,19 @@ namespace JTIS
                         Render(writeAll,i-1);
                         return;
                     }
+                    else if (resp.Length > 0)
+                    {
+                        int tempIdx = -1;
+                        if (int.TryParse(resp, out tempIdx))
+                        {
+                            tempIdx = tempIdx - 1;
+                            if (tempIdx >=0 && tempIdx < filteredCount)
+                            {
+                                Render(writeAll,tempIdx);
+                                return;
+                            }
+                        }
+                    }
                 }
             }
             if (writeAll)
@@ -131,9 +145,11 @@ namespace JTIS
             }
 
         }
-        private void WriteIssueHeader(JIssue ji)
+        private void WriteIssueHeader(JIssue ji, int itemIndex, int totalResults)
         {
             var escSummary = Markup.Escape(ConsoleUtil.Scrub(ji.Summary));
+            AnsiConsole.Write(new Rule($"[dim]({itemIndex:000} of {totalResults:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
+
             var p = new Panel($"[bold]Change Logs For {ji.Key}[/], ([dim]Issue Type: [/][bold]{ji.IssueType}[/][dim] Status:[/][bold] {ji.StatusName})[/]{Environment.NewLine}[dim]{escSummary}[/]");
             p.Border = BoxBorder.Rounded;
             p.Expand();
@@ -163,6 +179,7 @@ namespace JTIS
                         Markup? changeDt;
                         if ((cli.FieldName.ToLower()=="status"))
                         {
+                            
                             toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue} [/]");
                             frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue} [/]");
                             changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.ToString()} [/]");

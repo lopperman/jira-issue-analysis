@@ -42,7 +42,7 @@ namespace JTIS
                         return string.Empty;
                     }
                     ConsoleUtil.WriteStdLine($"[dim] * JQL QUERY * [/]{Environment.NewLine}\t{data}",StdLine.slInfo);
-                    if (ConsoleUtil.Confirm($"Would you like to save this [bold]JQL Query[/] to use in the future?",false,true))
+                    if (ConsoleUtil.Confirm($"Would you like to save this [bold]JQL Query[/] to use in the future?",false))
                     {
                         var saveName = isJQL ? $"JQL for:" : "Issue List for:";
                         saveName = ConsoleUtil.GetInput<string>("Enter short desc:",saveName,true);
