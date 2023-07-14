@@ -1,3 +1,4 @@
+using System.Dynamic;
 using System.Globalization;
 using System.Diagnostics;
 using System;
@@ -10,43 +11,73 @@ namespace JTIS.Data
 {
     public static class IssueFetcher
     {
-        private static  SortedList<string,jtisIssueData> _cachedData = new SortedList<string, jtisIssueData>();
+        private static  List<jtisIssueData> _cachedData = new List<jtisIssueData>();
 
-        public static jtisIssueData? FetchIssues(FetchOptions? options)
+        public static void ClearCachedData()
         {
-            var usedCache = false;
-            if (options.CacheResults)
+            if (ConsoleUtil.Confirm("Clear all caches issues search results?",true))
             {
-                if (string.IsNullOrWhiteSpace(options.CacheResultsDesc))
-                {
-                    options.CacheResultsDesc=$"(cached on: {DateTime.Now})";
-                }
+                _cachedData.Clear();
             }
+        }
+
+        public static IReadOnlyList<jtisIssueData> CachedDataList
+        {
+            get 
+            {
+                return _cachedData;
+            }
+        }
+
+        public static jtisIssueData? FetchIssues(FetchOptions options)
+        {
+            options.JQL = GetJQL(options);
+
             if (options.AllowCachedSelection && _cachedData.Count > 0)
             {
+                var cachedData = _cachedData.SingleOrDefault(
+                    x=>x.fetchOptions.JQL.StringsMatch(options.JQL) && 
+                    x.fetchOptions.FetchEpicChildren.Equals(options.FetchEpicChildren) && 
+                    x.fetchOptions.IncludeChangeLogs.Equals(options.IncludeChangeLogs));
                 
+                if (cachedData != null)
+                {                    
+                    AnsiConsole.Write(new Rule($"[blue on cornsilk1]USING CACHED SEARCH RESULTS[/]").Border(BoxBorder.Heavy));
+                    AnsiConsole.MarkupLine($"[bold]Using recent cached copy of the JQL search below[/].{Environment.NewLine}[dim]Cached search result are cleared when exiting app, or can be cleared in the Configuration Menu area[/]{Environment.NewLine}[italic]JQL: {cachedData.fetchOptions.JQL}[/]");
+                    if (ConsoleUtil.Confirm("Continue and use cached results? (Answering no ('n') will replace cached results with new search)",true))
+                    {
+                        return cachedData;
+                    }
+                    else 
+                    {
+                        options.CacheResults(true);
+                        options.CacheResultsDesc=$"(cached on: {DateTime.Now})";
+                        _cachedData.Remove(cachedData);
+                    }
+                }
             }
 
-            // bool handled = false;
             jtisIssueData? response = null;
-            // if (options==null){options = FetchOptions.DefaultFetchOptions;}
-            // if (options.AllowCachedSelection && _cachedData.Any())
-            // {
-            //     handled = SelectCachedResults();
-            // }
-            // if (!handled && options.JQL != null)
-            // {
-                response = ProcessJQL(options);                                
-            // }
-            // if (!handled)
-            // {
-            //     handled = ProcessJQL(options);
-            // }
-            if (options.CacheResults && usedCache==false)
+            response = ProcessJQL(options);                                
+            if (options.CacheResults)
             {
-                _cachedData.Add(options.CacheResultsDesc,response);
+                _cachedData.Add(response);
             }
             return response;
+        }
+
+        private static string GetJQL(FetchOptions options)
+        {
+            var tmpJQL = string.Empty;
+            if (options.JQL.Length==0)
+            {
+                tmpJQL=ConsoleInput.GetJQLOrIssueKeys(options.AllowJQLSnippets,options.FetchEpicChildren);
+            }
+            else 
+            {
+                tmpJQL=options.JQL;
+            }
+            return tmpJQL;
         }
 
         //TODO: IMPLEMENT
@@ -112,6 +143,19 @@ namespace JTIS.Data
                 }
             }
             return null;
+        }
+
+        internal static void DisplayCachedResults()
+        {
+            foreach (var cacheItem in _cachedData)
+            {
+                var info = new Markup($"[bold]Cached Items: {cacheItem.jtisIssueCount}, Include Change Logs: {cacheItem.fetchOptions.IncludeChangeLogs}, Find Epic Children: {cacheItem.fetchOptions.FetchEpicChildren}[/]{Environment.NewLine}[dim]JQL: {cacheItem.fetchOptions.JQL}[/]");
+                var p = new Panel(info);
+                p.Header(cacheItem.fetchOptions.CacheResultsDesc);
+                p.Border(BoxBorder.Rounded);
+                AnsiConsole.Write(p);
+            }
+            ConsoleUtil.PressAnyKeyToContinue();
         }
     }
 

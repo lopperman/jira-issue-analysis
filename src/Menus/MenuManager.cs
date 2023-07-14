@@ -103,6 +103,9 @@ namespace JTIS.Menu
                 case MenuItemEnum.miMenu_Issue_Notes:
                     exitMenu = MenuEnum.meIssue_Notes;
                     break;
+                case MenuItemEnum.miMenu_Cached_Searches:
+                    exitMenu = MenuEnum.meCached_Searches;
+                    break;
 #endregion
 //miMenu_Issue_Summary_Visualization
 #region ISSUE VISUALIZATION
@@ -128,6 +131,17 @@ namespace JTIS.Menu
                     break;
 
 #endregion
+
+                case MenuItemEnum.miCachedSearch_ClearAll:
+                    IssueFetcher.ClearCachedData();
+                    exitMenu = MenuEnum.meCached_Searches;
+                    break;
+                case MenuItemEnum.miCachedSearch_View:
+                    IssueFetcher.DisplayCachedResults();
+                    exitMenu = MenuEnum.meCached_Searches;
+                    break;
+
+
 #region ADVANCED SEARCH MENUS
 
                 case MenuItemEnum.miAdvSearchViewCustomFields:
@@ -481,6 +495,25 @@ namespace JTIS.Menu
   
         }
 
+        private static void ShowMenu_CachedSearches()
+        {
+            lastMenu = MenuEnum.meCached_Searches;
+            BuildMenuPanel(lastMenu);
+            var sp = new SelectionPrompt<MenuFunction>();       
+            sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+            
+            sp.PageSize = 16;
+
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miCachedSearch_View, "View Cached Searches"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miCachedSearch_ClearAll, "Clear Cached Search Results"));
+
+            sp.AddChoice(menuSeparator);
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_Config, "Menu: Configuration"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));       
+
+            AddCommonMenuItems(sp,lastMenu);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));       
+        }
         private static void ShowMenu_Config()
         {
             lastMenu = MenuEnum.meConfig;
@@ -490,7 +523,8 @@ namespace JTIS.Menu
             
             sp.PageSize = 16;
 
-            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));            
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));       
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_Cached_Searches,"Menu: Cached Searches"));
             sp.AddChoiceGroup(MenuFunction.GroupHeader("JIRA CONNECTION PROFILES"), 
                 MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"), 
                 MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"), 
@@ -527,6 +561,9 @@ namespace JTIS.Menu
         {
             switch (menu)
             {
+                case MenuEnum.meCached_Searches:
+                    ShowMenu_CachedSearches();
+                    return;
                 case MenuEnum.meConfig:
                     ShowMenu_Config();
                     return;

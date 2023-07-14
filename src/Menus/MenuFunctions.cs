@@ -20,7 +20,8 @@ namespace JTIS.Menu
         meJQL, 
         meAdvanced_Search, 
         meIssue_Summary_Visualization, 
-        meIssue_Notes
+        meIssue_Notes,
+        meCached_Searches
     }
     public enum MenuItemEnum
     {
@@ -70,8 +71,10 @@ namespace JTIS.Menu
         miSaveSessionToFile, 
         miStartRecordingSession,
         miAdvSearchViewCustomFields, 
-        miAdvSearchViewIssueFields
-        
+        miAdvSearchViewIssueFields,
+        miMenu_Cached_Searches,
+        miCachedSearch_View,
+        miCachedSearch_ClearAll
     }
 
 

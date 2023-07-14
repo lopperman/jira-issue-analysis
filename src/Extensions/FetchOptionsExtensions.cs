@@ -33,7 +33,7 @@ public static class FetchOptionsExtensions
         options.AllowManualJQL=value;
         return options;
     }
-    public static FetchOptions CacheResults(this FetchOptions options, bool value=false, string? desc=null)
+    public static FetchOptions CacheResults(this FetchOptions options, bool value=true, string? desc=null)
     {
         if (options is null){throw new ArgumentNullException(nameof(options));}
         options.CacheResults=value;

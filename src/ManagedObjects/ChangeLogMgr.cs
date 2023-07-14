@@ -14,7 +14,7 @@ namespace JTIS
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         private jtisIssueData? _jtisIssueData = null;
         private string? _exportPath = null;
-        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
+        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions.CacheResults().AllowCachedSelection().IncludeChangeLogs();
 
         public ChangeLogsMgr(AnalysisType analysisType)
         {
