@@ -471,7 +471,7 @@ namespace JTIS.Analysis
                 else 
                 {
                     ic.FirstActiveStateCalc = scStart;
-                    formattedStartDt = string.Format("[dim] ACTIVE WORK STARTED:[/][bold] {0} [/]",scStart.StartDt);
+                    formattedStartDt = string.Format("[dim] ACTIVE WORK STARTED:[/][bold] {0} [/]",scStart.StartDt.CheckTimeZone());
                 }
 
                 if (writeAll == false)
@@ -480,6 +480,11 @@ namespace JTIS.Analysis
                 }
 
                 // FIRST SUMMARY 'RULE' LINE
+                if (JTISTimeZone.DefaultTimeZone==false)
+                {
+                    AnsiConsole.Write(new Rule(ConsoleUtil.TimeZoneAlert));
+                }
+                
                 AnsiConsole.Write(new Rule($"[dim]({i+1:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 if (currentlyBlocked)
                 {
@@ -597,37 +602,37 @@ namespace JTIS.Analysis
                     {
                         if (statSumm.FirstEntry.HasValue && statSumm.FirstEntry.Value >= filterStatusChangeStart.Value)
                         {
-                            firstEntry = new Markup($"[bold blue on cornsilk1]{statSumm.FirstEntry}[/]").Centered();
+                            firstEntry = new Markup($"[bold blue on cornsilk1]{statSumm.FirstEntry.CheckTimeZoneNullable()}[/]").Centered();
                         }
                         else 
                         {
-                            firstEntry = new Markup($"{statSumm.FirstEntry}").Centered();
+                            firstEntry = new Markup($"{statSumm.FirstEntry.CheckTimeZoneNullable()}").Centered();
 
                         }
                         if (statSumm.LastEntry.HasValue && statSumm.LastEntry.Value >= filterStatusChangeStart.Value)
                         {
-                            lastEntry = new Markup($"[bold blue on cornsilk1]{statSumm.LastEntry}[/]").Centered();
+                            lastEntry = new Markup($"[bold blue on cornsilk1]{statSumm.LastEntry.CheckTimeZoneNullable()}[/]").Centered();
                         }
                         else 
                         {
-                            lastEntry = new Markup($"{statSumm.LastEntry}").Centered();
+                            lastEntry = new Markup($"{statSumm.LastEntry.CheckTimeZoneNullable()}").Centered();
 
                         }
                         if (statSumm.LastExit.HasValue && statSumm.LastExit.Value >= filterStatusChangeStart.Value)
                         {
-                            lastexit= new Markup($"[bold blue on cornsilk1]{statSumm.LastExit}[/]").Centered();
+                            lastexit= new Markup($"[bold blue on cornsilk1]{statSumm.LastExit.CheckTimeZoneNullable()}[/]").Centered();
                         }
                         else 
                         {
-                            lastexit = new Markup($"{statSumm.LastExit}").Centered();
+                            lastexit = new Markup($"{statSumm.LastExit.CheckTimeZoneNullable()}").Centered();
 
                         }
                     }
                     else 
                     {
-                        firstEntry = new Markup($"{statSumm.FirstEntry}").Centered();
-                        lastEntry = new Markup($"{statSumm.LastEntry}").Centered();
-                        lastexit = new Markup($"{statSumm.LastExit}").Centered();
+                        firstEntry = new Markup($"{statSumm.FirstEntry.CheckTimeZoneNullable()}").Centered();
+                        lastEntry = new Markup($"{statSumm.LastEntry.CheckTimeZoneNullable()}").Centered();
+                        lastexit = new Markup($"{statSumm.LastExit.CheckTimeZoneNullable()}").Centered();
                     }
 
                     tbl.AddRow(new Markup[]{
@@ -723,11 +728,11 @@ namespace JTIS.Analysis
                         }
                         else if (block.EndDt.HasValue)
                         {
-                            tEndDt = block.EndDt.Value.ToString();
+                            tEndDt = block.EndDt.Value.CheckTimeZone().ToString();
                         }
                         tbl.AddRow(new Text[]{
                             new Text($"{block.IssueKey}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.Bold)).Centered(),
-                            new Text($"{block.StartDt}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered(),
+                            new Text($"{block.StartDt.CheckTimeZone()}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered(),
                             new Text($"{tEndDt}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered()
                         });                        
                     }

@@ -11,6 +11,7 @@ namespace JTIS.Config
     {
         
         private IssueNotes? _issNotes;
+        private string? _timeZoneId;
 
         //A LIST OF STRINGS WHICH WILL GET SCRUBBED WHEN WRITING TO SCREEN
         //MAKES IT EASIER TO TAKE SCREENSHOTS AND SHARE ON GITHUB!
@@ -94,7 +95,6 @@ namespace JTIS.Config
                 _configId = value;
             }
         }
-        private string? _timeZoneId = null;
         private List<JQLConfig> _savedJQL = new List<JQLConfig>();
         private List<JiraStatus> _statusConfigs = new List<JiraStatus>();
         private List<JiraStatus> _defaultStatusConfigs = new List<JiraStatus>();
@@ -182,21 +182,16 @@ namespace JTIS.Config
         }
 
         [JsonProperty("TimeZoneId")]
-        public string? TimeZoneId 
+        public string? TimeZoneId
         {
-            get
-            {
+            get{
                 return _timeZoneId;
             }
-            set 
-            {
-                JTISTimeZone.Reset();
+            set{
                 _timeZoneId = value;
                 JTISTimeZone.SetJTISTimeZone(this);
             }
-        }            
-
-
+        }
 
         [JsonProperty("configName"),JsonRequired]
         public string? configName {get; private set;}

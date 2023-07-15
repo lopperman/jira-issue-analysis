@@ -147,6 +147,10 @@ namespace JTIS
         }
         private void WriteIssueHeader(JIssue ji, int itemIndex, int totalResults)
         {
+            if (JTISTimeZone.DefaultTimeZone==false)
+            {
+                AnsiConsole.Write(new Rule(ConsoleUtil.TimeZoneAlert));
+            }
             var escSummary = Markup.Escape(ConsoleUtil.Scrub(ji.Summary));
             AnsiConsole.Write(new Rule($"[dim]({itemIndex:000} of {totalResults:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
 
@@ -179,16 +183,15 @@ namespace JTIS
                         Markup? changeDt;
                         if ((cli.FieldName.ToLower()=="status"))
                         {
-                            
-                            toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue} [/]");
-                            frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue} [/]");
-                            changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.ToString()} [/]");
+                            toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue.CheckTimeZone()} [/]");
+                            frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue.CheckTimeZone()} [/]");
+                            changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.CheckTimeZone().ToString()} [/]");
                         }
                         else 
                         {
-                            toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue)}");
-                            frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue)}");
-                            changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.ToString()}");
+                            toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue.CheckTimeZone())}");
+                            frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue.CheckTimeZone())}");
+                            changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.CheckTimeZone().ToString()}");
                             //new Text(changeLog.CreatedDate.ToString())
                         }
 
@@ -227,8 +230,8 @@ namespace JTIS
                                 {
                                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                                     {
-                                        writer.WriteLine(string.Format("{0},{1},{2},{3},{4},{5},{6}",jIss.Key, jIss.IssueType,jIss.Summary.Replace(',',';') ,cli.ChangeLog.CreatedDate.ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
-                                    }
+                                        writer.WriteLine(string.Format("{0},{1},{2},{3},{4},{5},{6}",jIss.Key, jIss.IssueType,jIss.Summary.Replace(',',';') ,cli.ChangeLog.CreatedDate.CheckTimeZone().ToString(),cli.FieldName,cli.FromValue,cli.ToValue ));
+                                    }   
                                 }
                             }
                         }

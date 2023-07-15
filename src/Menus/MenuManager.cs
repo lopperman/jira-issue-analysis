@@ -350,17 +350,24 @@ namespace JTIS.Menu
         }
         private static void Dev2()
         {
-            CfgManager.config.issueNotes.CreateNote("wwt-291","6 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-292","1/2 day");
-            CfgManager.config.issueNotes.CreateNote("wwt-293","5-66 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-294","6-8 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-295","3-5 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-296","3-5 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-297","3-5 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-302","2-4 days");
-            CfgManager.config.issueNotes.CreateNote("wwt-310","n/a");
-            CfgManager.config.issueNotes.CreateNote("wwt-311","n/a");
-            CfgManager.SaveConfigList();
+
+            
+
+
+            // if (CfgManager.config.defaultProject=="WWT" && CfgManager.config.baseUrl.StringsMatch("graph",StringCompareType.scContains))
+            // {
+            //     CfgManager.config.issueNotes.CreateNote("wwt-291","6 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-292","1/2 day");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-293","5-66 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-294","6-8 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-295","3-5 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-296","3-5 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-297","3-5 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-302","2-4 days");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-310","n/a");
+            //     CfgManager.config.issueNotes.CreateNote("wwt-311","n/a");
+            //     CfgManager.SaveConfigList();
+            // }
 
             ConsoleUtil.PressAnyKeyToContinue();
         }

@@ -1,3 +1,5 @@
+using System;
+using JTIS.Config;
 using JTIS.Console;
 
 namespace JTIS
@@ -40,7 +42,31 @@ namespace JTIS
     
     public static class DateUtil
     {
-
+        public static string CheckTimeZone(this string item) 
+        {
+            if (string.IsNullOrWhiteSpace(item))
+            {
+                return item;
+            }
+            DateTime tmpDt = DateTime.MinValue;
+            if (DateTime.TryParse(item, out tmpDt))
+            {
+                return JTISTimeZone.CheckDate(tmpDt).ToString();
+            }
+            return item;
+        }
+        public static DateTime CheckTimeZone(this DateTime dtm)
+        {
+            return JTISTimeZone.CheckDate(dtm);
+        }
+        public static DateTime? CheckTimeZoneNullable(this DateTime? dtm)
+        {
+            if (dtm.HasValue)
+            {
+                return JTISTimeZone.CheckDate(dtm.Value);
+            }
+            return null;
+        }
 
         /// <summary> Get working days between two dates (Excluding a list of dates - Holidays) </summary>
         /// <param name="dtmCurrent">Current date time</param>
@@ -63,11 +89,6 @@ namespace JTIS
             Func<DateTime, bool> aDay = checkDate => (checkDate.DayOfWeek == DayOfWeek.Sunday || checkDate.DayOfWeek == DayOfWeek.Saturday);
             var weekendCount = Enumerable.Range(0,(first-other).Days).Count(intDay=>aDay(first.AddDays(intDay)));
             return (first-other).Days - weekendCount;
-            // Func<DateTime, bool> workDay = first => 
-            // (
-            //     first.DayOfWeek == DayOfWeek.Saturday || first.DayOfWeek == DayOfWeek.Sunday
-            // );
-            // return Enumerable.Range(0, 1 + (first-other).Days).Count(intDay=> workDay(first.AddDays(intDay)));
         }
 
         public static void testDT()

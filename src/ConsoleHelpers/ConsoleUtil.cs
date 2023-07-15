@@ -181,7 +181,7 @@ namespace JTIS.Console
                     if (CfgManager.config.DefaultTimeZoneDisplay() == false)
                     {   
                         var tzi = JTISTimeZone.DisplayTimeZone.StandardName;
-                        return $" [bold blue on lightyellow3]USING TIME ZONE: {tzi}[/] ";
+                        return $" [bold maroon on cornsilk1]USING TIME ZONE: {tzi}[/] ";
                     }
                 }
                 return string.Empty;
