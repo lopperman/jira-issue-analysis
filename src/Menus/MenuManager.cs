@@ -422,7 +422,11 @@ namespace JTIS.Menu
                     IssueStatesUtil.WriteJiraStatuses();
 
                 });
-            ConsoleUtil.PressAnyKeyToContinue();                    
+
+            if (ConsoleUtil.Confirm("Save Issue Status Config to csv?",false))
+            {
+                IssueStatesUtil.WriteJiraStatusesToCSV();
+            }
 
         }
 

@@ -52,6 +52,65 @@ namespace JTIS
             }            
         }
 
+
+
+        public static string ExportPath
+        {
+            get
+            {
+                var _exportPath = Path.Combine(CfgManager.JTISRootPath,"Exports");
+                if (Directory.Exists(_exportPath)==false)
+                {
+                    Directory.CreateDirectory(_exportPath);
+                }
+                _exportPath = Path.Combine(_exportPath,ExportFileName);
+                return _exportPath;
+
+            }
+        }
+        private static string ExportFileName
+        {
+            get
+            {
+                var dtInfo = DateTime.Now.ToString("yyyyMMMdd_HHmmss");
+                var tmpFileName = string.Format($"{CfgManager.config.defaultProject}_IssueStatusConfig_{dtInfo}.csv");
+                return tmpFileName;
+            }
+        }
+
+        public static void WriteJiraStatusesToCSV()
+        {
+            var savePath = ExportPath;
+                
+            using( var writer = new StreamWriter(savePath,false))
+            {
+                writer.WriteLine($"JiraId,statusName,localState,serverState,statusCategory,usedInProj_{CfgManager.config.defaultProject},overriden");
+
+                foreach (var jStatus in CfgManager.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
+                {
+                    JiraStatus  defStat = CfgManager.config.DefaultStatusConfigs.Single(x=>x.StatusId == jStatus.StatusId );
+                    string usedIn = string.Empty;   
+                    string overridden = string.Empty;      
+                    string locState = Enum.GetName(typeof(StatusType),jStatus.Type);     
+                    if (jStatus.DefaultInUse)
+                    {
+                        usedIn = "YES";
+                    }
+                    if (jStatus.Type != defStat.Type)
+                    {
+                        overridden = "YES";                                
+                    }
+                    var _jiraId = jStatus.StatusId.ToString();
+                    var _name = jStatus.StatusName.ToString();
+                    var _localState = locState;
+                    var _defState = Enum.GetName(typeof(StatusType),defStat.Type);
+                    var _jiraStatusCat = jStatus.CategoryName.ToString();
+                    writer.WriteLine($"{_jiraId},{_name},{_localState},{_defState},{_jiraStatusCat},{usedIn},{overridden}");
+                }
+            }
+            ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{savePath}[/]");                        
+        }
+
         public static void WriteJiraStatuses(string? searchTerm = null)
         {
             ConsoleUtil.WriteAppTitle();
@@ -110,6 +169,7 @@ namespace JTIS
                 }
             }
             AnsiConsole.Write(table);
+
         }                
 
     }
