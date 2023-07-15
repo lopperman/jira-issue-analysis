@@ -74,7 +74,8 @@ namespace JTIS.Menu
         miAdvSearchViewIssueFields,
         miMenu_Cached_Searches,
         miCachedSearch_View,
-        miCachedSearch_ClearAll
+        miCachedSearch_ClearAll,
+        miTISIssueTree
     }
 
 
@@ -92,6 +93,18 @@ namespace JTIS.Menu
             MenuName = string.Empty;
             MenuNameMarkup = string.Empty;
             
+        }
+
+        public static SelectionPrompt<MenuFunction> DefaultPrompt
+        {
+            get
+            {
+                var sp = new SelectionPrompt<MenuFunction>();       
+                sp.HighlightStyle(new Style(Color.Black, Color.Cornsilk1,decoration:Decoration.Bold));
+                sp.Mode(SelectionMode.Leaf);            
+                sp.PageSize = 16;
+                return sp;
+            }
         }
 
         public static MenuFunction Separator
@@ -112,9 +125,7 @@ namespace JTIS.Menu
             var mf = new MenuFunction();
             mf.MenuName = Markup.Remove(menuTitle);
             mf.MenuItem = MenuItemEnum.miMenuGroupHeader;
-            Color menuForecolor = AnsiConsole.Background;
-            Color menuBackcolor = AnsiConsole.Foreground;
-            mf.MenuNameMarkup = $"[dim]{mf.MenuName}[/]";
+            mf.MenuNameMarkup = $"[bold italic]    {mf.MenuName}    [/]";
             mf.Disabled = true;
             return mf;
         }

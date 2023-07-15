@@ -210,6 +210,11 @@ namespace JTIS.Menu
                     AnalyzeIssues analyzeEpics = new AnalyzeIssues(AnalysisType.atEpics);
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
                     break;
+                case MenuItemEnum.miTISIssueTree:
+                    IssueTree tree = new IssueTree();
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    break;
+
 
 #endregion                    
                     
@@ -530,7 +535,8 @@ namespace JTIS.Menu
             lastMenu = MenuEnum.meConfig;
             BuildMenuPanel(lastMenu);
             var sp = new SelectionPrompt<MenuFunction>();       
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));
+            sp.HighlightStyle(new Style(Color.Black, Color.Cornsilk1,decoration:Decoration.Bold));
+            sp.Mode(SelectionMode.Leaf);
             
             sp.PageSize = 16;
 
@@ -568,6 +574,26 @@ namespace JTIS.Menu
             sp.AddChoice(new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
 
         }
+
+        
+        private static void ShowMenu_IssueStates()
+        {
+
+            lastMenu = MenuEnum.meIssue_States;
+            BuildMenuPanel(lastMenu);
+            var sp = MenuFunction.DefaultPrompt;
+
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssueTree,"Issue -Build Status Tree"));
+            sp.AddChoiceGroup(MenuFunction.GroupHeader("GO TO MENU"), 
+                MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"), 
+                MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"), 
+                MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
+
+            AddCommonMenuItems(sp,lastMenu);
+            MenuManager.Execute(AnsiConsole.Prompt(sp));            
+        }
         public static void ShowMenu(MenuEnum menu)
         {
             switch (menu)
@@ -589,6 +615,9 @@ namespace JTIS.Menu
                     return;
                 case MenuEnum.meIssue_Summary_Visualization:
                     ShowMenu_SummaryVisualization();
+                    return;
+                case MenuEnum.meIssue_States:
+                    ShowMenu_IssueStates();
                     return;
 
             }
@@ -723,16 +752,6 @@ namespace JTIS.Menu
 
 
 
-//  ISSUE STATES MENU //
-
-                case(MenuEnum.meIssue_States):
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
-                    ret.Add(menuSeparator);
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));
-                break;
 
 //  MANAGE JQL MENU //
 

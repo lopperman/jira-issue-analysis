@@ -9,6 +9,14 @@ public static class FetchOptionsExtensions
         options.IncludeChangeLogs=value;
         return options;
     }
+
+    // public static FetchOptions SingleIssueOnly(this FetchOptions options, bool value=true)
+    // {
+    //     if (options is null){throw new ArgumentNullException(nameof(options));}
+    //     options.SingleIssueOnly = value;
+    //     return options;
+    // }
+
     public static FetchOptions FetchEpicChildren(this FetchOptions options, bool value=true)
     {
         if (options is null){throw new ArgumentNullException(nameof(options));}

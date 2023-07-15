@@ -9,6 +9,7 @@ namespace JTIS.Data
         public bool CacheResults {get;set;} = false;
         public bool FetchEpicChildren {get;set;} = false;
         public string CacheResultsDesc {get;set;} = string.Empty;
+        // public bool SingleIssueOnly {get;set;} = false;
         public string JQL {get;set;} = string.Empty;
 
         public FetchOptions()
