@@ -212,7 +212,7 @@ namespace JTIS.Menu
                     break;
                 case MenuItemEnum.miTISIssueTree:
                     IssueTree tree = new IssueTree();
-                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
                     break;
 
 
@@ -461,6 +461,7 @@ namespace JTIS.Menu
             sp.PageSize = 16;
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization,"Issue Status and Blocker Summary"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization_Epic,"Issue Status and Blocker Summary (by Epic)"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssueTree,"Build Status Tree"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Overall1,"Overall Status Summary 1"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Overall1_Epic ,"Overall Status Summary 1 (by Epic)"));
 
@@ -589,7 +590,7 @@ namespace JTIS.Menu
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
-            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssueTree,"Issue -Build Status Tree"));
+            // sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssueTree,"Build Status Tree"));
             sp.AddChoiceGroup(MenuFunction.GroupHeader("GO TO MENU"), 
                 MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"), 
                 MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"), 

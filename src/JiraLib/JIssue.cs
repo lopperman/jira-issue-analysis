@@ -57,30 +57,7 @@ namespace JTIS
 
         private void Initialize()
         {
-            // preDevStatuses.Add("backlog");
-            // preDevStatuses.Add("ready for development");
-            // preDevStatuses.Add("ready for story writing");
-            // preDevStatuses.Add("resolving dependencies");
-            // preDevStatuses.Add("in design");
-            // preDevStatuses.Add("ready for design");
-
-            // preQAStatuses.AddRange(preDevStatuses);
-            // preQAStatuses.Add("ready for code review");
-            // preQAStatuses.Add("verifying");
-            // preQAStatuses.Add("code review");
-            // preQAStatuses.Add("ready for qa");
-
             if (_issue == null) return;
-
-            // var subTasks = JiraUtil.JiraRepo.GetSubTasksAsList(_issue);
-            // if (subTasks != null && subTasks.Count > 0)
-            // {
-            //     foreach (var st in subTasks)
-            //     {
-            //         AddSubTask(st);
-            //     }
-            // }
-
 
             Key = _issue.Key.Value;
             Summary = _issue.Summary.Replace(",", " ");
@@ -115,35 +92,7 @@ namespace JTIS
                     _labels.Add(child);
                 }
             }
-
-            
-
         }
-
-        // [JsonIgnore]
-        // public string FeatureTeamChoices
-        // {
-        //     get
-        //     {
-        //         string ret = string.Empty;
-
-        //         if (!string.IsNullOrWhiteSpace(JiraUtil.JiraRepo.FeatureTeamChoicesFieldName))
-        //         {
-        //             var ftcField = _customFields.Where(x => x.Id == JiraUtil.JiraRepo.FeatureTeamChoicesFieldName).SingleOrDefault();
-        //             if (ftcField != null)
-        //             {
-        //                 if (ftcField.Values.Length > 0)
-        //                 {
-        //                     return String.Join("; ", ftcField.Values);
-        //                     //return ftcField.Values[0];
-        //                 }
-        //             }
-        //         }
-        //         return ret;
-        //     }
-        // }
-
-
         public string EpicLinkKey
         {
             get
@@ -179,15 +128,6 @@ namespace JTIS
 
             }
         }
-
-
-
-
-
-
-
-
-
         public void AddChangeLogs(IEnumerable<IssueChangeLog> logs)
         {
             foreach (var l in logs)
@@ -214,80 +154,6 @@ namespace JTIS
             }
 
         }
-
-        // public List<JCustomField> CustomFields
-        // {
-        //     get
-        //     {
-        //         return _customFields;
-        //     }
-        //     set
-        //     {
-        //         _customFields = value;
-        //     }
-        // }
-
-        // public List<string> Components
-        // {
-        //     get
-        //     {
-        //         if (_components == null)
-        //         {
-        //             _components = new List<string>();
-        //         }
-        //         return _components;
-        //     }
-        //     set
-        //     {
-        //         _components = value;
-        //     }
-
-        // }
-
-        // public string LabelsToString
-        // {
-        //     get
-        //     {
-        //         string ret = "";
-
-        //         if (Labels != null && Labels.Count > 0)
-        //         {
-        //             ret = string.Join("|", Labels);
-        //         }
-
-        //         return ret;
-        //     }
-        // }
-
-        // public List<string> Labels
-        // {
-        //     get
-        //     {
-        //         if (_labels == null)
-        //         {
-        //             _labels = new List<string>();
-        //         }
-        //         return _labels;
-        //     }
-        //     set
-        //     {
-        //         _labels = value;
-        //     }
-
-        // }
-
-        // public List<JIssue> SubTasks
-        // {
-        //     get
-        //     {
-        //         if (_subTasks == null) _subTasks = new List<JIssue>();
-        //         return _subTasks;
-        //     }
-        //     set
-        //     {
-        //         _subTasks = value;
-        //     }
-        // }
 
         public bool IsBlocked {
             get{

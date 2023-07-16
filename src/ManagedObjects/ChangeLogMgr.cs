@@ -12,6 +12,8 @@ namespace JTIS
     public class ChangeLogsMgr
     {
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
+        private jtisFilterItems<string> _issueFieldFilter = new jtisFilterItems<string>();
+        private List<jtisIssue> _filteredIssues = new List<jtisIssue>();
         private jtisIssueData? _jtisIssueData = null;
         private string? _exportPath = null;
         private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions.CacheResults().AllowCachedSelection().IncludeChangeLogs();
@@ -25,6 +27,8 @@ namespace JTIS
             if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {
                 CheckIssueTypeFilter();
+                CheckIssueFieldFilter();
+                BuildFilteredList();
 
                 if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
                 {
@@ -66,6 +70,33 @@ namespace JTIS
             }
         }
 
+        private void BuildFilteredList()
+        {
+            _filteredIssues = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            _filteredIssues = _filteredIssues.Where(x=>x.ChangeLogs.Any(y=>y.Items.Any(i=>_issueFieldFilter.IsFiltered(i.FieldName)))).ToList();
+        }
+        private void CheckIssueFieldFilter()
+        {
+            _issueFieldFilter.Clear();
+            foreach (var kvp in _jtisIssueData.IssueChangeLogFieldsCount)
+            {
+                _issueFieldFilter.AddFilterItem(kvp.Key,$"Count: {kvp.Value}");
+
+            }
+            if (_issueFieldFilter.Count > 1)
+            {
+                if (ConsoleUtil.Confirm($"Filter which of the {_issueFieldFilter.Count} fields get displayed?",true))
+                {
+                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueFieldFilter.Items.ToList());
+                    if (response != null && response.Count() > 0)
+                    {
+                        _issueFieldFilter.Clear();
+                        _issueFieldFilter.AddFilterItems(response); 
+                    }
+                }
+            }
+
+        }
         private void CheckIssueTypeFilter()
         {
             _issueTypeFilter.Clear();
@@ -92,7 +123,7 @@ namespace JTIS
 
         public void Render(bool writeAll = false, int startAt = 0)
         {
-            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            var filtered = _filteredIssues;
             var filteredCount = filtered.Count;
 
             if (startAt < 0 || startAt >= filtered.Count) {startAt = 0;}
@@ -175,28 +206,31 @@ namespace JTIS
             {
                 JIssueChangeLog changeLog = ji.ChangeLogs[i];
                 foreach (JIssueChangeLogItem cli in changeLog.Items)
-                {
+                {                    
+
                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                     {
-                        Markup? toVal;
-                        Markup? frVal;
-                        Markup? changeDt;
-                        if ((cli.FieldName.ToLower()=="status"))
+                        if (_issueFieldFilter.Items.Any(x=>x.Value.StringsMatch(cli.FieldName)))
                         {
-                            toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue.CheckTimeZone()} [/]");
-                            frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue.CheckTimeZone()} [/]");
-                            changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.CheckTimeZone().ToString()} [/]");
-                        }
-                        else 
-                        {
-                            toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue.CheckTimeZone())}");
-                            frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue.CheckTimeZone())}");
-                            changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.CheckTimeZone().ToString()}");
-                            //new Text(changeLog.CreatedDate.ToString())
-                        }
+                            Markup? toVal;
+                            Markup? frVal;
+                            Markup? changeDt;
+                            if ((cli.FieldName.ToLower()=="status"))
+                            {
+                                toVal = Markup.FromInterpolated($"[bold blue on white] {cli.ToValue.CheckTimeZone()} [/]");
+                                frVal = Markup.FromInterpolated($"[dim blue on white] {cli.FromValue.CheckTimeZone()} [/]");
+                                changeDt = Markup.FromInterpolated($"[blue on white] {changeLog.CreatedDate.CheckTimeZone().ToString()} [/]");
+                            }
+                            else 
+                            {
+                                toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue.CheckTimeZone())}");
+                                frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue.CheckTimeZone())}");
+                                changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.CheckTimeZone().ToString()}");
+                                //new Text(changeLog.CreatedDate.ToString())
+                            }
 
-                        tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
-                        
+                            tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
+                        }
                     }
                 }
             }

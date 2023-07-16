@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using JTIS.Console;
+
 namespace JTIS.Extensions
 {
 
@@ -22,6 +24,12 @@ namespace JTIS.Extensions
 
     public static class StringExt
     {
+
+        public static string Scrub(this string item)
+        {
+            return ConsoleUtil.Scrub(item);
+        }
+
         // converts any two inputs to strings and compares
         public static bool StringsMatch<T,T2>(this T sourceData, T2 compareTo, StringCompareType compareType = StringCompareType.scEquals)
         {            

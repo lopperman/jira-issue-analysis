@@ -124,7 +124,8 @@ namespace JTIS
                     barCht.AddItem(kvp.Key.Replace(useStart,""),kvp.Value,clr);
                 }
             }
-            AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ALL",Justify.Center));
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Panel(barCht).Expand().Header("[bold]  BLOCKED VS. NOT BLOCKED - ALL [/] ",Justify.Center));
 
             barCht = new BarChart();
             barCht.ShowValues();
@@ -138,7 +139,8 @@ namespace JTIS
                     barCht.AddItem(kvp.Key.Replace(useStart,""),kvp.Value,clr);
                 }
             }
-            AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ISSUE TYPE",Justify.Center));
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Panel(barCht).Expand().Header("[bold]  BLOCKED VS. NOT BLOCKED - ISSUE TYPE  [/]",Justify.Center));
 
             barCht = new BarChart();
             barCht.ShowValues();
@@ -152,7 +154,8 @@ namespace JTIS
                     barCht.AddItem(kvp.Key.Replace(useStart,""),kvp.Value,clr);
                 }
             }
-            AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ISSUE STATUS",Justify.Center));
+            AnsiConsole.WriteLine();
+            AnsiConsole.Write(new Panel(barCht).Expand().Header("[bold]  BLOCKED VS. NOT BLOCKED - ISSUE STATUS [/] ",Justify.Center));
 
             if (ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
             {
@@ -221,7 +224,7 @@ namespace JTIS
             tbl.Expand();                
             foreach (var issue in _filtered)
             {                    
-                tbl.AddRow(issue.jIssue.IsBlocked ? $"[bold maroon on cornsilk1] BLOCKED [/]" : "",issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
+                tbl.AddRow(issue.jIssue.IsBlocked ? $"[bold maroon on cornsilk1] BLOCKED [/]" : "",issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary.Scrub()));
             }
             AnsiConsole.Write(new Panel(tbl).Expand().Header("  ISSUE BLOCKED BREAKDOWN - DETAIL DATA  ",Justify.Center));
 
@@ -233,7 +236,7 @@ namespace JTIS
             tbl.Expand();                
             foreach (var issue in _filtered)
             {                    
-                tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
+                tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary.Scrub()));
             }
             AnsiConsole.Write(new Panel(tbl).Expand().Header("  ISSUE STATUS BREAKDOWN - DETAIL DATA  ",Justify.Center));
         }

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Atlassian.Jira;
@@ -25,6 +26,20 @@ namespace JTIS.Data
             return instance;
         }        
 
+        public SortedDictionary<string,int> IssueChangeLogFieldsCount
+        {
+            get{
+                SortedDictionary<string,int> response = new SortedDictionary<string,int>();
+                var clList = jtisIssuesList.SelectMany(x=>x.ChangeLogs).ToList();
+                var cliList = clList.SelectMany(x=>x.Items).ToList();
+                var distinctFields = cliList.Select(x=>x.FieldName).Distinct().ToList();
+                foreach (var fldName in distinctFields)
+                {
+                    response.Add(fldName,cliList.Count(x=>x.FieldName.StringsMatch(fldName)));
+                }
+                return response;
+            }
+        }
         public SortedDictionary<string,int> IssueTypesCount
         {
             get{
