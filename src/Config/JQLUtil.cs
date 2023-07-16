@@ -135,7 +135,6 @@ namespace JTIS
                             new Markup($"[dim]{jql.jql}[/]")}
                             );
                     tbl.AddRow(tRow);
-                    tbl.AddEmptyRow();
                 }
                 AnsiConsole.Write(tbl);
                 if (pause)

@@ -12,9 +12,10 @@ namespace JTIS
         jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
         public VisualSnapshotType SnapshotType {get;private set;}
         public AnalysisType SearchType {get;private set;}
-        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions;
+        private FetchOptions fetchOptions = FetchOptions.DefaultFetchOptions.AllowCachedSelection().CacheResults();
 
         private jtisIssueData? _jtisIssueData = null;
+        private List<jtisIssue>? _filtered = null;
 
         private VisualSnapshot(VisualSnapshotType snapshotType, AnalysisType analysisType)
         {
@@ -61,9 +62,9 @@ namespace JTIS
                 CheckIssueTypeFilter();
                 BuildStatusBreakdown();
                 ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
-                BuildBlockedNonBlocked(false,false);
+                BuildBlockedNonBlocked(false);
+                ConsoleUtil.PressAnyKeyToContinue();
             }
-            ConsoleUtil.PressAnyKeyToContinue($"NEXT: ???");
             
         }
 
@@ -74,7 +75,7 @@ namespace JTIS
                 dic.Add(key,0);
             }
         }
-        private void BuildBlockedNonBlocked(bool clearScreen = true, bool showDetail = false)
+        private void BuildBlockedNonBlocked(bool clearScreen = true)
         {
             if (_jtisIssueData.jtisIssueCount == 0){return;}
 
@@ -82,9 +83,7 @@ namespace JTIS
             SortedDictionary<string,double> chtPerc = new SortedDictionary<string, double>();
             SortedDictionary<string,double> dict = new SortedDictionary<string, double>();
 
-            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
-
-            foreach (var issue in filtered)
+            foreach (var issue in _filtered)
             {
                 var blocked = issue.jIssue.IsBlocked;
                 string key1 = "";
@@ -127,6 +126,8 @@ namespace JTIS
             }
             AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ALL",Justify.Center));
 
+            barCht = new BarChart();
+            barCht.ShowValues();
             useStart = "01-";
             foreach (var kvp in dict)
             {
@@ -139,6 +140,8 @@ namespace JTIS
             }
             AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ISSUE TYPE",Justify.Center));
 
+            barCht = new BarChart();
+            barCht.ShowValues();
             useStart = "02-";
             foreach (var kvp in dict)
             {
@@ -151,35 +154,29 @@ namespace JTIS
             }
             AnsiConsole.Write(new Panel(barCht).Expand().Header("BLOCKED VS. NOT BLOCKED - ISSUE STATUS",Justify.Center));
 
-
-            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
+            if (ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
             {
-                BuildBlockedNonBlocked(clearScreen,true);
-                return;
+                RenderBlockedDetail();
             }
-            ConsoleUtil.PressAnyKeyToContinue();
-
         }
-        private void BuildStatusBreakdown(bool clearScreen = true, bool showDetail = false)
+        private void BuildStatusBreakdown(bool clearScreen = true)
         {
             if (clearScreen)
             {
                 ConsoleUtil.WriteAppTitle();
-                AnsiConsole.Write(new Rule());
             }
 
-            // int totalCount = filteredItems.Count;
             if (_jtisIssueData.jtisIssueCount == 0){return;}
-            var filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
+            _filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
 
 
-            var statuses = filtered.Select(x=>x.issue.Status.Name).ToList().Distinct();
+            var statuses = _filtered.Select(x=>x.issue.Status.Name).ToList().Distinct();
             SortedDictionary<string,double> statusCounts = new SortedDictionary<string, double>();
             SortedDictionary<string,double> statusPercents = new SortedDictionary<string, double>();
             foreach (var tmpStatus in statuses)
             {   
-                var pct = (double)filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)filtered.Count;
-                statusCounts.Add(tmpStatus,filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
+                var pct = (double)_filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)_filtered.Count;
+                statusCounts.Add(tmpStatus,_filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
                 statusPercents.Add(tmpStatus,pct);
 
             }
@@ -189,7 +186,7 @@ namespace JTIS
             cht.ShowTagValues();
             chtPerc.FullSize().ShowPercentage().ShowTags();
             chtPerc.UseValueFormatter(x=>$"{x:0.00%}");
-            chtPerc.HideTags();
+            
             int clr = 1;
             foreach (var kvp in statusCounts)
             {
@@ -203,32 +200,42 @@ namespace JTIS
                 clr +=1;
             }
             AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Rule("ISSUE STATUS BREAKDOWN (COUNT/PERC)").Centered());
+            AnsiConsole.Write(new Rule("  ISSUE STATUS BREAKDOWN (COUNT/PERC)  ").Centered());
             AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Panel(cht).Expand().Header("ISSUE STATUS BREAKDOWN (COUNT)",Justify.Center).NoBorder());
+            AnsiConsole.Write(new Panel(cht).Expand().Header("  ISSUE STATUS BREAKDOWN (COUNT)  ",Justify.Center).NoBorder());
             AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Panel(chtPerc).Expand().Header("ISSUE STATUS BREAKDOWN (PERCENT)",Justify.Center).NoBorder());
+            AnsiConsole.Write(new Panel(chtPerc).Expand().Header("  ISSUE STATUS BREAKDOWN (PERCENT)  ",Justify.Center).NoBorder());
             AnsiConsole.WriteLine();
             AnsiConsole.Write(new Rule("~~~").Centered());
 
-            if (showDetail)
+            if (ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
             {
-                var tbl = new Table();
-                tbl.AddColumns("KEY","TYPE", "STATUS", "SUMMARY");
-                tbl.Expand();                
-                foreach (var issue in filtered)
-                {                    
-                    tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
-                }
-                AnsiConsole.Write(new Panel(tbl).Expand().Header("ISSUE STATUS BREAKDOWN - DETAIL DATA",Justify.Center));
+                RenderStatusDetail();
             }
-            
-            if (showDetail == false &&  ConsoleUtil.Confirm($"[bold]Show Data?[/]",false))
-            {
-                BuildStatusBreakdown(clearScreen,true);
-                return;
-            }
+        }
 
+        private void RenderBlockedDetail()
+        {
+            var tbl = new Table();
+            tbl.AddColumns( "BLOCKED","KEY","TYPE", "STATUS", "SUMMARY");
+            tbl.Expand();                
+            foreach (var issue in _filtered)
+            {                    
+                tbl.AddRow(issue.jIssue.IsBlocked ? $"[bold maroon on cornsilk1] BLOCKED [/]" : "",issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
+            }
+            AnsiConsole.Write(new Panel(tbl).Expand().Header("  ISSUE BLOCKED BREAKDOWN - DETAIL DATA  ",Justify.Center));
+
+        }
+        private void RenderStatusDetail()
+        {
+            var tbl = new Table();
+            tbl.AddColumns("KEY","TYPE", "STATUS", "SUMMARY");
+            tbl.Expand();                
+            foreach (var issue in _filtered)
+            {                    
+                tbl.AddRow(issue.issue.Key.Value,issue.issue.Type.Name,issue.issue.Status.Name,Markup.Escape(issue.issue.Summary));
+            }
+            AnsiConsole.Write(new Panel(tbl).Expand().Header("  ISSUE STATUS BREAKDOWN - DETAIL DATA  ",Justify.Center));
         }
 
 
