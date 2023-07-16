@@ -507,7 +507,7 @@ ResetLocalIssueStatusCfg();
 
         public override string ToString()
         {
-            return string.Format($"{configId:00} | {configName}");
+            return string.Format($"{configId:00} | {configName.Scrub()}");
         }
 
         internal void UpdateConfigId(int newCfgId)

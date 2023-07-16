@@ -54,6 +54,10 @@ namespace JTIS
         public static void Main(string[] args) 
         {
             
+            if (JTIS.Info.IsDev)
+            {
+                ConsoleUtil.ScrubData = ConsoleUtil.Confirm("DEV: SCRUB DATA?",false); 
+            }
             //ConsoleUtil.WriteAppTitle();
             ConsoleUtil.WriteAppHello();
 

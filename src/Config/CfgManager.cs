@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Data;
 using JTIS.Console;
 using JTIS.Data;
@@ -642,7 +643,6 @@ namespace JTIS.Config
 
         public static  JTISConfig? SelectJTISConfig(string markupTitle, bool confirm = true, bool canSelectCurrent = true,  List<JTISConfig>? list = null)
         {            
-
             JTISConfig? selectedCfg = null;
             if (list == null)
             {
@@ -736,6 +736,24 @@ namespace JTIS.Config
             }
 
 
+        }
+
+        internal static List<string> LoadDevScrubList()
+        {
+            var response = new List<string>();
+            var path = Path.Combine(JTISRootPath,"DevScrub.txt");
+            if (File.Exists(path))
+            {
+                using (var reader = new StreamReader(path))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        response.Add(reader.ReadLine());
+                    }
+                }
+            }
+
+            return response;
         }
     }
 }

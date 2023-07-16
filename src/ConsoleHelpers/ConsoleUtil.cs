@@ -38,7 +38,16 @@ namespace JTIS.Console
             }
             if (ScrubData == true)
             {
-                foreach (var scrubItem in CfgManager.config.ScrubList())
+                List<string> scList = new List<string>();
+                if (CfgManager.config != null)
+                {
+                    scList = CfgManager.config.ScrubData;
+                }
+                else 
+                {
+                    scList = CfgManager.LoadDevScrubList();
+                }
+                foreach (var scrubItem in scList)
                 {
                     data = data.Replace(scrubItem,new string('*',scrubItem.Length),StringComparison.OrdinalIgnoreCase);
                 }
