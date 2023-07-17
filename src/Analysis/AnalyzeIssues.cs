@@ -37,6 +37,15 @@ namespace JTIS.Analysis
         {
             if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+
+            //TODO:  FIX THIS STUPID JISSUE THING
+            foreach (var jtisIss in _jtisIssueData.jtisIssuesList)
+            {
+                if (jtisIss.ChangeLogs.Count() > 0)
+                {
+                    jtisIss.jIssue.AddChangeLogs(jtisIss.ChangeLogs,true);
+                }
+            }
             
             if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
             {

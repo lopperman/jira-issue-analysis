@@ -128,8 +128,12 @@ namespace JTIS
 
             }
         }
-        public void AddChangeLogs(IEnumerable<IssueChangeLog> logs)
+        public void AddChangeLogs(IEnumerable<IssueChangeLog> logs, bool clearExisting = false)
         {
+            if (clearExisting)
+            {
+                _changeLogs.Clear();
+            }
             foreach (var l in logs)
             {
                 AddChangeLog(l);
@@ -138,7 +142,7 @@ namespace JTIS
 
         public void AddChangeLog(IssueChangeLog changeLog)
         {
-            ChangeLogs.Add(new JIssueChangeLog(this, changeLog));
+            _changeLogs.Add(new JIssueChangeLog(this, changeLog));
         }
 
         public List<JIssueChangeLog> ChangeLogs

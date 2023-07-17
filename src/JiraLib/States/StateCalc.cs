@@ -1,5 +1,7 @@
 
 
+using Atlassian.Jira;
+
 namespace JTIS.Analysis
 {
     public class StateCalc
@@ -25,10 +27,10 @@ namespace JTIS.Analysis
         private void Populate()
         {
             
-            FromId = LogItem.FromId;
-            FromValue = LogItem.FromValue;
-            ToId = LogItem.ToId;
-            ToValue = LogItem.ToValue;
+            FromId = LogItem.FromId ?? string.Empty;
+            FromValue = LogItem.FromValue ?? string.Empty;
+            ToId = LogItem.ToId ?? string.Empty;
+            ToValue = LogItem.ToValue ?? string.Empty;
 
         }
 
