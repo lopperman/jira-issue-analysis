@@ -69,6 +69,8 @@ public static class TimeSlots
             lastBusDay = end.Date.AddDays(-1);
         } else if (end.DayOfWeek==DayOfWeek.Saturday) {
             lastBusDay = end.Date;
+        } else {
+            lastBusDay = end;
         }
         DateTime checkDate = firstBusDay;
         while (checkDate.Date <= lastBusDay.Date)
@@ -81,46 +83,43 @@ public static class TimeSlots
         }
         return ts;
 
-
-
     }
     public static List<TimeSlot> SlicedTimeSlots(params TimeSlot[] timeSlots)
     {
         List<TimeSlot> dates = new List<TimeSlot>();
         dates.AddRange(timeSlots.ToList());
-        List<TimeSlot> slicedDates = new List<TimeSlot>();
+        dates.OrderBy(x=>x.StartDate);
 
-        IEnumerable<TimeSlot> dateContainer = dates;
-
-        // Created an ordered list of Start & End dates.
-        var times = dateContainer.Select(x => x.StartDate);
-        times = times.Concat(dateContainer.Select(x => x.EndDate));
-        var orderedTimes = times.Distinct().OrderBy(x => x);
-        var prev = orderedTimes.First();
-        times = orderedTimes.Skip(1);
-
-        foreach (var time in times)
-        {
-            var names = new List<Guid>();
-            foreach (TimeSlot date in dateContainer)
+        foreach (var ts1 in dates)
+        {            
+            if (ts1.IsInvalid==false)
             {
-                // Add the TimeSlot if it's in range
-                if (prev >= date.StartDate && time <= date.EndDate)
+                foreach (var ts2 in dates)
                 {
-                    names.Add(date.Key);
+                    if (ts2.IsInvalid==false && ts2.Key != ts1.Key)
+                    {
+                        if (ts2.StartDate <= ts1.EndDate)
+                        {
+                            ts2.StartDate = ts1.EndDate.AddSeconds(1);
+                            if (ts2.StartDate > ts2.EndDate)
+                            {
+                                ts2.IsInvalid = true;
+                            }
+                        }
+                    }
                 }
-            }
 
-            var name = string.Join(",",names);
-            TimeSlot slot = new TimeSlot(prev, time);
-            slicedDates.Add(slot);
-            prev = time;
+            }
+        }
+        List<TimeSlot> slicedDates = new List<TimeSlot>();
+        foreach (var tsFinal in dates)
+        {
+            if (tsFinal.IsInvalid==false)
+            {
+                slicedDates.Add(new TimeSlot(tsFinal.StartDate,tsFinal.EndDate));
+            }
         }
         return slicedDates;
-        // foreach (var x in slicedDates)
-        // {
-        //     AnsiConsole.WriteLine($"{x.StartDate}, {x.EndDate}, {x.Key}");            
-        // }
     }
 }
 
@@ -131,6 +130,7 @@ public class TimeSlot
     public DateTime StartDate;
     public DateTime EndDate;
     public Guid Key = Guid.NewGuid();
+    public bool IsInvalid {get;set;}
 
     public TimeSlot(DateTime start, DateTime end)
     {

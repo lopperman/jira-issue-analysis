@@ -467,6 +467,7 @@ namespace JTIS.Analysis
             // foreach (var ic in filteredItems)
             {
                 var ic = filteredItems[i];
+                jtisIssue jtisIss = _jtisIssueData.jtisIssuesList.Single(x=>x.jIssue.Key.StringsMatch(ic.IssueObj.Key));
 
                 ic.ResetTotalDaysFields();
                 var currentlyBlocked = ic.IssueObj.IsBlocked;
@@ -528,6 +529,10 @@ namespace JTIS.Analysis
                     new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}EXITED DATE[/]").Centered())
                 });
                 
+
+                SortedDictionary<string,double> newBlockedCalDays = new SortedDictionary<string, double>();
+                SortedDictionary<string,double> newBlockedBusDays = new SortedDictionary<string, double>();
+
                 //status, first entered, last entered, last exit, entered count, active/passive/etc, caltime, bustime
                 List<StatusSummary> ssList = new List<StatusSummary>();
                 foreach (StateCalc sc in ic.StateCalcs)
@@ -535,6 +540,20 @@ namespace JTIS.Analysis
                     StatusSummary? ss = null;
                     if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
                     {
+                        // if (jtisIss.Blockers.Blockers.Count() > 0)
+                        // {
+                        //     if (ss.TrackType == StatusType.stActiveState || ss.TrackType == StatusType.stStart)
+                        //     {
+                        //         var tStart = sc.StartDt;
+                        //         var tEnd = sc.EndDt.HasValue ? sc.EndDt.Value : DateTime.Now;
+                        //         if (!newBlockedBusDays.ContainsKey(sc.ToValue)) {newBlockedBusDays.Add(sc.ToValue,0);}
+                        //         if (!newBlockedCalDays.ContainsKey(sc.ToValue)) {newBlockedCalDays.Add(sc.ToValue,0);}
+                        //         newBlockedCalDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,true).TotalDays;
+                        //         newBlockedBusDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,false).TotalDays;                                
+                        //     }
+                        // }
+
+
                         if (ssList.Exists(x=>x.Status == sc.ToValue))
                         {
                             ss = ssList.First(x=>x.Status == sc.ToValue);
@@ -559,7 +578,26 @@ namespace JTIS.Analysis
                         ss.EntryCount +=1;
                         ss.CalTime = ss.CalTime.Add(sc.LogItem.TotalCalendarTime);
                         ss.BusTime = ss.BusTime.Add(sc.LogItem.TotalBusinessTime);
-                        ss.BlockTime = ss.BlockTime.Add(sc.LogItem.TotalBlockedBusinessTime);
+
+
+                        if (jtisIss.Blockers.Blockers.Count() > 0)
+                        {
+                            if (ss.TrackType == StatusType.stActiveState || ss.TrackType == StatusType.stStart)
+                            {
+                                var tStart = sc.StartDt;
+                                var tEnd = sc.EndDt.HasValue ? sc.EndDt.Value : DateTime.Now;
+                                // if (!newBlockedBusDays.ContainsKey(sc.ToValue)) {newBlockedBusDays.Add(sc.ToValue,0);}
+                                // if (!newBlockedCalDays.ContainsKey(sc.ToValue)) {newBlockedCalDays.Add(sc.ToValue,0);}
+                                // newBlockedCalDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,true).TotalDays;
+                                // newBlockedBusDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,false).TotalDays;                                
+                                ss.BlockTime = ss.BlockTime.Add(jtisIss.Blockers.BlockedTime(tStart,tEnd,false));
+                            }
+                        }
+                        // if (newBlockedBusDays.ContainsKey(ss.Status))
+                        // {
+                        //     ss.BlockTime = ss.BlockTime
+                        // }
+                        // ss.BlockTime = ss.BlockTime.Add(sc.LogItem.TotalBlockedBusinessTime);
                     }
                 }
                 var todoStyle = new Style(Color.DarkRed,Color.LightYellow3);
@@ -581,6 +619,18 @@ namespace JTIS.Analysis
 
                 foreach (var statSumm in ssList)
                 {
+                    // string newBlockInfo = string.Empty;
+                    // if (newBlockedBusDays.ContainsKey(statSumm.Status) &&  newBlockedCalDays[statSumm.Status] > 0)
+                    // {
+                    //     if (newBlockedBusDays.ContainsKey(statSumm.Status))
+                    //     {
+                    //         var bCal = Math.Round(newBlockedCalDays[statSumm.Status],2);
+                    //         var bBus = Math.Round(newBlockedBusDays[statSumm.Status],2);
+                    //         newBlockInfo = $"Blocked Cal: {bCal}{Environment.NewLine}Blocked Bus: {bBus}";
+                    //     }
+
+                    // }
+
                     stActiveBlockedDays = 0;
                     stActiveUnblockedDays = 0;
 

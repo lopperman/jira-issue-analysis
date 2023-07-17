@@ -218,15 +218,8 @@ namespace JTIS.Console
             tbl.Columns[0].Centered();
             var panel = new Panel(tbl).Border(BoxBorder.Rounded).BorderColor(AnsiConsole.Foreground);
 
-            // AnsiConsole.Write(new Rule());
-            // AnsiConsole.MarkupLine(title);
-            // var tr = new Rule().DoubleBorder();
-
             AnsiConsole.Write(panel);
-//            ConsoleUtil.PressAnyKeyToContinue();
             var pbar = new ProgressBarColumn();
-            // pbar.CompletedStyle = new Style(Color.Green,Color.LightSlateGrey);
-            // pbar.IndeterminateStyle = new Style(Color.Yellow,Color.LightSlateGrey);
             pbar.RemainingStyle = new Style(foreground:Color.DarkSlateGray1).Decoration(Decoration.RapidBlink);
             pbar.CompletedStyle = new Style(foreground:Color.SlateBlue3_1).Decoration(Decoration.Bold);
             pbar.Width = 25;
@@ -245,7 +238,7 @@ namespace JTIS.Console
                     while (task.Value < task.MaxValue)
                     {
                         task.Increment(1);
-                        Thread.Sleep(25);
+                        Thread.Sleep(15);
                     }
                 });            
         }
