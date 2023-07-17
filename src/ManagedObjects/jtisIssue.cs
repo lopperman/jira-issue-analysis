@@ -4,9 +4,34 @@ namespace JTIS.Data
 {
     public class jtisIssue
     {
+        private List<IssueChangeLog> _changeLogs = new List<IssueChangeLog>();
+        private jtisBlockers? blockers = null;
         public Issue issue {get;private set;}
 
-        public List<IssueChangeLog> ChangeLogs {get; private set;}
+        public void BuildBlockers()
+        {
+            blockers = jtisBlockers.Create(this);
+        }
+
+        public jtisBlockers Blockers
+        {
+            get
+            {
+                if (blockers == null)
+                {
+                    BuildBlockers();
+                }
+                return blockers;                
+            }
+        }
+
+        public List<IssueChangeLog> ChangeLogs 
+        {
+            get
+            {
+                return _changeLogs.OrderBy(x=>x.CreatedDate).ToList();
+            }
+        }
 
         private JIssue? _jIssue = null;
         
@@ -16,10 +41,10 @@ namespace JTIS.Data
                 if (_jIssue == null){
                     _jIssue = new JIssue(issue);
                 }
-                if (_jIssue.ChangeLogs.Count() != ChangeLogs.Count())
+                if (_jIssue.ChangeLogs.Count() != _changeLogs.Count())
                 {
                     _jIssue.ChangeLogs.Clear();
-                    _jIssue.AddChangeLogs(ChangeLogs);
+                    _jIssue.AddChangeLogs(_changeLogs);
                 }
                 return _jIssue;
             }
@@ -28,15 +53,11 @@ namespace JTIS.Data
         public jtisIssue(Issue iss)
         {
             issue = iss;
-            ChangeLogs = new List<IssueChangeLog>();
         }
 
         public jtisIssue AddChangeLogs(IEnumerable<IssueChangeLog>? changeLogs)
         {
-            if (changeLogs != null && changeLogs.Count() > 0)
-            {
-                ChangeLogs.AddRange(changeLogs);
-            }
+            _changeLogs.AddRange(changeLogs);
             return this;
         }
     }

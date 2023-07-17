@@ -378,33 +378,15 @@ namespace JTIS.Menu
         }
         private static void Dev1()
         {
+            DateTime d1 = DateTime.Parse("2023-07-15 13:00 PM");
+            DateTime d2 = DateTime.Parse("2023-07-16 17:00 PM");
+//            AnsiConsole.WriteLine($"Start: {d1}, End: {d2}, Business Hours: {TimeSlots.BusinessTime(d1, d2).TotalHours}");
 
-            var refData = jtisRefData.Create(CfgManager.config);
+            d2 = DateTime.Parse("2023-07-17 13:30 PM");
+            AnsiConsole.WriteLine($"Start: {d1}, End: {d2}, Business Hours: {TimeSlots.BusinessTime(d1, d2).TotalHours}");
 
-            AnsiConsole.Write(new Rule());
-            AnsiConsole.Write(new Rule("PROJECT ISSUE TYPES"));
-            AnsiConsole.Write(new Rule());
-            foreach (var issType in refData.ProjectIssuesTypes(refData.project.Key))
-            {
-                AnsiConsole.WriteLine($"Id: {issType.Id}, Name: {issType.Name}, Statuses Count: {issType.Statuses.Count()}");
-            }
-            AnsiConsole.Write(new Rule());
-            AnsiConsole.Write(new Rule("PROJECT CUSTOM FIELDS"));
-            AnsiConsole.Write(new Rule());
-            foreach (var cstmFld in refData.ProjectCustomFields(refData.project.Key))
-            {
-                AnsiConsole.WriteLine($"Id: {cstmFld.Id}, Custom Field Name: {cstmFld.Name}, Custom Type: {cstmFld.CustomType.ToString()}");
-            }
 
-            AnsiConsole.Write(new Rule());
-            AnsiConsole.Write(new Rule("ALL CUSTOM FIELDS"));
-            AnsiConsole.Write(new Rule());
-            foreach (var f in refData.CustomFields)
-            {
-                AnsiConsole.WriteLine($"*CUSTOM FIELD (all)* Id: {f.Id}, Custom Field Name: {f.Name}, Custom Type: {f.CustomType.ToString()}");
-            }
-
-            ConsoleUtil.PressAnyKeyToContinue("DEV1 COMPLETED");
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
         private static void ViewIssueConfig(string defProject) 

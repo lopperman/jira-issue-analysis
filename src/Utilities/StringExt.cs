@@ -34,8 +34,10 @@ namespace JTIS.Extensions
         public static bool StringsMatch<T,T2>(this T sourceData, T2 compareTo, StringCompareType compareType = StringCompareType.scEquals)
         {            
             bool result = false;
-            string s1= sourceData.ToString() ?? string.Empty;
-            string s2=compareTo.ToString() ?? string.Empty;
+            string s1 = string.Empty;
+            string s2 = string.Empty;
+            if (sourceData != null){s1 = sourceData.ToString();}
+            if (compareTo != null){s2=compareTo.ToString();}
             switch (compareType)
             {
                 case StringCompareType.scEquals:

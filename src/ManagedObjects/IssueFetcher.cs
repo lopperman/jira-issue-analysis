@@ -67,6 +67,27 @@ namespace JTIS.Data
             {
                 _cachedData.Add(response);
             }
+            if (options.IncludeChangeLogs)
+            {
+                foreach (var iss in response.jtisIssuesList)
+                {
+                    iss.BuildBlockers();
+                    if (JTIS.Info.IsDev)
+                    {
+                        if (iss.Blockers.Blockers.Count() > 0)
+                        {
+                            AnsiConsole.WriteLine($"{iss.jIssue.Key} total blocked calendar days: {iss.Blockers.BlockedTime(iss.jIssue.CreateDate.Value,DateTime.Now,true).TotalDays}");
+                            AnsiConsole.WriteLine($"{iss.jIssue.Key} total blocked business days: {iss.Blockers.BlockedTime(iss.jIssue.CreateDate.Value,DateTime.Now).TotalDays}");
+
+                        }
+                    }
+                }
+                if (JTIS.Info.IsDev)                
+                {
+                    ConsoleUtil.PressAnyKeyToContinue();
+                }
+            }
+
             return response;
         }
 

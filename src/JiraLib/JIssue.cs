@@ -146,7 +146,7 @@ namespace JTIS
             get
             {
                 if (_changeLogs == null) _changeLogs = new List<JIssueChangeLog>();
-                return _changeLogs;
+                return _changeLogs.OrderBy(x=>x.CreatedDate).ToList();
             }
             set
             {

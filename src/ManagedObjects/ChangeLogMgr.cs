@@ -1,3 +1,4 @@
+using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
 using JTIS.Console;
@@ -74,6 +75,7 @@ namespace JTIS
         {
             _filteredIssues = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.issue.Type.Name)).ToList();
             _filteredIssues = _filteredIssues.Where(x=>x.ChangeLogs.Any(y=>y.Items.Any(i=>_issueFieldFilter.IsFiltered(i.FieldName)))).ToList();
+            _filteredIssues = _filteredIssues.OrderBy(x=>x.jIssue.Key).ToList();
         }
         private void CheckIssueFieldFilter()
         {
@@ -87,7 +89,7 @@ namespace JTIS
             {
                 if (ConsoleUtil.Confirm($"Filter which of the {_issueFieldFilter.Count} fields get displayed?",true))
                 {
-                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueFieldFilter.Items.ToList());
+                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueFieldFilter.Items.ToList(),pageSize:20);
                     if (response != null && response.Count() > 0)
                     {
                         _issueFieldFilter.Clear();
@@ -130,13 +132,13 @@ namespace JTIS
             for (int i = startAt; i < filtered.Count; i ++)
             // foreach (var iss in filtered)
             {
-                var iss = filtered[i];
+                jtisIssue iss = filtered[i];
                 if (writeAll==false)
                 {
                     AnsiConsole.Clear();
                 }
                 WriteIssueHeader(iss.jIssue, i+1, filteredCount);
-                WriteIssueDetail(iss.jIssue);
+                WriteIssueDetail(iss);
                 AnsiConsole.WriteLine();
                 if (writeAll == false)
                 {
@@ -193,21 +195,24 @@ namespace JTIS
             p.Padding(2,1,1,2);
             AnsiConsole.Write(p);
         }
-        private void WriteIssueDetail(JIssue ji)
+        private void WriteIssueDetail(jtisIssue ji)
         {
             var tbl = new Table();
+            tbl.AddColumn("CHANGELOG ID");
             tbl.AddColumn("KEY");
             tbl.AddColumn("FIELD");
             tbl.AddColumn("CHANGED DT");
             tbl.AddColumn("OLD VALUE");
             tbl.AddColumn("NEW VALUE");
 
+            //order change logs by create date
+
+
             for (int i = 0; i < ji.ChangeLogs.Count; i++)
             {
-                JIssueChangeLog changeLog = ji.ChangeLogs[i];
-                foreach (JIssueChangeLogItem cli in changeLog.Items)
+                IssueChangeLog changeLog = ji.ChangeLogs[i];
+                foreach (IssueChangeLogItem cli in changeLog.Items)
                 {                    
-
                     if (!cli.FieldName.ToLower().StartsWith("desc") && !cli.FieldName.ToLower().StartsWith("comment"))
                     {
                         if (_issueFieldFilter.Items.Any(x=>x.Value.StringsMatch(cli.FieldName)))
@@ -229,7 +234,7 @@ namespace JTIS
                                 //new Text(changeLog.CreatedDate.ToString())
                             }
 
-                            tbl.AddRow(new IRenderable[]{new Text(ji.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
+                            tbl.AddRow(new IRenderable[]{new Text(changeLog.Id),  new Text(ji.jIssue.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
                         }
                     }
                 }

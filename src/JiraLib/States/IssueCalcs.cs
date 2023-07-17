@@ -63,7 +63,6 @@ namespace JTIS
         {
             IssueObj = jIss;
             Populate();
-            PopulateBlockers();
         }
 
         public List<string> StateCalcStringList(bool addHeader = false)
@@ -104,9 +103,5 @@ namespace JTIS
             }
         }
 
-        private void PopulateBlockers()
-        {
-
-        }
     }
 }
