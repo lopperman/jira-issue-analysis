@@ -199,7 +199,8 @@ namespace JTIS.Console
 
         public static void WriteAppHello()
         {
-            ConsoleUtil.WriteAppTitle();
+            WriteAppTitle();
+            WriteBanner("FEATURE SUGGESTIONS? DROP A NOTE HERE: [link]https://github.com/lopperman/jira-issue-analysis/discussions[/] ");
             AnsiConsole.Background = Color.LightSteelBlue;
             AnsiConsole.Foreground = Color.Blue3_1;
             var tbl = new Table();
@@ -238,7 +239,7 @@ namespace JTIS.Console
                     while (task.Value < task.MaxValue)
                     {
                         task.Increment(1);
-                        Thread.Sleep(15);
+                        Thread.Sleep(25);
                     }
                 });            
         }
@@ -255,7 +256,7 @@ namespace JTIS.Console
             }
 
         }
-        public static void WriteAppTitle()
+        public static void WriteAppTitle(bool underDev = false)
         {
             // var panel = new Panel(title);
             // panel.Border = BoxBorder.
@@ -269,6 +270,10 @@ namespace JTIS.Console
             AnsiConsole.MarkupLine(title);
             var tr = new Rule().DoubleBorder();
             AnsiConsole.Write(tr);
+            if (underDev)
+            {
+                WriteBanner("THIS AREA IS UNDER DEVELOPMENT");
+            }
         }
         public static void WriteMarkupLine(string text,Style style, bool clearScreen = false)
         {
@@ -427,6 +432,34 @@ namespace JTIS.Console
         }    
 
 
+
+        public static void  WriteBanner(string msg, string foreColor="maroon", string backColor = "cornsilk1")
+        {
+            msg = $"  {msg.Trim()}  ";
+            if (msg.Length <= System.Console.WindowWidth)
+            {
+                if (msg.Length < System.Console.WindowWidth)
+                {
+                    msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
+                }
+                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";            
+            }
+            else 
+            {
+                int lines = (int)(msg.Length/System.Console.WindowWidth);
+                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
+                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
+
+                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
+            }
+            var r = new Rule();
+            r.Style = new Style(Color.Maroon ,Color.Cornsilk1).Decoration(Decoration.Dim);
+            r.Border(BoxBorder.Heavy);            
+            AnsiConsole.Write(r);
+            AnsiConsole.MarkupLine(msg);
+            AnsiConsole.Write(r);
+
+        }
 
         public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false, bool concealed = false) where T:IComparable<T>
         {

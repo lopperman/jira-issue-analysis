@@ -6,7 +6,6 @@ namespace JTIS
     {
         public JIssue? IssueObj {get;set;}
         public List<StateCalc> StateCalcs {get;set;}
-        public List<Blocker> Blockers {get;set;}
         public double CalendarDays {get; private set;}
         public double BusinessDays {get; private set;}
         public double UnblockedActiveDays {get; private set;}
@@ -56,8 +55,7 @@ namespace JTIS
 
         public IssueCalcs()
         {
-            StateCalcs = new List<StateCalc>();
-            Blockers = new List<Blocker>();
+            StateCalcs = new List<StateCalc>();            
         }
         public IssueCalcs(JIssue jIss):this()
         {

@@ -13,6 +13,12 @@ namespace JTIS.Data
             blockers = jtisBlockers.Create(this);
         }
 
+        public int BlockerCount 
+        {
+            get{
+                return Blockers.Blockers.Count();
+            }
+        }
         public jtisBlockers Blockers
         {
             get

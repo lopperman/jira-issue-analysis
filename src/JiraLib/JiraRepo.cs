@@ -133,9 +133,6 @@ namespace JTIS
 
             return response.ToString();
         }
-
-
-
         private async Task<string>GetFieldsAsync(CancellationToken token = default(CancellationToken))
         {
             var resourceUrl = String.Format("rest/api/3/field");

@@ -72,18 +72,8 @@ namespace JTIS.Data
                 foreach (var iss in response.jtisIssuesList)
                 {
                     iss.BuildBlockers();
-                    // if (JTIS.Info.IsDev)
-                    // {
-                    //     if (iss.Blockers.Blockers.Count() > 0)
-                    //     {
-                    //         AnsiConsole.WriteLine($"{iss.jIssue.Key} total blocked calendar days: {iss.Blockers.BlockedTime(iss.jIssue.CreateDate.Value,DateTime.Now,true).TotalDays}");
-                    //         AnsiConsole.WriteLine($"{iss.jIssue.Key} total blocked business days: {iss.Blockers.BlockedTime(iss.jIssue.CreateDate.Value,DateTime.Now).TotalDays}");
-
-                    //     }
-                    // }
                 }
             }
-
             return response;
         }
 
@@ -101,7 +91,6 @@ namespace JTIS.Data
             return tmpJQL;
         }
 
-        //TODO: IMPLEMENT
         private static jtisIssueData? ProcessJQL(FetchOptions options)
         {
             var jql = string.Empty;
@@ -136,11 +125,6 @@ namespace JTIS.Data
             return jtisData;
         }
 
-
-        private static void pdb(Issue iss)
-        {
-            
-        }
         private static List<jtisIssue>? PopulateEpicLinks(List<jtisIssue> epics, FetchOptions options)
         {
             var optionsClone = FetchOptions.Clone(options);

@@ -30,6 +30,7 @@ namespace JTIS.Menu
         miMenu_Main = 0, 
         miMenu_Config, 
         miMenu_Advanced_Search, 
+        miHelpfulURLs, 
         miMenu_IssueStates, 
         miMenu_Issue_Summary_Visualization, 
         miMenu_Issue_Notes, 

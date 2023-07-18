@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
@@ -228,7 +229,14 @@ namespace JTIS
                             }
                             else 
                             {
-                                toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue.CheckTimeZone())}");
+                                if (!string.IsNullOrWhiteSpace(cli.ToValue) && (cli.ToValue.StringsMatch("block",StringCompareType.scContains) || cli.ToValue.StringsMatch("impediment")))
+                                {
+                                    toVal = Markup.FromInterpolated($"[bold maroon on cornsilk1]{ConsoleUtil.Scrub(cli.ToValue)}[/]");
+                                }
+                                else 
+                                {
+                                    toVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.ToValue.CheckTimeZone())}");
+                                }
                                 frVal = Markup.FromInterpolated($"{ConsoleUtil.Scrub(cli.FromValue.CheckTimeZone())}");
                                 changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.CheckTimeZone().ToString()}");
                                 //new Text(changeLog.CreatedDate.ToString())

@@ -17,7 +17,6 @@ public class jtisBlockers
             return new TimeSpan();
         }
 
-        // throw new NotImplementedException();
         //remove any overlapping blocker time
         List<TimeSlot> timeIn = new List<TimeSlot>();
 
@@ -84,8 +83,6 @@ public class jtisBlockers
 
         CreateFlaggedBlockers(iss, stillBlockedDate);
         CreatePriorityFieldBlockers(iss,stillBlockedDate);
-
-
     }
 
     private void CreatePriorityFieldBlockers(jtisIssue iss, DateTime stillBlockedDate)

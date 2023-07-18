@@ -9,8 +9,6 @@ using JTIS.Menu;
 
 namespace JTIS.Analysis
 {
-
-
     public class AnalyzeIssues
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
@@ -118,12 +116,6 @@ namespace JTIS.Analysis
                 }
                 CalculateEndDates();
             }
-            foreach (var ic in JCalcs)
-            {
-                PopulateBlockers(ic);
-                AddBlockerAdjustments(ic);
-            }
-
         }
 
         private void CheckIssueTypeFilter()
@@ -201,19 +193,6 @@ namespace JTIS.Analysis
                     }
                 }
                 
-                writer.WriteLine();
-                writer.WriteLine("BLOCKERS");
-                writer.WriteLine();
-                writer.WriteLine(string.Format("{0},{1},{2},{3}","IssueKey","StartDt","EndDt","BlockerFieldName"));
-
-                foreach (var jc in JCalcs)
-                {
-                    foreach (var b in jc.Blockers)
-                    {
-                        writer.WriteLine(string.Format("{0},{1},{2},{3}",b.IssueKey,b.StartDt,b.EndDt,b.BlockerFieldName));
-                    }
-                }
-
             }
             return csvPath;   
         }
@@ -235,141 +214,6 @@ namespace JTIS.Analysis
             return false;
         }
 
-        private void AddBlockerAdjustments(IssueCalcs ic)
-        {
-            if (ic.Blockers.Count > 0)
-            {
-                foreach (var cl in ic.IssueObj.ChangeLogs)
-                {
-                    if (ic.Blockers.Exists(x=>x.IssueKey==ic.IssueObj.Key))
-                    {
-                        var issueBlockers = ic.Blockers.Where(x=>x.IssueKey==ic.IssueObj.Key).ToList();
-                        cl.CheckBlockers(issueBlockers);
-                    }
-                }
-            }
-        }
-
-        private void PopulateBlockers(IssueCalcs ic)
-        {
-            //identify all change log that 'START' a blocker
-            List<Blocker> tmpStartingBlockers = new List<Blocker>();
-            List<Blocker> tmpEndingBlockers = new List<Blocker>();
-
-            foreach (var cl in ic.IssueObj.ChangeLogs)
-            {
-                foreach (var cli in cl.Items)
-                {
-                    if (cli.FieldName.ToLower()=="flagged"   )
-                    {
-                        if (cli.ToValue.ToLower()=="impediment")
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked, cli.StartDt, cli.ChangeLogType, cli.FieldName );
-                            tmpStartingBlockers.Add(newBlocker);
-                        }      
-                        else if (cli.FromValue.ToLower()=="impediment")
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt,cli.ChangeLogType,cli.FieldName,cli.StartDt);
-                            tmpEndingBlockers.Add(newBlocker);
-                        }                                          
-                    }
-                    else if (cli.FieldName.ToLower()=="priority")
-                    {
-                        if (cli.ToValue.ToLower() == "blocked")                        
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
-                            tmpStartingBlockers.Add(newBlocker);
-                        }                        
-                        if (cli.FromValue.ToLower() == "blocked")                        
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
-                            tmpEndingBlockers.Add(newBlocker);
-                        }                                            
-                    }
-                    else if (cli.FieldName.StringsMatch("status"))
-                    {
-                        if (cli.ToValue.StringsMatch("blocked"))
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
-                            tmpStartingBlockers.Add(newBlocker);
-                        }
-                        if (cli.FromValue.StringsMatch("blocked"))
-                        {
-                            var newBlocker = new Blocker(cl.JIss.Key,cl.JIss.IsBlocked,cli.StartDt, ChangeLogTypeEnum.clBlockedField,cli.FieldName );
-                            tmpEndingBlockers.Add(newBlocker);
-                        }
-                    }
-                }
-            }
-            if (tmpStartingBlockers.Count > 0)
-            {
-                tmpStartingBlockers = tmpStartingBlockers.OrderBy(x=>x.StartDt).ToList();
-                
-                foreach (var blocker in tmpStartingBlockers)
-                {
-                    if (tmpEndingBlockers.Count > 0)
-                    {
-                        foreach (var endBlocker in tmpEndingBlockers)
-                        {
-                            if (endBlocker.BlockerFieldName == blocker.BlockerFieldName && endBlocker.StartDt > blocker.StartDt)
-                            {
-                                if (blocker.EndDt == null)
-                                {
-                                    blocker.EndDt = endBlocker.StartDt;
-                                }
-                                else 
-                                {
-                                    if (endBlocker.StartDt < blocker.EndDt.Value)
-                                    {
-                                        blocker.EndDt = endBlocker.StartDt;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    //slap on 'now' if blocker does not have an end dt 
-                    if (blocker.EndDt == null)
-                    {
-                        blocker.EndDt = DateTime.Now;
-                    }                                           
-                    ic.Blockers.Add(blocker);
-                }
-                if (ic.Blockers.Count > 1)
-                {
-                    RemoveBlockerOverlap(ic);
-                }
-
-            }            
-        }
-
-        private void RemoveBlockerOverlap(IssueCalcs ic)
-        {
-            var bList = ic.Blockers.OrderBy(x=>x.StartDt).ToList();
-            foreach (var b1 in bList)
-            {                   
-                if (b1.Removed == false && bList.Any(x=>x.tmpID != b1.tmpID && x.StartDt <= b1.EndDt && x.Removed == false))
-                {   
-                    if (!b1.EndDt.HasValue) {b1.EndDt = DateTime.Now;}
-                
-                    var overlaps = bList.Where(x=>x.tmpID != b1.tmpID && x.StartDt <= b1.EndDt).ToList();
-                    foreach (var o1 in overlaps)
-                    {
-                        if (!o1.EndDt.HasValue) {o1.EndDt = DateTime.Now;}
-                        o1.Adjusted = true;
-                        var newStartDt = b1.EndDt.Value.AddSeconds(1);
-                        o1.AdjustmentNotes.Add($"Overlap - StartDt Changed from '{o1.StartDt}' to '{newStartDt}'");
-                        o1.StartDt = newStartDt;
-                        if (o1.EndDt.Value <= o1.StartDt)
-                        {
-                            o1.Removed = true;
-                        }
-                    }
-
-                }
-            }
-            var goodList = bList.Where(x=>x.Removed == false).ToList();
-            ic.Blockers = goodList;
-        }
         private void CalculateEndDates()
         {
             foreach (IssueCalcs issCalcs in JCalcs)
@@ -498,7 +342,13 @@ namespace JTIS.Analysis
                 AnsiConsole.Write(new Rule($"[dim]({i+1:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 if (currentlyBlocked)
                 {
-                    AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED)[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
+                    var blockedOnDesc = string.Empty;
+                    if (jtisIss.Blockers.Blockers.Count() > 0)
+                    {
+                        blockedOnDesc = $" - BLOCKED ON {jtisIss.Blockers.Blockers.Max(x=>x.StartDt).ToString()}";
+                    }
+                    
+                    AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED{blockedOnDesc})[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
                 }
                 AnsiConsole.Write(new Rule($"[dim]({ic.IssueObj.IssueType.ToUpper()}) [/][bold]{ic.IssueObj.Key}[/][dim], DESC:[/] {Markup.Escape(ConsoleUtil.Scrub(ic.IssueObj.Summary))}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
@@ -540,20 +390,6 @@ namespace JTIS.Analysis
                     StatusSummary? ss = null;
                     if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
                     {
-                        // if (jtisIss.Blockers.Blockers.Count() > 0)
-                        // {
-                        //     if (ss.TrackType == StatusType.stActiveState || ss.TrackType == StatusType.stStart)
-                        //     {
-                        //         var tStart = sc.StartDt;
-                        //         var tEnd = sc.EndDt.HasValue ? sc.EndDt.Value : DateTime.Now;
-                        //         if (!newBlockedBusDays.ContainsKey(sc.ToValue)) {newBlockedBusDays.Add(sc.ToValue,0);}
-                        //         if (!newBlockedCalDays.ContainsKey(sc.ToValue)) {newBlockedCalDays.Add(sc.ToValue,0);}
-                        //         newBlockedCalDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,true).TotalDays;
-                        //         newBlockedBusDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,false).TotalDays;                                
-                        //     }
-                        // }
-
-
                         if (ssList.Exists(x=>x.Status == sc.ToValue))
                         {
                             ss = ssList.First(x=>x.Status == sc.ToValue);
@@ -580,24 +416,15 @@ namespace JTIS.Analysis
                         ss.BusTime = ss.BusTime.Add(sc.LogItem.TotalBusinessTime);
 
 
-                        if (jtisIss.Blockers.Blockers.Count() > 0)
+                        if (jtisIss.BlockerCount > 0)
                         {
                             if (ss.TrackType == StatusType.stActiveState || ss.TrackType == StatusType.stStart)
                             {
                                 var tStart = sc.StartDt;
                                 var tEnd = sc.EndDt.HasValue ? sc.EndDt.Value : DateTime.Now;
-                                // if (!newBlockedBusDays.ContainsKey(sc.ToValue)) {newBlockedBusDays.Add(sc.ToValue,0);}
-                                // if (!newBlockedCalDays.ContainsKey(sc.ToValue)) {newBlockedCalDays.Add(sc.ToValue,0);}
-                                // newBlockedCalDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,true).TotalDays;
-                                // newBlockedBusDays[sc.ToValue] += jtisIss.Blockers.BlockedTime(tStart,tEnd,false).TotalDays;                                
                                 ss.BlockTime = ss.BlockTime.Add(jtisIss.Blockers.BlockedTime(tStart,tEnd,false));
                             }
                         }
-                        // if (newBlockedBusDays.ContainsKey(ss.Status))
-                        // {
-                        //     ss.BlockTime = ss.BlockTime
-                        // }
-                        // ss.BlockTime = ss.BlockTime.Add(sc.LogItem.TotalBlockedBusinessTime);
                     }
                 }
                 var todoStyle = new Style(Color.DarkRed,Color.LightYellow3);
@@ -619,18 +446,6 @@ namespace JTIS.Analysis
 
                 foreach (var statSumm in ssList)
                 {
-                    // string newBlockInfo = string.Empty;
-                    // if (newBlockedBusDays.ContainsKey(statSumm.Status) &&  newBlockedCalDays[statSumm.Status] > 0)
-                    // {
-                    //     if (newBlockedBusDays.ContainsKey(statSumm.Status))
-                    //     {
-                    //         var bCal = Math.Round(newBlockedCalDays[statSumm.Status],2);
-                    //         var bBus = Math.Round(newBlockedBusDays[statSumm.Status],2);
-                    //         newBlockInfo = $"Blocked Cal: {bCal}{Environment.NewLine}Blocked Bus: {bBus}";
-                    //     }
-
-                    // }
-
                     stActiveBlockedDays = 0;
                     stActiveUnblockedDays = 0;
 
@@ -719,8 +534,6 @@ namespace JTIS.Analysis
                         firstEntry, 
                         lastEntry, 
                         lastexit
-                        // new Markup($"{statSumm.FirstEntry}").Centered(), 
-                        // new Markup($"{statSumm.LastExit}").Centered()
                     });
 
                     
@@ -772,25 +585,27 @@ namespace JTIS.Analysis
                 });
                 AnsiConsole.Write(tbl);
                 AnsiConsole.WriteLine();
-                if (ic.Blockers.Count > 0)
+                if (jtisIss.BlockerCount > 0)
                 {
                     AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
                     Justification=Justify.Left});
                     tbl = new Table();
-                    tbl.AddColumns("Issue Key", "BlockStart", "BlockEnd");
-                    foreach (var block in ic.Blockers)
+                    tbl.AddColumns("Issue Key", "Based On", "BlockStart", "BlockEnd");
+                    
+                    foreach (var block in jtisIss.Blockers.Blockers)
                     {   
                         var tEndDt = string.Empty;      
-                        if (block.CurrentlyBlocked)                  
+                        if (jtisIss.jIssue.IsBlocked)
                         {
                             tEndDt = "* Currently Blocked *";
                         }
-                        else if (block.EndDt.HasValue)
+                        else 
                         {
-                            tEndDt = block.EndDt.Value.CheckTimeZone().ToString();
+                            tEndDt = block.EndDt.CheckTimeZone().ToString();
                         }
                         tbl.AddRow(new Text[]{
-                            new Text($"{block.IssueKey}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.Bold)).Centered(),
+                            new Text($"{jtisIss.jIssue.Key}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.Bold)).Centered(),
+                            new Text($"{block.FieldName}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered(),
                             new Text($"{block.StartDt.CheckTimeZone()}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered(),
                             new Text($"{tEndDt}",ConsoleUtil.StdStyle(StdLine.slOutput).Decoration(Decoration.None)).Centered()
                         });                        

@@ -18,6 +18,22 @@ namespace JTIS
             }
         }
 
+        internal static void AppURLs()
+        {
+            ConsoleUtil.WriteAppTitle();
+            ConsoleUtil.WriteBanner("Jira Issue Analysis URLs","blue");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[dim] Right-click on URL to open link (if supported by your terminal)[/]");
+            AnsiConsole.WriteLine();
+
+            Markup mk = new Markup($"Project Wiki Page [link]https://github.com/lopperman/jira-issue-analysis/wiki[/]");
+            AnsiConsole.Write(new Panel(mk));
+            mk = new Markup($"Latest Release [link]https://github.com/lopperman/jira-issue-analysis/releases[/]");
+            AnsiConsole.Write(new Panel(mk));
+            mk = new Markup($"Discussion Area, Enhancement Requests [link]https://github.com/lopperman/jira-issue-analysis/discussions[/]");
+            AnsiConsole.Write(new Panel(mk));
+            ConsoleUtil.PressAnyKeyToContinue();
+        }
     }
 }
 
@@ -142,7 +158,13 @@ namespace JTIS.Menu
                     break;
 
 
+                case MenuItemEnum.miHelpfulURLs:
+                    exitMenu = MenuEnum.meMain;
+                    JTIS.Info.AppURLs();
+                    break;
+
 #region ADVANCED SEARCH MENUS
+
 
                 case MenuItemEnum.miAdvSearchViewCustomFields:
                     AdvancedSearch.Create().ViewJiraCustomFields();
@@ -733,7 +755,8 @@ namespace JTIS.Menu
 
                     ret.Add(menuSeparator);
                     ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Config,"Menu: Configuration"));
-                    ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
+                    //ret.Add(MakeMenuDetail(MenuItemEnum.miMenu_Advanced_Search,"Menu: Advanced Search" ));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miHelpfulURLs, "Application URLs"));
                 break;
 
 

@@ -59,60 +59,6 @@ namespace JTIS
 
         }
 
-        internal void CheckBlockers(List<Blocker> issueBlockers)
-        {
-            foreach (var clItem in Items)
-            {
-                if (clItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
-                {                
-                    foreach (var b in issueBlockers)
-                    {
-                        DateTime? bStart = null;
-                        DateTime? bEnd = null;
-                        
-                        if (b.EndDt.HasValue && b.StartDt <= clItem.EndDt && b.EndDt.Value >= clItem.StartDt)
-                        {
-                            if (b.StartDt > clItem.StartDt)
-                            {
-                                bStart = b.StartDt;
-                            }
-                            else 
-                            {
-                                bStart = clItem.StartDt;
-                            }
-                            if (b.EndDt.Value > clItem.EndDt)
-                            {
-                                bEnd = clItem.EndDt;
-                            }
-                            else 
-                            {
-                                bEnd = b.EndDt.Value;
-                            }
-
-                        }
-                        if (bStart.HasValue && bEnd.HasValue)
-                        {
-                            BlockedTimeSpan = BlockedTimeSpan.Add(bEnd.Value - bStart.Value);
-
-                            var ts = (bEnd.Value - bStart.Value);
-                            var tStart = bStart.Value.Date;
-                            do
-                            {
-                                if (bStart.Value.DayOfWeek == DayOfWeek.Saturday || bStart.Value.DayOfWeek == DayOfWeek.Sunday)
-                                {
-                                    ts = ts.Add(new TimeSpan(-24,0,0));
-                                }
-                                tStart = tStart.AddDays(1);
-                            } while (tStart <= bEnd.Value.Date);
-                            BlockedBusinessTimeSpan = BlockedBusinessTimeSpan.Add(ts);
-                        }
-                    }
-                }
-            }
-
-
-        }
-
         [JsonIgnore]
         public IssueChangeLog JiraChangeLog
         {
