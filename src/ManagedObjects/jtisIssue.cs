@@ -1,5 +1,6 @@
 using Atlassian.Jira;
 using JTIS.Analysis;
+using JTIS.Config;
 
 namespace JTIS.Data
 {
@@ -13,7 +14,9 @@ namespace JTIS.Data
         public StatusType StatusCategory
         {
             get {                
-                switch (issue.Status.StatusCategory.Name.ToLower())
+                var statId = issue.Status.Id;
+                var jStatus = CfgManager.config.StatusConfigs.Single(x=>x.StatusId.ToString()==statId);
+                switch (jStatus.CategoryName.ToLower())
                 {
                     case "done":
                         return StatusType.stEnd;;

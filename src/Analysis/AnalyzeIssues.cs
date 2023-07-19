@@ -12,9 +12,8 @@ namespace JTIS.Analysis
     public class AnalyzeIssues
     {        
         private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
-
+        private List<jtisIssue> _filtered = new List<jtisIssue>();
         private DateTime? filterStatusChangeStart = null;
-        // private DateTime? filterStatusChangeEnd = null;
         private jtisIssueData? _jtisIssueData = null;
         public List<IssueCalcs> JCalcs {get; private set;}
         FetchOptions fetchOptions = 
@@ -36,95 +35,89 @@ namespace JTIS.Analysis
             if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
 
-            //TODO:  FIX THIS STUPID JISSUE THING
-            foreach (var jtisIss in _jtisIssueData.jtisIssuesList)
-            {
-                if (jtisIss.ChangeLogs.Count() > 0)
-                {
-                    jtisIss.jIssue.AddChangeLogs(jtisIss.ChangeLogs,true);
-                }
-            }
-            
             if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
             {
-                ClassifyStates();
-                WriteToConsole();
+                CheckIssueTypeFilter();       
+                CheckStatusDateFilter(); 
+                UpdateFilter();
+                Render();
             }
         }
 
-        public void ClassifyStates()
-        {
-            var jtisIssues = _jtisIssueData.jtisIssuesList;
-            if (jtisIssues.Count == 0)
-            {
-                return;
-            }
-            foreach (var iss in jtisIssues)
-            {
-                var issCalc = new IssueCalcs(iss.jIssue);
-                JCalcs.Add(issCalc);
-                JIssueChangeLogItem? firstActiveCLI = null;
+        // public void ClassifyStates()
+        // {
+        //     var jtisIssues = _jtisIssueData.jtisIssuesList;
+        //     if (jtisIssues.Count == 0)
+        //     {
+        //         return;
+        //     }
+        //     foreach (var iss in jtisIssues)
+        //     {
+        //         var issCalc = new IssueCalcs(iss.jIssue);
+        //         JCalcs.Add(issCalc);
+        //         JIssueChangeLogItem? firstActiveCLI = null;
                 
-                foreach (StateCalc sc in issCalc.StateCalcs)
-                {
-                    if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedField || sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedFlag )
-                    {
-                        sc.LogItem.TrackType = StatusType.stPassiveState ;
-                    }
-                    else if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
-                    {
-                        //if change is TO and Active State, then check
-                        if (sc.LogItem.ToId != null)
-                        {
-                            if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
-                            {
-                                var stCfg = CfgManager.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
-                                if (stCfg != null)
-                                {
-                                    if (stCfg.Type == StatusType.stPassiveState )
-                                    {
-                                        sc.LogItem.TrackType = StatusType.stPassiveState ;
-                                    }
-                                    else if (stCfg.Type == StatusType.stEnd)
-                                    {
-                                        sc.LogItem.TrackType = StatusType.stEnd ;
+        //         foreach (StateCalc sc in issCalc.StateCalcs)
+        //         {
+        //             if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedField || sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedFlag )
+        //             {
+        //                 sc.LogItem.TrackType = StatusType.stPassiveState ;
+        //             }
+        //             else if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
+        //             {
+        //                 //if change is TO and Active State, then check
+        //                 if (sc.LogItem.ToId != null)
+        //                 {
+        //                     if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
+        //                     {
+        //                         var stCfg = CfgManager.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
+        //                         if (stCfg != null)
+        //                         {
+        //                             if (stCfg.Type == StatusType.stPassiveState )
+        //                             {
+        //                                 sc.LogItem.TrackType = StatusType.stPassiveState ;
+        //                             }
+        //                             else if (stCfg.Type == StatusType.stEnd)
+        //                             {
+        //                                 sc.LogItem.TrackType = StatusType.stEnd ;
 
-                                    }
-                                    else if (stCfg.Type == StatusType.stActiveState )
-                                    {   
-                                        sc.LogItem.TrackType = StatusType.stActiveState;
-                                        if (firstActiveCLI == null)
-                                        {
-                                            firstActiveCLI = sc.LogItem;
-                                        }
-                                        else 
-                                        {
-                                            if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
-                                            {
-                                                firstActiveCLI = sc.LogItem;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (firstActiveCLI != null) 
-                {
-                    firstActiveCLI.TrackType = StatusType.stStart;
-                }
-                CalculateEndDates();
-            }
-        }
+        //                             }
+        //                             else if (stCfg.Type == StatusType.stActiveState )
+        //                             {   
+        //                                 sc.LogItem.TrackType = StatusType.stActiveState;
+        //                                 if (firstActiveCLI == null)
+        //                                 {
+        //                                     firstActiveCLI = sc.LogItem;
+        //                                 }
+        //                                 else 
+        //                                 {
+        //                                     if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
+        //                                     {
+        //                                         firstActiveCLI = sc.LogItem;
+        //                                     }
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         if (firstActiveCLI != null) 
+        //         {
+        //             firstActiveCLI.TrackType = StatusType.stStart;
+        //         }
+        //         // CalculateEndDates();
+        //     }
+        // }
 
         private void CheckIssueTypeFilter()
         {
             _issueTypeFilter.Clear();
-            foreach (var issType in JCalcs.Select(x=>x.IssueObj.IssueType).Distinct())
+            foreach (var issType in _jtisIssueData.IssueTypesCount)
             {
-                int cnt = JCalcs.Count(x=>x.IssueObj.IssueType.StringsMatch(issType));
-                _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
+                // int cnt = JCalcs.Count(x=>x.IssueObj.IssueType.StringsMatch(issType));
+                _issueTypeFilter.AddFilterItem(issType.Key,$"Count: {issType.Value}");
+                // _issueTypeFilter.AddFilterItem(issType,$"Count: {cnt}");
             }
             if (_issueTypeFilter.Count > 1)
             {
@@ -141,11 +134,27 @@ namespace JTIS.Analysis
 
         }
 
-        public void WriteToConsole()
+
+        private void UpdateFilter()
         {
-            CheckIssueTypeFilter();       
-            CheckStatusDateFilter(); 
-            WriteIssueSummary();
+            _filtered.Clear();
+            _filtered = _jtisIssueData.jtisIssuesList.Where(x=>_issueTypeFilter.IsFiltered(x.jIssue.IssueType)).ToList();
+            //  = JCalcs.Where(x=>_issueTypeFilter.IsFiltered(x.IssueObj.IssueType)).ToList();
+            if (filterStatusChangeStart.HasValue)
+            {
+                _filtered = _filtered.Where(x=>x.StatusItems.Statuses.Any(
+                    y=>y.LastEntryDate >= filterStatusChangeStart.Value || (y.LastExitDate.HasValue && y.LastExitDate.Value >= filterStatusChangeStart.Value))).ToList();
+                // var filteredDates = new List<IssueCalcs>();
+                // foreach (var iCalc in filteredItems)
+                // {
+                //     if (iCalc.StateCalcs.Any(x=>x.StartDt >= filterStatusChangeStart.Value) || (iCalc.StateCalcs.Any(y=>y.EndDt.HasValue && y.EndDt.Value >= filterStatusChangeStart.Value)))
+                //     {
+                //         filteredDates.Add(iCalc);
+                //     }
+                // }
+                // filteredItems = filteredDates;
+            }
+
         }
 
         private void CheckStatusDateFilter()
@@ -214,131 +223,81 @@ namespace JTIS.Analysis
             return false;
         }
 
-        private void CalculateEndDates()
-        {
-            foreach (IssueCalcs issCalcs in JCalcs)
-            {
-                var allStateCalcs = issCalcs.StateCalcs;
-                foreach (var sc1 in allStateCalcs)
-                {
-                    var srcChangeLogId = sc1.LogItem.ChangeLog.Id;
-                    //status, blockedfield, blockedflag
-                    var srcChangeLogType = sc1.LogItem.ChangeLogType ;
-                    // if (srcChangeLogType == ChangeLogTypeEnum.clStatus || srcChangeLogType == ChangeLogTypeEnum.clBlockedField || srcChangeLogType == ChangeLogTypeEnum.clBlockedFlag)
-                    if (srcChangeLogType == ChangeLogTypeEnum.clStatus )
-                    {
-                        foreach (var sc2 in allStateCalcs)
-                        {
-                            var tarChangeLogId = sc2.LogItem.ChangeLog.Id;
-                            //status, blockedfield, blockedflag
-                            var tarChangeLogType = sc2.LogItem.ChangeLogType ;
-                            if (tarChangeLogId != srcChangeLogId)
-                            {
-                                if (sc2.LogItem.FieldName == sc1.LogItem.FieldName && tarChangeLogType == ChangeLogTypeEnum.clStatus )
-                                {
-                                    if (sc2.LogItem.ChangeLog.CreatedDate > sc1.LogItem.ChangeLog.CreatedDate)
-                                    {
-                                        if (sc1.LogItem.ChangeLog.EndDate == null)
-                                        {
-                                            sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
-                                        }
-                                        else 
-                                        {
-                                            if (sc2.LogItem.ChangeLog.CreatedDate < sc1.LogItem.ChangeLog.EndDate)
-                                            {
-                                                sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
-                                            }
-                                        }
-                                    }    
-                                }
+        // private void CalculateEndDates()
+        // {
+        //     foreach (IssueCalcs issCalcs in JCalcs)
+        //     {
+        //         var allStateCalcs = issCalcs.StateCalcs;
+        //         foreach (var sc1 in allStateCalcs)
+        //         {
+        //             var srcChangeLogId = sc1.LogItem.ChangeLog.Id;
+        //             //status, blockedfield, blockedflag
+        //             var srcChangeLogType = sc1.LogItem.ChangeLogType ;
+        //             // if (srcChangeLogType == ChangeLogTypeEnum.clStatus || srcChangeLogType == ChangeLogTypeEnum.clBlockedField || srcChangeLogType == ChangeLogTypeEnum.clBlockedFlag)
+        //             if (srcChangeLogType == ChangeLogTypeEnum.clStatus )
+        //             {
+        //                 foreach (var sc2 in allStateCalcs)
+        //                 {
+        //                     var tarChangeLogId = sc2.LogItem.ChangeLog.Id;
+        //                     //status, blockedfield, blockedflag
+        //                     var tarChangeLogType = sc2.LogItem.ChangeLogType ;
+        //                     if (tarChangeLogId != srcChangeLogId)
+        //                     {
+        //                         if (sc2.LogItem.FieldName == sc1.LogItem.FieldName && tarChangeLogType == ChangeLogTypeEnum.clStatus )
+        //                         {
+        //                             if (sc2.LogItem.ChangeLog.CreatedDate > sc1.LogItem.ChangeLog.CreatedDate)
+        //                             {
+        //                                 if (sc1.LogItem.ChangeLog.EndDate == null)
+        //                                 {
+        //                                     sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
+        //                                 }
+        //                                 else 
+        //                                 {
+        //                                     if (sc2.LogItem.ChangeLog.CreatedDate < sc1.LogItem.ChangeLog.EndDate)
+        //                                     {
+        //                                         sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
+        //                                     }
+        //                                 }
+        //                             }    
+        //                         }
 
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private string BuildJQLForEpicChildren(string srchData)
-        {
-            string[] cards = srchData.Split(' ',StringSplitOptions.RemoveEmptyEntries);
-            StringBuilder sb = new StringBuilder();
-            sb.Append("parentEpic in (");
-            int added = 0;
-            if (cards.Length > 0)
-            {
-                for (int i = 0; i < cards.Length; i ++)
-                {
-                    if (added == 0)
-                    {
-                        sb.AppendFormat("{0}",cards[i]);
-                    }
-                    else 
-                    {
-                        sb.AppendFormat(",{0}",cards[i]);
-                    }
-                }
-                sb.Append(")");
-            }
-            return sb.ToString();
-
-        }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
 
-        private void WriteIssueSummary(bool writeAllAtOnce = false, int startIndex = 0)
+        private void Render(bool writeAllAtOnce = false, int startIndex = 0)
         {
             bool writeAll = writeAllAtOnce;
             AnsiConsole.Clear();
-
-            var filteredItems = JCalcs.Where(x=>_issueTypeFilter.IsFiltered(x.IssueObj.IssueType)).ToList();
-            if (filterStatusChangeStart.HasValue)
-            {
-                var filteredDates = new List<IssueCalcs>();
-                foreach (var iCalc in filteredItems)
-                {
-                    if (iCalc.StateCalcs.Any(x=>x.StartDt >= filterStatusChangeStart.Value) || (iCalc.StateCalcs.Any(y=>y.EndDt.HasValue && y.EndDt.Value >= filterStatusChangeStart.Value)))
-                    {
-                        filteredDates.Add(iCalc);
-                    }
-                }
-                filteredItems = filteredDates;
-            }
-            int totalCount = filteredItems.Count;
-
+            int totalCount = _filtered.Count;
             if (startIndex <0 || startIndex >= totalCount){startIndex=0;}
-
             for (int i = startIndex; i < totalCount; i ++)
-            // foreach (var ic in filteredItems)
             {
-                var ic = filteredItems[i];
-                jtisIssue jtisIss = _jtisIssueData.jtisIssuesList.Single(x=>x.jIssue.Key.StringsMatch(ic.IssueObj.Key));
-
-                ic.ResetTotalDaysFields();
-                var currentlyBlocked = ic.IssueObj.IsBlocked;
-
-                StateCalc? scStart = ic.StateCalcs.FirstOrDefault(x=>x.ActivityType == StatusType.stStart);
+                jtisIssue jtisIss = _filtered[i];
+                var currentlyBlocked = jtisIss.jIssue.IsBlocked;
                 string formattedStartDt = string.Empty;
-                if (scStart == null)
+                jtisStatus? firstActive = jtisIss.StatusItems.FirstActive;                
+                if (firstActive == null)
                 {
                     formattedStartDt = "[dim] ACTIVE WORK HAS NOT STARTED[/]";
                 }
                 else 
                 {
-                    ic.FirstActiveStateCalc = scStart;
-                    formattedStartDt = string.Format("[dim] ACTIVE WORK STARTED:[/][bold] {0} [/]",scStart.StartDt.CheckTimeZone());
+                    formattedStartDt = string.Format("[dim] ACTIVE WORK STARTED:[/][bold] {0} [/]",firstActive.FirstEntryDate.CheckTimeZone());
                 }
-
                 if (writeAll == false)
                 {
                     AnsiConsole.Clear();
                 }
-
                 // FIRST SUMMARY 'RULE' LINE
                 if (JTISTimeZone.DefaultTimeZone==false)
                 {
                     AnsiConsole.Write(new Rule(ConsoleUtil.TimeZoneAlert));
                 }
-                
                 AnsiConsole.Write(new Rule($"[dim]({i+1:000} of {totalCount:#000} results)[/]"){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});
                 if (currentlyBlocked)
                 {
@@ -350,16 +309,16 @@ namespace JTIS.Analysis
                     
                     AnsiConsole.Write(new Rule($"[bold](THIS ISSUE IS CURRENTLY BLOCKED{blockedOnDesc})[/]").NoBorder().LeftJustified().RuleStyle(new Style(Color.DarkRed_1,Color.Cornsilk1)));
                 }
-                AnsiConsole.Write(new Rule($"[dim]({ic.IssueObj.IssueType.ToUpper()}) [/][bold]{ic.IssueObj.Key}[/][dim], DESC:[/] {Markup.Escape(ConsoleUtil.Scrub(ic.IssueObj.Summary))}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                AnsiConsole.Write(new Rule($"[dim]({jtisIss.jIssue.IssueType.ToUpper()}) [/][bold]{jtisIss.jIssue.Key}[/][dim], DESC:[/] {Markup.Escape(ConsoleUtil.Scrub(jtisIss.jIssue.Summary))}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
-                AnsiConsole.Write(new Rule($"[dim]Current Status:[/][bold] ({ic.IssueObj.StatusName.ToUpper()})[/]{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
+                AnsiConsole.Write(new Rule($"[dim]Current Status:[/][bold] ({jtisIss.jIssue.StatusName.ToUpper()})[/]{formattedStartDt}").NoBorder().LeftJustified().RuleStyle(new Style(Color.Blue,Color.Cornsilk1)));
 
                 // LAST SUMMARY 'RULE' LINE
                 AnsiConsole.Write(new Rule(){Style=new Style(Color.Blue,Color.Cornsilk1), Justification=Justify.Center});                
 
-                if (CfgManager.config.issueNotes.HasNote(ic.IssueObj.Key))
+                if (CfgManager.config.issueNotes.HasNote(jtisIss.jIssue.Key))
                 {
-                    AnsiConsole.MarkupLine($"[bold darkred_1 on cornsilk1]ISSUE NOTE: [/]{CfgManager.config.issueNotes.GetNote(ic.IssueObj.Key)}");
+                    AnsiConsole.MarkupLine($"[bold darkred_1 on cornsilk1]ISSUE NOTE: [/]{CfgManager.config.issueNotes.GetNote(jtisIss.jIssue.Key)}");
                 }
 
                 var tbl = new Table();
@@ -371,186 +330,99 @@ namespace JTIS.Analysis
                     new TableColumn(new Markup($"{Environment.NewLine}[bold]CATEGORY[/]").Centered()).Width(15),
                     new TableColumn(new Markup($"[bold]TOTAL{Environment.NewLine}DAYS[/]").Centered()),
                     new TableColumn(new Markup($"[bold]TOTAL{Environment.NewLine}[underline]BUS[/] DAYS[/]").Centered()),
-                    new TableColumn(new Markup($"[bold]BLOCKED{Environment.NewLine}[underline]ACTIVE[/] DAYS[/]").Centered()),
-                    new TableColumn(new Markup($"[bold][underline]UN[/]BLOCKED{Environment.NewLine}[underline]ACTIVE[/] DAYS[/]").Centered()),
+                    new TableColumn(new Markup($"[bold]BLOCKED{Environment.NewLine}[underline]BUS[/] DAYS[/]").Centered()),
+                    new TableColumn(new Markup($"[bold][underline]UN[/]BLOCKED{Environment.NewLine}[underline]BUS[/] DAYS[/]").Centered()),
                     new TableColumn(new Markup($"[bold]# TIMES{Environment.NewLine}STARTED[/]").Centered()),
                     new TableColumn(new Markup($"[bold][underline]FIRST[/]{Environment.NewLine}ENTERED DATE[/]").Centered()),
                     new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}ENTERED DATE[/]").Centered()),
                     new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}EXITED DATE[/]").Centered())
                 });
-                
 
-                SortedDictionary<string,double> newBlockedCalDays = new SortedDictionary<string, double>();
-                SortedDictionary<string,double> newBlockedBusDays = new SortedDictionary<string, double>();
-
-                //status, first entered, last entered, last exit, entered count, active/passive/etc, caltime, bustime
-                List<StatusSummary> ssList = new List<StatusSummary>();
-                foreach (StateCalc sc in ic.StateCalcs)
-                {                    
-                    StatusSummary? ss = null;
-                    if (sc.ChangeLogType == ChangeLogTypeEnum.clStatus && sc.ToValue != null && sc.ToValue.Length > 0)
-                    {
-                        if (ssList.Exists(x=>x.Status == sc.ToValue))
-                        {
-                            ss = ssList.First(x=>x.Status == sc.ToValue);
-                        }
-                        else 
-                        {
-                            ss = new StatusSummary();
-                            ss.Status = sc.ToValue;
-                            ss.Key = sc.LogItem.ChangeLog.JIss.Key;
-                            ss.FirstEntry = sc.CreatedDt;
-                            ss.LastEntry = sc.CreatedDt;
-                            ss.TrackType = sc.LogItem.TrackType;
-                            if (sc.EndDt.HasValue){ss.LastEntry=sc.EndDt.Value;}
-                            ssList.Add(ss);
-                        }
-                        if (sc.StartDt < ss.FirstEntry.Value){ss.FirstEntry = sc.StartDt;}
-                        if (sc.EndDt.HasValue)
-                        {
-                            if (ss.LastExit.HasValue == false){ss.LastExit=sc.EndDt;}
-                            else if (ss.LastExit.Value < sc.EndDt.Value){ss.LastExit = sc.EndDt.Value;}
-                        }
-                        ss.EntryCount +=1;
-                        ss.CalTime = ss.CalTime.Add(sc.LogItem.TotalCalendarTime);
-                        ss.BusTime = ss.BusTime.Add(sc.LogItem.TotalBusinessTime);
-
-
-                        if (jtisIss.BlockerCount > 0)
-                        {
-                            if (ss.TrackType == StatusType.stActiveState || ss.TrackType == StatusType.stStart)
-                            {
-                                var tStart = sc.StartDt;
-                                var tEnd = sc.EndDt.HasValue ? sc.EndDt.Value : DateTime.Now;
-                                ss.BlockTime = ss.BlockTime.Add(jtisIss.Blockers.BlockedTime(tStart,tEnd,false));
-                            }
-                        }
-                    }
-                }
                 var todoStyle = new Style(Color.DarkRed,Color.LightYellow3);
                 var inProgressStyle = new Style(Color.Blue,Color.LightYellow3);
                 var doneStyle = new Style(Color.Green,Color.LightYellow3);
 
-                double activeCalDays = 0;
-                double activeBusDays = 0;
-                double activeBlockDays = 0;
-                double passiveCalDays = 0;
-                double passiveBusDays = 0;
-                double passiveBlockDays = 0;
-
-                double stActiveBlockedDays = 0;
-                double stActiveUnblockedDays = 0;
-                double totActiveBlockedDays = 0;
-                double totActiveUnblockedDays = 0;
-
-
-                foreach (var statSumm in ssList)
+                foreach (var issStatus in jtisIss.StatusItems.Statuses)
                 {
-                    stActiveBlockedDays = 0;
-                    stActiveUnblockedDays = 0;
-
                     var trackStyle = todoStyle;
-                    if (statSumm.TrackType==StatusType.stActiveState || statSumm.TrackType==StatusType.stStart){trackStyle=inProgressStyle;}
-                    if (statSumm.TrackType==StatusType.stEnd){trackStyle=doneStyle;}
-                    if (statSumm.TrackType == StatusType.stActiveState || statSumm.TrackType == StatusType.stStart)
-                    {
-                        activeCalDays += statSumm.CalTime.TotalDays;
-                        activeBusDays += statSumm.BusTime.TotalDays;
-                        activeBlockDays += statSumm.BlockTime.TotalDays;
-                        stActiveBlockedDays = statSumm.BlockTime.TotalDays;
-                        stActiveUnblockedDays = statSumm.BusTime.TotalDays - stActiveBlockedDays;
-                        totActiveBlockedDays += stActiveBlockedDays;
-                        totActiveUnblockedDays += stActiveUnblockedDays;
-                    }
-                    else 
-                    {
-                        passiveCalDays += statSumm.CalTime.TotalDays;
-                        passiveBusDays += statSumm.BusTime.TotalDays;
-                        passiveBlockDays += statSumm.BlockTime.TotalDays;
-                    }
+                    if (jtisIss.StatusCategory==StatusType.stActiveState || jtisIss.StatusCategory==StatusType.stStart) {trackStyle=inProgressStyle;}
+                    if (jtisIss.StatusCategory==StatusType.stEnd) {trackStyle=doneStyle;}
 
                     Markup? lastEntry = null;
                     Markup? firstEntry = null;
                     Markup? lastexit = null;
                     if (filterStatusChangeStart.HasValue)
                     {
-                        if (statSumm.FirstEntry.HasValue && statSumm.FirstEntry.Value >= filterStatusChangeStart.Value)
+                        if (issStatus.FirstEntryDate >= filterStatusChangeStart.Value)
                         {
-                            firstEntry = new Markup($"[bold blue on cornsilk1]{statSumm.FirstEntry.CheckTimeZoneNullable()}[/]").Centered();
+                            firstEntry = new Markup($"[bold blue on cornsilk1]{issStatus.FirstEntryDate.CheckTimeZone()}[/]").Centered();
                         }
                         else 
                         {
-                            firstEntry = new Markup($"{statSumm.FirstEntry.CheckTimeZoneNullable()}").Centered();
+                            firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone()}").Centered();
 
                         }
-                        if (statSumm.LastEntry.HasValue && statSumm.LastEntry.Value >= filterStatusChangeStart.Value)
+                        if (issStatus.LastEntryDate  >= filterStatusChangeStart.Value)
                         {
-                            lastEntry = new Markup($"[bold blue on cornsilk1]{statSumm.LastEntry.CheckTimeZoneNullable()}[/]").Centered();
+                            lastEntry = new Markup($"[bold blue on cornsilk1]{issStatus.LastEntryDate.CheckTimeZone()}[/]").Centered();
                         }
                         else 
                         {
-                            lastEntry = new Markup($"{statSumm.LastEntry.CheckTimeZoneNullable()}").Centered();
+                            lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone()}").Centered();
 
                         }
-                        if (statSumm.LastExit.HasValue && statSumm.LastExit.Value >= filterStatusChangeStart.Value)
+                        if (issStatus.LastExitDate.HasValue && issStatus.LastExitDate.Value >= filterStatusChangeStart.Value)
                         {
-                            lastexit= new Markup($"[bold blue on cornsilk1]{statSumm.LastExit.CheckTimeZoneNullable()}[/]").Centered();
+                            lastexit= new Markup($"[bold blue on cornsilk1]{issStatus.LastExitDate.CheckTimeZoneNullable()}[/]").Centered();
                         }
                         else 
                         {
-                            lastexit = new Markup($"{statSumm.LastExit.CheckTimeZoneNullable()}").Centered();
-
+                            lastexit = new Markup($"{issStatus.LastExitDate.CheckTimeZoneNullable()}").Centered();
                         }
                     }
                     else 
                     {
-                        firstEntry = new Markup($"{statSumm.FirstEntry.CheckTimeZoneNullable()}").Centered();
-                        lastEntry = new Markup($"{statSumm.LastEntry.CheckTimeZoneNullable()}").Centered();
-                        lastexit = new Markup($"{statSumm.LastExit.CheckTimeZoneNullable()}").Centered();
+                        firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone()}").Centered();
+                        lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone()}").Centered();
+                        lastexit = new Markup($"{issStatus.LastExitDate.CheckTimeZoneNullable()}").Centered();
                     }
 
                     tbl.AddRow(new Markup[]{
-                        new Markup($" {statSumm.Status} ").Centered(),
+                        new Markup($" {issStatus.IssueStatus} ").Centered(),
 
-                        statSumm.TrackType == StatusType.stActiveState || statSumm.TrackType == StatusType.stStart ? 
-                            new Markup($"[bold]{statSumm.TrackType}[/]").Centered() :
-                            new Markup($"[dim]{statSumm.TrackType}[/]").Centered(),
+                        issStatus.StatusCategory == StatusType.stActiveState || issStatus.StatusCategory == StatusType.stStart ? 
+                            new Markup($"[bold]{issStatus.StatusCategory}[/]").Centered() :
+                            new Markup($"[dim]{issStatus.StatusCategory}[/]").Centered(),
 
-                        new Markup($"{statSumm.CalTime.TotalDays:##0.00}").Centered(), 
-                        new Markup($"{statSumm.BusTime.TotalDays:##0.00}").Centered(), 
+                        new Markup($"{issStatus.StatusCalendarTimeTotal.TotalDays:##0.00}").Centered(), 
+                        new Markup($"{issStatus.StatusBusinessTimeTotal.TotalDays:##0.00}").Centered(), 
 
-                        stActiveBlockedDays > 0 ? 
-                            new Markup($"[bold red1 on lightcyan1] {stActiveBlockedDays:##0.00} [/]").Centered() :
-                            new Markup($"[dim]{stActiveBlockedDays:##0.00}[/]").Centered(),
+                        issStatus.StatusBlockedBusinessTime.TotalDays > 0 ? 
+                            new Markup($"[bold red1 on lightcyan1] {issStatus.StatusBlockedBusinessTime.TotalDays:##0.00} [/]").Centered() :
+                            new Markup($"[dim]{issStatus.StatusBlockedBusinessTime.TotalDays:##0.00}[/]").Centered(),
 
-                        stActiveUnblockedDays > 0 ? 
-                            new Markup($"[bold green on lightcyan1] {stActiveUnblockedDays:##0.00} [/]").Centered() :
-                            new Markup($"[dim]{stActiveUnblockedDays:##0.00}[/]").Centered(),
+                        issStatus.StatusUnblockedBusinessTime.TotalDays > 0 ?
+                        // stActiveUnblockedDays > 0 ? 
+                            new Markup($"[bold green on lightcyan1] {issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00} [/]").Centered() :
+                            new Markup($"[dim]{issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00}[/]").Centered(),
 
-                        statSumm.EntryCount > 1 ? 
-                            new Markup($"[bold]{statSumm.EntryCount}[/]").Centered() :
-                            new Markup($"[dim]{statSumm.EntryCount}[/]").Centered(),
+                        issStatus.EnteredCount > 1 ? 
+                            new Markup($"[bold]{issStatus.EnteredCount}[/]").Centered() :
+                            new Markup($"[dim]{issStatus.EnteredCount}[/]").Centered(),
 
                         firstEntry, 
                         lastEntry, 
                         lastexit
                     });
-
-                    
                 }
-                    ic.SetCalendarDays(Math.Round(passiveCalDays + activeCalDays,2));
-                    ic.SetBusinessDays(Math.Round(passiveBusDays + activeBusDays,2));
-                    ic.SetBlockedActiveDays(Math.Round(totActiveBlockedDays,2));
-                    ic.SetUnblockedActiveDays(Math.Round(totActiveUnblockedDays,2));
-
                 tbl.AddEmptyRow();
                 tbl.AddRow(new Markup[]{
                     new Markup($"ACTIVE TOTALS:").RightJustified(),
                     new Markup($"[bold]ACTIVE[/]").Centered(),
-                    new Markup($"[bold]{activeCalDays:0.00}[/]").Centered(),
-                    new Markup($"[bold]{activeBusDays:0.00}[/]").Centered(),
-                    new Markup($"[bold red1 on lightcyan1] {activeBlockDays:0.00} [/]").Centered(),
-                    new Markup($"[bold green on lightcyan1] {activeBusDays-activeBlockDays:0.00} [/]").Centered(),
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalActiveCalTime.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalActiveBusTime.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold red1 on lightcyan1] {jtisIss.StatusItems.IssueBlockedActiveBusTime.TotalDays:0.00} [/]").Centered(),
+                    new Markup($"[bold green on lightcyan1] {jtisIss.StatusItems.IssueUnblockedActiveBusTime.TotalDays:0.00} [/]").Centered(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -559,10 +431,12 @@ namespace JTIS.Analysis
                 tbl.AddRow(new Markup[]{
                     new Markup($"PASSIVE TOTALS:").RightJustified(),
                     new Markup($"[bold]PASSIVE[/]").Centered(),
-                    new Markup($"[bold]{passiveCalDays:0.00}[/]").Centered(),
-                    new Markup($"[bold]{passiveBusDays:0.00}[/]").Centered(),
-                    new Markup($"{passiveBlockDays:0.00}").Centered(),
-                    new Markup($"[dim]n/a[/]").Centered(),
+
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalPassiveCalTime.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalPassiveBusTime.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold red1 on lightcyan1] {jtisIss.StatusItems.IssueBlockedPassiveBusTime.TotalDays:0.00} [/]").Centered(),
+                    new Markup($"[bold green on lightcyan1] {jtisIss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays:0.00} [/]").Centered(),
+
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -574,10 +448,10 @@ namespace JTIS.Analysis
                 tbl.AddRow(new Markup[]{
                     new Markup($"[bold]GRAND TOTAL:[/]").RightJustified(),
                     new Markup($"[bold]** ALL ** [/]").Centered(),
-                    new Markup($"[bold]{ic.CalendarDays:0.00}[/]").Centered(),
-                    new Markup($"[bold]{ic.BusinessDays:0.00}[/]").Centered(),
-                    new Markup($"[bold red1 on cornsilk1] {ic.BlockedActiveDays:0.00} [/]").Centered(),
-                    new Markup($"[bold green on cornsilk1] {ic.UnblockedActiveDays:0.00} [/]").Centered(),
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueCalendarTimeTotal.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold]{jtisIss.StatusItems.IssueBusinessTimeTotal.TotalDays:0.00}[/]").Centered(),
+                    new Markup($"[bold red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedBusinessTime.TotalDays:0.00} [/]").Centered(),
+                    new Markup($"[bold green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedBusinessTime.TotalDays:0.00} [/]").Centered(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -587,7 +461,7 @@ namespace JTIS.Analysis
                 AnsiConsole.WriteLine();
                 if (jtisIss.BlockerCount > 0)
                 {
-                    AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {ic.IssueObj.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
+                    AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {jtisIss.jIssue.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
                     Justification=Justify.Left});
                     tbl = new Table();
                     tbl.AddColumns("Issue Key", "Based On", "BlockStart", "BlockEnd");
@@ -625,20 +499,20 @@ namespace JTIS.Analysis
 
                         if (resp.StringsMatch("N")) 
                         {
-                            IssueNotesUtil.AddEdit(ic.IssueObj.Key, false);
+                            IssueNotesUtil.AddEdit(jtisIss.jIssue.Key, false);
                             ConsoleUtil.ClearLinesBackTo(currentTop);
                         } 
                         else if(resp.StringsMatch("X"))
                             {return;} 
                         else if (resp.StringsMatch("P"))
                         {
-                            WriteIssueSummary(writeAllAtOnce, i-1);
+                            Render(writeAllAtOnce, i-1);
                             return;
                         }
                         else if (resp.StringsMatch("A"))
                         {
                             writeAll = true;
-                            WriteIssueSummary(writeAll);
+                            Render(writeAll);
                             return;
                         }
                         else 

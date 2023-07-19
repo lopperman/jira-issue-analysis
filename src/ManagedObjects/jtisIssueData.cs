@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Atlassian.Jira;
 using JTIS.Extensions;
 using Spectre.Console;
+using JTIS.Config;
 
 namespace JTIS.Data
 {
@@ -13,7 +14,6 @@ namespace JTIS.Data
         private int _totReturnCount;
         private int _nextStart;
         private JiraRepo? repo = null;
-
         public FetchOptions? fetchOptions = null;
         public SortedList<string,TimeSpan> Performance = new SortedList<string, TimeSpan>();
         private SortedList<string,jtisIssue> _jtisIssues = new SortedList<string, jtisIssue>();
@@ -24,6 +24,7 @@ namespace JTIS.Data
             var instance = new jtisIssueData();
             instance.repo = jRepo;            
             return instance;
+            
         }        
 
         public SortedDictionary<string,int> IssueChangeLogFieldsCount
