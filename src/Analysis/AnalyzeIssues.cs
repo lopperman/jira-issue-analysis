@@ -15,7 +15,6 @@ namespace JTIS.Analysis
         private List<jtisIssue> _filtered = new List<jtisIssue>();
         private DateTime? filterStatusChangeStart = null;
         private jtisIssueData? _jtisIssueData = null;
-        public List<IssueCalcs> JCalcs {get; private set;}
         FetchOptions fetchOptions = 
             FetchOptions.DefaultFetchOptions
                 .CacheResults()
@@ -27,7 +26,6 @@ namespace JTIS.Analysis
         public bool GetDataFail {get;private set;}
         public AnalyzeIssues()
         {
-            JCalcs = new List<IssueCalcs>();
         }
 
         public AnalyzeIssues(AnalysisType analysisType): this()
@@ -175,35 +173,38 @@ namespace JTIS.Analysis
 
         public string WriteToCSV()
         {
-            bool addedHeader = false ;
-//            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
-            DateTime now = DateTime.Now;
-            string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
-            string csvPath = Path.Combine(CfgManager.JTISRootPath,fileName);
+            ConsoleUtil.WriteBanner("UNDER DEVELOPMENT");
+            ConsoleUtil.PressAnyKeyToContinue();
+            return string.Empty;
+//             bool addedHeader = false ;
+// //            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
+//             DateTime now = DateTime.Now;
+//             string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+//             string csvPath = Path.Combine(CfgManager.JTISRootPath,fileName);
 
-            using (StreamWriter writer = new StreamWriter(csvPath))
-            {                
-                foreach (var jc in JCalcs)
-                {
-                    if (addedHeader == false)
-                    {
-                        addedHeader = true;
-                        foreach (var ln in jc.StateCalcStringList(true))
-                        {
-                            writer.WriteLine(ln);
-                        }
-                    }
-                    else 
-                    {
-                        foreach (var ln in jc.StateCalcStringList())
-                        {
-                            writer.WriteLine(ln);
-                        }
-                    }
-                }
+//             using (StreamWriter writer = new StreamWriter(csvPath))
+//             {                
+//                 foreach (var jc in JCalcs)
+//                 {
+//                     if (addedHeader == false)
+//                     {
+//                         addedHeader = true;
+//                         foreach (var ln in jc.StateCalcStringList(true))
+//                         {
+//                             writer.WriteLine(ln);
+//                         }
+//                     }
+//                     else 
+//                     {
+//                         foreach (var ln in jc.StateCalcStringList())
+//                         {
+//                             writer.WriteLine(ln);
+//                         }
+//                     }
+//                 }
                 
-            }
-            return csvPath;   
+//             }
+//             return csvPath;   
         }
 
         private bool FromIdNull(JIssueChangeLogItem item)
