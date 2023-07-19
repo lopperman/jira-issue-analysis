@@ -8,8 +8,6 @@ using Spectre.Console;
 
 namespace JTIS
 {
-
-
     public class JiraRepo
     {
         private Jira _jira;
