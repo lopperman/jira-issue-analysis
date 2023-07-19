@@ -43,11 +43,6 @@ namespace JTIS
             return keys;
         }
 
-        public static void Reset()
-        {
-            _jiraRepo = null;
-
-        }
         public static JiraRepo JiraRepo
         {
             get
@@ -106,28 +101,6 @@ namespace JTIS
 
             return ret;            
         }
-
-
-        public static List<JIssue> GetJIssues(string jql, bool? expandChangeLog = true)
-        {
-            List<Issue> issues = new List<Issue>();
-            List<JIssue> jIssueList = new List<JIssue>();
-            try 
-            {
-                ConsoleUtil.WriteStdLine("QUERYING JIRA ISSUES",StdLine.slInfo ,false);
-
-
-                    
-            }
-            catch(Exception ex)
-            {
-                ConsoleUtil.WriteError(string.Format("Error getting issues using search: {0}",jql),ex:ex);
-            }
-            
-            return jIssueList;
-            
-        }
-
         internal static void DevScrub()
         {
             ConsoleUtil.WriteAppTitle();
