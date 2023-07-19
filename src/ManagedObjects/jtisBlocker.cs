@@ -40,8 +40,6 @@ public class jtisBlockers
         }
         var timeOut = TimeSlots.SlicedTimeSlots(timeIn.ToArray());
 
-
-
         foreach (var slice in timeOut)
         {
             if (includeWeekends)

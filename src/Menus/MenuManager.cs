@@ -377,7 +377,30 @@ namespace JTIS.Menu
         }
         private static void Dev2()
         {
+            var options = FetchOptions.DefaultFetchOptions;
+            var _jtisIssueData = IssueFetcher.FetchIssues(options);
+            foreach (var iss in _jtisIssueData.jtisIssuesList)
+            {
+                AnsiConsole.WriteLine($"Statuses Count: {iss.StatusItems.Statuses.Count()}");
+                foreach (var st in iss.StatusItems.Statuses)
+                {
+                    AnsiConsole.WriteLine($"{st.Key} - {st.IssueType} - {st.IssueStatus}");
+                    AnsiConsole.WriteLine($"First Entry: {st.FirstEntryDate}, Last Entry: {st.LastEntryDate}");
+                    if (st.FirstExitDate.HasValue)
+                    {
+                        AnsiConsole.WriteLine($"First Exit: {st.FirstExitDate.Value}, Last Exit: {st.LastExitDate.Value}, Entry Count: {st.EnteredCount}");
+                    }
 
+                    AnsiConsole.WriteLine($"Total Cal Days: {st.CalendarTimeTotal.TotalDays:0.00}");
+                    AnsiConsole.WriteLine($"Total Cal Days Blocked: {st.BlockedCalendarTime.TotalDays:0.00}");
+                    AnsiConsole.WriteLine($"Total Cal Days UnBlocked: {st.UnblockedCalendarTime.TotalDays:0.00}");
+                    AnsiConsole.WriteLine($"Total Bus Days: {st.BusinessTimeTotal.TotalDays:0.00}");
+                    AnsiConsole.WriteLine($"Total Bus Days Blocked: {st.BlockedBusinessTime.TotalDays:0.00}");
+                    AnsiConsole.WriteLine($"Total Bus Days UnBlocked: {st.UnblockedBusinessTime.TotalDays:0.00}");
+                    AnsiConsole.Write(new Rule());
+
+                }
+            }
             
 
 

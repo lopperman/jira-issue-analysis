@@ -1,4 +1,5 @@
 using Atlassian.Jira;
+using JTIS.Analysis;
 
 namespace JTIS.Data
 {
@@ -6,13 +7,43 @@ namespace JTIS.Data
     {
         private List<IssueChangeLog> _changeLogs = new List<IssueChangeLog>();
         private jtisBlockers? blockers = null;
+        private jtisStatuses? _statuses = null;
         public Issue issue {get;private set;}
 
+        public StatusType StatusCategory
+        {
+            get {                
+                switch (issue.Status.StatusCategory.Name.ToLower())
+                {
+                    case "done":
+                        return StatusType.stEnd;;
+                    case "in progress":
+                        return StatusType.stActiveState;
+                    case "to do":
+                        return StatusType.stPassiveState;       
+                    case "ignore":
+                        return StatusType.stIgnoreState;                 
+                    default:
+                        return StatusType.stUnknown;;
+                }
+            }
+        }
         public void BuildBlockers()
         {
             blockers = jtisBlockers.Create(this);
         }
 
+        public jtisStatuses? StatusItems
+        {
+            get 
+            {
+                if (_statuses == null && _changeLogs.Count() > 0)
+                {
+                    _statuses = jtisStatuses.Create(this);
+                }
+                return _statuses;
+            }
+        }
         public int BlockerCount 
         {
             get{
