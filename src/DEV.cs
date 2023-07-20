@@ -26,6 +26,7 @@ public static class TEST
                 System.Console.Write(i);
             }
             clearFromLine +=1;            
+            
             ConsoleUtil.FillLines(Color.LightCoral,System.Console.GetCursorPosition().Top - clearFromLine,1);
             AnsiConsole.Write($"{System.Console.GetCursorPosition().Top.ToString()}, {clearFromLine}");
         }

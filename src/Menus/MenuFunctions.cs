@@ -76,7 +76,8 @@ namespace JTIS.Menu
         miMenu_Cached_Searches,
         miCachedSearch_View,
         miCachedSearch_ClearAll,
-        miTISIssueTree
+        miTISIssueTree,
+        miTISCycleTime
     }
 
 

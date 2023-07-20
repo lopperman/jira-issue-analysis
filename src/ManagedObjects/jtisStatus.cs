@@ -33,6 +33,11 @@ public class jtisStatus
         }
         _startEnd.Add(startDt, endDt);
         var useEndDt = endDt.HasValue ? endDt.Value : DateTime.Now;
+        if (StatusCategory == StatusType.stEnd)
+        {
+            useEndDt = startDt;
+        }
+        
         _blockedBusinessTime = _blockedBusinessTime.Add(issue.Blockers.BlockedTime(startDt,useEndDt,false));
         _blockedCalendarTime = _blockedCalendarTime.Add(issue.Blockers.BlockedTime(startDt,useEndDt,true));
         _CalendarTimeTotal = _CalendarTimeTotal.Add(TimeSlots.CalendarTime(startDt,useEndDt));

@@ -163,9 +163,22 @@ namespace JTIS
 
         }
 
-        public static bool ValidJQL(string jql)
+        public static bool ValidJQL(string jql, bool showValidMessage = false)
         {
-            return JiraUtil.JiraRepo.GetJQLResultsCount(jql, ignoreError:true) >= 0;
+            int returnCount = JiraUtil.JiraRepo.GetJQLResultsCount(jql, ignoreError:false);
+            if (showValidMessage) 
+            {
+                if (returnCount > 0)
+                {
+                    ConsoleUtil.WriteBanner($"JQL is valid and would return {returnCount} results.","blue");
+                }
+                else 
+                {
+                    ConsoleUtil.WriteBanner($"JQL is not valid","red");
+                }
+                ConsoleUtil.PressAnyKeyToContinue();
+            }
+            return returnCount >= 0;
         }
 
         internal static void CheckManualJQL()
@@ -174,21 +187,22 @@ namespace JTIS
             if (jql.Length == 0){
                 return;
             }
-            AnsiConsole.Write(new Rule());
-            if (JQLUtil.ValidJQL(jql) == false)
-            {
-                AnsiConsole.MarkupLine($"[bold]JQL is invalid and could not be parsed![/]{Environment.NewLine}[dim]({jql})[/]");
-            }
-            else 
-            {
-                var totRows = JiraUtil.JiraRepo.GetJQLResultsCount(jql);
-                AnsiConsole.MarkupLine($"[bold]JQL is valid, and would return {totRows} Jira items[/]");
+            // AnsiConsole.Write(new Rule());
+            // ValidJQL(jql,true);
+            // if (JQLUtil.ValidJQL(jql) == false)
+            // {
+            //     AnsiConsole.MarkupLine($"[bold]JQL is invalid and could not be parsed![/]{Environment.NewLine}[dim]({jql})[/]");
+            // }
+            // else 
+            // {
+            //     var totRows = JiraUtil.JiraRepo.GetJQLResultsCount(jql);
+            //     AnsiConsole.MarkupLine($"[bold]JQL is valid, and would return {totRows} Jira items[/]");
 
-            }
+            // }
 
-            AnsiConsole.Write(new Rule());
+            // AnsiConsole.Write(new Rule());
 
-            ConsoleUtil.PressAnyKeyToContinue();
+            // ConsoleUtil.PressAnyKeyToContinue();
         }
 
         public static void CheckDefaultJQL(JTISConfig cfg)

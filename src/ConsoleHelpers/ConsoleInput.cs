@@ -63,8 +63,12 @@ namespace JTIS
                 }
                 if (data.Length > 0)
                 {
-                    if (JQLUtil.ValidJQL(data)==false)
+                    if (JQLUtil.ValidJQL(data,manualJQLValidation)==false)
                     {
+                        if (manualJQLValidation)
+                        {
+                            return string.Empty;
+                        }
                         ConsoleUtil.WriteError($"The JQL you entered is not valid ({data})",pause:true);
                         return string.Empty;
                     }

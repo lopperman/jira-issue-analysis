@@ -41,74 +41,7 @@ namespace JTIS.Analysis
                 Render();
             }
         }
-
-        // public void ClassifyStates()
-        // {
-        //     var jtisIssues = _jtisIssueData.jtisIssuesList;
-        //     if (jtisIssues.Count == 0)
-        //     {
-        //         return;
-        //     }
-        //     foreach (var iss in jtisIssues)
-        //     {
-        //         var issCalc = new IssueCalcs(iss.jIssue);
-        //         JCalcs.Add(issCalc);
-        //         JIssueChangeLogItem? firstActiveCLI = null;
-                
-        //         foreach (StateCalc sc in issCalc.StateCalcs)
-        //         {
-        //             if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedField || sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clBlockedFlag )
-        //             {
-        //                 sc.LogItem.TrackType = StatusType.stPassiveState ;
-        //             }
-        //             else if (sc.LogItem.ChangeLogType == ChangeLogTypeEnum.clStatus)
-        //             {
-        //                 //if change is TO and Active State, then check
-        //                 if (sc.LogItem.ToId != null)
-        //                 {
-        //                     if (Int32.TryParse(sc.LogItem.ToId , out int tmpID))
-        //                     {
-        //                         var stCfg = CfgManager.config.StatusConfigs.FirstOrDefault(x=>x.StatusId == tmpID );
-        //                         if (stCfg != null)
-        //                         {
-        //                             if (stCfg.Type == StatusType.stPassiveState )
-        //                             {
-        //                                 sc.LogItem.TrackType = StatusType.stPassiveState ;
-        //                             }
-        //                             else if (stCfg.Type == StatusType.stEnd)
-        //                             {
-        //                                 sc.LogItem.TrackType = StatusType.stEnd ;
-
-        //                             }
-        //                             else if (stCfg.Type == StatusType.stActiveState )
-        //                             {   
-        //                                 sc.LogItem.TrackType = StatusType.stActiveState;
-        //                                 if (firstActiveCLI == null)
-        //                                 {
-        //                                     firstActiveCLI = sc.LogItem;
-        //                                 }
-        //                                 else 
-        //                                 {
-        //                                     if (sc.LogItem.ChangeLog.CreatedDate < firstActiveCLI.ChangeLog.CreatedDate )
-        //                                     {
-        //                                         firstActiveCLI = sc.LogItem;
-        //                                     }
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         if (firstActiveCLI != null) 
-        //         {
-        //             firstActiveCLI.TrackType = StatusType.stStart;
-        //         }
-        //         // CalculateEndDates();
-        //     }
-        // }
-
-        private void CheckIssueTypeFilter()
+       private void CheckIssueTypeFilter()
         {
             _issueTypeFilter.Clear();
             foreach (var issType in _jtisIssueData.IssueTypesCount)
@@ -132,7 +65,6 @@ namespace JTIS.Analysis
 
         }
 
-
         private void UpdateFilter()
         {
             _filtered.Clear();
@@ -142,15 +74,6 @@ namespace JTIS.Analysis
             {
                 _filtered = _filtered.Where(x=>x.StatusItems.Statuses.Any(
                     y=>y.LastEntryDate >= filterStatusChangeStart.Value || (y.LastExitDate.HasValue && y.LastExitDate.Value >= filterStatusChangeStart.Value))).ToList();
-                // var filteredDates = new List<IssueCalcs>();
-                // foreach (var iCalc in filteredItems)
-                // {
-                //     if (iCalc.StateCalcs.Any(x=>x.StartDt >= filterStatusChangeStart.Value) || (iCalc.StateCalcs.Any(y=>y.EndDt.HasValue && y.EndDt.Value >= filterStatusChangeStart.Value)))
-                //     {
-                //         filteredDates.Add(iCalc);
-                //     }
-                // }
-                // filteredItems = filteredDates;
             }
 
         }
@@ -223,52 +146,6 @@ namespace JTIS.Analysis
             }
             return false;
         }
-
-        // private void CalculateEndDates()
-        // {
-        //     foreach (IssueCalcs issCalcs in JCalcs)
-        //     {
-        //         var allStateCalcs = issCalcs.StateCalcs;
-        //         foreach (var sc1 in allStateCalcs)
-        //         {
-        //             var srcChangeLogId = sc1.LogItem.ChangeLog.Id;
-        //             //status, blockedfield, blockedflag
-        //             var srcChangeLogType = sc1.LogItem.ChangeLogType ;
-        //             // if (srcChangeLogType == ChangeLogTypeEnum.clStatus || srcChangeLogType == ChangeLogTypeEnum.clBlockedField || srcChangeLogType == ChangeLogTypeEnum.clBlockedFlag)
-        //             if (srcChangeLogType == ChangeLogTypeEnum.clStatus )
-        //             {
-        //                 foreach (var sc2 in allStateCalcs)
-        //                 {
-        //                     var tarChangeLogId = sc2.LogItem.ChangeLog.Id;
-        //                     //status, blockedfield, blockedflag
-        //                     var tarChangeLogType = sc2.LogItem.ChangeLogType ;
-        //                     if (tarChangeLogId != srcChangeLogId)
-        //                     {
-        //                         if (sc2.LogItem.FieldName == sc1.LogItem.FieldName && tarChangeLogType == ChangeLogTypeEnum.clStatus )
-        //                         {
-        //                             if (sc2.LogItem.ChangeLog.CreatedDate > sc1.LogItem.ChangeLog.CreatedDate)
-        //                             {
-        //                                 if (sc1.LogItem.ChangeLog.EndDate == null)
-        //                                 {
-        //                                     sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
-        //                                 }
-        //                                 else 
-        //                                 {
-        //                                     if (sc2.LogItem.ChangeLog.CreatedDate < sc1.LogItem.ChangeLog.EndDate)
-        //                                     {
-        //                                         sc1.LogItem.ChangeLog.EndDate = sc2.LogItem.ChangeLog.CreatedDate;
-        //                                     }
-        //                                 }
-        //                             }    
-        //                         }
-
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
 
         private void Render(bool writeAllAtOnce = false, int startIndex = 0)
         {
@@ -356,20 +233,20 @@ namespace JTIS.Analysis
                     {
                         if (issStatus.FirstEntryDate >= filterStatusChangeStart.Value)
                         {
-                            firstEntry = new Markup($"[bold blue on cornsilk1]{issStatus.FirstEntryDate.CheckTimeZone()}[/]").Centered();
+                            firstEntry = new Markup($"[bold blue on cornsilk1]{issStatus.FirstEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}[/]").Centered();
                         }
                         else 
                         {
-                            firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone()}").Centered();
+                            firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}").Centered();
 
                         }
                         if (issStatus.LastEntryDate  >= filterStatusChangeStart.Value)
                         {
-                            lastEntry = new Markup($"[bold blue on cornsilk1]{issStatus.LastEntryDate.CheckTimeZone()}[/]").Centered();
+                            lastEntry = new Markup($"[bold blue on cornsilk1]{issStatus.LastEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}[/]").Centered();
                         }
                         else 
                         {
-                            lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone()}").Centered();
+                            lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}").Centered();
 
                         }
                         if (issStatus.LastExitDate.HasValue && issStatus.LastExitDate.Value >= filterStatusChangeStart.Value)
@@ -383,11 +260,17 @@ namespace JTIS.Analysis
                     }
                     else 
                     {
-                        firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone()}").Centered();
-                        lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone()}").Centered();
-                        lastexit = new Markup($"{issStatus.LastExitDate.CheckTimeZoneNullable()}").Centered();
+                        firstEntry = new Markup($"{issStatus.FirstEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}").Centered();
+                        lastEntry = new Markup($"{issStatus.LastEntryDate.CheckTimeZone().ToString("MM/dd/yy HH:mm")}").Centered();
+                        if (issStatus.LastExitDate.HasValue)
+                        {
+                            lastexit = new Markup($"{issStatus.LastExitDate.Value.CheckTimeZone().ToString("MM/dd/yy HH:mm")}").Centered();
+                        }
+                        else 
+                        {
+                            lastexit = new Markup($"{issStatus.LastExitDate.CheckTimeZoneNullable()}").Centered();
+                        }
                     }
-
                     tbl.AddRow(new Markup[]{
                         new Markup($" {issStatus.IssueStatus} ").Centered(),
 

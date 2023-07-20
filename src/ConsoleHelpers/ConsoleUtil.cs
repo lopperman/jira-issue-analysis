@@ -315,11 +315,14 @@ namespace JTIS.Console
             text = Markup.Escape(text);
             if (clearScreen){System.Console.Clear();}
 
-            AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
+//            AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
+            WriteBanner(text,"red");
+
             if (ex != null)
-            {
-                WriteError(ex.Message);
-                WriteError(ex.StackTrace);
+            {                
+                WriteBanner(ex.Message,"red");
+                WriteBanner(ex.StackTrace,"red");
+                // WriteError(ex.StackTrace);
             }
             if (pause)
             {
@@ -430,32 +433,34 @@ namespace JTIS.Console
             AnsiConsole.Write(panel);
             Environment.Exit(0);
         }    
-
-
-
+        
         public static void  WriteBanner(string msg, string foreColor="maroon", string backColor = "cornsilk1")
         {
-            msg = $"  {msg.Trim()}  ";
-            if (msg.Length <= System.Console.WindowWidth)
-            {
-                if (msg.Length < System.Console.WindowWidth)
-                {
-                    msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
-                }
-                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";            
-            }
-            else 
-            {
-                int lines = (int)(msg.Length/System.Console.WindowWidth);
-                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
-                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
-
-                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
-            }
             var r = new Rule();
             r.Style = new Style(Color.Maroon ,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);            
             AnsiConsole.Write(r);
+
+            msg = $"  {msg.Trim()}  ";
+            int lines = 1;
+            if (msg.Length <= System.Console.WindowWidth)
+            {
+                // if (msg.Length < System.Console.WindowWidth)
+                // {
+                //     msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
+                // }
+                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";            
+            }
+            else 
+            {
+                lines = (int)(msg.Length/System.Console.WindowWidth);
+                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
+                // msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
+
+                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
+            }            
+            FillNextXLines(Color.Cornsilk1,lines);
+            FillLines(Color.Cornsilk1,0,lines,0);
             AnsiConsole.MarkupLine(msg);
             AnsiConsole.Write(r);
 
@@ -475,21 +480,22 @@ namespace JTIS.Console
                     msg = msg.Remove(place,Environment.NewLine.Length);
                 }                
             }
-            msg = $"  {msg.Trim()}  ";
+            msg = $"  {msg.Trim()}";
+            noMarkup = Markup.Remove(msg);
+            int lines = 1;
             if (msg.Length <= System.Console.WindowWidth)
             {
-                if (msg.Length < System.Console.WindowWidth)
-                {
-                    msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
-                }
+                // if (msg.Length < System.Console.WindowWidth)
+                // {
+                //     msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
+                // }
                 msg = $"[bold blue on cornsilk1]{msg}[/]";            
             }
             else 
             {
-                int lines = (int)(msg.Length/System.Console.WindowWidth);
+                lines = (int)(msg.Length/System.Console.WindowWidth);
                 if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
-                // double totLen = lines * System.Console.WindowWidth;
-                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
+//                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
 
                 msg = $"[bold blue on cornsilk1]{msg}[/]";
             }
@@ -504,6 +510,7 @@ namespace JTIS.Console
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);            
             AnsiConsole.Write(r);
+            FillNextXLines(Color.Cornsilk1,lines);
             AnsiConsole.MarkupLine(msg);
             AnsiConsole.Write(r);
 
@@ -532,19 +539,27 @@ namespace JTIS.Console
         }
         public static bool Confirm(string msg, bool defResp)
         {
-            var startLine = System.Console.CursorTop + 1;
-            // ClearLinesBackTo(startLine);
+            var startLine = System.Console.CursorTop;
 
-            AnsiConsole.WriteLine();
+            // AnsiConsole.WriteLine();
             var r = new Rule();
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);
             AnsiConsole.Write(r);
+
             msg = Markup.Remove(msg);
+            msg = $"  {msg}";
+            int lines = System.Console.WindowWidth/msg.Length;
+            if (System.Console.WindowWidth * lines < msg.Length){lines +=1;}
+            FillNextXLines(Color.Cornsilk1,lines);
+
+
             // msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
-            msg = $"[bold blue on cornsilk1]  {msg}  [/]";
+            msg = $"[bold blue on cornsilk1]{msg}[/]";
+            AnsiConsole.MarkupLine(msg);
 //            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
-            var result = AnsiConsole.Confirm($"{msg}{Environment.NewLine}:",defResp);
+            // var result = AnsiConsole.Confirm($"{msg}{Environment.NewLine}:",defResp);
+            var result = AnsiConsole.Confirm($"{Environment.NewLine}:",defResp);
             ClearLinesBackTo(startLine);
             return result;
         }    
@@ -558,6 +573,23 @@ namespace JTIS.Console
             }
         }
 
+        public static void FillNextXLines(Color fillColor, int lines)
+        {
+            var currentPos = System.Console.GetCursorPosition();
+            var spaces = new string(c:' ', System.Console.WindowWidth);
+//            var startBackColor = System.Console.BackgroundColor;
+            for (int i = 0; i < lines; i++)
+            {
+                System.Console.SetCursorPosition(0,(currentPos.Top + i));
+                System.Console.BackgroundColor=fillColor;
+                AnsiConsole.Write(new Markup(spaces,new Style(AnsiConsole.Foreground,fillColor)));
+                // System.Console.Write(spaces);
+                // AnsiConsole.Markup($"[yellow on navy]{spaces}[/]");
+            }
+            // System.Console.BackgroundColor=startBackColor;
+            System.Console.SetCursorPosition(currentPos.Left,currentPos.Top);
+
+        }
         public static void FillLines(Color fillColor, int startRowOffset = 0, int fillRowCount = 1, int resumeOffset = 0)
         {
             var currentPos = System.Console.GetCursorPosition();
@@ -568,10 +600,10 @@ namespace JTIS.Console
             var spaces = new string(c:' ', System.Console.WindowWidth);
             for (int i = 0; i < fillRowCount; i++)
             {
-                System.Console.SetCursorPosition(0,(currentPos.Top + i));
-                AnsiConsole.Markup($"[yellow on navy]{spaces}[/]");
+                System.Console.SetCursorPosition(0,(currentPos.Top + i));                
+                AnsiConsole.Write(new Markup($"{spaces}",new Style(AnsiConsole.Foreground,fillColor)));
             }
-            System.Console.SetCursorPosition(0,(currentPos.Top + resumeOffset));
+            System.Console.SetCursorPosition(currentPos.Left,(currentPos.Top + resumeOffset));
         }
 
         public static void ClearLines(int lineCount)
