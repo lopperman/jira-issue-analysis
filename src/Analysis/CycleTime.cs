@@ -1,3 +1,5 @@
+using System.Text;
+using JTIS.Config;
 using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
@@ -11,12 +13,14 @@ public class CycleTime
     private jtisFilterItems<string> _issueTypeFilter = new jtisFilterItems<string>();
     private List<jtisIssue> _filtered = new List<jtisIssue>();
     private jtisIssueData? _jtisIssueData = null;
+    private JiraStatus? toStatus = null;
     FetchOptions fetchOptions = 
         FetchOptions.DefaultFetchOptions
             .CacheResults()
             .AllowCachedSelection()
             .AllowJQLSnippets()
             .IncludeChangeLogs()
+            .RequiredIssueStatusSequence()
             .AllowManualJQL();    
     public CycleTime()
     {
@@ -24,8 +28,33 @@ public class CycleTime
 
     public CycleTime(AnalysisType analysisType): this()
     {
-        if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
+
+        var p = new SelectionPrompt<JiraStatus>();
+        p.Title = "Select 'End' Status for Cycle Time Calculation";
+        var issStatuses = CfgManager.config.GetJiraStatuses(CfgManager.config.defaultProject,true).OrderBy(x=>x.StatusName).ToList();
+        p.AddChoices(issStatuses.ToArray());
+        toStatus = AnsiConsole.Prompt(p);
+        StringBuilder sb = new StringBuilder();
+        foreach (var issSt in issStatuses.Where(x=>x.ProgressOrder >= toStatus.ProgressOrder).ToList())
+        {
+            if (sb.Length == 0) {
+                sb = sb.Append($"'{issSt.StatusName}'");
+            } else {
+                sb = sb.Append($", '{issSt.StatusName}'");
+            }
+        }
+
+        var jql = $"project={CfgManager.config.defaultProject} and status in ({sb.ToString()})";
+        fetchOptions.JQL = jql;
+        ConsoleUtil.WriteBanner($"Running JQL Query: {jql}");
+        
         _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+        if (fetchOptions.Cancelled) {return;}
+
+
+
+        // if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
+        // _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
 
         if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
         {
@@ -39,13 +68,6 @@ public class CycleTime
     private void Render(bool showAll = false, int startIdx = 0)
     {
         var issues = _jtisIssueData.jtisIssuesList;
-        // foreach (var tmpStatus in statuses)
-        // {   
-        //     var pct = (double)_filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)) / (double)_filtered.Count;
-        //     statusCounts.Add(tmpStatus,_filtered.Count(x=>x.issue.Status.Name.StringsMatch(tmpStatus)));
-        //     statusPercents.Add(tmpStatus,pct);
-
-        // }
         for (int i = startIdx; i < issues.Count; i ++)
         {
             jtisIssue iss = issues[i];

@@ -24,6 +24,7 @@ namespace JTIS
         {
             if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+            if (fetchOptions.Cancelled) {return;}
 
             bool doExport = false;
             if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)

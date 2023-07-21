@@ -56,6 +56,7 @@ namespace JTIS
             fetchOptions.IncludeChangeLogs(false);
             if (SearchType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+            if (fetchOptions.Cancelled) {return;}
 
             if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {

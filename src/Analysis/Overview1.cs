@@ -19,11 +19,10 @@ internal class Overview1
         fetchOptions = options;
     }
 
-    public static Overview1 Create(FetchOptions options)
+    public static void Create(FetchOptions options)
     {        
         var vs = new Overview1(options.AllowCachedSelection().CacheResults().IncludeChangeLogs());
         vs.Build();
-        return vs;
     }
 
     private void CheckIssueTypeFilter()
@@ -68,10 +67,11 @@ internal class Overview1
         }
     }
 
-    public Overview1 Build()
+    public void Build()
     {
         fetchOptions.IncludeChangeLogs().AllowCachedSelection().CacheResults();
         _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+        if (fetchOptions.Cancelled) {return;}
 
         if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
         {
@@ -83,7 +83,6 @@ internal class Overview1
         }
 
         ConsoleUtil.PressAnyKeyToContinue();
-        return this;
     }
 
     private void Summarize()

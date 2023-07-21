@@ -138,12 +138,12 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miIssue_Summary_Overall1:
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
-                    var ov1 = Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs()).Build();
+                    Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs());
                     break;
 
                 case MenuItemEnum.miIssue_Summary_Overall1_Epic :
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
-                    var ov1E = Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs().FetchEpicChildren()).Build();
+                    Overview1.Create(FetchOptions.DefaultFetchOptions.IncludeChangeLogs().FetchEpicChildren());
                     break;
 
 #endregion
@@ -242,6 +242,17 @@ namespace JTIS.Menu
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
                     break;
 
+                case MenuItemEnum.miIssCfgEdit:
+                    IssueStatesUtil.EditIssueStatus();
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    break;
+
+                case MenuItemEnum.miIssCfgSequence:
+                    IssueStatesUtil.EditIssueSequence();
+                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    break;
+
+
 
 #endregion                    
                     
@@ -303,10 +314,7 @@ namespace JTIS.Menu
 
 #region CONFIG MENU MANAGEMENT
 
-                case MenuItemEnum.miIssCfgEdit:
-                    IssueStatesUtil.EditIssueStatus();
-                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
-                    break;
+
 
                 case MenuItemEnum.miChangeTimeZoneDisplay:
                     CfgManager.ChangeTimeZone();
@@ -791,6 +799,7 @@ namespace JTIS.Menu
                 case(MenuEnum.meStatus_Config):
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgView,"View Issue Status Config"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgEdit,"Edit Local Issue Status Config"));
+                    ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgSequence,"Manage Issue Status Progress Sequence"));
                     ret.Add(MakeMenuDetail(MenuItemEnum.miIssCfgReset,"Reset Local Issue Status Config to Match Jira"));
                 break;
 

@@ -2,6 +2,7 @@ namespace JTIS.Data
 {
     public class FetchOptions
     {
+        public bool RequiredIssueStatusSequence {get;set;} = false;
         public bool AllowJQLSnippets {get;set;} = true;
         public bool AllowManualJQL {get;set;} = true;
         public bool AllowCachedSelection {get;set;} = true;
@@ -45,6 +46,7 @@ namespace JTIS.Data
             }
         }
 
+        public bool Cancelled { get; internal set; }
     }
 
 

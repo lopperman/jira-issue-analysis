@@ -17,6 +17,13 @@ public static class FetchOptionsExtensions
     //     return options;
     // }
 
+    public static FetchOptions RequiredIssueStatusSequence(this FetchOptions options, bool value=true)
+    {
+        if (options is null){throw new ArgumentNullException(nameof(options));}
+        options.RequiredIssueStatusSequence = value;
+        return options;
+    }
+
     public static FetchOptions FetchEpicChildren(this FetchOptions options, bool value=true)
     {
         if (options is null){throw new ArgumentNullException(nameof(options));}

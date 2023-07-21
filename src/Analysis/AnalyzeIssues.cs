@@ -32,6 +32,8 @@ namespace JTIS.Analysis
         {
             if (analysisType == AnalysisType.atEpics){fetchOptions.FetchEpicChildren=true;}
             _jtisIssueData = IssueFetcher.FetchIssues(fetchOptions);
+            if (fetchOptions.Cancelled) {return;}
+
 
             if (_jtisIssueData != null && _jtisIssueData.jtisIssuesList.Count() > 0)
             {
@@ -216,9 +218,9 @@ namespace JTIS.Analysis
                     new TableColumn(new Markup($"[bold][underline]LAST[/]{Environment.NewLine}EXITED[/]").Centered())
                 });
 
-                var todoStyle = new Style(Color.DarkRed,Color.LightYellow3);
-                var inProgressStyle = new Style(Color.Blue,Color.LightYellow3);
-                var doneStyle = new Style(Color.Green,Color.LightYellow3);
+                var todoStyle = new Style(Color.DarkRed,Color.Cornsilk1);
+                var inProgressStyle = new Style(Color.Blue,Color.Cornsilk1);
+                var doneStyle = new Style(Color.Green,Color.Cornsilk1);
 
                 foreach (var issStatus in jtisIss.StatusItems.Statuses)
                 {
@@ -286,12 +288,12 @@ namespace JTIS.Analysis
                         new Markup($"{issStatus.StatusBusinessTimeTotal.TotalDays:##0.00}").RightJustified(), 
 
                         issStatus.StatusBlockedBusinessTime.TotalDays > 0 ? 
-                            new Markup($"[bold red1 on lightcyan1] {issStatus.StatusBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
+                            new Markup($"[bold red1 on cornsilk1] {issStatus.StatusBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
                             new Markup($"[dim]{issStatus.StatusBlockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
 
                         issStatus.StatusUnblockedBusinessTime.TotalDays > 0 ?
                         // stActiveUnblockedDays > 0 ? 
-                            new Markup($"[bold green on lightcyan1] {issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
+                            new Markup($"[bold green on cornsilk1] {issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
                             new Markup($"[dim]{issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
 
                         issStatus.EnteredCount > 1 ? 
@@ -305,25 +307,25 @@ namespace JTIS.Analysis
                 }
                 tbl.AddEmptyRow();
                 tbl.AddRow(new Markup[]{
-                    new Markup($"ACTIVE TOTALS:").RightJustified(),
-                    new Markup($"[bold]ACTIVE[/]").Centered(),
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalActiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalActiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold red1 on lightcyan1] {jtisIss.StatusItems.IssueBlockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[bold green on lightcyan1] {jtisIss.StatusItems.IssueUnblockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic]ACTIVE TOTALS:[/]").RightJustified(),
+                    new Markup($"[italic]ACTIVE[/]").Centered(),
+                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalActiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalActiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered()
                 });
                 tbl.AddRow(new Markup[]{
-                    new Markup($"PASSIVE TOTALS:").RightJustified(),
-                    new Markup($"[bold]PASSIVE[/]").Centered(),
+                    new Markup($"[italic]PASSIVE TOTALS:[/]").RightJustified(),
+                    new Markup($"[italic]PASSIVE[/]").Centered(),
 
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalPassiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueTotalPassiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold red1 on lightcyan1] {jtisIss.StatusItems.IssueBlockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[bold green on lightcyan1] {jtisIss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalPassiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalPassiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -334,12 +336,12 @@ namespace JTIS.Analysis
                 tbl.AddEmptyRow();
 
                 tbl.AddRow(new Markup[]{
-                    new Markup($"[bold]GRAND TOTAL:[/]").RightJustified(),
-                    new Markup($"[bold]** ALL ** [/]").Centered(),
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueCalendarTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold]{jtisIss.StatusItems.IssueBusinessTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[bold green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[bold underline]GRAND TOTAL:[/]").RightJustified(),
+                    new Markup($"[bold underline]** ALL ** [/]").Centered(),
+                    new Markup($"[bold underline]{jtisIss.StatusItems.IssueCalendarTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[bold underline]{jtisIss.StatusItems.IssueBusinessTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[bold underline red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[bold underline green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 

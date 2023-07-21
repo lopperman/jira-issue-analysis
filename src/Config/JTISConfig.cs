@@ -1,3 +1,4 @@
+using System.Linq;
 using Atlassian.Jira;
 using JTIS.Console;
 using JTIS.Extensions;
@@ -343,6 +344,44 @@ namespace JTIS.Config
             _statusConfigs.Add(jStatus);
             IsDirty = true;
         }
+
+        [JsonIgnore]
+        public bool ValidIssueStatusSequence 
+        {
+            get {
+                var invalidCount = this.StatusConfigs.Where(x=>x.ProgressOrder == 0 && x.DefaultInUse == true).Count();
+                return invalidCount == 0;
+            }
+        }
+
+        [JsonIgnore]
+        public int StatusesCount
+        {
+            get {
+                return StatusConfigs.Where(x=>x.DefaultInUse).Count();
+            }
+        }
+
+        [JsonIgnore]
+        public List<JiraStatus> DefaultStatuses 
+        {
+            get 
+            {
+                return StatusConfigs.Where(x=>x.DefaultInUse==true).OrderBy(y=>y.ProgressOrder).ToList();
+            }
+        }
+
+        public void UpdateStatusProgressOrder(int statusId, int progressOrder)
+        {
+            JiraStatus? existStat = StatusConfigs.SingleOrDefault(x=>x.ProgressOrder == progressOrder);
+            if (existStat != null) {
+                existStat.ProgressOrder = 0;
+            }
+            JiraStatus updateStat = StatusConfigs.Single(x=>x.StatusId == statusId);
+            updateStat.ProgressOrder = progressOrder;
+            IsDirty=true;
+        }
+
         private void ResetLocalIssueStatusCfg()
         {
             _statusConfigs.Clear();
@@ -386,6 +425,7 @@ namespace JTIS.Config
 
         public void UpdateDefaultStatusConfigs(string defProject,  bool clearLocal = false)
         {
+            List<JiraStatus> origDefault = DefaultStatuses;
             List<JiraStatus>? statusAll ; 
             List<JiraStatus>? statusProj;
 
@@ -433,6 +473,10 @@ ResetLocalIssueStatusCfg();
                         foreach (var tmpStCfg in statusAll)
                         {
                             UpdateStatusCfgLocal(tmpStCfg);
+                            JiraStatus? origSeq = origDefault.SingleOrDefault(x=>x.StatusId==tmpStCfg.StatusId);
+                            if (origSeq!= null) {
+                                tmpStCfg.ProgressOrder = origSeq.ProgressOrder;
+                            }
                         }
                         task3.Increment(1);
                     }
@@ -465,7 +509,7 @@ ResetLocalIssueStatusCfg();
             }
         }
 
-        private List<JiraStatus> GetJiraStatuses(string defProject,  bool defaultProjectOnly = true)
+        public List<JiraStatus> GetJiraStatuses(string defProject,  bool defaultProjectOnly = true)
         {
             List<JiraStatus> ret = new List<JiraStatus>();
             string data = string.Empty;

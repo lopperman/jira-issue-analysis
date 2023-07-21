@@ -6,6 +6,8 @@ using JTIS.Console;
 using Spectre.Console;
 using JTIS.Extensions;
 using Atlassian.Jira;
+using JTIS.Config;
+using JTIS.Menu;
 
 namespace JTIS.Data
 {
@@ -31,6 +33,14 @@ namespace JTIS.Data
 
         public static jtisIssueData? FetchIssues(FetchOptions options)
         {
+            if (options.RequiredIssueStatusSequence && CfgManager.config.ValidIssueStatusSequence == false)
+            {
+                options.Cancelled = true;
+                ConsoleUtil.WriteError("The feature requested requires all issue statuses to have a sequence order.  Please use the next screen to update issue status sequences.",pause:true);
+                IssueStatesUtil.EditIssueSequence(true);
+                return null;
+            }
+
             options.JQL = GetJQL(options);
             if (options.JQL.Length==0)
             {
@@ -132,6 +142,8 @@ namespace JTIS.Data
             //  project=CSSK and "epic link" in (CSSK-85, ETC, ETC)
             //FOR TEAM MANAGER JIRA CLOUD, USE:
             //  project=CSSK AND parent in (EPIC KEY, EPIC KEY, ETC)
+
+
 
             if (epics.Count() > 0)
             {

@@ -170,7 +170,48 @@ namespace JTIS
             }
             AnsiConsole.Write(table);
 
-        }                
+        }
 
+        internal static void EditIssueSequence(bool editMode = false)
+        {
+            List<JiraStatus> _defStatuses = CfgManager.config.DefaultStatuses;
+            ConsoleUtil.WriteAppTitle();
+            ConsoleUtil.WriteBanner($"ISSUE STATUS SEQUENCE ORDER FOR PROJECT: {CfgManager.config.defaultProject} - ALL STATUSES MUST HAVE A SEQUENCE ORDER");
+            var tbl = new Table();
+            tbl.AddColumns(
+                new TableColumn("SEQUENCE ORDER").Centered(), 
+                new TableColumn("STATUS").Centered(), 
+                new TableColumn("STATUS ID").Centered());
+            foreach (var status in _defStatuses)
+            {
+                tbl.AddRow(
+                    new Text($"{status.ProgressOrder}").Centered(), 
+                    new Text($"{status.StatusName}").LeftJustified(), 
+                    new Text($"{status.StatusId}").Centered());
+            }
+            AnsiConsole.Write(new Panel(tbl));
+            if (editMode == false)
+            {
+                if (ConsoleUtil.Confirm("Edit Issue Status Sequence?",false))
+                {
+                    EditIssueSequence(true);
+                }
+            }
+            else 
+            {
+                var sp = new SelectionPrompt<JiraStatus>();
+                sp.AddChoices(_defStatuses);
+                sp.Title = "SELECT STATUS TO CHANGE ORDER SEQUENCE";
+                var jiraStat = AnsiConsole.Prompt(sp);
+                int newSeq = ConsoleUtil.GetInput<int>($"ENTER SEQUENCE NUMBER BETWEEN 1 AND {CfgManager.config.StatusesCount} for Status: {jiraStat.StatusName}. (ENTER '0' TO CANCEL)");
+                if (newSeq >= 1 && newSeq <= CfgManager.config.StatusesCount)
+                {
+                    CfgManager.config.UpdateStatusProgressOrder(jiraStat.StatusId,newSeq);
+                    CfgManager.SaveConfigList();
+                }
+                EditIssueSequence();
+            }
+            
+        }
     }
 }

@@ -25,6 +25,10 @@ namespace JTIS.Console
         public static bool? ScrubData = null;                    
         public static string Scrub(string data)
         {
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                return data;
+            }
             if (ScrubData == null) 
             {
                 if (!Info.IsDev)
@@ -103,7 +107,6 @@ namespace JTIS.Console
         public static void PressAnyKeyToContinue(string? msg = null)
         {
             var startLine = System.Console.CursorTop + 1;
-            // ClearLinesBackTo(startLine);
 
             AnsiConsole.WriteLine();
             var mk = new List<Markup>();
@@ -114,8 +117,6 @@ namespace JTIS.Console
                 msg = Markup.Remove(msg);
                 msg = $"{Emoji.Known.BlackSquareButton}  [{StdLine.slInfo.FontMkp()} on {StdLine.slInfo.BackMkp()}]{msg}[/]{Environment.NewLine}";
                 rws = new Rows(new Markup(msg),finalMsg);
-                // mk.Add(new Markup(msg));
-                //AnsiConsole.MarkupLine(msg);
             }
             else 
             {
@@ -542,10 +543,10 @@ namespace JTIS.Console
             AnsiConsole.Write(r);
 
             msg = Markup.Remove(msg);
-            msg = $"  {msg}";
+            msg = $"  {msg}  ";
             int lines = System.Console.WindowWidth/msg.Length;
             if (System.Console.WindowWidth * lines < msg.Length){lines +=1;}
-            FillNextXLines(Color.Cornsilk1,lines);
+//            FillNextXLines(Color.Cornsilk1,lines);
             msg = $"[bold blue on cornsilk1]{msg}[/]";
             AnsiConsole.MarkupLine(msg);
             var result = AnsiConsole.Confirm($"{Environment.NewLine}:",defResp);

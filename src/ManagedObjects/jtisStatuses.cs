@@ -22,20 +22,22 @@ public class jtisStatuses
             return _statuses.SingleOrDefault(x=>x.StatusCategory==StatusType.stStart);
         }
     }
-    public static jtisStatuses Create(jtisIssue issue)
+    public static jtisStatuses Create(jtisIssue issue, string? stopAtStatus = null)
     {
         jtisStatuses newObj = new jtisStatuses();
 
-        newObj.Populate(issue);
+        newObj.Populate(issue, stopAtStatus);
 
         return newObj;
     }
 
-    private void Populate(jtisIssue jtisIss)
+    private void Populate(jtisIssue jtisIss, string? stopAtStatus)
     {
         if (jtisIss.ChangeLogs.Count() == 0) {return;}
 
+        
         List<IssueChangeLog> _statusChanges = jtisIss.ChangeLogs.Where(x=>x.Items.Any(y=>y.FieldName.StringsMatch("status"))).OrderBy(z=>z.CreatedDate).ToList();
+
         if (_statusChanges.Count() == 0) {return;}
 
         bool foundFirstActive = false;
