@@ -95,6 +95,7 @@ public class jtisBlockers
             if (impedimentEndList.Any(x=>x.CreatedDate > blocker.StartDt))
             {
                 blocker.EndDt = impedimentEndList.Where(x=>x.CreatedDate > blocker.StartDt).Min(y=>y.CreatedDate);
+                blocker.BlockerClosed = true;
             }
             else 
             {
@@ -116,6 +117,7 @@ public class jtisBlockers
             if (impedimentEndList.Any(x=>x.CreatedDate > blocker.StartDt))
             {
                 blocker.EndDt = impedimentEndList.Where(x=>x.CreatedDate > blocker.StartDt).Min(y=>y.CreatedDate);
+                blocker.BlockerClosed = true;
             }
             else 
             {
@@ -137,5 +139,5 @@ public class jtisBlocker
     //Flagged field contains 'impediment'
     public string FieldName {get;set;} = string.Empty;    
     public bool DuplicateAdjusted {get;set;}
-
+    public bool BlockerClosed { get; internal set; }
 }

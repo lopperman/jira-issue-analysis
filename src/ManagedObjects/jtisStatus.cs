@@ -70,7 +70,12 @@ public class jtisStatus
     }}
     public DateTime? LastExitDate { 
         get {
-            return _exitDates.LastOrDefault();
+            DateTime? lastExit = _exitDates.LastOrDefault();
+            if (lastExit.HasValue && lastExit.Value.CompareTo(DateTime.MinValue)==0)
+            {
+                lastExit = null;
+            }
+            return lastExit;
         }
     }
 

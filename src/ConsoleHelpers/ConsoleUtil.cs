@@ -483,22 +483,18 @@ namespace JTIS.Console
             msg = $"  {msg.Trim()}";
             noMarkup = Markup.Remove(msg);
             int lines = 1;
-            if (msg.Length <= System.Console.WindowWidth)
-            {
-                // if (msg.Length < System.Console.WindowWidth)
-                // {
-                //     msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
-                // }
-                msg = $"[bold blue on cornsilk1]{msg}[/]";            
-            }
-            else 
-            {
+            // if (msg.Length <= System.Console.WindowWidth)
+            // {
+            //     msg = $"[bold blue on cornsilk1]{msg}[/]";            
+            // }
+            // else 
+            // {
                 lines = (int)(msg.Length/System.Console.WindowWidth);
                 if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
 //                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
 
                 msg = $"[bold blue on cornsilk1]{msg}[/]";
-            }
+            // }
             // msg = $"{msg}{Environment.NewLine}:: ";
             var showDefVal = false;
             if (default(T) != null &&  default(T).CompareTo(defVal)!=0)
@@ -540,8 +536,6 @@ namespace JTIS.Console
         public static bool Confirm(string msg, bool defResp)
         {
             var startLine = System.Console.CursorTop;
-
-            // AnsiConsole.WriteLine();
             var r = new Rule();
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);
@@ -552,13 +546,8 @@ namespace JTIS.Console
             int lines = System.Console.WindowWidth/msg.Length;
             if (System.Console.WindowWidth * lines < msg.Length){lines +=1;}
             FillNextXLines(Color.Cornsilk1,lines);
-
-
-            // msg = $"[{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}]{Emoji.Known.WhiteQuestionMark} {msg}[/]";
             msg = $"[bold blue on cornsilk1]{msg}[/]";
             AnsiConsole.MarkupLine(msg);
-//            var finalMsg = new Markup($"{Emoji.Known.BlackSquareButton}  [{StdLine.slResponse.FontMkp()} on {StdLine.slResponse.BackMkp()}] {msg} [/]{Environment.NewLine}");      
-            // var result = AnsiConsole.Confirm($"{msg}{Environment.NewLine}:",defResp);
             var result = AnsiConsole.Confirm($"{Environment.NewLine}:",defResp);
             ClearLinesBackTo(startLine);
             return result;
