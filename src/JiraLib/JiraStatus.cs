@@ -9,12 +9,6 @@ namespace JTIS
     public class JiraStatus 
     {
 
-        // var id = j["id"].Value<string>();
-        // var name = j["name"].Value<string>();
-        // var catToken = j["statusCategory"].Value<JToken>();
-        // var catKey = catToken["key"].Value<string>();
-        // var catName = catToken["name"].Value<string>();
-
         public int ProgressOrder {get;set;}
         public int StatusId {get;set;}
         public string StatusName {get;set;}
@@ -40,7 +34,7 @@ namespace JTIS
 
         public override string ToString()
         {
-            return $"{ProgressOrder} - {StatusName} - (Id: {StatusId})";
+            return $"{ProgressOrder:00} - {StatusName} - (Id: {StatusId})";
         }
         public JiraStatus(JToken token):this()
         {

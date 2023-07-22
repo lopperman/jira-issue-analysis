@@ -5,6 +5,7 @@ using JTIS.Data;
 using JTIS.Extensions;
 using Newtonsoft.Json;
 using Spectre.Console;
+using JTIS.Menu;
 
 namespace JTIS.Config
 {
@@ -327,7 +328,7 @@ namespace JTIS.Config
                     ConsoleUtil.WriteAppTitle();
                 }
 
-                resp = SelectJTISConfig("Select Jira Config",false,list:choices);
+                resp = SelectJTISConfig("SELECT JIRA CONFIG",false,list:choices);
             }
             if (resp != null)
             {
@@ -502,7 +503,7 @@ namespace JTIS.Config
                     sp.HighlightStyle(new Style(decoration:Decoration.Bold));
 
                     sp.Title("Select Time Zone - (Required - can cancel after selection)");
-                    sp.PageSize = 20;
+                    sp.PageSize = MenuManager.MenuPageSize;
                     sp.AddChoices(results.ToArray());
                     var selTZ = AnsiConsole.Prompt(sp);
                     if (ConsoleUtil.Confirm($"Change Time-Zone displayed for Jira data to: {selTZ.DisplayName}?",false))
@@ -511,95 +512,9 @@ namespace JTIS.Config
                         CfgManager.SaveConfigList();
                         ConsoleUtil.PressAnyKeyToContinue($"Jira Configuration '{CfgManager.config.configName}' has been updated to display time zone ** {selTZ.DisplayName} ** ");
                     }
-
-
-                // var sp = new SelectionPrompt<MenuFunction>();
-                
-                // sp.PageSize = 16;
-                // sp.AddChoices(menuItems);
-                // if (menu == MenuEnum.meMain)
-                // {
-                //     sp.AddChoiceGroup(
-                //             menuSeparator, 
-                //             new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to other Jira Site","[dim]Connect to other Jira Site[/]"),
-                //             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
-                // }
-                // else 
-                // {
-                //     sp.AddChoiceGroup(
-                //             menuSeparator, 
-                //             new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"),
-                //             new MenuFunction(MenuItemEnum.miChangeConnection,"Connect to different Jira","[dim]Connect to other Jira Site[/]"),
-                //             new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
-
-                // }                    
-                // var mnu = AnsiConsole.Prompt(sp);
-
                 }
 
             }
-
-
-            //             List<JiraStatus>? statusAll ; 
-            // List<JiraStatus>? statusProj;
-
-            // AnsiConsole.Progress()
-            //     .Columns(new ProgressColumn[]
-            //     {
-            //         new TaskDescriptionColumn(), 
-            //         new PercentageColumn(),
-            //         new ElapsedTimeColumn(), 
-            //         new SpinnerColumn()
-            //     })
-            //     .Start(ctx => 
-            //     {
-            //         var task1 = ctx.AddTask("[blue on white]Get Jira Statuses[/]");
-            //         var task2 = ctx.AddTask("[blue on white]Check Default Project Statuses[/]");        
-            //         var task3 = ctx.AddTask("[blue on white]Check Missing Status Configs[/]");        
-
-
-            //         task1.MaxValue = 2;
-            //         statusAll = GetJiraStatuses(false);
-            //         task1.Increment(1);
-            //         statusProj = GetJiraStatuses(true);
-            //         task1.Increment(1);
-
-            //         task2.MaxValue = statusAll.Count;
-            //         for (int i = 0; i < statusAll.Count; i ++)
-            //         {
-            //             if (statusProj.Exists(x=>x.StatusId == statusAll[i].StatusId))
-            //             {
-            //                 statusAll[i].DefaultInUse = true;
-            //             }
-            //             task2.Increment(1);                        
-            //         }
-
-            //         task3.MaxValue = 3;
-
-            //         config.ResetOnlineIssueStatusCfg();
-            //         foreach (var stCfg in statusAll)
-            //         {
-            //             config.UpdateStatusCfgOnline(stCfg);
-            //         }
-            //         task3.Increment(1);
-            //         if (clearLocal || config.StatusConfigs.Count == 0)
-            //         {
-            //             config.ResetLocalIssueStatusCfg();
-            //             foreach (var tmpStCfg in statusAll)
-            //             {
-            //                 config.UpdateStatusCfgLocal(tmpStCfg);
-            //             }
-            //             task3.Increment(1);
-            //         }
-            //         else 
-            //         {
-            //             FillMissingStatusConfigs();
-            //             task3.Increment(1);
-            //         }
-            //         CfgManager.SaveConfigList();
-            //         task3.Increment(1);
-            //     });
-
         }
 
         internal static string? CheckManualFilePath(string checkPath)
@@ -658,15 +573,12 @@ namespace JTIS.Config
             {
                 markupTitle = $"[bold]{markupTitle}[/]";
             }
-            AnsiConsole.Write(new Spectre.Console.Rule());
-            AnsiConsole.MarkupLine($"\t{markupTitle}");
-            AnsiConsole.Write(new Spectre.Console.Rule());
+            ConsoleUtil.WriteBanner(markupTitle,Color.Blue);
 
             var sp  = new SelectionPrompt<JTISConfig>();
             sp.HighlightStyle(new Style(decoration:Decoration.Bold));
 
             sp.AddChoices<JTISConfig>(list);
-            //sp.Title("SELECT CONFIG ITEM");
             selectedCfg = AnsiConsole.Prompt<JTISConfig>(sp);
 
             if (canSelectCurrent == false && config.Key == selectedCfg.Key)

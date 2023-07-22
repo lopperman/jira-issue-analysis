@@ -28,10 +28,10 @@ public class CycleTime
 
     public CycleTime(AnalysisType analysisType): this()
     {
-
+        ConsoleUtil.WriteBanner("Select 'End' Status for Cycle Time Calculation",Color.Blue);
         var p = new SelectionPrompt<JiraStatus>();
-        p.Title = "Select 'End' Status for Cycle Time Calculation";
-        var issStatuses = CfgManager.config.GetJiraStatuses(CfgManager.config.defaultProject,true).OrderBy(x=>x.StatusName).ToList();
+//        p.Title = "Select 'End' Status for Cycle Time Calculation";
+        var issStatuses = CfgManager.config.DefaultStatuses;
         p.AddChoices(issStatuses.ToArray());
         toStatus = AnsiConsole.Prompt(p);
         StringBuilder sb = new StringBuilder();

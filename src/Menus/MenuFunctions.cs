@@ -105,7 +105,7 @@ namespace JTIS.Menu
                 var sp = new SelectionPrompt<MenuFunction>();       
                 sp.HighlightStyle(new Style(Color.Black, Color.Cornsilk1,decoration:Decoration.Bold));
                 sp.Mode(SelectionMode.Leaf);            
-                sp.PageSize = 16;
+                sp.PageSize = MenuManager.MenuPageSize;
                 return sp;
             }
         }

@@ -91,7 +91,7 @@ namespace JTIS
             {
                 if (ConsoleUtil.Confirm($"Filter which of the {_issueFieldFilter.Count} fields get displayed?",true))
                 {
-                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueFieldFilter.Items.ToList(),pageSize:20);
+                    var response = MenuManager.MultiSelect<jtisFilterItem<string>>($"Choose items to include. [dim](To select all items, press ENTER[/])",_issueFieldFilter.Items.ToList(),pageSize:MenuManager.MenuPageSize);
                     if (response != null && response.Count() > 0)
                     {
                         _issueFieldFilter.Clear();

@@ -317,12 +317,12 @@ namespace JTIS.Console
             if (clearScreen){System.Console.Clear();}
 
 //            AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
-            WriteBanner(text,"red");
+            WriteBanner(text,Color.Red);
 
             if (ex != null)
             {                
-                WriteBanner(ex.Message,"red");
-                WriteBanner(ex.StackTrace,"red");
+                WriteBanner(ex.Message,Color.Red);
+                WriteBanner(ex.StackTrace,Color.Red);
                 // WriteError(ex.StackTrace);
             }
             if (pause)
@@ -435,36 +435,25 @@ namespace JTIS.Console
             Environment.Exit(0);
         }    
         
-        public static void  WriteBanner(string msg, string foreColor="maroon", string backColor = "cornsilk1")
+        public static void  WriteBanner(string msg, Color? foreColor = null, Color? backColor = null)
         {
+            if (foreColor == null){foreColor = Color.Maroon;}
+            if (backColor == null){backColor = Color.Cornsilk1;}
             var r = new Rule();
-            r.Style = new Style(Color.Maroon ,Color.Cornsilk1).Decoration(Decoration.Dim);
+            r.Style = new Style(foreColor,backColor).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);            
             AnsiConsole.Write(r);
 
             msg = $"  {msg.Trim()}  ";
             int lines = 1;
-            if (msg.Length <= System.Console.WindowWidth)
-            {
-                // if (msg.Length < System.Console.WindowWidth)
-                // {
-                //     msg = $"{msg}" + new string(' ',System.Console.WindowWidth - msg.Length);
-                // }
-                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";            
-            }
-            else 
-            {
-                lines = (int)(msg.Length/System.Console.WindowWidth);
-                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
-                // msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
+            lines = (int)(msg.Length/System.Console.WindowWidth);
+            if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
+            msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
 
-                msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
-            }            
             FillNextXLines(Color.Cornsilk1,lines);
             FillLines(Color.Cornsilk1,0,lines,0);
             AnsiConsole.MarkupLine(msg);
             AnsiConsole.Write(r);
-
         }
 
         public static T GetInput<T>(string msg,T defVal=default(T), bool allowEmpty = false, bool concealed = false) where T:IComparable<T>

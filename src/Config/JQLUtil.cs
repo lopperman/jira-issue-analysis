@@ -170,11 +170,11 @@ namespace JTIS
             {
                 if (returnCount > 0)
                 {
-                    ConsoleUtil.WriteBanner($"JQL is valid and would return {returnCount} results.","blue");
+                    ConsoleUtil.WriteBanner($"JQL is valid and would return {returnCount} results.",Color.Blue);
                 }
                 else 
                 {
-                    ConsoleUtil.WriteBanner($"JQL is not valid","red");
+                    ConsoleUtil.WriteBanner($"JQL is not valid",Color.Red);
                 }
                 ConsoleUtil.PressAnyKeyToContinue();
             }
