@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using Spectre.Console;
 using JTIS.Config;
 using JTIS.Console;
@@ -5,6 +6,7 @@ using JTIS.ManagedObjects;
 using JTIS.Analysis;
 using JTIS.Extensions;
 using JTIS.Data;
+
 
 namespace JTIS
 {
@@ -392,39 +394,69 @@ namespace JTIS.Menu
         }
         private static void Dev2()
         {
-            // var options = FetchOptions.DefaultFetchOptions;
-            // var _jtisIssueData = IssueFetcher.FetchIssues(options);
-            // foreach (var iss in _jtisIssueData.jtisIssuesList)
-            // {
-
+            var slice = new SliceDice();
+            slice.AddIssues(
+                CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch("in progress")),
+                CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch("ready for review")), 
+                "Story", 16);
             
-
-
-            // if (CfgManager.config.defaultProject=="WWT" && CfgManager.config.baseUrl.StringsMatch("graph",StringCompareType.scContains))
-            // {
-            //     CfgManager.config.issueNotes.CreateNote("wwt-291","6 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-292","1/2 day");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-293","5-66 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-294","6-8 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-295","3-5 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-296","3-5 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-297","3-5 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-302","2-4 days");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-310","n/a");
-            //     CfgManager.config.issueNotes.CreateNote("wwt-311","n/a");
-            //     CfgManager.SaveConfigList();
-            // }
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
         private static void Dev1()
         {
-            DateTime d1 = DateTime.Parse("2023-07-15 13:00 PM");
-            DateTime d2 = DateTime.Parse("2023-07-16 17:00 PM");
-//            AnsiConsole.WriteLine($"Start: {d1}, End: {d2}, Business Hours: {TimeSlots.BusinessTime(d1, d2).TotalHours}");
+            var options = FetchOptions.DefaultFetchOptions;
+            options.IncludeChangeLogs().AllowJQLSnippets(false).AllowCachedSelection(false).CacheResults(false);
+            options.JQL = "project=WWT and status was in ('in progress') and status=done and issueType=story";
+            var data = IssueFetcher.FetchIssues(options);
+            SortedDictionary<string,List<double>> statusValues = new SortedDictionary<string, List<double>>();
+            IEnumerable<double> issueValues = new List<double>();
+            foreach (var iss in data.jtisIssuesList)
+            {
+                if (iss.StatusItems != null)
+                {
+                    var issDays = Math.Round(iss.StatusItems.IssueTotalActiveBusTime.TotalDays,0);    
+                    if (issDays > 0)
+                    {
+                        issueValues = issueValues.Append(issDays);
 
-            d2 = DateTime.Parse("2023-07-17 13:30 PM");
-            AnsiConsole.WriteLine($"Start: {d1}, End: {d2}, Business Hours: {TimeSlots.BusinessTime(d1, d2).TotalHours}");
+                        foreach (var stat in iss.StatusItems.Statuses)
+                        {
+                            if (!statusValues.ContainsKey(stat.IssueStatus))
+                            {
+                                statusValues.Add(stat.IssueStatus,new List<double>());
+                            }
+                            statusValues[stat.IssueStatus].Add(Math.Round(stat.StatusBusinessTimeTotal.TotalDays,2));
+                        }
+                    }
+                }
+            }
+
+            // var stdDevIssues = issueValues.StandardDeviation();
+
+            AnsiConsole.WriteLine($"Issue Count: {issueValues.Count()}");
+            AnsiConsole.WriteLine($"Min/Max: {issueValues.Min()} / {issueValues.Max()}");
+            AnsiConsole.WriteLine($"Mean: {issueValues.Average()}");
+            AnsiConsole.WriteLine($"StdDev: {issueValues.StandardDeviation()}");
+            
+            var tLower = issueValues.Average() - (issueValues.StandardDeviation());
+            var tUpper = issueValues.Average() + (issueValues.StandardDeviation());
+
+            var within2StdDev = issueValues.Where(x=>x>=tLower && x<=tUpper ).Count();
+            double DevPerc = ((double)within2StdDev/(double)issueValues.Count());
+            var tOutsideLower = issueValues.Where(x=>x<tLower).Count();
+            var tOutsideUpper = issueValues.Where(x=>x>tUpper).Count();
+
+            AnsiConsole.WriteLine($"Count within 2 stddev: {within2StdDev}");
+
+            AnsiConsole.WriteLine($"Normal Dist = 68.2% - Your Dist is : {DevPerc:0.00%}");
+
+            AnsiConsole.WriteLine($"Count outsidelower: {tOutsideLower}");
+            AnsiConsole.WriteLine($"Count outsideupper: {tOutsideUpper}");
+
+
+
+            //var nbrs = new List<double>(){30.99,38.22,138.87,134.1244}
 
 
             ConsoleUtil.PressAnyKeyToContinue();

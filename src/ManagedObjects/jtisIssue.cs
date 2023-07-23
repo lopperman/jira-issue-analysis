@@ -1,6 +1,7 @@
 using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
+using JTIS.Extensions;
 
 namespace JTIS.Data
 {
@@ -100,5 +101,31 @@ namespace JTIS.Data
             _changeLogs.AddRange(changeLogs);
             return this;
         }
+
+        public jtisStatus? EnteredOnOrAfter(JiraStatus jstat)
+        {
+            if (StatusItems == null || StatusItems.Statuses == null || CfgManager.config.ValidIssueStatusSequence==false)
+            {
+                return null;
+            }
+            var stats = CfgManager.config.DefaultStatuses.Where(x=>x.ProgressOrder >= jstat.ProgressOrder).ToList();
+            jtisStatus? retVal = null;
+            foreach (var stChange in StatusItems.Statuses)
+            {
+                if (stats.Exists(x=>x.StatusName.StringsMatch(stChange.IssueStatus)))
+                {
+                    if (retVal==null)
+                    {
+                        retVal = stChange;
+                    }
+                    else if (stChange.LastEntryDate < retVal.LastEntryDate)
+                    {
+                        retVal = stChange;
+                    }
+                }
+            }
+            return retVal;
+        }
+
     }
 }

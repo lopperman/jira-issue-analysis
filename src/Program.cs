@@ -1,4 +1,5 @@
-﻿using JTIS.Config;
+﻿using JTIS.Analysis;
+using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
 using JTIS.Menu;
@@ -19,30 +20,17 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
-            DEV.TEST.test1();
-            
-            var r1 = new Tree("Brower Family");
-            r1.Guide(TreeGuide.BoldLine);
-            var r1n1 = r1.AddNode("Paul");
-            
-            var r1n2 = r1.AddNode("Emily");
-            var r1n1n1 = r1n1.AddNode("Ethan");
-            var r1n1n2 = r1n1.AddNode("Chase");
-            
-            var r1n2n1 = new Panel($":llama::llama:{Environment.NewLine}Elena").HeaderAlignment(Justify.Center).Border(BoxBorder.Rounded).BorderColor(Color.DeepPink1_1);
-            r1n2n1.Padding(2,0,2,0);
-            r1n2.AddNode(r1n2n1);
+            double tMean = 5;
+            double tStdDev = 2.138089935;
+            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,2)}");
+            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,4)}");
+            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,7)}");
 
-            var r1r1 = r1.AddNode(new Tree("Pets"));
+            var tND = Math.Exp(-.5 * Math.Pow((2 - tMean) / tStdDev, 2));
+            AnsiConsole.WriteLine($"2: {tND}");
 
-            
-            
-
-            AnsiConsole.Write(r1);
-
-
-
-
+            tND = Math.Exp(-.5 * Math.Pow((9 - tMean) / tStdDev, 2));
+            AnsiConsole.WriteLine($"9: {tND}");
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
@@ -54,15 +42,6 @@ namespace JTIS
         public static void Main(string[] args) 
         {
             
-            if (JTIS.Info.IsDev)
-            {
-                ConsoleUtil.ScrubData = ConsoleUtil.Confirm("DEV: SCRUB DATA?",false); 
-            }
-            //ConsoleUtil.WriteAppTitle();
-            ConsoleUtil.WriteAppHello();
-
-            AnsiConsole.Write(new Rule());
-
             List<JTISConfig> tmpCfgList  = new List<JTISConfig>();
             var tmpConfigFilePath = string.Empty;
             if (args.Length > 0)
@@ -98,6 +77,19 @@ namespace JTIS
                     }
                 }
             }
+
+            if (JTIS.Info.IsDev)
+            {
+                ConsoleUtil.ScrubData = ConsoleUtil.Confirm("DEV: SCRUB DATA?",false); 
+            }
+            //ConsoleUtil.WriteAppTitle();
+            ConsoleUtil.WriteAppHello();
+
+            AnsiConsole.Write(new Rule());
+
+
+
+
             if (tmpConfigFilePath.Length == 0)
             {
                 tmpConfigFilePath=CfgManager.ConfigFilePath;

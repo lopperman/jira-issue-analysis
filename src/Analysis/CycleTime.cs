@@ -3,6 +3,7 @@ using JTIS.Config;
 using JTIS.Console;
 using JTIS.Data;
 using JTIS.Extensions;
+using JTIS.Menu;
 using Spectre.Console;
 
 namespace JTIS.Analysis;
@@ -28,11 +29,13 @@ public class CycleTime
 
     public CycleTime(AnalysisType analysisType): this()
     {
+        
         ConsoleUtil.WriteBanner("Select 'End' Status for Cycle Time Calculation",Color.Blue);
         var p = new SelectionPrompt<JiraStatus>();
 //        p.Title = "Select 'End' Status for Cycle Time Calculation";
         var issStatuses = CfgManager.config.DefaultStatuses;
         p.AddChoices(issStatuses.ToArray());
+        p.PageSize=MenuManager.MenuPageSize;
         toStatus = AnsiConsole.Prompt(p);
         StringBuilder sb = new StringBuilder();
         foreach (var issSt in issStatuses.Where(x=>x.ProgressOrder >= toStatus.ProgressOrder).ToList())
@@ -136,6 +139,21 @@ public class CycleTime
 
     }
 
+    public static double GaussianCDF(double mean, double standardDev, double x)
+        {
+        double phi, result, z, denominator = 1,
+            sum = 0;
+        int i;
+        z = (x - mean) / standardDev;
+        phi = Math.Exp(-Math.Pow(z, 2) / 2) / Math.Sqrt(2 * Math.PI);
+        for (i = 1; i <= 100; i += 2)
+        {
+            denominator *= i;
+            sum += Math.Pow(z, i) / denominator;
+        }
+        result = 0.5 + phi * sum;
+        return result;
+        }
 
 }
 

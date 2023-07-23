@@ -12,8 +12,9 @@
             "program": "${workspaceFolder}/bin/Debug/net7.0/JiraStates.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "console":"integratedTerminal",
-            "stopAtEntry": false
+            "console": "integratedTerminal",            
+            "stopAtEntry": false, 
+            "requireExactSource": false
         },
         {
             "name": "DEV",
