@@ -60,6 +60,7 @@ namespace JTIS.Config
                     _refData = null;
 
                     _config = value;
+                    _refData=jtisRefData.Create(_config);
                     JTISTimeZone.SetJTISTimeZone(_config);
                 }
                 else 

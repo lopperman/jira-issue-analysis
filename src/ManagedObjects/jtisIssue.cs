@@ -102,7 +102,7 @@ namespace JTIS.Data
             return this;
         }
 
-        public jtisStatus? EnteredOnOrAfter(JiraStatus jstat)
+        public jtisStatus? EnteredOnOrAfter(JiraStatus jstat, bool useFirstEntered)
         {
             if (StatusItems == null || StatusItems.Statuses == null || CfgManager.config.ValidIssueStatusSequence==false)
             {
@@ -118,7 +118,11 @@ namespace JTIS.Data
                     {
                         retVal = stChange;
                     }
-                    else if (stChange.LastEntryDate < retVal.LastEntryDate)
+                    else if (useFirstEntered && stChange.FirstEntryDate < retVal.FirstEntryDate)
+                    {
+                        retVal = stChange;
+                    }
+                    else if (useFirstEntered == false && stChange.LastEntryDate < retVal.LastEntryDate)
                     {
                         retVal = stChange;
                     }

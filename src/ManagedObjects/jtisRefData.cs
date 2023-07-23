@@ -5,9 +5,6 @@ namespace JTIS.Data
 {
     public class jtisRefData
     {
-        // Stopwatch? sw = null;
-        // private int _totReturnCount;
-        // private int _nextStart;
         private JiraRepo? repo = null;
         public Project? project {get;private set;}
         private List<CustomField> _customFieldsList = new List<CustomField>();
@@ -62,12 +59,6 @@ namespace JTIS.Data
             await Task.WhenAll(tasks[1]);
 
         }
-        // private async Task  GetProjectsAsync()
-        // {
-        //     var prjTask = repo.jira.Projects.GetProjectsAsync();
-        //     await Task<IEnumerable<Project>>.WhenAny(prjTask);
-        //     _projectList.AddRange(prjTask.Result);
-        // }
         private async Task  GetCustomFieldsAsync()
         {
             Task<IEnumerable<CustomField>> fldsTask = repo.jira.Fields.GetCustomFieldsAsync();

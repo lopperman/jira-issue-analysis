@@ -59,6 +59,24 @@ namespace JTIS.Menu
         {
             return MenuFunction.GroupHeader(menuTitle);
         }
+
+        public static T SelectSingle<T>(string title, List<T> choices, int? pageSize=null, bool clearConsole=false, Func<T, string>? useConverter = null) where T:notnull
+        {
+            if (!pageSize.HasValue){pageSize = MenuPageSize;}
+            if (clearConsole){
+                ConsoleUtil.WriteAppTitle();
+            }
+            ConsoleUtil.WriteBanner(title, Color.Blue, Color.Cornsilk1);
+            var p = new SelectionPrompt<T>();
+                if (useConverter != null) {
+                    p.Converter = useConverter;
+                }
+                p.PageSize = pageSize.Value;                
+                p.MoreChoicesText("[grey](Move up and down to reveal more choices)[/]");
+                p.AddChoices(choices);
+            var response = AnsiConsole.Prompt(p);
+            return response;
+        }
         public static IEnumerable<T> MultiSelect<T>(string title, List<T> choices, int? pageSize = null, bool required = false) where T:notnull
         {
             if (!pageSize.HasValue){pageSize = MenuPageSize;}
