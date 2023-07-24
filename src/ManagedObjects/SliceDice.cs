@@ -53,7 +53,8 @@ public class SliceDice
     public string IssueType {get;set;} = string.Empty;
     private jtisIssueData? _data = null;
     private List<CycleTimeEvent> _ctEvents = new List<CycleTimeEvent>();
-    public DateTime SearchDate {get;set;}
+    public DateTime SearchStartDt {get;set;}
+    public DateTime SearchEndDt {get;set;}
     public List<CycleTimeEvent> CycleTimeEvents {        
             get {
                 return _ctEvents;
@@ -63,13 +64,13 @@ public class SliceDice
 
     SortedDictionary<DateTime,List<jtisIssue>> _issues = new SortedDictionary<DateTime, List<jtisIssue>>();
 
-    public void AddIssues(JiraStatus startMin, JiraStatus endMin, string issueType, int weeksOld)
+    public void AddIssues(JiraStatus startMin, JiraStatus endMin, string issueType, DateTime startDt, DateTime endDt)
     {
+        SearchStartDt = startDt;
+        SearchEndDt = endDt;
         FetchOptions options = FetchOptions.DefaultFetchOptions;
         options.AllowManualJQL().IncludeChangeLogs().RequiredIssueStatusSequence();
-        var updDt = DateTime.Today.StartOfWeek().AddDays(-(weeksOld*7));
-        SearchDate = updDt;
-        string jql = $"project={CfgManager.config.defaultProject} and issueType='{issueType}' and status in ({BuildGTEStatusInList(endMin)}) and updated >= '{updDt.ToString("yyyy-MM-dd")}'";        
+        string jql = $"project={CfgManager.config.defaultProject} and issueType='{issueType}' and status in ({BuildGTEStatusInList(endMin)}) and updated >= '{startDt.ToString("yyyy-MM-dd")}' and updated <= '{endDt.ToString("yyyy-MM-dd")}'";        
         options.JQL=jql;
         ConsoleUtil.WriteBanner($"Running JQL Query: {jql}");
         _data = IssueFetcher.FetchIssues(options);
@@ -77,24 +78,22 @@ public class SliceDice
         {
             foreach (var iss in _data.jtisIssuesList)
             {
-                var firstStat = iss.EnteredOnOrAfter(startMin,true);
-                var lastStat = iss.EnteredOnOrAfter(endMin,false);
-                var startJiraStatus = CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch(firstStat.IssueStatus));
-                var endJiraStatus = CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch(lastStat.IssueStatus));
+                var firstStat = iss.EnteredOnOrAfter(startMin);
+                var lastStat = iss.EnteredOnOrAfter(endMin);
+                var startJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(firstStat.IssueStatus));
+                var endJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(lastStat.IssueStatus));
                 if (Math.Round(TimeSlots.BusinessTime(firstStat.FirstEntryDate,lastStat.LastEntryDate).TotalDays,2) > 0)
                 {    
                     _ctEvents.Add(new CycleTimeEvent(iss,firstStat.FirstEntryDate, lastStat.LastEntryDate,startJiraStatus, endJiraStatus));
                 }
-                // AnsiConsole.WriteLine($"{iss.jIssue.Key} CURRENT STATUS: {iss.jIssue.StatusName}{Environment.NewLine}{"\t"} 'FROM' {firstStat.IssueStatus} on {firstStat.LastEntryDate},  'TO' {lastStat.IssueStatus} on {lastStat.LastEntryDate}");
+
             }
         }
     }
-
-
     private string BuildGTEStatusInList(JiraStatus startStatus)
     {
         StringBuilder sb = new StringBuilder();
-        var issStatuses = CfgManager.config.DefaultStatuses;
+        var issStatuses = CfgManager.config.LocalProjectDefaultStatuses;
         foreach (var issSt in issStatuses.Where(x=>x.ProgressOrder >= startStatus.ProgressOrder).ToList())
         {
             if (sb.Length == 0) {

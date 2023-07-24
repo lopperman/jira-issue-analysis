@@ -102,33 +102,30 @@ namespace JTIS.Data
             return this;
         }
 
-        public jtisStatus? EnteredOnOrAfter(JiraStatus jstat, bool useFirstEntered)
+        public jtisStatus? EnteredOnOrAfter(JiraStatus jstat)
         {
             if (StatusItems == null || StatusItems.Statuses == null || CfgManager.config.ValidIssueStatusSequence==false)
             {
                 return null;
             }
-            var stats = CfgManager.config.DefaultStatuses.Where(x=>x.ProgressOrder >= jstat.ProgressOrder).ToList();
+            var stats = CfgManager.config.LocalProjectDefaultStatuses.Where(x=>x.ProgressOrder >= jstat.ProgressOrder).ToList();
             jtisStatus? retVal = null;
-            foreach (var stChange in StatusItems.Statuses)
+            int nextOrder = jstat.ProgressOrder;
+            while (true)
             {
-                if (stats.Exists(x=>x.StatusName.StringsMatch(stChange.IssueStatus)))
+                var searchLocalStatus = stats.FirstOrDefault(x=>x.ProgressOrder==nextOrder);
+                retVal = StatusItems.Statuses.SingleOrDefault(x=>x.IssueStatus.StringsMatch(searchLocalStatus.StatusName));
+                if (retVal != null) 
                 {
-                    if (retVal==null)
-                    {
-                        retVal = stChange;
-                    }
-                    else if (useFirstEntered && stChange.FirstEntryDate < retVal.FirstEntryDate)
-                    {
-                        retVal = stChange;
-                    }
-                    else if (useFirstEntered == false && stChange.LastEntryDate < retVal.LastEntryDate)
-                    {
-                        retVal = stChange;
-                    }
+                    return retVal;
+                }
+                nextOrder +=1;
+                if (nextOrder > stats.Max(x=>x.ProgressOrder))
+                {
+                    return null;
                 }
             }
-            return retVal;
+
         }
 
     }

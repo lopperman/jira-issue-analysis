@@ -20,17 +20,7 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
-            double tMean = 5;
-            double tStdDev = 2.138089935;
-            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,2)}");
-            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,4)}");
-            AnsiConsole.WriteLine($"{CycleTime.GaussianCDF(tMean,tStdDev,7)}");
-
-            var tND = Math.Exp(-.5 * Math.Pow((2 - tMean) / tStdDev, 2));
-            AnsiConsole.WriteLine($"2: {tND}");
-
-            tND = Math.Exp(-.5 * Math.Pow((9 - tMean) / tStdDev, 2));
-            AnsiConsole.WriteLine($"9: {tND}");
+           
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 

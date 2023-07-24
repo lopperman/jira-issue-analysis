@@ -174,7 +174,7 @@ namespace JTIS
 
         internal static void EditIssueSequence(bool editMode = false)
         {
-            List<JiraStatus> _defStatuses = CfgManager.config.DefaultStatuses;
+            List<JiraStatus> _defStatuses = CfgManager.config.LocalProjectDefaultStatuses;
             ConsoleUtil.WriteAppTitle();
             ConsoleUtil.WriteBanner($"ISSUE STATUS SEQUENCE ORDER FOR PROJECT: {CfgManager.config.defaultProject} - ALL STATUSES MUST HAVE A SEQUENCE ORDER");
             var tbl = new Table();

@@ -363,7 +363,7 @@ namespace JTIS.Config
         }
 
         [JsonIgnore]
-        public List<JiraStatus> DefaultStatuses 
+        public List<JiraStatus> LocalProjectDefaultStatuses 
         {
             get 
             {
@@ -425,7 +425,7 @@ namespace JTIS.Config
 
         public void UpdateDefaultStatusConfigs(string defProject,  bool clearLocal = false)
         {
-            List<JiraStatus> origDefault = DefaultStatuses;
+            List<JiraStatus> origDefault = LocalProjectDefaultStatuses;
             List<JiraStatus>? statusAll ; 
             List<JiraStatus>? statusProj;
 

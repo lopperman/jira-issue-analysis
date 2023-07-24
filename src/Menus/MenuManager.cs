@@ -412,11 +412,6 @@ namespace JTIS.Menu
         }
         private static void Dev2()
         {
-            var slice = new SliceDice();
-            slice.AddIssues(
-                CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch("in progress")),
-                CfgManager.config.DefaultStatuses.Single(x=>x.StatusName.StringsMatch("ready for review")), 
-                "Story", 16);
             
 
             ConsoleUtil.PressAnyKeyToContinue();
