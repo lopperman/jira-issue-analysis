@@ -675,6 +675,8 @@ namespace JTIS.Config
             return response;
         }
 
+        
+        /// <summary>Return 'Enabled' value for ConfigOption in active jtisConfig</summary>
         public static bool CfgOptionEnabled(CfgEnum cfgEnum)
         {
             var cfg = config.cfgOptions.items.SingleOrDefault(x=>x.configOption==cfgEnum);
@@ -684,6 +686,8 @@ namespace JTIS.Config
                 return false;
             }
         }
+
+        /// <summary>Show List of CfgOptions for active jtisConfig, provide option to toggle values</summary>
         internal static void EditConfigOptions()
         {
             ConsoleUtil.WriteAppTitle();
