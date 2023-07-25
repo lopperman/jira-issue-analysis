@@ -47,7 +47,7 @@ public class CycleTimeEvent
 }
 public class SliceDice
 {
-
+    public List<string> IgnoredIssues {get;private set;} = new List<string>();
     public JiraStatus? StartMin {get;set;} = null;
     public JiraStatus? EndMin {get;set;} = null;
     public string IssueType {get;set;} = string.Empty;
@@ -64,6 +64,17 @@ public class SliceDice
 
     SortedDictionary<DateTime,List<jtisIssue>> _issues = new SortedDictionary<DateTime, List<jtisIssue>>();
 
+    public bool IgnoreIfMissingStartState
+    {
+        get {
+            bool cfgValue = true;
+            if (CfgManager.config.cfgOptions.items.Exists(x=>x.configOption==CfgEnum.cfgCTIngoreIfMissingStart))
+            {
+                cfgValue = CfgManager.config.cfgOptions.items.Single(x=>x.configOption==CfgEnum.cfgCTIngoreIfMissingStart).Enabled;
+            }
+            return cfgValue;
+        }
+    }
     public void AddIssues(JiraStatus startMin, JiraStatus endMin, string issueType, DateTime startDt, DateTime endDt)
     {
         SearchStartDt = startDt;
@@ -76,15 +87,42 @@ public class SliceDice
         _data = IssueFetcher.FetchIssues(options);
         if (_data != null && _data.jtisIssueCount > 0)
         {
+            bool ignoreIfStartStateMissing = IgnoreIfMissingStartState;
             foreach (var iss in _data.jtisIssuesList)
             {
+                bool canAdd = true;
                 var firstStat = iss.EnteredOnOrAfter(startMin);
                 var lastStat = iss.EnteredOnOrAfter(endMin);
-                var startJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(firstStat.IssueStatus));
-                var endJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(lastStat.IssueStatus));
-                if (Math.Round(TimeSlots.BusinessTime(firstStat.FirstEntryDate,lastStat.LastEntryDate).TotalDays,2) > 0)
-                {    
-                    _ctEvents.Add(new CycleTimeEvent(iss,firstStat.FirstEntryDate, lastStat.LastEntryDate,startJiraStatus, endJiraStatus));
+                if (firstStat == null || lastStat == null)
+                {
+                    if (firstStat == null){
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start status could not be determined.");
+                    }
+                    if (lastStat == null){
+                    }
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - end status could not be determined.");
+                    canAdd = false;
+                }
+                if (canAdd && ignoreIfStartStateMissing)
+                {
+                    if (firstStat.IssueStatus.StringsMatch(lastStat.IssueStatus))
+                    {
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start and end statuses are same status");
+                        canAdd = false;
+                    }
+                }
+                if (canAdd)
+                {
+                    var startJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(firstStat.IssueStatus));
+                    var endJiraStatus = CfgManager.config.LocalProjectDefaultStatuses.Single(x=>x.StatusName.StringsMatch(lastStat.IssueStatus));
+                    if (Math.Round(TimeSlots.BusinessTime(firstStat.FirstEntryDate,lastStat.LastEntryDate).TotalDays,2) > 0)
+                    {    
+                        _ctEvents.Add(new CycleTimeEvent(iss,firstStat.FirstEntryDate, lastStat.LastEntryDate,startJiraStatus, endJiraStatus));
+                    }
+                    else 
+                    {
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - time from start to end state was '0' Days");
+                    }
                 }
 
             }

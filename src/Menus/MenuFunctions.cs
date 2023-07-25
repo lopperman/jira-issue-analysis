@@ -78,7 +78,8 @@ namespace JTIS.Menu
         miCachedSearch_ClearAll,
         miTISIssueTree,
         miTISCycleTime,
-        miIssCfgSequence
+        miIssCfgSequence,
+        miEditConfigOptions
     }
 
 

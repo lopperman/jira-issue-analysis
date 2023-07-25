@@ -32,9 +32,14 @@ namespace JTIS
             DefaultInUse = inDefaultPrj ;
         }
 
+        public static string ToMarkup(JiraStatus js)
+        {
+            return $"{js.ProgressOrder:00} - [bold]{js.StatusName.ToUpper()}[/] - ([dim]Category: [underline]{js.CategoryName}[/], Id: {js.StatusId}[/])";
+        }
+
         public override string ToString()
         {
-            return $"{ProgressOrder:00} - {StatusName} - (Id: {StatusId})";
+            return $"{ProgressOrder:00} - {StatusName} - (Id: {StatusId}, Category: {CategoryName})";
         }
         public JiraStatus(JToken token):this()
         {

@@ -244,7 +244,7 @@ namespace JTIS.Menu
                     break;
                 case MenuItemEnum.miIssCfgView:
                     ViewIssueConfig(CfgManager.config.defaultProject);
-                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
                     break;
                 case MenuItemEnum.miTISIssues:
                     AnalyzeIssues analyzeIssSum = new AnalyzeIssues(AnalysisType.atIssueSummary );
@@ -266,13 +266,26 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miIssCfgEdit:
                     IssueStatesUtil.EditIssueStatus();
-                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
                     break;
 
                 case MenuItemEnum.miIssCfgSequence:
                     IssueStatesUtil.EditIssueSequence();
-                    if (exitMenu == null){exitMenu = MenuEnum.meIssue_States;}
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
                     break;
+                case MenuItemEnum.miIssCfgReset:
+                    if (ConsoleUtil.Confirm("RESET local issue status configuration to match Jira Server?",false))
+                    {
+                        CfgManager.config.UpdateDefaultStatusConfigs(CfgManager.config.defaultProject,true);                        
+                        ConsoleUtil.WriteAppTitle();
+                        ConsoleUtil.WriteBanner("LOCAL ISSUE STATUS CONFIGURATIONS HAVE BEEN RESET");
+                        ConsoleUtil.PressAnyKeyToContinue();
+                        ViewIssueConfig(CfgManager.config.defaultProject);
+
+                    }
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
+                    break;
+
 
 
 
@@ -336,6 +349,10 @@ namespace JTIS.Menu
 
 #region CONFIG MENU MANAGEMENT
 
+                case MenuItemEnum.miEditConfigOptions:
+                    CfgManager.EditConfigOptions();
+                    if (exitMenu == null){exitMenu = MenuEnum.meConfig;}
+                    break;
 
 
                 case MenuItemEnum.miChangeTimeZoneDisplay:
@@ -629,7 +646,9 @@ namespace JTIS.Menu
             );
             sp.AddChoiceGroup(MenuFunction.GroupHeader("MISCELLANEOUS"), 
                 MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"), 
-                MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone")
+                MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"), 
+                MakeMenuDetail(MenuItemEnum.miEditConfigOptions,"Edit Config Options")
+
             );            
             AddCommonMenuItems(sp,lastMenu);
             MenuManager.Execute(AnsiConsole.Prompt(sp));            

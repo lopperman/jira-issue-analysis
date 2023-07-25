@@ -33,14 +33,10 @@ namespace JTIS
                 CheckIssueFieldFilter();
                 BuildFilteredList();
 
-                if (ConsoleUtil.Confirm("Show results on screen? (To export only, enter 'n')",true))
-                {
-                    Render();                
-                }
-                else 
-                {
-                    doExport = true;
-                }
+                ConsoleUtil.StartAutoRecording();
+                Render();
+                ConsoleUtil.StopAutoRecording("ChangeLog");
+
                 if (ConsoleUtil.Confirm("Export to csv file?",doExport))
                 {
                     Export();

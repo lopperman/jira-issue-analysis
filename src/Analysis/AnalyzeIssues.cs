@@ -40,7 +40,9 @@ namespace JTIS.Analysis
                 CheckIssueTypeFilter();       
                 CheckStatusDateFilter(); 
                 UpdateFilter();
+                ConsoleUtil.StartAutoRecording();
                 Render();
+                ConsoleUtil.StopAutoRecording("AnalyzeIssues");
             }
         }
        private void CheckIssueTypeFilter()

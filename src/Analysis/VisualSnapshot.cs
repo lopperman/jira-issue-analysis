@@ -61,9 +61,11 @@ namespace JTIS
             if (_jtisIssueData != null && _jtisIssueData.jtisIssueCount > 0)
             {
                 CheckIssueTypeFilter();
+                ConsoleUtil.StartAutoRecording();
                 BuildStatusBreakdown();
                 ConsoleUtil.PressAnyKeyToContinue($"NEXT: BLOCKED/NONBLOCKED SUMMARY");
                 BuildBlockedNonBlocked(false);
+                ConsoleUtil.StopAutoRecording("StatusSummary");
                 ConsoleUtil.PressAnyKeyToContinue();
             }
             

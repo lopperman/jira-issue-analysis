@@ -168,6 +168,19 @@ namespace JTIS.Console
             }
         }
 
+        public static void StartAutoRecording()
+        {
+            if (CfgManager.CfgOptionEnabled(CfgEnum.cfgAutoRecordAndSave) && IsConsoleRecording == false){
+                AnsiConsole.Record();
+            }
+        }
+        public static void StopAutoRecording(string recordingArea)
+        {
+            if (CfgManager.CfgOptionEnabled(CfgEnum.cfgAutoRecordAndSave) && ConsoleUtil.IsConsoleRecording == false){
+                ConsoleUtil.SaveSessionFile(recordingArea);
+            }
+        }
+
         public static string RecordingInfo
         {
             get
@@ -315,15 +328,12 @@ namespace JTIS.Console
         {
             text = Markup.Escape(text);
             if (clearScreen){System.Console.Clear();}
-
-//            AnsiConsole.MarkupLine(text,StdStyle(StdLine.slError));
             WriteBanner(text,Color.Red);
 
             if (ex != null)
             {                
                 WriteBanner(ex.Message,Color.Red);
                 WriteBanner(ex.StackTrace,Color.Red);
-                // WriteError(ex.StackTrace);
             }
             if (pause)
             {
@@ -445,14 +455,18 @@ namespace JTIS.Console
             AnsiConsole.Write(r);
 
             msg = $"  {msg.Trim()}  ";
-            int lines = 1;
-            lines = (int)(msg.Length/System.Console.WindowWidth);
-            if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
             msg = $"[bold {foreColor} on {backColor}]{msg}[/]";
+            AnsiConsole.Markup(msg);
+            int remChars = System.Console.WindowWidth - System.Console.GetCursorPosition().Left;
+            if (remChars > 0)
+            {
+                string fillSpaces = new string(' ',remChars);
+                var markupFill = new Markup($"[{foreColor} on {backColor}]{fillSpaces}[/]");
+                AnsiConsole.Write(markupFill);
+            }
+            AnsiConsole.Write(Environment.NewLine);
+            
 
-            FillNextXLines(Color.Cornsilk1,lines);
-            FillLines(Color.Cornsilk1,0,lines,0);
-            AnsiConsole.MarkupLine(msg);
             AnsiConsole.Write(r);
         }
 
@@ -472,20 +486,7 @@ namespace JTIS.Console
             }
             msg = $"  {msg.Trim()}";
             noMarkup = Markup.Remove(msg);
-            int lines = 1;
-            // if (msg.Length <= System.Console.WindowWidth)
-            // {
-            //     msg = $"[bold blue on cornsilk1]{msg}[/]";            
-            // }
-            // else 
-            // {
-                lines = (int)(msg.Length/System.Console.WindowWidth);
-                if (lines * System.Console.WindowWidth < msg.Length){lines+=1;}
-//                msg = $"{msg}" + new string(' ',(lines*System.Console.WindowWidth)-msg.Length);
-
-                msg = $"[bold blue on cornsilk1]{msg}[/]";
-            // }
-            // msg = $"{msg}{Environment.NewLine}:: ";
+            msg = $"[bold blue on cornsilk1]{msg}[/]";
             var showDefVal = false;
             if (default(T) != null &&  default(T).CompareTo(defVal)!=0)
             {
@@ -496,8 +497,17 @@ namespace JTIS.Console
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);
             r.Border(BoxBorder.Heavy);            
             AnsiConsole.Write(r);
-            FillNextXLines(Color.Cornsilk1,lines);
-            AnsiConsole.MarkupLine(msg);
+
+            AnsiConsole.Markup(msg);
+            int remChars = System.Console.WindowWidth - System.Console.GetCursorPosition().Left;
+            if (remChars > 0)
+            {
+                string fillSpaces = new string(' ',remChars);
+                var markupFill = new Markup($"[blue on cornsilk1]{fillSpaces}[/]");
+                AnsiConsole.Write(markupFill);
+            }
+            AnsiConsole.Write(Environment.NewLine);
+
             AnsiConsole.Write(r);
 
             var tp = new TextPrompt<T>(" : ");
@@ -531,13 +541,19 @@ namespace JTIS.Console
             r.Border(BoxBorder.Heavy);
             AnsiConsole.Write(r);
 
-            msg = Markup.Remove(msg);
             msg = $"  {msg}  ";
-            int lines = System.Console.WindowWidth/msg.Length;
-            if (System.Console.WindowWidth * lines < msg.Length){lines +=1;}
-//            FillNextXLines(Color.Cornsilk1,lines);
             msg = $"[bold blue on cornsilk1]{msg}[/]";
-            AnsiConsole.MarkupLine(msg);
+            AnsiConsole.Markup(msg);
+            int remChars = System.Console.WindowWidth - System.Console.GetCursorPosition().Left;
+            if (remChars > 0)
+            {
+                string fillSpaces = new string(' ',remChars);
+                var markupFill = new Markup($"[blue on cornsilk1]{fillSpaces}[/]");
+                AnsiConsole.Write(markupFill);
+            }
+            AnsiConsole.Write(Environment.NewLine);
+
+
             var result = AnsiConsole.Confirm($"{Environment.NewLine}:",defResp);
             ClearLinesBackTo(startLine);
             return result;
@@ -597,11 +613,16 @@ namespace JTIS.Console
         }
 
 
-        public static string SaveSessionFile()
+        public static string SaveSessionFile(string? areaDesc = null)
         {
             string sessFile = Path.Combine(CfgManager.JTISRootPath,"SessionFiles");
             if (!Directory.Exists(sessFile)){Directory.CreateDirectory(sessFile);}
-            string fName = string.Format("SessionFile_{0}.html",DateTime.Now.ToString("yyyyMMMddHHmmss"));
+            if (areaDesc == null){
+                areaDesc="SessionFile";
+            } else {
+                areaDesc=$"SessionFile_{areaDesc}";
+            }
+            string fName = $"{areaDesc}_{DateTime.Now.ToString("yyyyMMMddHHmmss")}.html";
             sessFile = Path.Combine(sessFile,fName);
             using (StreamWriter writer = new StreamWriter(sessFile,false))
             {

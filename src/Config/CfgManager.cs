@@ -62,6 +62,12 @@ namespace JTIS.Config
                     _config = value;
                     _refData=jtisRefData.Create(_config);
                     JTISTimeZone.SetJTISTimeZone(_config);
+                    var cfgCount = _config.cfgOptions.items.Count();
+                    _config.cfgOptions.AddDefaultsIfMissing();
+                    if (_config.cfgOptions.items.Count()!= cfgCount)
+                    {
+                        _config.IsDirty = true;
+                    }
                 }
                 else 
                 {
@@ -668,5 +674,37 @@ namespace JTIS.Config
 
             return response;
         }
+
+        public static bool CfgOptionEnabled(CfgEnum cfgEnum)
+        {
+            var cfg = config.cfgOptions.items.SingleOrDefault(x=>x.configOption==cfgEnum);
+            if (cfg != null) {
+                return cfg.Enabled;
+            } else {
+                return false;
+            }
+        }
+        internal static void EditConfigOptions()
+        {
+            ConsoleUtil.WriteAppTitle();
+            ConsoleUtil.WriteBanner("Jira TIS Options");
+            foreach (var opt in config.cfgOptions.items)
+            {
+                var p = new Panel(new Markup(CfgOption.ToMarkup(opt)));
+                p.Border(BoxBorder.Rounded);
+                p.Expand();
+                AnsiConsole.Write(p);
+                // AnsiConsole.MarkupLine(CfgOption.ToMarkup(opt));
+            }
+            if (ConsoleUtil.Confirm("Edit Options?",false))
+            {
+                var toggleItem = MenuManager.SelectSingle<CfgOption>("Select option to change",config.cfgOptions.items,pageSize:MenuManager.MenuPageSize,true,CfgOption.ToMarkup);
+                toggleItem.Enabled = !toggleItem.Enabled;
+                CfgManager.SaveConfigList();
+                EditConfigOptions();
+            }
+        }
+
+        
     }
 }

@@ -24,7 +24,7 @@ public class CycleTime
 
     public static string IssueTypeStringConverter(IssueType issType)
     {
-        return $"name: {issType.Name} (desc: {issType.Description ?? "n/a"})";
+        return $"[dim]name:[/] [bold]{issType.Name.ToUpper()}[/] [dim](desc: {issType.Description ?? "n/a"})[/]";
     }
 
     public CycleTime(AnalysisType analysisType): this()
@@ -33,7 +33,7 @@ public class CycleTime
         issType = MenuManager.SelectSingle<IssueType>("SELECT ISSUE TYPE FOR CYCLE-TIME ANALYSIS",projIssueTypes,clearConsole:true,useConverter:IssueTypeStringConverter);
         AnsiConsole.MarkupLine($"{"\t"}[dim]Issue Type selected: [/][bold underline]{issType.Name.ToUpper()}[/]");
         var statuses = CfgManager.config.LocalProjectDefaultStatuses;
-        startStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as starting point for Cycle-Time calculation",statuses);
+        startStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as starting point for Cycle-Time calculation",statuses,useConverter:JiraStatus.ToMarkup);
         AnsiConsole.MarkupLine($"{"\t"}[dim]Starting Status selected: [/][bold underline]{startStatus.StatusName.ToUpper()}[/]");
         endStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as ending point for Cycle-Time calculation",statuses.Where(x=>x.StatusName.StringsMatch(startStatus.StatusName)==false).ToList());
         AnsiConsole.MarkupLine($"{"\t"}[dim]Ending Status selected: [/][bold underline]{endStatus.StatusName.ToUpper()}[/]");
@@ -77,10 +77,16 @@ public class CycleTime
             }
 
             _ctEvents = slice.CycleTimeEvents;
+            ConsoleUtil.StartAutoRecording();
             Render();
+            ConsoleUtil.StopAutoRecording("CycleTime");
+
             if (ConsoleUtil.Confirm("View breakdown by WEEK?",true))
             {
+                ConsoleUtil.StartAutoRecording();
                 RenderWeekly();
+                ConsoleUtil.StopAutoRecording("CycleTimeWeekly");
+
                 ConsoleUtil.PressAnyKeyToContinue();
             }
 
@@ -159,6 +165,17 @@ public class CycleTime
                
         }
         AnsiConsole.Write(tbl);
+
+        if (slice.IgnoredIssues.Count() > 0)
+        {
+            AnsiConsole.WriteLine();
+            ConsoleUtil.WriteError("THE FOLLOWING ISSUES WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            foreach (var desc in slice.IgnoredIssues)
+            {
+                AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+            }
+            AnsiConsole.Write(new Rule());
+        }
 
 
     }
@@ -254,6 +271,18 @@ public class CycleTime
                 break;
             }
         }
+
+        if (slice.IgnoredIssues.Count() > 0)
+        {
+            AnsiConsole.WriteLine();
+            ConsoleUtil.WriteError("THE FOLLOWING ISSUES WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            foreach (var desc in slice.IgnoredIssues)
+            {
+                AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+            }
+            AnsiConsole.Write(new Rule());
+        }
+
 
     }    
 

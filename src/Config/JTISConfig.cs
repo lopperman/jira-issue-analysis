@@ -9,9 +9,10 @@ using Spectre.Console;
 namespace JTIS.Config
 {
     public class JTISConfig
-    {
-        
+    {        
         private IssueNotes? _issNotes;
+        private CfgOptions? _cfgOptions;
+        
         private string? _timeZoneId;
 
         //A LIST OF STRINGS WHICH WILL GET SCRUBBED WHEN WRITING TO SCREEN
@@ -42,6 +43,20 @@ namespace JTIS.Config
                 {
                     ScrubData.Add(item);
                 }
+            }
+        }
+
+        [JsonProperty]
+        public CfgOptions? cfgOptions
+        {
+            get 
+            {
+                if (_cfgOptions == null) { _cfgOptions = new CfgOptions();}
+                return _cfgOptions;                
+            }
+            set 
+            {
+                _cfgOptions = value;
             }
         }
 
