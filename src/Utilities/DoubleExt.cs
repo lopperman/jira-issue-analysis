@@ -16,6 +16,10 @@ public static class Extend
         }
     }
 
+    public static double RoundTwo(this double value)
+    {
+        return Math.Round(value,2);
+    }
     public static double AveragesStdErr(this IEnumerable<double> values, double? stdDeviation = null, bool besselsCorrection = false)
     {
         if (stdDeviation == null)

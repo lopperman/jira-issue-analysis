@@ -98,6 +98,48 @@ namespace JTIS.Analysis
 
         }
 
+        private List<BreakdownChart> BuildStatusChart(jtisIssue iss)
+        {
+            List<BreakdownChart> charts = new List<BreakdownChart>();
+            SortedDictionary<string,double> statusChart = new SortedDictionary<string, double>();
+            SortedDictionary<string,double> blockerChart = new SortedDictionary<string, double>();
+            
+            var totDays = iss.StatusItems.IssueBusinessTimeTotal.TotalDays;
+            foreach (var tmpStatus in iss.StatusItems.Statuses)
+            {   
+                statusChart.Add(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo());
+                if (tmpStatus.StatusBlockedBusinessTime.TotalDays > 0)
+                {
+                    blockerChart.Add("Blocked",tmpStatus.StatusBlockedBusinessTime.TotalDays.RoundTwo());
+                    blockerChart.Add("Unblocked", tmpStatus.StatusUnblockedBusinessTime.TotalDays.RoundTwo());
+                }
+            }
+            var chtStatus = new BreakdownChart();
+            var chtBlockers = new BreakdownChart();
+            chtStatus.FullSize().ShowTags();
+            chtStatus.ShowTagValues();
+            chtBlockers.FullSize().ShowTags();
+            
+            int clr = 1;
+            foreach (var kvp in statusChart)
+            {
+                chtStatus.AddItem(kvp.Key,kvp.Value,Color.FromInt32(clr));
+                clr += 1;
+            }
+            charts.Add(chtStatus);
+            clr = 1;
+            if (blockerChart.Count() > 0)
+            {
+                 foreach (var kvp in blockerChart)
+                {
+                    chtBlockers.AddItem(kvp.Key,kvp.Value,clr);
+                    clr +=1;
+                }
+                charts.Add(chtBlockers);
+            }
+            return charts;
+        }
+
         public string WriteToCSV()
         {
             ConsoleUtil.WriteBanner("UNDER DEVELOPMENT");
@@ -160,6 +202,7 @@ namespace JTIS.Analysis
             for (int i = startIndex; i < totalCount; i ++)
             {
                 jtisIssue jtisIss = _filtered[i];
+                var charts = BuildStatusChart(jtisIss);
                 var currentlyBlocked = jtisIss.jIssue.IsBlocked;
                 string formattedStartDt = string.Empty;
                 jtisStatus? firstActive = jtisIss.StatusItems.FirstActive;                
@@ -351,6 +394,12 @@ namespace JTIS.Analysis
                 });
                 AnsiConsole.Write(tbl);
                 AnsiConsole.WriteLine();
+
+                foreach (var chart in charts)
+                {
+                    AnsiConsole.Write(new Panel(chart));
+                }
+
                 if (jtisIss.BlockerCount > 0)
                 {
                     AnsiConsole.Write(new Rule($"[bold]BLOCKERS FOR: {jtisIss.jIssue.Key}[/]"){Style=new Style(Color.DarkRed,Color.White), 
