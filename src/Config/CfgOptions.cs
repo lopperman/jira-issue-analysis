@@ -4,7 +4,8 @@ public enum CfgEnum
 {
     cfgUNKNOWN = 0, 
     cfgCTIngoreIfMissingStart = 1, 
-    cfgAutoRecordAndSave = 2
+    cfgAutoRecordAndSave = 2, 
+    cfgCTWeeklyTwoWeeks = 3
 }
 
 public class CfgOptions
@@ -25,6 +26,9 @@ public class CfgOptions
         if (items.Exists(x=>x.configOption==CfgEnum.cfgAutoRecordAndSave)==false){
         SetOption(CfgEnum.cfgAutoRecordAndSave,false,"If enabled, when manual sessions recording is not active, session recording will activate and save file for screen output from Issue Analysis areas");
         }
+        if (items.Exists(x=>x.configOption==CfgEnum.cfgCTWeeklyTwoWeeks)==false){
+        SetOption(CfgEnum.cfgCTWeeklyTwoWeeks,false,"If enabled, Cycle-Time Weekly Grouping in 2 week blocks, otherwise (False) will use 1 week blocks");
+        }
 
 
         
@@ -41,6 +45,7 @@ public class CfgOptions
             item = new CfgOption(cfgEnum,enabled,desc);
             items.Add(item);
         }
+        CfgManager.config.IsDirty = true;
     }    
 }
 

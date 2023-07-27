@@ -38,6 +38,10 @@ public class CycleTime
         endStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as ending point for Cycle-Time calculation",statuses.Where(x=>x.StatusName.StringsMatch(startStatus.StatusName)==false).ToList());
         AnsiConsole.MarkupLine($"{"\t"}[dim]Ending Status selected: [/][bold underline]{JiraStatus.ToMarkup(endStatus)}[/]");
         DateTime startDt = DateTime.Today.StartOfWeek().AddDays(-7*12);
+        if (CfgManager.CfgOptionEnabled(CfgEnum.cfgCTWeeklyTwoWeeks))
+        {
+            ConsoleUtil.WriteBanner("The Option (Configuration --> Edit Config Options) to group 'weekly' data is set for 2 weeks.  If the START and END dates entered result in an odd number of weeks, the start date will automatically be moved back a week so that all groups will be the same size.");
+        }
         startDt = ConsoleUtil.GetInput<DateTime>($"Enter the oldest date to filter when issues were changed to '{endStatus.StatusName}' (Press ENTER for default - 12 weeks)",startDt);
         if (startDt.DayOfWeek != DayOfWeek.Monday)
         {
@@ -63,6 +67,11 @@ public class CycleTime
         {
             ConsoleUtil.WriteError("END DATE MUST BE LATER THAN START DATE, AND MUST BE IN THE PAST");
             return;
+        }
+        if (((endDt.Subtract(startDt).TotalDays/7) % 2) > 0)
+        {
+            startDt = startDt.AddDays(-7).Date;
+            AnsiConsole.MarkupLine($"{"\t"}[italic]Start Date adjusted to: {startDt.ToString()}[/]");
         }
         AnsiConsole.MarkupLine($"{"\t"}[dim]End Date: [/][bold underline]{endDt.ToShortDateString()}[/]");
 
@@ -182,13 +191,14 @@ public class CycleTime
 
     private void RenderWeekly()
     {
-
+        bool useTwoWeekGroups = CfgManager.CfgOptionEnabled(CfgEnum.cfgCTWeeklyTwoWeeks);
+        int groupDays = useTwoWeekGroups ? 14 : 7;
         ConsoleUtil.WriteAppTitle();
         ConsoleUtil.WriteBanner("CYCLE TIME ANALYSIS - WEEKLY BREAKDOWN",Color.Blue);
         DateTime workingWeek = slice.SearchStartDt.Date;
         while(true)
         {
-            DateTime workingWeekEnd = workingWeek.AddDays(7).Date.AddSeconds(-1);
+            DateTime workingWeekEnd = workingWeek.AddDays(groupDays).Date.AddSeconds(-1);
             if (_ctEvents.Any(x=>x.cycleTimeEnd >= workingWeek && x.cycleTimeEnd <= workingWeekEnd))
             {
                 List<CycleTimeEvent> _events = _ctEvents.Where(x=>x.cycleTimeEnd >= workingWeek && x.cycleTimeEnd <= workingWeekEnd).ToList();
@@ -265,7 +275,7 @@ public class CycleTime
                 AnsiConsole.WriteLine();
             }
 
-            workingWeek = workingWeek.AddDays(7);
+            workingWeek = workingWeek.AddDays(groupDays);
             if (workingWeek > slice.SearchEndDt)
             {
                 break;
