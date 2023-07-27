@@ -112,7 +112,7 @@ namespace JTIS.Analysis
                 {
                     blockerChart.Add("Blocked",tmpStatus.StatusBlockedBusinessTime.TotalDays.RoundTwo());
                     blockerChart.Add("Unblocked", tmpStatus.StatusUnblockedBusinessTime.TotalDays.RoundTwo());
-                }
+                 }
             }
             var chtStatus = new BreakdownChart();
             var chtBlockers = new BreakdownChart();

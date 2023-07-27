@@ -12,6 +12,7 @@ namespace JTIS.Config
     {        
         private IssueNotes? _issNotes;
         private CfgOptions? _cfgOptions;
+        private List<CfgColor>? _cfgColors;
         
         private string? _timeZoneId;
 
@@ -43,6 +44,58 @@ namespace JTIS.Config
                 {
                     ScrubData.Add(item);
                 }
+            }
+        }
+
+        public void CfgStyleUpdate(CfgColor cfgClr, CfgStyleEnum csEnum, string? cfgKey = null)
+        {
+            if (csEnum==CfgStyleEnum.csManualKey)
+            {
+                if (cfgKey!=null)
+                {
+                    if (cfgColors.Exists(x=>x.cfgStyle==csEnum && x.ColorKey.StringsMatch(cfgKey)))
+                    {
+                        cfgColors.Single(x=>x.cfgStyle==csEnum && x.ColorKey.StringsMatch(cfgKey)).style = cfgClr.style;
+                    }
+                    else 
+                    {
+                        cfgColors.Add(cfgClr);
+                    }
+
+                }
+            }
+            else 
+            {
+                if (cfgColors.Exists(x=>x.cfgStyle==csEnum))
+                {
+                    cfgColors.Single(x=>x.cfgStyle==csEnum).style  = cfgClr.style;
+                }
+                else 
+                {
+                    cfgColors.Add(cfgClr);
+                }
+            }
+        }
+        public Style? CfgStyle(CfgStyleEnum csEnum, string? cfgKey = null)
+        {
+            Style? retStyle = null;
+            CfgColor? _color = null;
+            if (csEnum == CfgStyleEnum.csManualKey && cfgKey != null)
+            {
+                _color = cfgColors.SingleOrDefault(x=>x.cfgStyle==csEnum && x.ColorKey.StringsMatch(cfgKey));
+            }
+            else 
+            {
+                _color = cfgColors.SingleOrDefault(x=>x.cfgStyle==csEnum);
+            }
+
+            return retStyle;
+        }
+        public List<CfgColor>? cfgColors 
+        {
+            get{
+                if (_cfgColors == null) { _cfgColors =  new List<CfgColor>();}
+                return _cfgColors;
             }
         }
 
