@@ -116,7 +116,8 @@ namespace JTIS.Menu
             get
             {
                 var mf = new MenuFunction();
-                mf.MenuName = $"\t\t--- --- ---";
+                mf.MenuName = string.Empty;
+                // mf.MenuName = $"\t\t--- --- ---";
                 mf.MenuItem = MenuItemEnum.miSeparator;
                 mf.MenuNameMarkup = $"[dim]{mf.MenuName}[/]";
                 mf.Disabled = true;
@@ -164,8 +165,9 @@ namespace JTIS.Menu
                 var markupTitle = $"[bold]MENU: [/]{title.Trim().ToUpper()}";                
                 menuTitleMarkup = markupTitle;
             }
-            if (emoji == null){emoji = Emoji.Known.SmallBlueDiamond;}
+            // if (emoji == null){emoji = Emoji.Known.SmallBlueDiamond;}
             if (emoji != null){emoji = $"{emoji}  ";}
+            if (emoji==null){emoji="    ";}
             MenuNameMarkup = $"{emoji ?? string.Empty}{menuTitleMarkup}";
             MenuItem = menuItem;
         }

@@ -10,8 +10,16 @@ public class jtisBlockers
     private string _key = string.Empty;
     private List<jtisBlocker> _blockers = new List<jtisBlocker>();
 
+    public void test()
+    {
+        var kk = System.Console.ReadKey();
+            
+    }
+    
     public TimeSpan BlockedTime(DateTime startDt, DateTime endDt, bool includeWeekends = false)
     {
+    
+    
         if (_blockers.Count() == 0)
         {
             return new TimeSpan();

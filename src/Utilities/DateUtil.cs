@@ -1,45 +1,9 @@
 using System;
 using JTIS.Config;
-using JTIS.Console;
 
 namespace JTIS
 {
 
-    public static class ColorUtil
-        {
-            public static IEnumerable<T> ReverseEnumerable<T>(this IEnumerable<T> source)
-            {
-                if (source is null)
-                {
-                    throw new ArgumentNullException(nameof(source));
-                }
-
-                return source.Reverse();
-            }
-
-            public static Spectre.Console.Style? CStyle(this StdLine line)
-            {
-                return ConsoleUtil.StdStyle(line);
-            }
-            public static string FontMkp(this StdLine line)
-            {            
-                return line.CStyle().Foreground.ToString();
-            }
-            public static Spectre.Console.Color FontColor(this StdLine line)
-            {            
-                return line.CStyle().Foreground;
-            }
-            public static string BackMkp(this StdLine line)
-            {            
-                return line.CStyle().Background.ToString();
-            }
-            public static Spectre.Console.Color BackColor(this StdLine line)
-            {            
-                return line.CStyle().Background;
-            }
-
-        }
-    
     public static class DateUtil
     {
         public static DateTime StartOfWeek(this DateTime dt)

@@ -31,14 +31,14 @@ public class CycleTime
     {
         var projIssueTypes = CfgManager.RefData.ProjectIssuesTypes(CfgManager.config.defaultProject).Where(x=>x.IsSubTask==false).OrderBy(y=>y.Name).ToList();
         issType = MenuManager.SelectSingle<IssueType>("SELECT ISSUE TYPE FOR CYCLE-TIME ANALYSIS",projIssueTypes,clearConsole:true,useConverter:IssueTypeStringConverter);
-        AnsiConsole.MarkupLine($"{"\t"}[dim]Issue Type selected: [/][bold underline]{issType.Name.ToUpper()}[/]");
+        AnsiConsole.MarkupLine($"{"\t"}[dim]Issue Type selected: [/][bold underline]{CycleTime.IssueTypeStringConverter(issType)}[/]");
         var statuses = CfgManager.config.LocalProjectDefaultStatuses;
         startStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as starting point for Cycle-Time calculation",statuses,useConverter:JiraStatus.ToMarkup);
-        AnsiConsole.MarkupLine($"{"\t"}[dim]Starting Status selected: [/][bold underline]{startStatus.StatusName.ToUpper()}[/]");
+        AnsiConsole.MarkupLine($"{"\t"}[dim]Starting Status selected: [/][bold underline]{JiraStatus.ToMarkup(startStatus)}[/]");
         endStatus = MenuManager.SelectSingle<JiraStatus>("Select Status to use as ending point for Cycle-Time calculation",statuses.Where(x=>x.StatusName.StringsMatch(startStatus.StatusName)==false).ToList());
-        AnsiConsole.MarkupLine($"{"\t"}[dim]Ending Status selected: [/][bold underline]{endStatus.StatusName.ToUpper()}[/]");
+        AnsiConsole.MarkupLine($"{"\t"}[dim]Ending Status selected: [/][bold underline]{JiraStatus.ToMarkup(endStatus)}[/]");
         DateTime startDt = DateTime.Today.StartOfWeek().AddDays(-7*12);
-        startDt = ConsoleUtil.GetInput<DateTime>($"Enter the oldest date to filter when issues were changed to '{endStatus.StatusName}'",startDt);
+        startDt = ConsoleUtil.GetInput<DateTime>($"Enter the oldest date to filter when issues were changed to '{endStatus.StatusName}' (Press ENTER for default - 12 weeks)",startDt);
         if (startDt.DayOfWeek != DayOfWeek.Monday)
         {
             startDt = startDt.StartOfWeek().Date;
@@ -54,7 +54,7 @@ public class CycleTime
         {
             endDt = endDt.AddDays(-7);
         }
-        endDt = ConsoleUtil.GetInput<DateTime>($"Enter the latest date to filter when issues were changed to '{endStatus.StatusName}'",endDt);
+        endDt = ConsoleUtil.GetInput<DateTime>($"Enter the latest date to filter when issues were changed to '{endStatus.StatusName}' (Press ENTER for default - latest week)",endDt);
         if (endDt.DayOfWeek != DayOfWeek.Sunday)
         {
             endDt = endDt.StartOfWeek().AddDays(6);

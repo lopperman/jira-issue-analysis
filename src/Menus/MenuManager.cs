@@ -1,3 +1,4 @@
+using System.Text;
 using System.Reflection.Metadata;
 using Spectre.Console;
 using JTIS.Config;
@@ -427,9 +428,40 @@ namespace JTIS.Menu
             }
             ShowMenu(exitMenu.Value);
         }
-        private static void Dev2()
+        private static void Dev2(int fcIndex = -1)
         {
-            
+            if (fcIndex == -1)
+            {
+                for (int i = 0; i <ColorUtil.ColorsAll.Count(); i ++)
+                {
+                    var fColor = ColorUtil.ColorsAll[i];
+    //                var bColor = ColorUtil.ColorsAll[ColorUtil.ColorsAll.Count - (1+i)];
+                    AnsiConsole.MarkupLine($"[{fColor.ToString()} on white]{fColor.ToString()}[/], [{fColor.ToString()} on grey50]{fColor.ToString()}[/] (Index: {i})");
+                }
+                int fIndex = ConsoleUtil.GetInput<int>("Enter Index of Color to see on all backcolors (Enter a number higher than 254 to exit)");
+                if (fIndex >= 0 && fIndex <= 254)
+                {
+                    Dev2(fIndex);
+                    return;
+                }
+            }
+            else 
+            {
+                var fColor = ColorUtil.ColorsAll[fcIndex];
+                for (int i = 0; i <ColorUtil.ColorsAll.Count(); i ++)
+                {
+                    var bColor = ColorUtil.ColorsAll[i];
+                    AnsiConsole.MarkupLine($"[{fColor.ToString()} on {bColor.ToString()}]{fColor.ToString()} on {bColor.ToString()} [/]");
+                }
+                if (ConsoleUtil.Confirm("Start Over?",true))
+                {
+                    Dev2();
+                    return;
+                }
+
+            }
+
+
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
@@ -541,9 +573,8 @@ namespace JTIS.Menu
             lastMenu = MenuEnum.meIssue_Summary_Visualization;
             BuildMenuPanel(lastMenu);
 
-            var sp = new SelectionPrompt<MenuFunction>();      
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));      
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault();
+
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization,"Issue Status and Blocker Summary"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssue_Summary_Visualization_Epic,"Issue Status and Blocker Summary (by Epic)"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssueTree,"Build Status Tree"));
@@ -561,9 +592,7 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meChangeLog;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();      
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));      
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault();
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryCards,"Issue Change-Logs "));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miShowChangeHistoryEpics,"Issue Change-Logs (by Epic) "));
 
@@ -577,9 +606,7 @@ namespace JTIS.Menu
 
             lastMenu = MenuEnum.meIssue_Notes ;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();          
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));  
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault();
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesView, "View Issue Notes"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesAdd, "Add Issue Note"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssueNotesDelete, "Delete Issue Note"));
@@ -592,9 +619,7 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meDev;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();       
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));     
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault();
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev1, $"{Environment.UserName} TEST 1"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDev2, $"{Environment.UserName} TEST 2"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miDevScrubEdit, "Managed Scrubbed Terms"));
@@ -607,10 +632,7 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meCached_Searches;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();       
-            sp.HighlightStyle(new Style(decoration:Decoration.Bold));
-            
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault();
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miCachedSearch_View, "View Cached Searches"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miCachedSearch_ClearAll, "Clear Cached Search Results"));
@@ -626,26 +648,19 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meConfig;
             BuildMenuPanel(lastMenu);
-            var sp = new SelectionPrompt<MenuFunction>();       
-            sp.HighlightStyle(new Style(Color.Black, Color.Cornsilk1,decoration:Decoration.Bold));
-            sp.Mode(SelectionMode.Leaf);
-            
-            sp.PageSize = MenuPageSize;
+            var sp = MenuPromptDefault(SelectionMode.Independent);
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));       
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_Cached_Searches,"Menu: Cached Searches"));
-            sp.AddChoiceGroup(MenuFunction.GroupHeader("JIRA CONNECTION PROFILES"), 
-                MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Configured Jira Profiles"), 
+            sp.AddChoiceGroup(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Jira Connection Profiles",bold:true),
                 MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"), 
                 MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"), 
                 MakeMenuDetail(MenuItemEnum.miJiraConfigRemove,"Remove Jira Connection")
             );
-            sp.AddChoiceGroup(MenuFunction.GroupHeader("CONSOLE SESSION RECORDING"), 
-                MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start session recording"), 
+            sp.AddChoiceGroup(MakeMenuDetail(MenuItemEnum.miStartRecordingSession,"Start Session Recording",bold:true),
                 MakeMenuDetail(MenuItemEnum.miSaveSessionToFile,"Save session to file")
             );
-            sp.AddChoiceGroup(MenuFunction.GroupHeader("MISCELLANEOUS"), 
-                MakeMenuDetail(MenuItemEnum.miJiraServerInfo,$"View Jira Server Info"), 
+            sp.AddChoiceGroup(MakeMenuDetail(MenuItemEnum.miJiraServerInfo,"View Jira Server Info",bold:true),
                 MakeMenuDetail(MenuItemEnum.miChangeTimeZoneDisplay,"Change Displayed Time Zone"), 
                 MakeMenuDetail(MenuItemEnum.miEditConfigOptions,"Edit Config Options")
 
@@ -672,7 +687,7 @@ namespace JTIS.Menu
 
             lastMenu = MenuEnum.meIssue_States;
             BuildMenuPanel(lastMenu);
-            var sp = MenuFunction.DefaultPrompt;
+            var sp = MenuPromptDefault();
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISIssues,"Get Issue(s) Data"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miTISEpic,"Get Issue(s) Data by Epic"));
@@ -688,7 +703,7 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meJQL;
             BuildMenuPanel(lastMenu);
-            var sp = MenuFunction.DefaultPrompt;
+            var sp = MenuPromptDefault();
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miSavedJQLView,"View Saved JQL / Issue Numbers"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miSavedJQLAdd,"Save New JQL / Issue Numbers"));
@@ -722,7 +737,7 @@ namespace JTIS.Menu
         {
             lastMenu = MenuEnum.meMain;;
             BuildMenuPanel(lastMenu);
-            var sp = MenuFunction.DefaultPrompt;
+            var sp = MenuPromptDefault();
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_IssueStates,"Menu: Issue Analysis"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_Issue_Summary_Visualization,"Menu: Issue Summary Visualization"));
@@ -777,56 +792,6 @@ namespace JTIS.Menu
                     return;
             }
 
-            // lastMenu = menu;
-            // BuildMenuPanel(menu);
-            // List<MenuFunction> menuItems = BuildMenuItems(menu);
-            // if (menuItems.Count > 0)
-            // {
-            //     var sp = new SelectionPrompt<MenuFunction>();
-            //     sp.HighlightStyle(new Style(decoration:Decoration.Bold));
-                
-            //     sp.PageSize = MenuPageSize;
-
-            //     sp.AddChoices(menuItems);
-
-
-
-            //     if (menu == MenuEnum.meMain)
-            //     {
-            //         sp.AddChoiceGroup(
-            //                 menuSeparator, 
-            //                 new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
-            //     }
-            //     else 
-            //     {
-            //         sp.AddChoiceGroup(
-            //                 menuSeparator, 
-            //                 new MenuFunction(MenuItemEnum.miMenu_Main,"Back to Main Menu","Back to [bold]Main Menu[/]"),
-            //                 new MenuFunction(MenuItemEnum.miExit,"Exit App","[dim bold]Exit App[/]",true,Emoji.Known.SmallOrangeDiamond));
-
-            //     }                    
-            //     var mnu = AnsiConsole.Prompt(sp);
-            //     try
-            //     {
-            //         MenuManager.Execute(mnu);            
-            //     }
-            //     catch(Exception errEx)
-            //     {
-            //         ConsoleUtil.WriteError($"An error occurred processing request. Please double-check syntax of any JQL statements you are working with.",false,ex:errEx,true);
-
-            //         ShowMenu(menu);
-            //     }
-            // }
-            // else 
-            // {
-            //     string miName = Enum.GetName(typeof(MenuEnum),menu);
-            //     AnsiConsole.Write(new Rule());
-            //     AnsiConsole.Write(new Rule($"[{Color.DarkRed.ToString()} on {Color.LightYellow3.ToString()}] a handler for '{miName}' does not exist, reverting to main menu [/]"));
-            //     AnsiConsole.Write(new Rule());
-            //     ConsoleUtil.PressAnyKeyToContinue();
-            //     ShowMenu(MenuEnum.meMain);
-            // }
-
         }
         private static void BuildMenuPanel(MenuEnum menu)
         {
@@ -846,14 +811,27 @@ namespace JTIS.Menu
             return miString.StringsMatch("miMenu",StringCompareType.scStartsWith);
         }
 
-        private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null)
+        private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null, bool bold = false, bool underline = false, bool italic = false)
         {
             var miFore = StdLine.slMenuDetail.FontMkp();
             var miBack = StdLine.slMenuDetail.BackMkp();
-            string plainTitle = Markup.Remove(title);
+            string plainTitle = string.Empty;
             string markupTitle = string.Empty;
-            markupTitle = $"[{miFore} on {miBack}]{plainTitle}[/]";
-            return new MenuFunction(mi,plainTitle,markupTitle,emoji:emojiFront);
+            plainTitle = Markup.Remove(title);
+            StringBuilder sb = new StringBuilder();
+            if (bold) {sb=sb.Append("bold ");}
+            if (italic){sb = sb.Append("italic ");}
+            if (underline){sb = sb.Append("underline ");}
+            if (sb.Length > 0)
+            {
+                markupTitle = $"[{sb.ToString()}{miFore} on {miBack}]{plainTitle}[/]";
+            }
+            else 
+            {
+                markupTitle = $"[{miFore} on {miBack}]{plainTitle}[/]";
+            }
+            // return new MenuFunction(mi,plainTitle,markupTitle,emoji:emojiFront);
+            return new MenuFunction(mi,plainTitle,markupTitle);
         }
 
         // public static List<MenuFunction> BuildMenuItems(MenuEnum menu)
@@ -881,6 +859,17 @@ namespace JTIS.Menu
             ShowMenu(MenuEnum.meMain);
         }
 
+        private static SelectionPrompt<MenuFunction> MenuPromptDefault(SelectionMode selMode = SelectionMode.Leaf)
+        {
+            var sp = new SelectionPrompt<MenuFunction>();
+            sp.HighlightStyle(new Style(Color.Maroon,Color.Cornsilk1, decoration:Decoration.Bold));
+            sp.PageSize = MenuPageSize;
+            sp.Mode = selMode;
+
+            
+
+            return sp;
+        }
 
     }
 }
