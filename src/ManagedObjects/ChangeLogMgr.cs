@@ -196,7 +196,7 @@ namespace JTIS
         private void WriteIssueDetail(jtisIssue ji)
         {
             var tbl = new Table();
-            tbl.AddColumn("CHANGELOG ID");
+            tbl.AddColumn("[dim]CHANGELOG ID[/]");
             tbl.AddColumn("KEY");
             tbl.AddColumn("FIELD");
             tbl.AddColumn("CHANGED DT");
@@ -238,8 +238,8 @@ namespace JTIS
                                 changeDt = Markup.FromInterpolated($"{changeLog.CreatedDate.CheckTimeZone().ToString()}");
                                 //new Text(changeLog.CreatedDate.ToString())
                             }
-
-                            tbl.AddRow(new IRenderable[]{new Text(changeLog.Id),  new Text(ji.jIssue.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
+                            var clID = new Markup($"[dim]{changeLog.Id}[/]");
+                            tbl.AddRow(new IRenderable[]{clID,  new Text(ji.jIssue.Key.ToString()),new Text(cli.FieldName), changeDt,frVal,toVal});
                         }
                     }
                 }

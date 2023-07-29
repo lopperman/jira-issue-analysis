@@ -92,22 +92,24 @@ public class SliceDice
             {
                 bool canAdd = true;
                 var firstStat = iss.EnteredOnOrAfter(startMin);
+                var summary = Markup.Escape(iss.jIssue.Summary);
                 var lastStat = iss.EnteredOnOrAfter(endMin);
+                var line2 = $"{Environment.NewLine}  [dim]Status: {iss.jIssue.StatusName}, Summary: {summary}[/]";
                 if (firstStat == null || lastStat == null)
                 {
                     if (firstStat == null){
-                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start status could not be determined.");
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start status could not be determined.{line2}");
                     }
                     if (lastStat == null){
                     }
-                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - end status could not be determined.");
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - end status could not be determined.{line2}");
                     canAdd = false;
                 }
                 if (canAdd && ignoreIfStartStateMissing)
                 {
                     if (firstStat.IssueStatus.StringsMatch(lastStat.IssueStatus))
                     {
-                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start and end statuses are same status");
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - start and end statuses are same status{line2}");
                         canAdd = false;
                     }
                 }
@@ -121,7 +123,7 @@ public class SliceDice
                     }
                     else 
                     {
-                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - time from start to end state was '0' Days");
+                        IgnoredIssues.Add($"{iss.jIssue.Key} was ignored - time from start to end state was '0' Days{line2}");
                     }
                 }
 

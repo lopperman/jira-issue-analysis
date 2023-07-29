@@ -178,12 +178,15 @@ public class CycleTime
         if (slice.IgnoredIssues.Count() > 0)
         {
             AnsiConsole.WriteLine();
-            ConsoleUtil.WriteError("THE FOLLOWING ISSUES WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
-            foreach (var desc in slice.IgnoredIssues)
+            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            if (ConsoleUtil.Confirm("VIEW EXCLUDED ISSUES DETAIL",false))
             {
-                AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+                foreach (var desc in slice.IgnoredIssues)
+                {
+                    AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+                }
+                AnsiConsole.Write(new Rule());
             }
-            AnsiConsole.Write(new Rule());
         }
 
 
@@ -285,14 +288,16 @@ public class CycleTime
         if (slice.IgnoredIssues.Count() > 0)
         {
             AnsiConsole.WriteLine();
-            ConsoleUtil.WriteError("THE FOLLOWING ISSUES WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
-            foreach (var desc in slice.IgnoredIssues)
+            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            if (ConsoleUtil.Confirm("VIEW EXCLUDED ISSUES DETAIL",false))
             {
-                AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+                foreach (var desc in slice.IgnoredIssues)
+                {
+                    AnsiConsole.MarkupLine($"[italic]{desc}[/]");
+                }
+                AnsiConsole.Write(new Rule());
             }
-            AnsiConsole.Write(new Rule());
         }
-
 
     }    
 
