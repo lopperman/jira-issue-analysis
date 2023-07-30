@@ -49,6 +49,13 @@ public class jtisStatus
         _BusinessTimeTotal = _BusinessTimeTotal.Add(TimeSlots.BusinessTime(startDt,useEndDt));
     }
 
+    public string StatusCategoryToString
+    {
+        get {
+            return Enum.GetName(typeof(StatusType),StatusCategory);
+        }
+    }
+
     public JiraStatus? LocalStatus 
     {
         get 

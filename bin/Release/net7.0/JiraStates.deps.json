@@ -12,7 +12,7 @@
           "Microsoft.Extensions.Configuration.Json": "7.0.0",
           "Newtonsoft.Json": "13.0.3",
           "Spectre.Console": "0.47.1-preview.0.11",
-          "Spectre.Console.Json": "0.47.0",
+          "Spectre.Console.Json": "0.47.1-preview.0.11",
           "System.Configuration.ConfigurationManager": "7.0.0"
         },
         "runtime": {
@@ -167,14 +167,14 @@
           }
         }
       },
-      "Spectre.Console.Json/0.47.0": {
+      "Spectre.Console.Json/0.47.1-preview.0.11": {
         "dependencies": {
           "Spectre.Console": "0.47.1-preview.0.11"
         },
         "runtime": {
           "lib/net7.0/Spectre.Console.Json.dll": {
             "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.47.0.0"
+            "fileVersion": "0.47.1.0"
           }
         }
       },
@@ -384,12 +384,12 @@
       "path": "spectre.console/0.47.1-preview.0.11",
       "hashPath": "spectre.console.0.47.1-preview.0.11.nupkg.sha512"
     },
-    "Spectre.Console.Json/0.47.0": {
+    "Spectre.Console.Json/0.47.1-preview.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6nq5sCmYViulDjdMsTUpc5xD++aEsAHy9s9LKc1geif8slK9zJtze1PCjRHj2sRVN/alwBbL9/IyELDK4wTkeQ==",
-      "path": "spectre.console.json/0.47.0",
-      "hashPath": "spectre.console.json.0.47.0.nupkg.sha512"
+      "sha512": "sha512-uEWSuy50G8Zd5LHbxayqCjXRhcAVM1nZqiEhUrXLHclhxtm21djUR55y674xrqhwwQamQ/86mursBR8l1hgaxA==",
+      "path": "spectre.console.json/0.47.1-preview.0.11",
+      "hashPath": "spectre.console.json.0.47.1-preview.0.11.nupkg.sha512"
     },
     "System.Configuration.ConfigurationManager/7.0.0": {
       "type": "package",

@@ -30,6 +30,16 @@ namespace JTIS.Extensions
             return ConsoleUtil.Scrub(item);
         }
 
+        public static string ClearCommas(this string data, char replaceWith = ' ')
+        {
+            if (!string.IsNullOrWhiteSpace(data))
+            {
+                data = data.Replace(',',replaceWith);
+            }
+            return data;
+            
+        }
+
         // converts any two inputs to strings and compares
         public static bool StringsMatch<T,T2>(this T sourceData, T2 compareTo, StringCompareType compareType = StringCompareType.scEquals)
         {            

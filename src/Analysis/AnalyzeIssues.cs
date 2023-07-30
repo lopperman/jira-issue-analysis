@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Spectre.Console;
@@ -43,6 +45,7 @@ namespace JTIS.Analysis
                 ConsoleUtil.StartAutoRecording();
                 Render();
                 ConsoleUtil.StopAutoRecording("AnalyzeIssues");
+                WriteToCSV();
             }
         }
        private void CheckIssueTypeFilter()
@@ -141,101 +144,39 @@ namespace JTIS.Analysis
 
             return bchart;
         }
-        // private List<BreakdownChart> xxxBuildStatusChart(jtisIssue iss)
-        // {
-        //     List<BreakdownChart> charts = new List<BreakdownChart>();
-        //     SortedDictionary<string,double> statusChart = new SortedDictionary<string, double>();
-        //     SortedDictionary<string,double> blockerChart = new SortedDictionary<string, double>();
-        //     int clr = 1;
-        //     var chtStatus = new BreakdownChart();
-            
-        //     var chtBlockers = new BreakdownChart();
 
-        //     var totDays = iss.StatusItems.IssueBusinessTimeTotal.TotalDays;
-        //     foreach (var tmpStatus in iss.StatusItems.Statuses)
-        //     {
-        //         var localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusName.StringsMatch(tmpStatus.IssueStatus) && x.DefaultInUse==true);
-        //         if (localStatus != null && localStatus.ChartColor != null)
-        //         {
-        //             Color chtColor = Style.Parse(localStatus.ChartColor).Foreground;
-        //             chtStatus.AddItem($"({localStatus.ProgressOrder}) {tmpStatus.IssueStatus}",tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),chtColor);
-        //         }
-        //         else 
-        //         {
-        //             chtStatus.AddItem(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),Color.FromInt32(clr));
-        //         }
-        //         clr += 1;
-        //         statusChart.Add(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo());
-        //         if (tmpStatus.StatusBlockedBusinessTime.TotalDays > 0)
-        //         {
-        //             try 
-        //             {
-        //                 blockerChart.Add("Blocked",iss.StatusItems.IssueBlockedActiveBusTime.TotalDays.RoundTwo());
-        //                 blockerChart.Add("Unblocked", iss.StatusItems.IssueUnblockedActiveBusTime.TotalDays.RoundTwo());
-        //             }
-        //             catch 
-        //             {
-        //                 ConsoleUtil.WriteError("error");
-        //             }
-        //          }
-        //     }
-        //     chtStatus.FullSize().ShowTags();
-        //     chtStatus.ShowTagValues();            
-        //     chtBlockers.FullSize().ShowTags();
-            
-        //     charts.Add(chtStatus);
-        //     if (blockerChart.Count() > 0)
-        //     {
-        //          foreach (var kvp in blockerChart)
-        //         {
-        //             if (kvp.Key.StringsMatch("blocked"))
-        //             {
-        //                 chtBlockers.AddItem(kvp.Key,kvp.Value,Color.Red);
-        //             }
-        //             else 
-        //             {
-        //                 chtBlockers.AddItem(kvp.Key,kvp.Value,Color.Green);
-        //             }
-        //         }
-        //         charts.Add(chtBlockers);
-        //     }
-        //     return charts;
-        // }
-
-        public string WriteToCSV()
+        public void WriteToCSV()
         {
-            ConsoleUtil.WriteBanner("UNDER DEVELOPMENT");
-            ConsoleUtil.PressAnyKeyToContinue();
-            return string.Empty;
-//             bool addedHeader = false ;
-// //            ConsoleUtil.WriteStdLine("PRESS 'Y' to Save to csv file",StdLine.slResponse,false);
-//             DateTime now = DateTime.Now;
-//             string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
-//             string csvPath = Path.Combine(CfgManager.JTISRootPath,fileName);
+            if (ConsoleUtil.Confirm("Save data to csv file?",false)==false)
+            {
+                return;
+            }
 
-//             using (StreamWriter writer = new StreamWriter(csvPath))
-//             {                
-//                 foreach (var jc in JCalcs)
-//                 {
-//                     if (addedHeader == false)
-//                     {
-//                         addedHeader = true;
-//                         foreach (var ln in jc.StateCalcStringList(true))
-//                         {
-//                             writer.WriteLine(ln);
-//                         }
-//                     }
-//                     else 
-//                     {
-//                         foreach (var ln in jc.StateCalcStringList())
-//                         {
-//                             writer.WriteLine(ln);
-//                         }
-//                     }
-//                 }
-                
-//             }
-//             return csvPath;   
+            ConsoleUtil.WriteBanner("CREATING CSV FILE");
+
+            DateTime now = DateTime.Now;
+            string fileName = string.Format("AnalysisOutput_{0:0000}{1}{2:00}_{3}.csv", now.Year, now.ToString("MMM"), now.Day, now.ToString("hhmmss"));
+            string csvPath = Path.Combine(CfgManager.JTISRootPath,fileName);
+
+            using (StreamWriter writer = new StreamWriter(csvPath))
+            {                
+                for (int i = 0; i < _jtisIssueData.jtisIssueCount; i ++)
+                {
+                    var iss = _jtisIssueData.jtisIssuesList[i];
+                    if (i==0)
+                    {
+                        writer.WriteLine("IssueKey, IssueType, CurrentStatus, Summary, Status, StatusCategory, TotalCalDays, TotalBusDays, BlockedBusDays, UnblockedBusDays, EnteredCount, FirstEntry, LastEntry, LastExit");
+
+                    }
+                    foreach (var statItem in iss.StatusItems.Statuses)
+                    {
+                        string lastExitDt = statItem.LastExitDate.HasValue ? statItem.LastExitDate.Value.ToString() : string.Empty;
+                        writer.WriteLine($"{iss.jIssue.Key}, {iss.jIssue.IssueType}, {iss.jIssue.StatusName}, {iss.jIssue.Summary.ClearCommas()}, {statItem.IssueStatus}, {statItem.StatusCategoryToString}, {statItem.StatusCalendarTimeTotal.TotalDays.RoundTwo()}, {statItem.StatusBusinessTimeTotal.TotalDays.RoundTwo()}, {statItem.StatusBlockedBusinessTime.TotalDays.RoundTwo()}, {statItem.StatusUnblockedBusinessTime.TotalDays.RoundTwo()}, {statItem.EnteredCount.ToString()}, {statItem.FirstEntryDate.ToString()}, {statItem.LastEntryDate.ToString()}, {lastExitDt}");
+                    }
+                }                
+            }
+            ConsoleUtil.WriteBanner($"CSV FILE SAVED TO: {csvPath}");
+            ConsoleUtil.PressAnyKeyToContinue();
         }
 
         private bool FromIdNull(JIssueChangeLogItem item)
