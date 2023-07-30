@@ -79,18 +79,33 @@ namespace JTIS.Menu
         miTISIssueTree,
         miTISCycleTime,
         miIssCfgSequence,
-        miEditConfigOptions
+        miEditConfigOptions,
+        miIssCfgEditColor
     }
 
 
     public class MenuFunction 
     {
+        private MenuEnum? _parentMenu;
+
         // private Func<object>? theFunc;
 
         public string MenuName {get;private set;}
         public string? MenuNameMarkup {get; private set;}
         public MenuItemEnum MenuItem {get; private set;}
         public bool Disabled {get;set;}
+
+        public MenuEnum? ParentMenu {
+            get {
+                return _parentMenu;
+            }
+        }
+
+        public bool HasParentMenu {
+            get {
+                return _parentMenu != null;
+            }
+        }
 
         public MenuFunction()
         {
@@ -134,8 +149,12 @@ namespace JTIS.Menu
             mf.Disabled = true;
             return mf;
         }
-        public MenuFunction(MenuItemEnum menuItem, string menuTitle, string menuTitleMarkup, bool dimItem = false, string? emoji = null)
+        public MenuFunction(MenuItemEnum menuItem, string menuTitle, string menuTitleMarkup, bool dimItem = false, string? emoji = null, MenuEnum? parentMenu = null)
         {
+            if (parentMenu != null)
+            {
+                _parentMenu = parentMenu;
+            }
             if (menuItem == MenuItemEnum.miSeparator)
             {
                 MenuName = $"\t\t--- --- ---";

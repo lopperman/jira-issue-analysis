@@ -12,7 +12,7 @@ public class jtisStatuses
     public IReadOnlyList<jtisStatus> Statuses
     {
         get{
-            return _statuses.OrderBy(x=>x.FirstEntryDate).ToList();
+            return _statuses.OrderBy(x=>x.StatusSequence).ThenBy(y=>y.FirstEntryDate).ToList();
         }
     }
 
@@ -45,7 +45,7 @@ public class jtisStatuses
         {
             bool lastStatus = (i == _statusChanges.Count -1);
             var cli = ChangeLogItem(_statusChanges[i]);
-            jtisStatus? item = _statuses.SingleOrDefault(x=>x.IssueStatus.StringsMatch(cli.ToValue));
+            jtisStatus? item = _statuses.SingleOrDefault(x=>x.IssueStatus.StringsMatch(cli.ToValue));            
             var statCat = StatusCategory(cli.ToId);
             // var statCat = jtisIss.StatusCategory;
             if (statCat == StatusType.stActiveState && foundFirstActive == false)
@@ -54,7 +54,10 @@ public class jtisStatuses
                 statCat = StatusType.stStart;
             }
             if (item == null) {
-                item = new jtisStatus(jtisIss.jIssue.Key,jtisIss.jIssue.IssueType,cli.ToValue ?? "ERROR", statCat);
+                JiraStatus? localStatus = CfgManager.config.StatusConfigs.FirstOrDefault(x=>x.StatusName.StringsMatch(cli.ToValue) && x.DefaultInUse==true);
+                int seqNum = 0;
+                if (localStatus != null) {seqNum=localStatus.ProgressOrder;}
+                item = new jtisStatus(jtisIss.jIssue.Key,jtisIss.jIssue.IssueType,cli.ToValue ?? "ERROR", statCat, cli.ToId,seqNum);
                 _statuses.Add(item);
             }
             item.AddEntry(cli.ToValue ?? "ERROR",_statusChanges[i].CreatedDate, lastStatus ? null : _statusChanges[i+1].CreatedDate, jtisIss);

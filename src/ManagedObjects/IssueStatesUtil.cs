@@ -111,7 +111,7 @@ namespace JTIS
             ConsoleUtil.PressAnyKeyToContinue($"File Saved to [bold]{Environment.NewLine}{savePath}[/]");                        
         }
 
-        public static void WriteJiraStatuses(string? searchTerm = null)
+        public static void WriteJiraStatuses(string? searchTerm = null, bool defProjectOnly = false)
         {
             ConsoleUtil.WriteAppTitle();
             AnsiConsole.Write(new Rule());
@@ -132,9 +132,17 @@ namespace JTIS
             foreach (var jStatus in CfgManager.config.StatusConfigs.OrderByDescending(d=>d.DefaultInUse).ThenBy(x=>x.Type).ThenBy(y=>y.StatusName).ToList())
             {
                 bool includeStatus = false;
-                if (searchTerm == null || searchTerm.Length == 0)
+                if (searchTerm == null || searchTerm.Length == 0 )
                 {
-                    includeStatus = true;
+                    if (defProjectOnly==false)
+                    {    
+                        includeStatus = true;
+                    }
+                    else if (jStatus.DefaultInUse == true)
+                    {
+                        includeStatus = true;
+                    }
+
                 }
                 else 
                 {
@@ -161,6 +169,15 @@ namespace JTIS
                     }
                     var _jiraId = usedIn.StringsMatch("yes") ? jStatus.StatusId.ToString() : $"[dim]{jStatus.StatusId.ToString()}[/]";
                     var _name = usedIn.StringsMatch("yes") ? jStatus.StatusName.ToString() : $"[dim]{jStatus.StatusName.ToString()}[/]";
+
+                    if (jStatus.ChartColor != null)
+                    {
+                        Color backClr = ColorUtil.ColorDictionary.Values.First(x=>x.ToString().StringsMatch(jStatus.ChartColor));
+                        // Color backClr = ColorUtil.ColorsAll.First(x=>x.ToString().StringsMatch(jStatus.ChartColor));
+                        string fontClr = ColorUtil.InverseColor(backClr).ToString();
+                        _name =  $"[bold {fontClr} on {backClr.ToString()}]{jStatus.StatusName.ToString()}[/]";
+                    }
+
                     var _localState = usedIn.StringsMatch("yes") ? locState : $"[dim]{locState}[/]";
                     var _defState = usedIn.StringsMatch("yes") ? Enum.GetName(typeof(StatusType),defStat.Type) : $"[dim]{Enum.GetName(typeof(StatusType),defStat.Type)}[/]";
                     var _jiraStatusCat = usedIn.StringsMatch("yes") ? jStatus.CategoryName.ToString() : $"[dim]{jStatus.CategoryName.ToString()}[/]";
@@ -212,6 +229,36 @@ namespace JTIS
                 EditIssueSequence();
             }
             
+        }
+
+        internal static void EditIssueColor()
+        {
+            WriteJiraStatuses(defProjectOnly:true);
+
+            var editIss = ConsoleUtil.GetInput<string>("Enter JiraId of Issues Status to set chart color.  (Press ENTER to cancel)",allowEmpty:true);
+            int editId = 0;
+            if (int.TryParse(editIss, out editId))
+            {
+                var jIss = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusId==editId);
+                if (jIss != null && jIss.DefaultInUse)
+                {
+                    SetIssueStatusColor(jIss);
+                    EditIssueColor();
+                }
+            }
+
+
+        }
+
+        private static void SetIssueStatusColor(JiraStatus jIss)
+        {
+            Color? clr = ColorUtil.PickColor($"Pick a background color for charts for status: {jIss.StatusName}");
+            if (clr != null)
+            {
+                jIss.ChartColor = clr.ToString();
+                CfgManager.SaveConfigList();
+
+            }
         }
     }
 }

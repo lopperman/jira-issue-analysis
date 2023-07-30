@@ -97,11 +97,15 @@ namespace JTIS.Menu
         }
 
         public static void Execute(MenuFunction item, MenuEnum? returnToMenu = null)
-        {            
+        {                        
             exitMenu = null;
             if (returnToMenu != null)
             {
                 exitMenu = returnToMenu;
+            }
+            else if (item.HasParentMenu)
+            {
+                exitMenu = item.ParentMenu;
             }
             if (item.MenuItem == MenuItemEnum.miSeparator)
             {
@@ -113,37 +117,37 @@ namespace JTIS.Menu
             {
 #region MENUS - MENU ITEMS                
                 case MenuItemEnum.miMenu_Main:
-                    exitMenu = MenuEnum.meMain;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meMain;}
                     break;
                 case MenuItemEnum.miMenu_Config:
-                    exitMenu = MenuEnum.meConfig;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
                     break;
                 case MenuItemEnum.miMenu_IssueStates:
-                    exitMenu = MenuEnum.meIssue_States;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_States;}
                     break;
                 case MenuItemEnum.miMenu_JQL:
-                    exitMenu = MenuEnum.meJQL;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meJQL;}
                     break;
                 case MenuItemEnum.miMenu_StatusConfig:
-                    exitMenu = MenuEnum.meStatus_Config;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meStatus_Config;}
                     break;
                 case MenuItemEnum.miMenu_Advanced_Search:
-                    exitMenu = MenuEnum.meAdvanced_Search;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meAdvanced_Search;}
                     break;
                 case MenuItemEnum.miMenu_Issue_Summary_Visualization:
-                    exitMenu = MenuEnum.meIssue_Summary_Visualization;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_Summary_Visualization;}
                     break;
                 case MenuItemEnum.miMenu_Dev:
-                    exitMenu = MenuEnum.meDev;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meDev;}
                     break;
                 case MenuItemEnum.miMenu_Change_Log:
-                    exitMenu = MenuEnum.meChangeLog;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meChangeLog;}
                     break;
                 case MenuItemEnum.miMenu_Issue_Notes:
-                    exitMenu = MenuEnum.meIssue_Notes;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_Notes;}
                     break;
                 case MenuItemEnum.miMenu_Cached_Searches:
-                    exitMenu = MenuEnum.meCached_Searches;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meCached_Searches;}
                     break;
 #endregion
 //miMenu_Issue_Summary_Visualization
@@ -173,16 +177,16 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miCachedSearch_ClearAll:
                     IssueFetcher.ClearCachedData();
-                    exitMenu = MenuEnum.meCached_Searches;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meCached_Searches;}
                     break;
                 case MenuItemEnum.miCachedSearch_View:
                     IssueFetcher.DisplayCachedResults();
-                    exitMenu = MenuEnum.meCached_Searches;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meCached_Searches;}
                     break;
 
 
                 case MenuItemEnum.miHelpfulURLs:
-                    exitMenu = MenuEnum.meMain;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meMain;}
                     JTIS.Info.AppURLs();
                     break;
 
@@ -191,11 +195,11 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miAdvSearchViewCustomFields:
                     AdvancedSearch.Create().ViewJiraCustomFields();
-                    exitMenu = MenuEnum.meAdvanced_Search;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meAdvanced_Search;}
                     break;  
                 case MenuItemEnum.miAdvSearchViewIssueFields:
                     AdvancedSearch.Create().ViewJiraIssueFields();
-                    exitMenu = MenuEnum.meAdvanced_Search;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meAdvanced_Search;}
                     break; 
 #endregion
 
@@ -203,15 +207,15 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miIssueNotesView:
                     IssueNotesUtil.View();
-                    exitMenu = MenuEnum.meIssue_Notes;                    
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_Notes;}                    
                     break;
                 case MenuItemEnum.miIssueNotesAdd:
                     IssueNotesUtil.AddEdit();
-                    exitMenu = MenuEnum.meIssue_Notes;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_Notes;}
                     break;
                 case MenuItemEnum.miIssueNotesDelete:
                     IssueNotesUtil.Delete();
-                    exitMenu = MenuEnum.meIssue_Notes;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meIssue_Notes;}
                     break;
 #endregion
 
@@ -220,15 +224,15 @@ namespace JTIS.Menu
 
                 case MenuItemEnum.miDev1:
                     MenuManager.Dev1();
-                    exitMenu = MenuEnum.meConfig;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
                     break;
                 case MenuItemEnum.miDev2:
                     MenuManager.Dev2();
-                    exitMenu = MenuEnum.meConfig;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
                     break;
                 case MenuItemEnum.miDevScrubEdit:
                     JiraUtil.DevScrub();
-                    exitMenu = MenuEnum.meConfig;
+                    if (exitMenu == null) {exitMenu = MenuEnum.meConfig;}
                     break;
 #endregion
 
@@ -263,6 +267,11 @@ namespace JTIS.Menu
                     CycleTime ct = new CycleTime(AnalysisType.atIssues);
                     
                     if (exitMenu == null){exitMenu = MenuEnum.meIssue_Summary_Visualization;}
+                    break;
+
+                case MenuItemEnum.miIssCfgEditColor:
+                    IssueStatesUtil.EditIssueColor();
+                    if (exitMenu == null){exitMenu = MenuEnum.meStatus_Config;}
                     break;
 
                 case MenuItemEnum.miIssCfgEdit:
@@ -666,6 +675,7 @@ namespace JTIS.Menu
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_JQL,"Menu: Manage Saved JQL"));       
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_Cached_Searches,"Menu: Cached Searches"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miMenu_StatusConfig,"Menu: Issue Status Config"));
             sp.AddChoiceGroup(MakeMenuDetail(MenuItemEnum.miJiraConfigView,"View Jira Connection Profiles",bold:true),
                 MakeMenuDetail(MenuItemEnum.miChangeConnection,"Change to another Jira connection"), 
                 MakeMenuDetail(MenuItemEnum.miJiraConfigAdd,"Add New Jira Connection"), 
@@ -739,6 +749,7 @@ namespace JTIS.Menu
 
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssCfgView,"View Issue Status Config"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssCfgEdit,"Edit Local Issue Status Config"));
+            sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssCfgEditColor,"Set Chart Colors"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssCfgSequence,"Manage Issue Status Progress Sequence"));
             sp.AddChoice(MakeMenuDetail(MenuItemEnum.miIssCfgReset,"Reset Local Issue Status Config to Match Jira"));
 
@@ -825,7 +836,7 @@ namespace JTIS.Menu
             return miString.StringsMatch("miMenu",StringCompareType.scStartsWith);
         }
 
-        private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null, bool bold = false, bool underline = false, bool italic = false)
+        private static MenuFunction MakeMenuDetail(MenuItemEnum mi, string title, string? emojiFront = null, bool bold = false, bool underline = false, bool italic = false, MenuEnum? parentMenu = null)
         {
             var miFore = StdLine.slMenuDetail.FontMkp();
             var miBack = StdLine.slMenuDetail.BackMkp();
@@ -845,7 +856,7 @@ namespace JTIS.Menu
                 markupTitle = $"[{miFore} on {miBack}]{plainTitle}[/]";
             }
             // return new MenuFunction(mi,plainTitle,markupTitle,emoji:emojiFront);
-            return new MenuFunction(mi,plainTitle,markupTitle);
+            return new MenuFunction(mi,plainTitle,markupTitle,parentMenu:parentMenu);
         }
 
         // public static List<MenuFunction> BuildMenuItems(MenuEnum menu)

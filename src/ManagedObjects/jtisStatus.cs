@@ -1,5 +1,6 @@
 using System.Linq;
 using JTIS.Analysis;
+using JTIS.Config;
 using JTIS.Extensions;
 
 namespace JTIS.Data;
@@ -9,8 +10,10 @@ public class jtisStatus
     
     
     public string Key {get;private set;} = string.Empty;
+    public string StatusId {get;set;}
     public string IssueType {get;private set;} = string.Empty;
     public string IssueStatus {get;private set;} = string.Empty;
+    public int StatusSequence {get;set;}
     public StatusType StatusCategory {get;private set;} = StatusType.stUnknown;
     private SortedDictionary<DateTime,DateTime?> _startEnd = new SortedDictionary<DateTime, DateTime?>();
     private TimeSpan _blockedCalendarTime = new TimeSpan();
@@ -18,12 +21,14 @@ public class jtisStatus
     private TimeSpan _blockedBusinessTime = new TimeSpan();
     private TimeSpan _BusinessTimeTotal = new TimeSpan();
 
-    public jtisStatus(string key, string issueType, string status, StatusType statusCategory)
+    public jtisStatus(string key, string issueType, string status, StatusType statusCategory, string statusId, int sequence)
     {
         Key=key;
         IssueType = issueType;
         IssueStatus = status;
         StatusCategory = statusCategory;
+        StatusId=statusId;
+        StatusSequence = sequence;
     }
     public void AddEntry(string status, DateTime startDt, DateTime? endDt, jtisIssue issue)
     {
@@ -42,6 +47,14 @@ public class jtisStatus
         _blockedCalendarTime = _blockedCalendarTime.Add(issue.Blockers.BlockedTime(startDt,useEndDt,true));
         _CalendarTimeTotal = _CalendarTimeTotal.Add(TimeSlots.CalendarTime(startDt,useEndDt));
         _BusinessTimeTotal = _BusinessTimeTotal.Add(TimeSlots.BusinessTime(startDt,useEndDt));
+    }
+
+    public JiraStatus? LocalStatus 
+    {
+        get 
+        {
+            return CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusName.StringsMatch(IssueStatus) && x.DefaultInUse==true);
+        }
     }
     private List<DateTime> _exitDates {
         get {

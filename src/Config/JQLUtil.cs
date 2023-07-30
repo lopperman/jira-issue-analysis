@@ -208,7 +208,7 @@ namespace JTIS
         public static void CheckDefaultJQL(JTISConfig cfg)
         {             
             var defaultjql = new SortedList<string,string>();
-            defaultjql.Add("(def) Blocked Work",$"project={cfg.defaultProject} and status not in (backlog, done) and (priority = Blocked OR Flagged in (Impediment))");
+            defaultjql.Add("(def) Blocked Work",$"project={cfg.defaultProject} and Flagged in (Impediment)");
             defaultjql.Add("(def) Recent Updates",$"project={cfg.defaultProject} and updated >= -7d");
 
             defaultjql.Add("(def) Status Category In Progress",$"project={cfg.defaultProject} and statusCategory in ('In Progress')");

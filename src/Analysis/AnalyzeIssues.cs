@@ -98,47 +98,109 @@ namespace JTIS.Analysis
 
         }
 
-        private List<BreakdownChart> BuildStatusChart(jtisIssue iss)
+        private BreakdownChart? BuildStatusChart(jtisIssue iss)
         {
-            List<BreakdownChart> charts = new List<BreakdownChart>();
-            SortedDictionary<string,double> statusChart = new SortedDictionary<string, double>();
-            SortedDictionary<string,double> blockerChart = new SortedDictionary<string, double>();
-            
+            if (iss.StatusItems.Statuses.Count()==0)
+            {
+                return null;
+            }
+            BreakdownChart? chart = new BreakdownChart();
+            int clr = 1;
             var totDays = iss.StatusItems.IssueBusinessTimeTotal.TotalDays;
             foreach (var tmpStatus in iss.StatusItems.Statuses)
-            {   
-                statusChart.Add(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo());
-                if (tmpStatus.StatusBlockedBusinessTime.TotalDays > 0)
-                {
-                    blockerChart.Add("Blocked",tmpStatus.StatusBlockedBusinessTime.TotalDays.RoundTwo());
-                    blockerChart.Add("Unblocked", tmpStatus.StatusUnblockedBusinessTime.TotalDays.RoundTwo());
-                 }
-            }
-            var chtStatus = new BreakdownChart();
-            var chtBlockers = new BreakdownChart();
-            chtStatus.FullSize().ShowTags();
-            chtStatus.ShowTagValues();
-            chtBlockers.FullSize().ShowTags();
-            
-            int clr = 1;
-            foreach (var kvp in statusChart)
             {
-                chtStatus.AddItem(kvp.Key,kvp.Value,Color.FromInt32(clr));
+                var localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusName.StringsMatch(tmpStatus.IssueStatus) && x.DefaultInUse==true);
+                if (localStatus != null && localStatus.ChartColor != null)
+                {
+                    Color chtColor = Style.Parse(localStatus.ChartColor).Foreground;
+                    chart.AddItem($"{tmpStatus.IssueStatus}",tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),chtColor);
+                }
+                else 
+                {
+                    chart.AddItem(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),Color.FromInt32(clr));
+                }
                 clr += 1;
             }
-            charts.Add(chtStatus);
-            clr = 1;
-            if (blockerChart.Count() > 0)
-            {
-                 foreach (var kvp in blockerChart)
-                {
-                    chtBlockers.AddItem(kvp.Key,kvp.Value,clr);
-                    clr +=1;
-                }
-                charts.Add(chtBlockers);
-            }
-            return charts;
+            chart.FullSize().ShowTags();
+            chart.ShowTagValues();            
+            
+            return chart;
         }
+        private BreakdownChart? BuildBlockerChart(jtisIssue iss)
+        {
+            if (iss.StatusItems.IssueBlockedBusinessTime.TotalDays ==0)
+            {
+                return null;
+            }
+            var bchart = new  BreakdownChart();
+            bchart.AddItem($"Blocked (Active)",iss.StatusItems.IssueBlockedActiveBusTime.TotalDays.RoundTwo(),Color.Red);
+            bchart.AddItem($"Unblocked (Active)",iss.StatusItems.IssueUnblockedActiveBusTime.TotalDays.RoundTwo(),Color.Green);
+            bchart.AddItem($"Blocked (Passive)",iss.StatusItems.IssueBlockedPassiveBusTime.TotalDays.RoundTwo(),Color.Yellow);
+            bchart.AddItem($"Unblocked (Passive)",iss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays.RoundTwo(),Color.Grey);
+
+
+            return bchart;
+        }
+        // private List<BreakdownChart> xxxBuildStatusChart(jtisIssue iss)
+        // {
+        //     List<BreakdownChart> charts = new List<BreakdownChart>();
+        //     SortedDictionary<string,double> statusChart = new SortedDictionary<string, double>();
+        //     SortedDictionary<string,double> blockerChart = new SortedDictionary<string, double>();
+        //     int clr = 1;
+        //     var chtStatus = new BreakdownChart();
+            
+        //     var chtBlockers = new BreakdownChart();
+
+        //     var totDays = iss.StatusItems.IssueBusinessTimeTotal.TotalDays;
+        //     foreach (var tmpStatus in iss.StatusItems.Statuses)
+        //     {
+        //         var localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusName.StringsMatch(tmpStatus.IssueStatus) && x.DefaultInUse==true);
+        //         if (localStatus != null && localStatus.ChartColor != null)
+        //         {
+        //             Color chtColor = Style.Parse(localStatus.ChartColor).Foreground;
+        //             chtStatus.AddItem($"({localStatus.ProgressOrder}) {tmpStatus.IssueStatus}",tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),chtColor);
+        //         }
+        //         else 
+        //         {
+        //             chtStatus.AddItem(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),Color.FromInt32(clr));
+        //         }
+        //         clr += 1;
+        //         statusChart.Add(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo());
+        //         if (tmpStatus.StatusBlockedBusinessTime.TotalDays > 0)
+        //         {
+        //             try 
+        //             {
+        //                 blockerChart.Add("Blocked",iss.StatusItems.IssueBlockedActiveBusTime.TotalDays.RoundTwo());
+        //                 blockerChart.Add("Unblocked", iss.StatusItems.IssueUnblockedActiveBusTime.TotalDays.RoundTwo());
+        //             }
+        //             catch 
+        //             {
+        //                 ConsoleUtil.WriteError("error");
+        //             }
+        //          }
+        //     }
+        //     chtStatus.FullSize().ShowTags();
+        //     chtStatus.ShowTagValues();            
+        //     chtBlockers.FullSize().ShowTags();
+            
+        //     charts.Add(chtStatus);
+        //     if (blockerChart.Count() > 0)
+        //     {
+        //          foreach (var kvp in blockerChart)
+        //         {
+        //             if (kvp.Key.StringsMatch("blocked"))
+        //             {
+        //                 chtBlockers.AddItem(kvp.Key,kvp.Value,Color.Red);
+        //             }
+        //             else 
+        //             {
+        //                 chtBlockers.AddItem(kvp.Key,kvp.Value,Color.Green);
+        //             }
+        //         }
+        //         charts.Add(chtBlockers);
+        //     }
+        //     return charts;
+        // }
 
         public string WriteToCSV()
         {
@@ -395,10 +457,18 @@ namespace JTIS.Analysis
                 AnsiConsole.Write(tbl);
                 AnsiConsole.WriteLine();
 
-                foreach (var chart in charts)
+
+                var statusChart = BuildStatusChart(jtisIss);
+                if (statusChart != null) 
                 {
-                    AnsiConsole.Write(new Panel(chart));
+                    AnsiConsole.Write(new Panel(statusChart));
                 }
+                var blockChart = BuildBlockerChart(jtisIss);
+                if (blockChart != null)
+                {
+                    AnsiConsole.Write(new Panel(blockChart));
+                }
+
 
                 if (jtisIss.BlockerCount > 0)
                 {

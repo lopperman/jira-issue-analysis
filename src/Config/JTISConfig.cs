@@ -131,7 +131,7 @@ namespace JTIS.Config
             if (cc == null) 
             {
                 ccStyle = new Style(Color.Red,Color.Cornsilk1,Decoration.Bold);
-                cfgColors.Add(new CfgColor(CfgStyleEnum.csBannerStd, ccStyle));
+                cfgColors.Add(new CfgColor(CfgStyleEnum.csBannerError, ccStyle));
                 IsDirty=true;
             }
 

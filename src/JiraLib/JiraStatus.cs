@@ -3,6 +3,7 @@
 using System.Text.Json.Serialization;
 using JTIS.Analysis;
 using Newtonsoft.Json.Linq;
+using Spectre.Console;
 
 namespace JTIS
 {
@@ -15,6 +16,7 @@ namespace JTIS
         public string CategoryKey {get;set;}
         public string CategoryName {get;set;}
         public bool DefaultInUse {get;set;}
+        public string? ChartColor {get;set;}
 
         public JiraStatus()
         {
