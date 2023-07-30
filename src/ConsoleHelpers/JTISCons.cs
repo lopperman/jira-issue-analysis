@@ -1,12 +1,18 @@
+using System.Diagnostics.Tracing;
 
 using Spectre.Console;
 using Spectre.Console.Json;
 
 
-namespace JTIS.Console
-{
-    public static class JConsole
-    {
+namespace JTIS;
+
+    
+    public static class JC
+    { 
+        private static void test()
+        {
+            // AnsiConsole
+        }
         private static IAnsiConsole? _cons = null;
 
         public static IAnsiConsole Console
@@ -22,6 +28,10 @@ namespace JTIS.Console
         private static AnsiConsoleSettings ConsoleSettings{
             get{
                 var stg = new AnsiConsoleSettings();
+                // stg.ColorSystem = ColorSystemSupport.Standard;
+                // var pe = new ProfileEnrichment();
+                
+
 
                 //stg.EnvironmentVariables.
 
@@ -32,6 +42,7 @@ namespace JTIS.Console
         public static void ShowJson(string title, string jsonData)
         {
             var json = new JsonText(jsonData);
+            
                     
             AnsiConsole.Write(
                 new Panel(json)
@@ -75,4 +86,3 @@ namespace JTIS.Console
 
 
 
-}

@@ -253,7 +253,7 @@ namespace JTIS.Console
                     while (task.Value < task.MaxValue)
                     {
                         task.Increment(1);
-                        Thread.Sleep(25);
+                        Thread.Sleep(20);
                     }
                 });            
         }

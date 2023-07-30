@@ -91,6 +91,52 @@ namespace JTIS.Config
 
             return retStyle;
         }
+
+        public Style? CfgColorStyle(CfgStyleEnum styleEnum)
+        {
+            var cStyle =  cfgColors.SingleOrDefault(x=>x.cfgStyle==styleEnum);
+            if (cStyle != null)
+            {
+                return cStyle.style;
+            }
+            else 
+            {
+                return null;
+            }
+        }
+        public Style? CfgColorStyle(string styleKey)
+        {
+            var cStyle =  cfgColors.SingleOrDefault(x=>x.cfgStyle==CfgStyleEnum.csManualKey && x.ColorKey.StringsMatch(styleKey));
+            if (cStyle != null)
+            {
+                return cStyle.style;
+            }
+            else 
+            {
+                return null;
+            }
+
+        }
+        private void CheckDefaultColorCfg()
+        {
+            var cc = cfgColors.SingleOrDefault(x=>x.cfgStyle==CfgStyleEnum.csBannerStd);
+            Style? ccStyle = null;
+            if (cc == null) 
+            {
+                ccStyle = new Style(Color.Maroon,Color.Cornsilk1,Decoration.Bold);
+                cfgColors.Add(new CfgColor(CfgStyleEnum.csBannerStd, ccStyle));
+                IsDirty=true;
+            }
+            cc = cfgColors.SingleOrDefault(x=>x.cfgStyle==CfgStyleEnum.csBannerError);
+            if (cc == null) 
+            {
+                ccStyle = new Style(Color.Red,Color.Cornsilk1,Decoration.Bold);
+                cfgColors.Add(new CfgColor(CfgStyleEnum.csBannerStd, ccStyle));
+                IsDirty=true;
+            }
+
+        }
+        
         public List<CfgColor>? cfgColors 
         {
             get{
@@ -248,7 +294,9 @@ namespace JTIS.Config
             bool isNewFile = Key == null;
             if (isNewFile){Key = Guid.NewGuid();}
             UpdateDefaultStatusConfigs(defProject, isNewFile);
+            CheckDefaultColorCfg();
         }
+
 
         [JsonProperty("TimeZoneId")]
         public string? TimeZoneId

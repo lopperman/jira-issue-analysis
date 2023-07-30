@@ -178,7 +178,7 @@ public class CycleTime
         if (slice.IgnoredIssues.Count() > 0)
         {
             AnsiConsole.WriteLine();
-            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} ISSUE(S) WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
             if (ConsoleUtil.Confirm("VIEW EXCLUDED ISSUES DETAIL",false))
             {
                 foreach (var desc in slice.IgnoredIssues)
@@ -288,7 +288,7 @@ public class CycleTime
         if (slice.IgnoredIssues.Count() > 0)
         {
             AnsiConsole.WriteLine();
-            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
+            ConsoleUtil.WriteError($"{slice.IgnoredIssues.Count()} ISSUE(S) WERE EXCLUDED FROM CYCLE-TIME ANALYSIS");
             if (ConsoleUtil.Confirm("VIEW EXCLUDED ISSUES DETAIL",false))
             {
                 foreach (var desc in slice.IgnoredIssues)

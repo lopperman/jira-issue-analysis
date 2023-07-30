@@ -20,7 +20,9 @@ namespace JTIS
         ///QUICK TESTING AREA - USE COMMAND LINE ARG 'DEV'
         private static void DevQuick()
         {
-           
+           var jc = AnsiConsole.Console;
+           System.Console.ForegroundColor = Color.Maroon;
+           jc.WriteLine("testing testing");
 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
 // ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ 
@@ -31,7 +33,7 @@ namespace JTIS
 
         public static void Main(string[] args) 
         {
-            
+             
             List<JTISConfig> tmpCfgList  = new List<JTISConfig>();
             var tmpConfigFilePath = string.Empty;
             if (args.Length > 0)

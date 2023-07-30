@@ -10,6 +10,8 @@ public enum CfgStyleEnum
 {
     csManualKey = 0, 
     csErrorMessage = 1, 
+    csBannerStd = 2, 
+    csBannerError = 3
     
 }
 
@@ -18,13 +20,25 @@ public class CfgColor
     public CfgStyleEnum cfgStyle {get;set;}
     public string ColorKey {get;set;} = string.Empty;
     
-    private Style? _style = null;
-    public Style? style {
+    private Style? _style;
+
+    public CfgColor()
+    {
+
+    }
+    public CfgColor(CfgStyleEnum styleEnum, Style style)
+    {
+        cfgStyle = styleEnum;
+        _style = style;
+    }
+    public CfgColor(string styleKey, Style style)
+    {
+        cfgStyle = CfgStyleEnum.csManualKey;
+        ColorKey = styleKey;
+        _style = style;
+    }
+    public Style style {
         get {
-            if (_style == null)
-            {
-                _style = new Style();
-            }
             return _style;
         } set{
             _style=value;
