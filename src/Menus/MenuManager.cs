@@ -500,7 +500,7 @@ namespace JTIS.Menu
             {
                 if (iss.StatusItems != null)
                 {
-                    var issDays = Math.Round(iss.StatusItems.IssueTotalActiveBusTime.TotalDays,0);    
+                    var issDays = Math.Round(iss.StatusItems.tsActiveBusTime.TotalDays,0);    
                     if (issDays > 0)
                     {
                         issueValues = issueValues.Append(issDays);
@@ -511,7 +511,7 @@ namespace JTIS.Menu
                             {
                                 statusValues.Add(stat.IssueStatus,new List<double>());
                             }
-                            statusValues[stat.IssueStatus].Add(Math.Round(stat.StatusBusinessTimeTotal.TotalDays,2));
+                            statusValues[stat.IssueStatus].Add(Math.Round(stat.tsBusinessTime.TotalDays,2));
                         }
                     }
                 }

@@ -5,7 +5,7 @@ using JTIS.Extensions;
 
 namespace JTIS.Data;
 
-public class jtisStatuses
+public class jtisStatuses: ITimeSummary
 {
     private List<jtisStatus> _statuses = new List<jtisStatus>();
 
@@ -84,206 +84,206 @@ public class jtisStatuses
     }
 
 
-    public TimeSpan IssueCalendarTimeTotal {
+    public TimeSpan tsCalendarTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusCalendarTimeTotal);
+                ts = ts.Add(s.tsCalendarTime);
             });
             return ts;
         }
     }
-    public TimeSpan IssueBusinessTimeTotal {
+    public TimeSpan tsBusinessTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusBusinessTimeTotal);
-            });
-            return ts;
-        }
-    }
-
-    public TimeSpan IssueBlockedCalendarTime {
-        get {
-            TimeSpan ts = new TimeSpan();
-            _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusBlockedCalendarTime);
+                ts = ts.Add(s.tsBusinessTime);
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueBlockedBusinessTime {
+    public TimeSpan tsBlockedCalendarTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusBlockedBusinessTime);
+                ts = ts.Add(s.tsBlockedCalendarTime);
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueUnblockedCalendarTime {
+    public TimeSpan tsBlockedBusinessTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusUnblockedCalendarTime);
+                ts = ts.Add(s.tsBlockedBusinessTime);
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueUnblockedBusinessTime {
+    public TimeSpan tsUnblockedCalendarTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
-                ts = ts.Add(s.StatusUnblockedBusinessTime);
+                ts = ts.Add(s.tsUnblockedCalendarTime);
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueBlockedActiveBusTime {
+    public TimeSpan tsUnblockedBusinessTime {
+        get {
+            TimeSpan ts = new TimeSpan();
+            _statuses.ForEach(s=> {
+                ts = ts.Add(s.tsUnblockedBusinessTime);
+            });
+            return ts;
+        }
+    }
+
+    public TimeSpan tsBlockedActiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusBlockedBusinessTime);
+                    ts = ts.Add(s.tsBlockedBusinessTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueUnblockedActiveBusTime {
+    public TimeSpan tsUnblockedActiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusUnblockedBusinessTime);
+                    ts = ts.Add(s.tsUnblockedBusinessTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueBlockedActiveCalTime {
+    public TimeSpan tsBlockedActiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusBlockedCalendarTime);
+                    ts = ts.Add(s.tsBlockedCalendarTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueUnblockedActiveCalTime {
+    public TimeSpan tsUnblockedActiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusUnblockedCalendarTime);
+                    ts = ts.Add(s.tsUnblockedCalendarTime);
                 }
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueBlockedPassiveBusTime {
+    public TimeSpan tsBlockedPassiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusBlockedBusinessTime);
+                    ts = ts.Add(s.tsBlockedBusinessTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueUnblockedPassiveBusTime {
+    public TimeSpan tsUnblockedPassiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusUnblockedBusinessTime);
+                    ts = ts.Add(s.tsUnblockedBusinessTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueBlockedPassiveCalTime {
+    public TimeSpan tsBlockedPassiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusBlockedCalendarTime);
+                    ts = ts.Add(s.tsBlockedCalendarTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueUnblockedPassiveCalTime {
+    public TimeSpan tsUnblockedPassiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusUnblockedCalendarTime);
+                    ts = ts.Add(s.tsUnblockedCalendarTime);
                 }
             });
             return ts;
         }
     }
 
-    public TimeSpan IssueTotalActiveCalTime {
+    public TimeSpan tsActiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusCalendarTimeTotal);
+                    ts = ts.Add(s.tsCalendarTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueTotalActiveBusTime {
+    public TimeSpan tsActiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stActiveState || s.StatusCategory==StatusType.stStart)
                 {
-                    ts = ts.Add(s.StatusBusinessTimeTotal);
+                    ts = ts.Add(s.tsBusinessTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueTotalPassiveCalTime {
+    public TimeSpan tsPassiveCalTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusCalendarTimeTotal);
+                    ts = ts.Add(s.tsCalendarTime);
                 }
             });
             return ts;
         }
     }
-    public TimeSpan IssueTotalPassiveBusTime {
+    public TimeSpan tsPassiveBusTime {
         get {
             TimeSpan ts = new TimeSpan();
             _statuses.ForEach(s=> {
                 if (s.StatusCategory==StatusType.stPassiveState)
                 {
-                    ts = ts.Add(s.StatusBusinessTimeTotal);
+                    ts = ts.Add(s.tsBusinessTime);
                 }
             });
             return ts;

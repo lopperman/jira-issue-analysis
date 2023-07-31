@@ -5,10 +5,8 @@ using JTIS.Extensions;
 
 namespace JTIS.Data;
 
-public class jtisStatus 
-{
-    
-    
+public class jtisStatus: ITimeSummary 
+{       
     public string Key {get;private set;} = string.Empty;
     public string StatusId {get;set;}
     public string IssueType {get;private set;} = string.Empty;
@@ -56,6 +54,22 @@ public class jtisStatus
         }
     }
 
+    public bool IsActiveStatus {
+        get{
+            return StatusCategory==StatusType.stActiveState || StatusCategory==StatusType.stStart;
+        }
+    }
+    public bool IsDoneStatus {
+        get{
+            return StatusCategory==StatusType.stEnd;
+        }
+    }
+    public bool IsPassiveStatus {
+        get{
+            return StatusCategory == StatusType.stPassiveState;
+        }
+    }
+
     public JiraStatus? LocalStatus 
     {
         get 
@@ -99,40 +113,193 @@ public class jtisStatus
         }
     }
 
-    public TimeSpan StatusCalendarTimeTotal {
+    public TimeSpan tsCalendarTime {
         get {
             return _CalendarTimeTotal;
         }
     }
-    public TimeSpan StatusBusinessTimeTotal {
+    public TimeSpan tsBusinessTime {
         get {
             return _BusinessTimeTotal;
         }
     }
 
-    public TimeSpan StatusBlockedCalendarTime {
+    public TimeSpan tsBlockedCalendarTime {
         get {
             return _blockedCalendarTime;
         }
     }
 
-    public TimeSpan StatusBlockedBusinessTime {
+    public TimeSpan tsBlockedBusinessTime {
         get {
             return _blockedBusinessTime;
         }
     }
 
-    public TimeSpan StatusUnblockedCalendarTime {
+    public TimeSpan tsUnblockedCalendarTime {
         get {
             return _CalendarTimeTotal.Subtract(_blockedCalendarTime);
         }
     }
 
-    public TimeSpan StatusUnblockedBusinessTime {
+    public TimeSpan tsUnblockedBusinessTime {
         get {
             return _BusinessTimeTotal.Subtract(_blockedBusinessTime);
         }
     }
 
+    public TimeSpan tsActiveCalTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+
+    public TimeSpan tsPassiveCalTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+
+        }
+    }
+
+    public TimeSpan tsBlockedActiveCalTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsBlockedCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+
+        }
+    }
+
+    public TimeSpan tsUnblockedActiveCalTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsUnblockedCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+
+    public TimeSpan tsBlockedPassiveCalTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsBlockedCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+
+    public TimeSpan tsUnblockedPassiveCalTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsUnblockedCalendarTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+
+    public TimeSpan tsActiveBusTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+    public TimeSpan tsPassiveBusTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+    public TimeSpan tsBlockedActiveBusTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsBlockedBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+    public TimeSpan tsUnblockedActiveBusTime {
+        get{
+            if (IsActiveStatus)
+            {
+                return tsUnblockedBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+
+    public TimeSpan tsBlockedPassiveBusTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsBlockedBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
+    public TimeSpan tsUnblockedPassiveBusTime {
+        get{
+            if (IsPassiveStatus)
+            {
+                return tsUnblockedBusinessTime;
+            }
+            else 
+            {
+                return new TimeSpan();
+            }
+        }
+    }
 
 }

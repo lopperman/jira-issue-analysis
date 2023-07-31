@@ -101,6 +101,106 @@ namespace JTIS.Analysis
 
         }
 
+        private BreakdownChart? AveragesUnblockedBusDayChart(string issueType)
+        {
+            var tmpIssList = _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).ToList();
+            if (tmpIssList.Count() == 0 ) {return null;}
+            BreakdownChart averagesChart = new BreakdownChart();
+
+            SortedList<int,string> seqStat = new SortedList<int, string>();
+            SortedDictionary<string,double> busDayValues = new SortedDictionary<string, double>();
+
+            var uniqueStatuses = tmpIssList.SelectMany(x=>x.StatusItems.Statuses).Select(y=>y.IssueStatus).Distinct().ToList();
+            foreach (var stat in uniqueStatuses)
+            {
+                JiraStatus? localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));
+                if (localStatus != null)
+                {
+                    seqStat.Add(localStatus.ProgressOrder, stat);
+                }
+                else 
+                {
+                    seqStat.Add(0, stat);
+                }
+                Double totBusDays = tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).Sum(z=>z.tsUnblockedBusinessTime.TotalDays).RoundTwo();
+                totBusDays = totBusDays / (double)tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).Count();
+                totBusDays = totBusDays.RoundTwo();
+                busDayValues.Add(stat,totBusDays);
+            }
+            if (busDayValues.Count > 0)
+            {
+                int clr = 1;
+                foreach (var stat in seqStat.Values)
+                {
+                    var localStat = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));
+                    if (localStat != null && localStat.ChartColor != null)
+                    {
+                        var chtColor = Style.Parse($"{localStat.ChartColor}").Foreground;
+                        averagesChart.AddItem($"AVG: {stat}",busDayValues[stat], chtColor);
+                    }
+                    else 
+                    {
+                        averagesChart.AddItem($"AVG: {stat}",busDayValues[stat], clr);
+                        clr +=1;
+                    }
+                }
+                return averagesChart;
+            }
+            return null;            
+        }
+        private BreakdownChart? AveragesBusDayChart(string issueType)
+        {
+            var tmpIssList = _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).ToList();
+            if (tmpIssList.Count() == 0 ) {return null;}
+            BreakdownChart averagesChart = new BreakdownChart();
+
+            SortedList<int,string> seqStat = new SortedList<int, string>();
+            SortedDictionary<string,double> busDayValues = new SortedDictionary<string, double>();
+            // SortedDictionary<string,double> busDayUnblockedValues = new SortedDictionary<string, double>();
+
+            var uniqueStatuses = tmpIssList.SelectMany(x=>x.StatusItems.Statuses).Select(y=>y.IssueStatus).Distinct().ToList();
+            foreach (var stat in uniqueStatuses)
+            {
+                JiraStatus? localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));
+                if (localStatus != null)
+                {
+                    seqStat.Add(localStatus.ProgressOrder, stat);
+                }
+                else 
+                {
+                    seqStat.Add(0, stat);
+                }
+                Double totBusDays = tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).Sum(z=>z.tsBusinessTime.TotalDays).RoundTwo();
+                totBusDays = totBusDays / (double)tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).Count();
+                totBusDays = totBusDays.RoundTwo();
+                busDayValues.Add(stat,totBusDays);
+                // Double totUnblockedBusDays = tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).Sum(z=>z.tsUnblockedBusinessTime.TotalDays).RoundTwo();
+                // busDayUnblockedValues.Add(stat,totUnblockedBusDays);
+            }
+            if (busDayValues.Count > 0)
+            {
+                int clr = 1;
+                foreach (var stat in seqStat.Values)
+                {
+                    var localStat = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));
+                    if (localStat != null && localStat.ChartColor != null)
+                    {
+                        var chtColor = Style.Parse($"{localStat.ChartColor}").Foreground;
+                        averagesChart.AddItem($"AVG: {stat}",busDayValues[stat], chtColor);
+                    }
+                    else 
+                    {
+                        averagesChart.AddItem($"AVG: {stat}",busDayValues[stat], clr);
+                        clr +=1;
+                    }
+                }
+                return averagesChart;
+            }
+            return null;
+            
+
+        }
+
         private BreakdownChart? BuildStatusChart(jtisIssue iss)
         {
             if (iss.StatusItems.Statuses.Count()==0)
@@ -109,18 +209,18 @@ namespace JTIS.Analysis
             }
             BreakdownChart? chart = new BreakdownChart();
             int clr = 1;
-            var totDays = iss.StatusItems.IssueBusinessTimeTotal.TotalDays;
+            var totDays = iss.StatusItems.tsBusinessTime.TotalDays;
             foreach (var tmpStatus in iss.StatusItems.Statuses)
             {
                 var localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.StatusName.StringsMatch(tmpStatus.IssueStatus) && x.DefaultInUse==true);
                 if (localStatus != null && localStatus.ChartColor != null)
                 {
                     Color chtColor = Style.Parse(localStatus.ChartColor).Foreground;
-                    chart.AddItem($"{tmpStatus.IssueStatus}",tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),chtColor);
+                    chart.AddItem($"{tmpStatus.IssueStatus}",tmpStatus.tsBusinessTime.TotalDays.RoundTwo(),chtColor);
                 }
                 else 
                 {
-                    chart.AddItem(tmpStatus.IssueStatus,tmpStatus.StatusBusinessTimeTotal.TotalDays.RoundTwo(),Color.FromInt32(clr));
+                    chart.AddItem(tmpStatus.IssueStatus,tmpStatus.tsBusinessTime.TotalDays.RoundTwo(),Color.FromInt32(clr));
                 }
                 clr += 1;
             }
@@ -131,15 +231,15 @@ namespace JTIS.Analysis
         }
         private BreakdownChart? BuildBlockerChart(jtisIssue iss)
         {
-            if (iss.StatusItems.IssueBlockedBusinessTime.TotalDays ==0)
+            if (iss.StatusItems.tsBlockedBusinessTime.TotalDays ==0)
             {
                 return null;
             }
             var bchart = new  BreakdownChart();
-            bchart.AddItem($"Blocked (Active)",iss.StatusItems.IssueBlockedActiveBusTime.TotalDays.RoundTwo(),Color.Red);
-            bchart.AddItem($"Unblocked (Active)",iss.StatusItems.IssueUnblockedActiveBusTime.TotalDays.RoundTwo(),Color.Green);
-            bchart.AddItem($"Blocked (Passive)",iss.StatusItems.IssueBlockedPassiveBusTime.TotalDays.RoundTwo(),Color.Yellow);
-            bchart.AddItem($"Unblocked (Passive)",iss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays.RoundTwo(),Color.Grey);
+            bchart.AddItem($"Blocked (Active)",iss.StatusItems.tsBlockedActiveBusTime.TotalDays.RoundTwo(),Color.Red);
+            bchart.AddItem($"Unblocked (Active)",iss.StatusItems.tsUnblockedActiveBusTime.TotalDays.RoundTwo(),Color.Green);
+            bchart.AddItem($"Blocked (Passive)",iss.StatusItems.tsBlockedPassiveBusTime.TotalDays.RoundTwo(),Color.Yellow);
+            bchart.AddItem($"Unblocked (Passive)",iss.StatusItems.tsUnblockedPassiveBusTime.TotalDays.RoundTwo(),Color.Grey);
 
 
             return bchart;
@@ -171,7 +271,7 @@ namespace JTIS.Analysis
                     foreach (var statItem in iss.StatusItems.Statuses)
                     {
                         string lastExitDt = statItem.LastExitDate.HasValue ? statItem.LastExitDate.Value.ToString() : string.Empty;
-                        writer.WriteLine($"{iss.jIssue.Key}, {iss.jIssue.IssueType}, {iss.jIssue.StatusName}, {iss.jIssue.Summary.ClearCommas()}, {statItem.IssueStatus}, {statItem.StatusCategoryToString}, {statItem.StatusCalendarTimeTotal.TotalDays.RoundTwo()}, {statItem.StatusBusinessTimeTotal.TotalDays.RoundTwo()}, {statItem.StatusBlockedBusinessTime.TotalDays.RoundTwo()}, {statItem.StatusUnblockedBusinessTime.TotalDays.RoundTwo()}, {statItem.EnteredCount.ToString()}, {statItem.FirstEntryDate.ToString()}, {statItem.LastEntryDate.ToString()}, {lastExitDt}");
+                        writer.WriteLine($"{iss.jIssue.Key}, {iss.jIssue.IssueType}, {iss.jIssue.StatusName}, {iss.jIssue.Summary.ClearCommas()}, {statItem.IssueStatus}, {statItem.StatusCategoryToString}, {statItem.tsCalendarTime.TotalDays.RoundTwo()}, {statItem.tsBusinessTime.TotalDays.RoundTwo()}, {statItem.tsBlockedBusinessTime.TotalDays.RoundTwo()}, {statItem.tsUnblockedBusinessTime.TotalDays.RoundTwo()}, {statItem.EnteredCount.ToString()}, {statItem.FirstEntryDate.ToString()}, {statItem.LastEntryDate.ToString()}, {lastExitDt}");
                     }
                 }                
             }
@@ -332,17 +432,17 @@ namespace JTIS.Analysis
                             new Markup($"[bold]{issStatus.StatusCategory}[/]").Centered() :
                             new Markup($"[dim]{issStatus.StatusCategory}[/]").Centered(),
 
-                        new Markup($"{issStatus.StatusCalendarTimeTotal.TotalDays:##0.00}").RightJustified(), 
-                        new Markup($"{issStatus.StatusBusinessTimeTotal.TotalDays:##0.00}").RightJustified(), 
+                        new Markup($"{issStatus.tsCalendarTime.TotalDays:##0.00}").RightJustified(), 
+                        new Markup($"{issStatus.tsBusinessTime.TotalDays:##0.00}").RightJustified(), 
 
-                        issStatus.StatusBlockedBusinessTime.TotalDays > 0 ? 
-                            new Markup($"[bold red1 on cornsilk1] {issStatus.StatusBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
-                            new Markup($"[dim]{issStatus.StatusBlockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
+                        issStatus.tsBlockedBusinessTime.TotalDays > 0 ? 
+                            new Markup($"[bold red1 on cornsilk1] {issStatus.tsBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
+                            new Markup($"[dim]{issStatus.tsBlockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
 
-                        issStatus.StatusUnblockedBusinessTime.TotalDays > 0 ?
+                        issStatus.tsUnblockedBusinessTime.TotalDays > 0 ?
                         // stActiveUnblockedDays > 0 ? 
-                            new Markup($"[bold green on cornsilk1] {issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
-                            new Markup($"[dim]{issStatus.StatusUnblockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
+                            new Markup($"[bold green on cornsilk1] {issStatus.tsUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified() :
+                            new Markup($"[dim]{issStatus.tsUnblockedBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
 
                         issStatus.EnteredCount > 1 ? 
                             new Markup($"[bold]{issStatus.EnteredCount}[/]").Centered() :
@@ -357,10 +457,10 @@ namespace JTIS.Analysis
                 tbl.AddRow(new Markup[]{
                     new Markup($"[italic]ACTIVE TOTALS:[/]").RightJustified(),
                     new Markup($"[italic]ACTIVE[/]").Centered(),
-                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalActiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalActiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.tsActiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.tsActiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.tsBlockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.tsUnblockedActiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -370,10 +470,10 @@ namespace JTIS.Analysis
                     new Markup($"[italic]PASSIVE TOTALS:[/]").RightJustified(),
                     new Markup($"[italic]PASSIVE[/]").Centered(),
 
-                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalPassiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[italic]{jtisIss.StatusItems.IssueTotalPassiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.tsPassiveCalTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic]{jtisIss.StatusItems.tsPassiveBusTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[italic red1 on cornsilk1] {jtisIss.StatusItems.tsBlockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[italic green on cornsilk1] {jtisIss.StatusItems.tsUnblockedPassiveBusTime.TotalDays:##0.00} [/]").RightJustified(),
 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -386,10 +486,10 @@ namespace JTIS.Analysis
                 tbl.AddRow(new Markup[]{
                     new Markup($"[bold underline]GRAND TOTAL:[/]").RightJustified(),
                     new Markup($"[bold underline]** ALL ** [/]").Centered(),
-                    new Markup($"[bold underline]{jtisIss.StatusItems.IssueCalendarTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold underline]{jtisIss.StatusItems.IssueBusinessTimeTotal.TotalDays:##0.00}[/]").RightJustified(),
-                    new Markup($"[bold underline red1 on cornsilk1] {jtisIss.StatusItems.IssueBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
-                    new Markup($"[bold underline green on cornsilk1] {jtisIss.StatusItems.IssueUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[bold underline]{jtisIss.StatusItems.tsCalendarTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[bold underline]{jtisIss.StatusItems.tsBusinessTime.TotalDays:##0.00}[/]").RightJustified(),
+                    new Markup($"[bold underline red1 on cornsilk1] {jtisIss.StatusItems.tsBlockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
+                    new Markup($"[bold underline green on cornsilk1] {jtisIss.StatusItems.tsUnblockedBusinessTime.TotalDays:##0.00} [/]").RightJustified(),
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
                     new Markup($"[dim]---[/]").Centered(), 
@@ -402,7 +502,20 @@ namespace JTIS.Analysis
                 var statusChart = BuildStatusChart(jtisIss);
                 if (statusChart != null) 
                 {
+                    AnsiConsole.Write(new Rule($"{jtisIss.jIssue.Key} TOTAL BUSINESS DAYS"));
                     AnsiConsole.Write(new Panel(statusChart));
+                }
+                var avgBusDaysChart = AveragesBusDayChart(jtisIss.jIssue.IssueType);
+                if (avgBusDaysChart != null)
+                {
+                    AnsiConsole.Write(new Rule($"[bold]TOTAL BUSINESS DAY AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
+                    AnsiConsole.Write(new Panel(avgBusDaysChart));
+                }
+                var avgUnblockedBusDaysChart = AveragesUnblockedBusDayChart(jtisIss.jIssue.IssueType);
+                if (avgUnblockedBusDaysChart != null)
+                {
+                    AnsiConsole.Write(new Rule($"[bold]TOTAL UNBLOCKED BUSINESS DAY AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
+                    AnsiConsole.Write(new Panel(avgUnblockedBusDaysChart));
                 }
                 var blockChart = BuildBlockerChart(jtisIss);
                 if (blockChart != null)
