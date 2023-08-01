@@ -175,6 +175,17 @@ public class CycleTime
         }
         AnsiConsole.Write(tbl);
 
+        if (ConsoleUtil.Confirm("Show Velocity Chart?",false))
+        {
+            var velChart = slice.EnteredStateChart(issType.Name);
+            if (velChart != null)
+            {
+                ConsoleUtil.WriteBanner("ENTERED STATUS COUNT - BY WEEK");
+                AnsiConsole.Write(velChart);
+            }
+            
+        }
+
         if (slice.IgnoredIssues.Count() > 0)
         {
             AnsiConsole.WriteLine();

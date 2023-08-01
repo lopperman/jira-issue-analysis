@@ -148,6 +148,11 @@ namespace JTIS.Analysis
             }
             return null;            
         }
+
+        private int IssueCountWithStatusChanges(string issueType)
+        {
+            return _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).Count();
+        }
         private BreakdownChart? AveragesBusDayChart(string issueType)
         {
             var tmpIssList = _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).ToList();
@@ -499,23 +504,28 @@ namespace JTIS.Analysis
                 AnsiConsole.WriteLine();
 
 
+                if (IssueCountWithStatusChanges(jtisIss.jIssue.IssueType)>1)
+                {
+                    ConsoleUtil.WriteBanner($"AVERAGE BUSINESS DAYS BY STATUS FOR {IssueCountWithStatusChanges(jtisIss.jIssue.IssueType)} QUERIED ITEMS (ISSUE TYPE: {jtisIss.jIssue.IssueType})",Color.Black, Color.Grey93);
+                    var avgBusDaysChart = AveragesBusDayChart(jtisIss.jIssue.IssueType);
+                    if (avgBusDaysChart != null)
+                    {
+                        AnsiConsole.Write(new Rule($"[bold]TOTAL BUSINESS DAYS - AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
+                        AnsiConsole.Write(new Panel(avgBusDaysChart));
+                    }
+                    var avgUnblockedBusDaysChart = AveragesUnblockedBusDayChart(jtisIss.jIssue.IssueType);
+                    if (avgUnblockedBusDaysChart != null)
+                    {
+                        AnsiConsole.Write(new Rule($"[bold]TOTAL ** UNBLOCKED **  BUSINESS DAYS  - AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
+                        AnsiConsole.Write(new Panel(avgUnblockedBusDaysChart));
+                    }
+                }
+
+                ConsoleUtil.WriteBanner($"TOTAL BUSINESS DAYS BY STATUS FOR ISSUE {jtisIss.jIssue.Key}", Color.Black, Color.Grey93);
                 var statusChart = BuildStatusChart(jtisIss);
                 if (statusChart != null) 
                 {
-                    AnsiConsole.Write(new Rule($"{jtisIss.jIssue.Key} TOTAL BUSINESS DAYS"));
                     AnsiConsole.Write(new Panel(statusChart));
-                }
-                var avgBusDaysChart = AveragesBusDayChart(jtisIss.jIssue.IssueType);
-                if (avgBusDaysChart != null)
-                {
-                    AnsiConsole.Write(new Rule($"[bold]TOTAL BUSINESS DAY AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
-                    AnsiConsole.Write(new Panel(avgBusDaysChart));
-                }
-                var avgUnblockedBusDaysChart = AveragesUnblockedBusDayChart(jtisIss.jIssue.IssueType);
-                if (avgUnblockedBusDaysChart != null)
-                {
-                    AnsiConsole.Write(new Rule($"[bold]TOTAL UNBLOCKED BUSINESS DAY AVERAGES FOR QUERIED RESULTS ({jtisIss.jIssue.IssueType})[/]"));
-                    AnsiConsole.Write(new Panel(avgUnblockedBusDaysChart));
                 }
                 var blockChart = BuildBlockerChart(jtisIss);
                 if (blockChart != null)

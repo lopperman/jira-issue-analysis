@@ -145,4 +145,57 @@ public class SliceDice
         return sb.ToString();
     }
 
+    public BarChart? EnteredStateChart(string issueType)
+    {
+        var tmpIssList = _data.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType));
+
+        if (tmpIssList.Count() == 0 ) {return null;}
+        BarChart chart = new BarChart();
+
+        SortedList<int,string> seqStat = new SortedList<int, string>();
+
+        var uniqueStatuses = tmpIssList.SelectMany(x=>x.StatusItems.Statuses).Select(y=>y.IssueStatus).Distinct().ToList();
+        int clr = 0;
+        foreach (var stat in uniqueStatuses)
+        {
+            clr += 1;
+            JiraStatus? localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));
+            Color? tmpColor;
+            if (localStatus != null)
+            {
+                seqStat.Add(localStatus.ProgressOrder, stat);
+                if (localStatus.ChartColor != null)
+                {
+                    tmpColor = Style.Parse(localStatus.ChartColor).Foreground;
+                }
+                else 
+                {
+                    tmpColor = Color.FromInt32(clr);
+                }
+            }
+            else 
+            {
+                seqStat.Add(0, stat);
+                tmpColor = Color.FromInt32(clr);
+            }
+            var tStatuses = tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat))).ToList();                
+            DateTime maxDt = tStatuses.Max(x=>x.LastEntryDate).StartOfWeek();
+            DateTime minDt = tStatuses.Min(x=>x.LastEntryDate).StartOfWeek();
+            DateTime checkDt = minDt.Date;
+            while (checkDt <= maxDt.Date)
+            {
+                DateTime endWeek = checkDt.AddDays(7).AddSeconds(-1);
+                var weekIssues = tmpIssList.SelectMany(x=>x.StatusItems.Statuses.Where(y=>y.IssueStatus.StringsMatch(stat) && y.LastEntryDate >= checkDt && y.LastEntryDate <= endWeek)).Count();
+                if (weekIssues > 0)
+                {
+                    chart.AddItem($"[dim]Entered[/] [bold]{stat}[/] [dim]week of[/] [bold]{checkDt.Date.ToString("MM/dd/yy")}[/]",weekIssues,tmpColor);
+                }
+                checkDt = checkDt.AddDays(7);
+            }
+        }
+        return chart;
+    }
+
+
+
 }
