@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 using JTIS.Config;
 using JTIS.Console;
@@ -80,7 +79,8 @@ public class SliceDice
         SearchStartDt = startDt;
         SearchEndDt = endDt;
         FetchOptions options = FetchOptions.DefaultFetchOptions;
-        options.AllowManualJQL().IncludeChangeLogs().RequiredIssueStatusSequence();
+        options.AllowManualJQL().IncludeChangeLogs().RequiredIssueStatusSequence().AllowCachedSelection().CacheResults();
+
         string jql = $"project={CfgManager.config.defaultProject} and issueType='{issueType}' and status in ({BuildGTEStatusInList(endMin)}) and updated >= '{startDt.ToString("yyyy-MM-dd")}' and updated <= '{endDt.ToString("yyyy-MM-dd")}'";        
         options.JQL=jql;
         ConsoleUtil.WriteBanner($"Running JQL Query: {jql}");
@@ -195,7 +195,5 @@ public class SliceDice
         }
         return chart;
     }
-
-
 
 }

@@ -23,7 +23,8 @@ namespace JTIS
             ConsoleUtil.WriteAppTitle();
             JQLUtil.ViewSavedJQL(CfgManager.config,false);
             string jqlIdHelp = $"Enter Saved JQL Id ('1'-'{CfgManager.config.SavedJQLCount}'), ** OR ** Enter a valid JQL statement, ** OR ** Enter 1 or more Issue Keys separated by a SPACE";
-            var jqlHelp = new Markup($"\t[dim italic](If entering list of issue keys for current project, '{CfgManager.config.defaultProject}-' will be prepended automatically if missing -- '100' becomes '{CfgManager.config.defaultProject}-100')[/]{Environment.NewLine}\t[dim]Example of valid issue keys:  100, 101, 102[/]{Environment.NewLine}\t[dim]Example of valid issue keys:  100 101 102[/]{Environment.NewLine}\t[dim]Example of valid issue keys:  WWT-100 QA-101 102[/]");
+
+            var jqlHelp = new Markup($"[dim italic](If entering list of issue keys for current project, '{CfgManager.config.defaultProject}-' will be prepended automatically if missing -- '100' becomes '{CfgManager.config.defaultProject}-100')[/]{Environment.NewLine}[bold]NOTE: If querying a single issue (e.g. '5') that has a number matching a JQL Snippet Id, type the full issue key.[/]{Environment.NewLine}[dim]Example of valid issue keys:  100, 101, 102[/]{Environment.NewLine}[dim]Example of valid issue keys:  100 101 102[/]{Environment.NewLine}[dim]Example of valid issue keys:  WWT-100 QA-101 102[/]");
 
             var r = new Rule();
             r.Style = new Style(Color.Blue,Color.Cornsilk1).Decoration(Decoration.Dim);

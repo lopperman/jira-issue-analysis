@@ -1,13 +1,7 @@
-using System.Dynamic;
-using System.Globalization;
-using System.Diagnostics;
-using System;
 using JTIS.Console;
 using Spectre.Console;
 using JTIS.Extensions;
-using Atlassian.Jira;
 using JTIS.Config;
-using JTIS.Menu;
 
 namespace JTIS.Data
 {
