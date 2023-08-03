@@ -41,7 +41,8 @@ public class jtisIssue: ITimeSummary
     {
         get 
         {
-            if (_statuses == null && _changeLogs.Count() > 0)
+            // if (_statuses == null && _changeLogs.Count() > 0)
+            if (_statuses == null)
             {
                 _statuses = jtisStatuses.Create(this);
             }

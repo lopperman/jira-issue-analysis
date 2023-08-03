@@ -1,6 +1,7 @@
 using Atlassian.Jira;
 using JTIS.Analysis;
 using JTIS.Config;
+using JTIS.Console;
 using JTIS.Extensions;
 
 namespace JTIS.Data;
@@ -26,7 +27,17 @@ public class jtisStatuses: ITimeSummary
     {
         jtisStatuses newObj = new jtisStatuses();
 
-        newObj.Populate(issue, stopAtStatus);
+        try
+        {
+            newObj.Populate(issue, stopAtStatus);
+        }
+        catch (Exception ex)
+        {
+            if (JTIS.Info.IsDev)
+            {
+                ConsoleUtil.WriteError("jtisStatuses.Create",false,ex,true);
+            }
+        }
 
         return newObj;
     }

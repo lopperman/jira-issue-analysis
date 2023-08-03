@@ -2,6 +2,7 @@ using System.Text;
 using JTIS.Config;
 using JTIS.Console;
 using JTIS.Extensions;
+using JTIS.Menu;
 using Spectre.Console;
 
 namespace JTIS.Data;
@@ -155,8 +156,14 @@ public class SliceDice
         SortedList<int,string> seqStat = new SortedList<int, string>();
 
         var uniqueStatuses = tmpIssList.SelectMany(x=>x.StatusItems.Statuses).Select(y=>y.IssueStatus).Distinct().ToList();
+        var selectedStatuses = MenuManager.MultiSelect<string>("Choose statuses to include, otherwise just press ENTER to select all.",uniqueStatuses);
+        if (selectedStatuses == null || selectedStatuses.Count() == 0)
+        {
+            selectedStatuses = uniqueStatuses;
+        }
+
         int clr = 0;
-        foreach (var stat in uniqueStatuses)
+        foreach (var stat in selectedStatuses)
         {
             clr += 1;
             JiraStatus? localStatus = CfgManager.config.StatusConfigs.SingleOrDefault(x=>x.DefaultInUse==true && x.StatusName.StringsMatch(stat));

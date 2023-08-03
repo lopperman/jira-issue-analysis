@@ -151,7 +151,19 @@ namespace JTIS.Analysis
 
         private int IssueCountWithStatusChanges(string issueType)
         {
-            return _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).Count();
+            try 
+            {
+                //_jtisIssueData.jtisIssuesList.Where(x=>x.StatusItems.Statuses.Count==0).Count();
+                return _jtisIssueData.jtisIssuesList.Where(x=>x.jIssue.IssueType.StringsMatch(issueType) && x.tsBusinessTime.TotalDays > 0).Count();
+            }
+            catch (Exception ex)
+            {
+                if (JTIS.Info.IsDev)
+                {
+                    ConsoleUtil.WriteError("IssueCountWithStatusChanges",false,ex,true);
+                }
+                return 0;
+            }
         }
         private BreakdownChart? AveragesBusDayChart(string issueType)
         {
