@@ -440,51 +440,6 @@ namespace JTIS.Menu
         private static void Dev2(int fcIndex = -1)
         {
             var clr = ColorUtil.PickColor("pick a background color for status: In Progress");
-    //         if (fcIndex == -1)
-    //         {
-    //             for (int i = 0; i <ColorUtil.ColorsAll.Count(); i ++)
-    //             {
-    //                 var bColor = ColorUtil.ColorsAll[i];
-    //                 var fColor = ColorUtil.InverseColor(bColor);
-    // //                var bColor = ColorUtil.ColorsAll[ColorUtil.ColorsAll.Count - (1+i)];
-    //                 string colorName = bColor.ToString();
-    //                 if (colorName.Length <40)
-    //                 {
-    //                     var spaces = new string(' ',40-colorName.Length);
-    //                     colorName = $"{colorName}{spaces}";
-    //                 }
-    //                 AnsiConsole.MarkupLine($"[{fColor.ToString()} on {bColor.ToString()}]{colorName}[/], (Index: {i}) (InverseCalc: {ColorUtil.InverseCalcVal(bColor)})");
-    //             }
-    //             int fIndex = ConsoleUtil.GetInput<int>("Enter Index of Color to see on all backcolors (Enter a number higher than 254 to exit)");
-    //             if (fIndex >= 0 && fIndex <= 254)
-    //             {
-    //                 Dev2(fIndex);
-    //                 return;
-    //             }
-    //         }
-    //         else 
-    //         {
-    //             var fColor = ColorUtil.ColorsAll[fcIndex];
-    //             for (int i = 0; i <ColorUtil.ColorsAll.Count(); i ++)
-    //             {
-    //                 var bColor = ColorUtil.ColorsAll[i];
-    //                 var showText = $"{fColor.ToString()} on {bColor.ToString()}";
-    //                 if (showText.Length < 40)
-    //                 {
-    //                     var spaces = new string(' ',40-showText.Length);
-    //                     showText = $"{showText}{spaces}";
-    //                 }
-    //                 AnsiConsole.MarkupLine($"[{fColor.ToString()} on {bColor.ToString()}]{showText}[/] (Index: ({i}))");
-    //             }
-    //             if (ConsoleUtil.Confirm("Start Over?",true))
-    //             {
-    //                 Dev2();
-    //                 return;
-    //             }
-
-    //         }
-
-
 
             ConsoleUtil.PressAnyKeyToContinue();
         }
